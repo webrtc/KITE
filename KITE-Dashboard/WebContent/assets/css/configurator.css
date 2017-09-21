@@ -1,0 +1,206 @@
+<!--
+Copyright 2017 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+pre {
+    font-size: 90%;
+    line-height: 1.2em;
+    font-family: "Courier 10 Pitch", Courier, monospace;
+    white-space: pre;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -o-pre-wrap;
+
+    height:1%;
+    width: auto;
+    display: block;
+    clear: both;
+    color: #555555;
+    padding: 1em 1em;
+    margin: auto 40px auto 40px;
+    background: #f4f4f4;
+    border: solid 1px #e1e1e1
+}
+code {
+    font-size: 90%;
+    line-height: 1.2em;
+    font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
+
+    display: inline;
+    color: white;
+    padding: 1em 1em;
+    background: black;
+}
+
+.padded-medium{
+    padding: 30px;
+}
+
+
+.code-display{
+    padding: 20px;
+    background: black;
+    height: 300px;
+    overflow-y: auto;
+    border-radius: 10px;
+}
+
+.hide{
+    display: inline;
+}
+
+.fixed-text{
+    width: 30%;
+    min-width: 300px;
+    overflow: auto;
+    border-radius:px;
+}
+
+*, *:before, *:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 100%;
+  background: #333;
+}
+
+#page-wrapper {
+  width: 650px;
+  background: #FFF;
+  padding: 1em;
+  margin: 1em auto;
+  border-top: 5px solid #69c773;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+
+h1 {
+	margin-top: 0;
+}
+p{
+    font-size: 12px;
+}
+
+#status {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.open {
+  color: green;
+}
+
+.closed {
+  color: red;
+}
+
+.sent {
+  background-color: #F7F7F7;
+}
+
+.received {}
+
+#message-form {
+  margin-top: 1.5rem;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #D9D9D9;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+  min-height: 100px;
+  margin-bottom: 1rem;
+}
+
+button {
+  display: inline-block;
+  border-radius: 3px;
+  border: none;
+  font-size: 0.9rem;
+  padding: 0.6rem 1em;
+  color: white;
+  margin: 0 0.25rem 0.25rem 0.25rem;
+  text-align: center;
+  background: #BABABA;
+  border-bottom: 1px solid #999;
+}
+
+button[type="submit"] {
+  background: #86b32d;
+  border-bottom: 1px solid #5d7d1f;
+}
+
+button:hover {
+  opacity: 0.75;
+  cursor: pointer;
+}
+input{
+    padding-left:5px;
+    border-radius:3px;
+}
+input:focus{
+    border: solid #14bc73;
+}
+input:hover{
+    opacity: 0.75;
+}
+.whiteOne{
+    background: white;
+    color: green;
+    border: solid black;
+}
+.greyOne{
+    background: grey;
+    color: green;
+    border: solid black;
+}
+
+
+.btn-circle {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 1.428571429;
+  border-radius: 15px;
+}
+.btn-circle.btn-lg {
+  width: 50px;
+  height: 50px;
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.33;
+  border-radius: 25px;
+}
+.btn-circle.btn-xl {
+  width: 70px;
+  height: 70px;
+  padding: 10px 16px;
+  font-size: 24px;
+  line-height: 1.33;
+  border-radius: 35px;
+}
+
+input, select, textarea{
+    color: #000000;
+    border-radius: 8px;
+    padding: 2px 2px;
+}

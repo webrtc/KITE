@@ -1,0 +1,45 @@
+{
+  "name": "saucelabs, browserstack, testingbot grid example",
+  "callback": "http://localhost:8080/kiteweb/datacenter",
+  "remotes": [
+    {
+      "type": "saucelabs",
+      "username": "username",
+      "accesskey": "Access Key"
+    },
+    {
+      "type": "browserstack",
+      "username": "Username",
+      "accesskey": "Access Key"
+    },
+    {
+      "type": "testingbot",
+      "username": "Key",
+      "accesskey": "Secret"
+    }
+  ],
+  "tests": [
+    {
+      "name": "IceConnectionTest",
+      "tupleSize": 2,
+      "testImpl": "org.webrtc.kite.IceConnectionTest"
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "chrome",
+      "version": "59.0",
+      "platform": "MAC"
+    },
+    {
+      "browserName": "firefox",
+      "version": "46.0",
+      "platform": "LINUX"
+    },
+    {
+      "browserName": "MicrosoftEdge",
+      "version": "15.0",
+      "platform": "WINDOWS"
+    }
+  ]
+}

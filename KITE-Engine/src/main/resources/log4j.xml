@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//log4j/log4j Configuration//EN" "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<appender name="fileAppender" class="org.apache.log4j.FileAppender">
+		<param name="File" value="logs/kite.log" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-7p %d [%t] %c %x - %m%n" />
+		</layout>
+	</appender>
+
+	<category name="org.apache.http">
+		<priority value="WARN" />
+		<appender-ref ref="fileAppender" />
+	</category>
+
+	<root>
+		<priority value="INFO" />
+		<appender-ref ref="fileAppender" />
+	</root>
+
+</log4j:configuration>

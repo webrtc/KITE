@@ -1,0 +1,25 @@
+{
+  "name": "local selenium example",
+  "callback": "http://localhost:8080/kiteweb/datacenter",
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://localhost:4444/wd/hub"
+    }
+  ],
+  "tests": [
+    {
+      "name": "IceConnectionTest",
+      "tupleSize": 2,
+      "testImpl": "org.webrtc.kite.IceConnectionTest"
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "firefox"
+    },
+    {
+      "browserName": "chrome"
+    }
+  ]
+}

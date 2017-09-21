@@ -1,0 +1,254 @@
+<!--
+Copyright 2017 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+    nav.overview {
+        padding-left: 20;
+        text-align: left;
+    }
+
+    nav.overview ul {
+        margin-left: 0;
+        padding-left: 0;
+        width: 98%;
+        list-style: none;
+        position: relative;
+        display: inline-table;
+    }
+
+    nav.overview ul ul {
+        display: none;
+    }
+
+    nav.overview ul li:hover > ul {
+        display: block;
+    }
+
+    nav.overview ul li {
+        float: left;
+        width: 98%;
+        text-align: left;
+        border-bottom: 3px solid #2ecc71; 
+    }
+        
+    nav.overview ul li:hover {
+        background: transparent;
+    }
+
+    nav.overview ul li a {
+        display: block;
+        font-size: 10px;
+        padding: 15px 10px;
+        color: #2a2a2a; 
+        text-decoration: none;
+    }
+                        
+    nav.overview ul ul {
+        border-radius: 0px; 
+        padding: 0;
+        position: absolute; 
+        top: 100%;
+    }
+
+    nav.overview ul ul li {
+        background: transparent;
+        float: none;
+        border-bottom: 2px solid #eaeaea; 
+        position: relative;
+    }
+
+    nav.overview ul ul li a {
+        padding: 15px 10px;
+        color: black;
+        font-size: 10px;
+    }   
+
+    nav.overview ul ul li a:hover {
+        background: transparent;
+        color: red;
+    }   
+
+    #down-triangle {
+        float: right;
+        width: 0; 
+        height: 0;
+        border-top: 10px solid white;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+    }
+
+    .circle {
+        float: right;
+        display: inline;
+        width: 10px;
+        height: 10px; 
+        margin-top: 5px;
+        border: 3px solid white;
+        -moz-border-radius: 100%;
+        -webkit-border-radius: 100%;
+        border-radius: 100%;
+    }
+
+    .hideme {
+        height: 1px; border: none
+    }
+
+    .noborder{
+        border: none
+    }
+
+    .offscreen {
+        height: 1px; width: 1px; position: absolute; overflow: hidden; top: -10px;
+    }
+
+    .tooltip {
+        display:none;
+        position:absolute;
+        border:1px solid #333;
+        background-color:#161616;
+        border-radius:5px;
+        padding:10px;
+        color:#fff;
+        font-size:12px Arial;
+    }
+    * {
+        box-sizing: border-box;
+    }
+    .center{
+        align: center;
+    }
+    .right{
+        align: right;
+    }
+
+    table {
+        text-align: center;
+        empty-cells:show;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+    th{
+          text-align: center;
+
+    }
+    @media screen and (min-width: 400px) {
+        .modal-dialog {
+            width: 80%;
+        }
+        .success {
+            background:none;
+            border:none;
+            color: green;
+        }
+        .failed {
+            background:none;
+            border:none;
+            color: red;
+        }
+        a {
+          color: black;
+          text-decoration: none;
+        }
+    }
+    td{
+        border: 5px solid white;
+        align: center;
+        valign: center;
+        font-size: 12px;
+        font-weight: 300;
+    }
+    td.small{
+        border: 1px solid white;
+        width: 7px;
+        height: 7px;
+    }
+    td.big{
+
+        width: 14%;
+        width: 14%;
+        height: 14%;
+    }
+    td.ok{
+        background: linear-gradient(to bottom right, green, white);
+    }
+    td.notok{
+        background: linear-gradient(to bottom right, red, white);
+    }
+    td.error{
+        background: linear-gradient(to bottom right, #3366ff, white);
+    }
+    td.tbd{
+        background: linear-gradient(to bottom right, gold, white);
+    }
+    td.untestable{
+        background: linear-gradient(to bottom right, black, white);
+    }
+    td.caller{
+        height: 80px;
+        width: 40px;
+    }
+
+    td.callee{
+        max-width: 80px;
+        width: 80px;
+        height: 40px;
+    }
+
+    h1 {
+        font-size: 10px;
+        height:12px;
+    }
+    h2 {
+        font-size: 13px;
+        text-transform: lowercase;
+    }
+    .tilt-text {
+    	transform: rotate(310deg);
+    }
+
+    .vertical-text {
+        height: 13px;
+        font-size: 10px;
+        transform: rotate(270deg);
+    }
+
+    .button-cell{
+        opacity: 0;
+        display:inline-block;
+        width: 100%;
+        height: 100%;
+        overflow:hidden;
+    }
+    .info{
+        opacity: 0;
+    }
+
+    .logged{
+        overflow-y: scroll;
+        height: 200px;
+        text-align: left;
+        word-break: break-all;
+    }
+    .left{
+        test-align: left;
+    }
+    .right{
+        test-align: right;
+    }
+
+    input, select, textarea{
+        color: #000000;
+        border-radius: 8px;
+        padding: 2px 2px;
+    }

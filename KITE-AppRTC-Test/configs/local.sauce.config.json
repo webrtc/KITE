@@ -1,0 +1,33 @@
+{
+  "name": "local and saucelabs grid example",
+  "callback": "http://localhost:8080/kiteweb/datacenter",
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://localhost:4444/wd/hub"
+    },
+    {
+      "type": "saucelabs",
+      "username": "username",
+      "accesskey": "Access Key"
+    }
+  ],
+  "tests": [
+    {
+      "name": "IceConnectionTest",
+      "tupleSize": 2,
+      "testImpl": "org.webrtc.kite.IceConnectionTest"
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "chrome"
+    },
+    {
+      "browserName": "firefox"
+    },
+    {
+      "browserName": "MicrosoftEdge"
+    }
+  ]
+}

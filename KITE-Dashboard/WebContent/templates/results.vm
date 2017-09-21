@@ -1,0 +1,403 @@
+<!--
+Copyright 2017 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html lang="en">
+<head>
+
+    <meta charset="utf-8" />
+    <title>Result - KITE Dashboard</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/pace.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/themes/black/pace-theme-minimal.css" rel="stylesheet" />
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+    <!--  Light Bootstrap Table core CSS    -->
+    <link href="assets/css/light-bootstrap-dashboard.css" rel="stylesheet"/>
+    <link href="assets/css/first_page.css" rel="stylesheet"/>
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
+    <link href="https://rawgithub.com/olimsaidov/pixeden-stroke-7-icon/master/pe-icon-7-stroke/dist/pe-icon-7-stroke.css" rel="stylesheet" />
+    <link href="assets/css/result.css" rel="stylesheet"/>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+        $(document).on("click", "#grid div", function(e) {
+            var data = $(this).attr('name');
+            $(".cell").css("opacity",0.2);
+            $(this).css("opacity", 1);
+            $(".caller").css("opacity", 1);
+            $(".callee").css("opacity", 1);
+            $(".hidden-grid").css("display", "none");
+            $("#"+data).css("display", "inline");
+            $(".big").css("opacity", 1);
+            $("#duration").text("");
+            $("#result").text("");
+        });
+        $(document).on("click", "input", function(e) {
+            var name = $(this).attr('name');
+            var duration = $(this).attr('data-duration');
+            var logged = $(this).attr('data-log');
+            var dur=Math.ceil(duration/1000);
+
+            $(".big").css("opacity", 0.2);
+            $("#"+name).css("opacity", 1);
+            $("#durationBox").css("display", "inline");
+            $("#resultBox").css("display", "inline");
+            $("#duration").text(""+dur+" s");
+            $("#result").text(""+logged);
+        });
+        $(document).on("click", ".failed", function(e) {
+            var log = $(this).attr('data-log');
+            alert(log);
+        });
+        $(document).on("click", ".error", function(e) {
+            var log = $(this).attr('data-log');
+            alert(log);
+        });
+    </script>
+</head>
+<body>
+    <div class="wrapper">
+
+        <div class="sidebar" data-color="purple" data-image="assets/img/sidebarSmall.jpg">
+            <div class="sidebar-wrapper">
+                <div class="logo">
+                    <a href="dashboard" class="simple-text">
+                        KITE
+                    </a>
+                </div>
+
+                <ul class="nav">
+                    <li>
+                        <div class="row">
+                            <div class="col-sm-1 col-sm-offset-1">
+                                <i class="pe-7s-search"></i>
+                            </div>
+                            <div class="col-sm-9 ">
+                                <form action="search" method="get">
+                                  <div>
+                                    <input name="key" id="key" placeholder="Search">
+                                  </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </li>
+                    <li class="active">
+                        <a href="dashboard"> <!-- change link to dashboard -->
+                            <i class="pe-7s-note2"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="">
+                        <a href="config">
+                            <i class="pe-7s-note"></i>
+                            <p>Configurator</p>
+                        </a>
+                    </li>
+                    <li class="">
+                        <a href="overview">
+                            <i class="pe-7s-pin"></i>
+                            <p>Overview</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- End of side nav bar -->
+
+        <!-- Start horizontal nav bar -->
+
+        <div class="main-panel">
+            <nav class="navbar navbar-default navbar-fixed">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navigation-example-2">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="dashboard">Dashboard</a>
+                    </div>
+                    <div class="collapse navbar-collapse">
+                    </div>
+                </div>
+            </nav>
+            <!-- End of horizontal nav bar -->
+            <!-- Start main data content display -->
+            <div class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="card result-wrapper">
+                                <div class="header">
+                                    <h4 class="title">Result(s) for: $testName</h4>
+                                </div>
+                                <div class="content table-responsive table-full-width">
+                                    <table class="table table-hover table-striped">
+                                        <thead>
+                                            <th width="10">N.</th>
+                                            #set($tupleSize = $listOfResult.getListOfResultTable().get(0).getBrowserList().size())
+                                            #foreach($number in [1..$tupleSize])
+                                            <th width="280">Browser $number</th>
+                                            #end
+                                            <th>Result</th>
+                                            <th>Duration</th>
+                                        </thead>
+                                        <tbody>
+                                        #set($index = 1)
+                                            #foreach($result in $listOfResult.getListOfResultTable())
+                                            <tr>
+                                                <td width="5%">
+                                                        $index
+                                                </td>
+                                                #foreach($browser in $result.getBrowserList())
+                                                <td width="20%">
+                                                    #if ($browser.getName() == "firefox")
+                                                        <img src="assets/img/firefox.png" height="20" width="20">
+                                                    #elseif ($browser.getName() == "chrome")
+                                                        <img src="assets/img/chrome.png" height="20" width="20">
+                                                    #elseif ($browser.getName() == "MicrosoftEdge")
+                                                        <img src="assets/img/edge.png" height="20" width="20">
+                                                    #end
+                                                    $browser.getVersion()
+                                                    $browser.getPlatform()
+                                                </td>
+                                                #end
+                                                <td width="30%">
+                                                    #if($result.getResult() == "SUCCESSFUL")
+                                                        <button type="button" class="success" >Success</button>
+                                                    #elseif($result.getResult() == "SCHEDULED")
+                                                        <button type="button" class="waiting">waiting</button>
+                                                    #elseif($result.getResult() == "TIME OUT")
+                                                        <button type="button" class="failed" data-log="$result.getResult()">Failed</button>
+                                                    #elseif($result.getResult() == "FAILED")
+                                                        <button type="button" class="failed" data-log="$result.getResult()">Failed</button>
+                                                    #else
+                                                        <button type="button" class="error" data-log="$result.getResult()">Error</button>
+                                                    #end
+                                                    #set($index = $index + 1)
+                                                </td>
+                                                <td id="obvDuration$index" width=20%>
+                                                    <script>
+                                                        var dur=Math.ceil($result.getDuration()/1000);
+                                                        var index = $index;
+                                                        $("#obvDuration"+index).text(dur+" s");
+                                                    </script>
+                                                </td>
+                                            </tr>
+                                            #end
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="card">
+                                <div class="header custom">
+                                    <table id="grid">
+                                        <thead>
+                                            <th></th>
+                                            #foreach($index1 in [1..$listOfFirstBrowser.size()])
+                                            <th></th>
+                                            #end
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td></td>
+                                                #foreach($firstBrowser in $listOfFirstBrowser)
+                                                    <td class="caller" align="center">
+                                                        #if ($firstBrowser.get(0) == "firefox")
+                                                            <img title="Version: $firstBrowser.get(1)" src="assets/img/firefox.png" height="20" width="20">
+                                                        #elseif ($firstBrowser.get(0) == "chrome")
+                                                            <img title="Version: $firstBrowser.get(1)" src="assets/img/chrome.png" height="20" width="20">
+                                                        #elseif ($firstBrowser.get(0) == "MicrosoftEdge")
+                                                            <img title="Version: $firstBrowser.get(1)" src="assets/img/edge.png" height="20" width="20">
+                                                        #end
+                                                        <p>$firstBrowser.get(1)</p>
+                                                    </td>
+
+                                                #end
+                                            </tr>
+                                            #set($modalCount = 1)
+                                            #foreach($secondBrowser in $listOfSecondBrowser)
+                                            <tr>
+                                                <td class="callee">
+
+                                                    #if ($secondBrowser.get(0) == "firefox")
+                                                        <img title="Version: $secondBrowser.get(1)" src="assets/img/firefox.png" height="20" width="20">
+                                                    #elseif ($secondBrowser.get(0) == "chrome")
+                                                        <img title="Version: $secondBrowser.get(1)" src="assets/img/chrome.png" height="20" width="20">
+                                                    #elseif ($secondBrowser.get(0) == "MicrosoftEdge")
+                                                        <img title="Version: $secondBrowser.get(1)" src="assets/img/edge.png" height="20" width="20">
+                                                    #end
+                                                    <p>$secondBrowser.get(1)</p>
+                                                </td>
+
+                                                #foreach($firstBrowser in $listOfFirstBrowser)
+
+                                                <td>
+                                                    <div name="Modal$modalCount" class="cell">
+                                                        #set($osResultTableGrid = $listOfResult.getResultTableListInOSGrid($firstBrowser,$secondBrowser))
+                                                        <table style{empty-cells:show}>
+                                                            <tbody>
+                                                            #foreach($row in [0..$numberOfOS])
+                                                            <tr>
+                                                                #foreach($col in [0..$numberOfOS])
+                                                                    #if($osResultTableGrid.get($col).get($row).getResult().equals("SUCCESSFUL"))
+                                                                    <td class="small ok">
+                                                                    </td>
+                                                                    #elseif($osResultTableGrid.get($col).get($row).getResult().equals("SCHEDULED"))
+                                                                    <td class="small tbd">
+
+                                                                    </td>
+                                                                    #elseif($osResultTableGrid.get($col).get($row).getResult().equals("NA"))
+                                                                    <td class="small not-covered">
+                                                                    </td>
+                                                                    #elseif($osResultTableGrid.get($col).get($row).getResult().equals("NP"))
+                                                                    <td class="small untestable">
+                                                                    </td>
+                                                                    #elseif($osResultTableGrid.get($col).get($row).getResult().equals("TIME OUT"))
+                                                                    <td class="small notok">
+                                                                    </td>
+                                                                    #elseif($osResultTableGrid.get($col).get($row).getResult().equals("FAILED"))
+                                                                    <td class="small notok">
+                                                                    </td>
+                                                                    #else
+                                                                    <td class="small errored">
+                                                                    </td>
+                                                                    #end
+                                                                #end
+                                                            </tr>
+                                                            #end
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    #set($modalCount = $modalCount + 1)
+                                                #end
+                                                </td>
+
+                                            </tr>
+                                            #end
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="header" align="center">
+
+                                    #set($modalCount2 = 1)
+                                    <table class="table">
+                                        <thead>
+                                        <th id=durationBox class="hidden-grid" >Duration(ms):&nbsp;&nbsp;&nbsp;<span id=duration></span></th>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td id=resultBox>
+                                                <div id="result" class="info logged medium-text"></div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                    #foreach($secondBrowser2 in $listOfSecondBrowser)
+                                        #foreach($firstBrowser2 in $listOfFirstBrowser)
+                                        #set($osResultTableGrid2 = $listOfResult.getResultTableListInOSGrid($firstBrowser2,$secondBrowser2))
+                                        <div class="hidden-grid" id="Modal$modalCount2" padding=20px>
+                                            <table id="OSgrid" style{empty-cells:show}>
+                                            <tbody>
+                                            <tr>
+                                            <td></td>
+                                            #foreach($os in $listOfOS)
+                                                <td class="caller"><div style="min-width:30px"><p class="tilt-text small-text">$os.replaceAll("_", " ")</h1></div></td>
+                                            #end
+                                            </tr>
+                                            #foreach($row2 in [0..$numberOfOS])
+                                            <tr>
+                                                <td class="callee"><p class="small-text">$listOfOS.get($row2).replaceAll("_", " ")</p></td>
+                                                #foreach($col2 in [0..$numberOfOS])
+                                                #set($time = $dateTool.format($osResultTableGrid2.get($col2).get($row2).getStartTime()))
+                                                #set($duration = $osResultTableGrid2.get($col2).get($row2).getDuration())
+                                                #set($logged = $osResultTableGrid2.get($col2).get($row2).getResult().replaceAll("(\r\n|\n)", "<br />"))
+
+                                                    #if($logged.equals("SUCCESSFUL"))
+                                                    <td class="big ok" id="$modalCount2$row2$col2">
+                                                    <input class='button-cell' name="$modalCount2$row2$col2" data-duration="$duration" data-log="$logged" type='button' value=''/>
+                                                    </td>
+                                                    #elseif($logged.equals("SCHEDULED"))
+                                                    <td class="big tbd" id="$modalCount2$row2$col2">
+                                                    <input class='button-cell' name="$modalCount2$row2$col2" data-duration="0" data-log="Waiting for result" type='button' value=''/>
+                                                    </td>
+                                                    #elseif($logged.equals("NA"))
+                                                    <td class="big not-covered" id="$modalCount2$row2$col2">
+                                                    <input class='button-cell' name="$modalCount2$row2$col2" data-duration="N/A" data-log="Not covered in this Test" type='button' value=''/>
+                                                    </td>
+                                                    #elseif($logged.equals("NP"))
+                                                    <td class="big untestable" id="$modalCount2$row2$col2">
+                                                    <input class='button-cell' name="$modalCount2$row2$col2" data-duration="untestable" data-log="untestable" type='button' value=''/>
+                                                    </td>
+                                                    #elseif($logged.equals("TIME OUT"))
+                                                    <td class="big notok" id="$modalCount2$row2$col2">
+                                                    <input class='button-cell' name="$modalCount2$row2$col2" data-duration="$duration" data-log="$logged" type='button' value=''/>
+                                                    </td>
+                                                    #elseif($logged.equals("FAILED"))
+                                                    <td class="big notok" id="$modalCount2$row2$col2">
+                                                    <input class='button-cell' name="$modalCount2$row2$col2" data-duration="$duration" data-log="$logged" type='button' value=''/>
+                                                    </td>
+                                                    #else
+                                                    <td class="big errored" id="$modalCount2$row2$col2">
+                                                    <input class='button-cell' name="$modalCount2$row2$col2" data-duration="$duration" data-log="$logged" type='button' value=''/>
+                                                    </td>
+                                                    #end
+                                                #end
+                                            </tr>
+                                            #end
+                                            </tbody>
+                                            </table>
+                                        </div>
+                                        #set($modalCount2 = $modalCount2 + 1)
+                                        #end
+                                    #end
+                                    </br>
+                                    </br>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End of main data content display -->
+            <!-- Start footer-->
+            <footer class="footer">
+                <div class="container-fluid">
+                    <nav class="pull-left">
+                        <ul>
+                            <li>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </footer>
+           <!-- End of footer-->
+        </div>
+    </div>
+
+</body>
+    <!--   Core JS Files   -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
+
+
+    <!-- Light Bootstrap Table Core javascript and methods for Demo purpose -->
+    <script src="assets/js/light-bootstrap-dashboard.js"></script>
+
+</html>
