@@ -84,7 +84,7 @@ java -Dwebdriver.chrome.driver=./chromedriver -Dwebdriver.edge.driver=./Microsof
 
 You can use example configuration file `./KITE-AppRTC-Test/configs/local.config.json` as starting point.
 
-Read below about the configuration file, check that you have the desired browsers available listed in your configuration file.
+Read below about the configuration file, check that the desired browsers listed in your configuration file are available in your system.
 
 ### Understanding a basic configuration file
 
@@ -113,9 +113,6 @@ The example local.config.json file is almost the simplest config file you can ge
     },
     {
       "browserName": "chrome"
-    },
-    {
-      "browserName": "MicrosoftEdge"
     }
   ]
 }
