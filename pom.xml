@@ -1,0 +1,18 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.webrtc.kite</groupId>
+  <artifactId>kite-base</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>KITE-Engine-IF</module>
+    <module>KITE-Engine</module>
+    <module>KITE-AppRTC-Test</module>
+    <module>KITE-Dashboard</module>
+  </modules>
+
+</project>

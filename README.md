@@ -72,11 +72,11 @@ java -Dwebdriver.chrome.driver=./chromedriver -Dwebdriver.edge.driver=./Microsof
 
 ### Build KITE-Engine and KITE-AppRTC-Test
 
-1. Build and install (maven clean install) first KITE-Engine-IF
+1. Build and install running the command
 
-1. Then build and install KITE-Engine
-
-1. Finally, build KITE-AppRTC-Test
+```
+maven clean install
+```
 
 * KITE-AppRTC-Test build includes a Junit test that requires local selenium, you can skip this (not recommended) running maven with -DskipTests 
 

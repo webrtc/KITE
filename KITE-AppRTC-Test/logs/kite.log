@@ -1,6 +1,0 @@
-INFO    2017-09-21 11:07:04,240 [main] org.webrtc.kite.IceConnectionTest  - RemoteWebDriver: firefox on ANY (873c6563-0669-4762-86ca-89dac8a4f8d2): new
-INFO    2017-09-21 11:07:04,260 [main] org.webrtc.kite.IceConnectionTest  - RemoteWebDriver: chrome on LINUX (dc92bd65-d565-467f-ad1c-b572b407fcc6): unknown
-INFO    2017-09-21 11:07:05,288 [main] org.webrtc.kite.IceConnectionTest  - RemoteWebDriver: firefox on ANY (873c6563-0669-4762-86ca-89dac8a4f8d2): new
-INFO    2017-09-21 11:07:05,306 [main] org.webrtc.kite.IceConnectionTest  - RemoteWebDriver: chrome on LINUX (dc92bd65-d565-467f-ad1c-b572b407fcc6): checking
-INFO    2017-09-21 11:07:06,353 [main] org.webrtc.kite.IceConnectionTest  - RemoteWebDriver: firefox on ANY (873c6563-0669-4762-86ca-89dac8a4f8d2): connected
-INFO    2017-09-21 11:07:06,406 [main] org.webrtc.kite.IceConnectionTest  - RemoteWebDriver: chrome on LINUX (dc92bd65-d565-467f-ad1c-b572b407fcc6): connected
