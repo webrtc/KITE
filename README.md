@@ -12,7 +12,7 @@ See LICENSE for licensing.
 
 ### Install prerequisite software
 
-* Install the browsers you would like to test, available for your machine. Chrome, Edge and Firefox are supported at this stage. **Attention:** WebDriver for Firefox on Windows has some limitations (not supporting testing involving using media, or Firefox profile with fake media stream).
+* Install the browsers you would like to test, available for your machine. Chrome, Edge, Firefox and Safari are supported at this stage. **Attention:** WebDriver for Firefox on Windows has some limitations (not supporting testing involving using media, or Firefox profile with fake media stream).
 * Make sure you have a recent Java SDK installed (or get e.g. [*JDK 8.1*](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html))
 
 ### Download webdrivers and selenium server standalone
@@ -21,54 +21,33 @@ See LICENSE for licensing.
 *  Download the corresponding webdrivers on the root of a new working directory:
 
    *   Download the latest [*chrome webdriver*](https://sites.google.com/a/chromium.org/chromedriver/downloads),
-   *   Download the latest [*edge webdriver*](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/),
    *   Download the latest [*firefox webdriver*](https://github.com/mozilla/geckodriver/releases),
-   *   Safari webdrivers (if you are on macOs 10.12+, and have Safari 10+), is located at ```/usr/bin/safaridriver```
+   *   On Windows, download the latest [*edge webdriver*](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/),
 
-*  Download [*Selenium Server Standalone 3.4.0*](http://selenium-release.storage.googleapis.com/3.4/selenium-server-standalone-3.4.0.jar) in the same folder
+*  Download [*Selenium Server Standalone 3.5.3*](http://selenium-release.storage.googleapis.com/3.5/selenium-server-standalone-3.5.3.jar) in the same folder
 
 ### If on MAC, enable safari automation
 
 Enable the 'Allow Remote Automation' option in Safari's Develop menu to control Safari via WebDriver.
 
-### Start selenium-server-standalone:
+### Start selenium-server-standalone
 
-Run this command, don't stop it until testing session has finished
+Run this command , don't stop it until testing session has finished
 
+On Linux and Mac run:
 ```
-java -Dwebdriver.chrome.driver=./chromedriver -Dwebdriver.edge.driver=./MicrosoftWebDriver -Dwebdriver.gecko.driver=./geckodriver -Dwebdriver.safari.driver=/usr/bin/safaridriver -jar selenium-server-standalone-3.4.0.jar
+java -Dwebdriver.chrome.driver=./chromedriver -Dwebdriver.gecko.driver=./geckodriver -jar selenium-server-standalone-3.5.3.jar
+```
+
+On Windows run:
+```
+java -Dwebdriver.chrome.driver=./chromedriver.exe -Dwebdriver.gecko.driver=./geckodriver.exe -Dwebdriver.edge.driver=./MicrosoftWebDriver.exe -jar selenium-server-standalone-3.5.3.jar
 ```
 
 *  ```-Dwebdriver.xxxx.driver``` specifies the path to the webdriver executable matching the browser xxxx (possible values of xxxx are: gecko, chrome, edge, ...).
-*  Depending on the testing needs, command line can include one, two or the three drivers
+*  Depending on platform and the testing needs, command line can include one, two or the three drivers
 
-## B. Setup the Dashboard
-
-### Deploy and run the dashboard locally
-
-1.  Download compressed tomcat distribution, (version 8.5.20 at time of this writing) \[[*http://tomcat.apache.org/download-80.cgi\#8.5.20*](http://tomcat.apache.org/download-80.cgi#8.5.20)\]
-
-1.  Unzip/extract anywhere.
-
-1.  Build KITE-Dashboard, copy kiteweb.war file to apache-tomcat-8.5.20/webapps
-
-1.  Start tomcat:
-
-| Windows  | Linux / Mac |
-| ------------- | ------------- |
-| cd apache-tomcat-8.5.20\bin  | cd apache-tomcat-8.5.20/bin  |
-| startup  | ./catalina.sh run  |
-
-1.  Now open a browser and access the following URL [*http://localhost:8080/kiteweb*](http://localhost:8080/kiteweb)
-
-1.  When test session finishes, stop tomcat:
-
-| Windows  | Linux / Mac |
-| ------------- | ------------- |
-| cd apache-tomcat-8.5.20\bin  | cd apache-tomcat-8.5.20/bin  |
-| shutdown  | ./shutdown.sh  |
-
-## C. Build and KITE Engine and the basic sample AppRTC Test
+## B. Build and KITE Engine and the basic sample AppRTC Test
 
 ### Build KITE-Engine and KITE-AppRTC-Test
 
@@ -78,7 +57,40 @@ java -Dwebdriver.chrome.driver=./chromedriver -Dwebdriver.edge.driver=./Microsof
 mvn clean install
 ```
 
-* KITE-AppRTC-Test build includes a Junit test that requires local selenium, you can skip this (not recommended) running maven with -DskipTests 
+* If selenium is not running, build will fail, as KITE-AppRTC-Test includes a Junit test that requires local selenium. You can skip this (not recommended) running maven with -DskipTests 
+```
+mvn clean install -DskipTests
+```
+
+## C. Setup the Dashboard
+
+### Deploy and run the dashboard locally
+
+1.  Download compressed tomcat distribution, (version 8.5.20 at time of this writing) \[[*http://tomcat.apache.org/download-80.cgi\#8.5.20*](http://tomcat.apache.org/download-80.cgi#8.5.20)\]
+
+1.  Unzip/extract anywhere.
+
+1.  Copy ```KITE-Dashboard/target/kiteweb.war``` file to ```apache-tomcat-8.5.20/webapps```
+  * If the file ```KITE-Dashboard/target/kiteweb.war``` doesn't exist, rerun the build (previous step)
+
+4.  Start tomcat:
+
+| Windows  | Linux / Mac |
+| ------------- | ------------- |
+| cd apache-tomcat-8.5.20\bin  | cd apache-tomcat-8.5.20/bin  |
+| startup  | ./catalina.sh run  |
+
+5.  Now open a browser and access the following URL [*http://localhost:8080/kiteweb*](http://localhost:8080/kiteweb)
+
+6.  When test session finishes, stop tomcat:
+
+| Windows  | Linux / Mac |
+| ------------- | ------------- |
+| cd apache-tomcat-8.5.20\bin  | cd apache-tomcat-8.5.20/bin  |
+| shutdown  | ./shutdown.sh  |
+
+
+## D. Run sample basic test
 
 ### Choose and edit your test run configuration
 
@@ -164,8 +176,14 @@ Sample config files in ```KITE-AppRTC-Test/configs``` contain different examples
 
 Execute the following command in the working directory, the last argument specifies the configuration file specifying the tests:
 
+On Linux and Mac run:
 ```
 java -cp KITE-Engine/target/kite-jar-with-dependencies.jar:KITE-AppRTC-Test/target/apprtc-test-1.0.jar org.webrtc.kite.Engine ./KITE-AppRTC-Test/configs/local.config.json
+```
+
+On Windows run:
+```
+java -cp KITE-Engine/target/kite-jar-with-dependencies.jar;KITE-AppRTC-Test/target/apprtc-test-1.0.jar org.webrtc.kite.Engine ./KITE-AppRTC-Test/configs/local.config.json
 ```
 
 Check the dashboard for the results and reports.
@@ -180,7 +198,7 @@ KITE-Dashboard can be setup on any machine as described in previous section, you
 
 ## Setup a hosted test service account
 
-SauceLabs, BrowserStack and TestingBot have been tested and are supported. In theory any webdriver compliant service is usable.
+SauceLabs, BrowserStack and TestingBot have been tested and are supported.
 
 See example files in ```KITE-AppRTC-Test/configs``` mixing different hosted test services.
 
