@@ -27,6 +27,28 @@
         <version>3.0.0</version>
         <configuration>
           <warSourceDirectory>WebContent</warSourceDirectory>
+          <webResources>
+            <resource>
+              <directory>${project.basedir}/../third_party/pixeden-stroke-7-icon/fonts</directory>
+              <targetPath>assets/fonts</targetPath>
+            </resource>
+            <resource>
+              <directory>${project.basedir}/../third_party/pixeden-stroke-7-icon/css</directory>
+              <targetPath>assets/css</targetPath>
+            </resource>
+            <resource>
+              <directory>${project.basedir}/../third_party/light-bootstrap-dashboard/css</directory>
+              <targetPath>assets/css</targetPath>
+            </resource>
+            <resource>
+              <directory>${project.basedir}/../third_party/light-bootstrap-dashboard/js</directory>
+              <targetPath>assets/js</targetPath>
+            </resource>
+            <resource>
+              <directory>${project.basedir}/../third_party/bootstrap_notify/js</directory>
+              <targetPath>assets/js</targetPath>
+            </resource>
+          </webResources>          
         </configuration>
       </plugin>
     </plugins>
