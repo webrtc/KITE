@@ -48,6 +48,9 @@
               <directory>${project.basedir}/../third_party/bootstrap_notify/js</directory>
               <targetPath>assets/js</targetPath>
             </resource>
+            <resource>
+              <directory>${project.basedir}/../third_party/startbootstrap-grayscale</directory>
+            </resource>
           </webResources>          
         </configuration>
       </plugin>
