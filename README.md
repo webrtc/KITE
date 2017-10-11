@@ -12,7 +12,7 @@ See LICENSE for licensing.
 
 ### Install prerequisite software
 
-* Install the browsers you would like to test, available for your machine. Chrome, Edge, Firefox and Safari are supported at this stage. **Attention:** WebDriver for Firefox on Windows has some limitations (not supporting testing involving using media, or Firefox profile with fake media stream).
+* Install the browsers you would like to test, available for your machine. Chrome, Edge, Firefox and Safari are supported at this stage. See the wiki for some limitations or hints for each browser.
 * Make sure you have a recent Java SDK installed (or get e.g. [*JDK 8.1*](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html))
 
 ### Download webdrivers and selenium server standalone
@@ -160,7 +160,6 @@ It requests for firefox and chrome, but without specifying a platform or a versi
 
 Sample config files in ```KITE-AppRTC-Test/configs``` contain different examples for explicit version and platform configuration, take a look
 
- **Attention**: WebDriver for Firefox on Windows has some limitations (not supporting testing involving using media, or Firefox profile with fake media stream).
 ```json
   "browsers": [
     {
