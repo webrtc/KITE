@@ -44,22 +44,23 @@ public class Utility {
   }
 
   /**
-   * Checks if the given key exists in the given JsonObject.
+   * Checks if the given key exists in the given JsonObject with a valid value.
    *
    * @param jsonObject JsonObject
    * @param key key
    * @param valueClass Class object for the value of the key.
+   * @param isOptional A boolean specifying that the value may be optional. Note: This only works if the valueClass is String.
    * @return the value of the key
    * @throws KiteNoKeyException if the key is not mapped in the JsonObject.
    * @throws KiteBadValueException if the value of the key is invalid.
    */
   public static Object throwNoKeyOrBadValueException(JsonObject jsonObject, String key,
-      Class<?> valueClass) throws KiteNoKeyException, KiteBadValueException {
+      Class<?> valueClass, boolean isOptional) throws KiteNoKeyException, KiteBadValueException {
     Object value = null;
     try {
       switch (valueClass.getSimpleName()) {
         case "String":
-          value = jsonObject.getString(key);
+          value = (isOptional) ? jsonObject.getString(key, null) : jsonObject.getString(key);
           break;
         case "JsonArray":
           value = jsonObject.getJsonArray(key);
