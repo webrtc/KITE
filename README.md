@@ -24,7 +24,7 @@ See LICENSE for licensing.
    *   Download the latest [*firefox webdriver*](https://github.com/mozilla/geckodriver/releases),
    *   On Windows, download the latest [*edge webdriver*](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/),
 
-*  Download [*Selenium Server Standalone 3.5.3*](http://selenium-release.storage.googleapis.com/3.5/selenium-server-standalone-3.5.3.jar) in the same folder
+*  Download [*Selenium Server Standalone 3.7.1*](http://selenium-release.storage.googleapis.com/3.7/selenium-server-standalone-3.7.1.jar) in the same folder
 
 ### If on MAC, enable safari automation
 
@@ -36,12 +36,12 @@ Run this command , don't stop it until testing session has finished
 
 On Linux and Mac run:
 ```
-java -Dwebdriver.chrome.driver=./chromedriver -Dwebdriver.gecko.driver=./geckodriver -jar selenium-server-standalone-3.5.3.jar
+java -Dwebdriver.chrome.driver=./chromedriver -Dwebdriver.gecko.driver=./geckodriver -jar selenium-server-standalone-3.7.1.jar
 ```
 
 On Windows run:
 ```
-java -Dwebdriver.chrome.driver=./chromedriver.exe -Dwebdriver.gecko.driver=./geckodriver.exe -Dwebdriver.edge.driver=./MicrosoftWebDriver.exe -jar selenium-server-standalone-3.5.3.jar
+java -Dwebdriver.chrome.driver=./chromedriver.exe -Dwebdriver.gecko.driver=./geckodriver.exe -Dwebdriver.edge.driver=./MicrosoftWebDriver.exe -jar selenium-server-standalone-3.7.1.jar
 ```
 
 *  ```-Dwebdriver.xxxx.driver``` specifies the path to the webdriver executable matching the browser xxxx (possible values of xxxx are: gecko, chrome, edge, ...).
