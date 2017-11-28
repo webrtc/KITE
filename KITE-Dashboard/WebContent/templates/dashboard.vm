@@ -23,17 +23,46 @@ limitations under the License.
     <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/themes/black/pace-theme-minimal.css" rel="stylesheet" />
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
     <link href="assets/css/light-bootstrap-dashboard.css" rel="stylesheet"/>
-    <link href="assets/css/first_page.css" rel="stylesheet"/>
+    <link href="assets/css/kite-dashboard.css" rel="stylesheet"/>
 
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
     <link href="https://rawgithub.com/olimsaidov/pixeden-stroke-7-icon/master/pe-icon-7-stroke/dist/pe-icon-7-stroke.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js" type="text/javascript"></script>
+    <script>
+        $(document).on("click", "i", function(e) {
+            var id = $(this).attr('name');
+            if($(this).attr('class')=='pe-7s-plus'){
+                $("#"+id).css("height","230px");
+                $("#"+id).css("overflow","visible");
+                $(this).attr('class', 'pe-7s-less');
 
+            }else{
+                $("#"+id).css("height","60px");
+                $("#"+id).css("overflow","hidden");
+                $(this).attr('class', 'pe-7s-plus');
+            }
+        });
+    </script>
+    <style>
+        .grow{
+            overflow: hidden;
+            height:60px;
+            width: 90%;
+            -webkit-transition:width 200ms;
+            -moz-transition:width 200ms;
+            transition:width 200ms;
+            -webkit-transition:height 200ms;
+            -moz-transition:height 200ms;
+            transition:height 200ms;
+            margin:10px;
+        }
+    </style>
 </head>
 <body>
     <div class="wrapper">
-
+        <!-- Start of side nav bar -->
         <div class="sidebar" data-color="black" data-image="assets/img/sidebarSmall.jpg">
             <div class="sidebar-wrapper">
                 <div class="logo">
@@ -41,7 +70,6 @@ limitations under the License.
                         KITE
                     </a>
                 </div>
-
                 <ul class="nav">
                     <li>
                         <div class="row">
@@ -64,74 +92,75 @@ limitations under the License.
                             <p>Dashboard</p>
                         </a>
                     </li>
-                    <li class="">
+                    <li>
+                        <a href="versions">
+                            <i class="pe-7s-way"></i>
+                            <p>Version Info</p>
+                        </a>
+                    </li>
+                    <li>
                         <a href="config">
                             <i class="pe-7s-note"></i>
                             <p>Configurator</p>
                         </a>
                     </li>
-                    <li class="">
-                        <a href="overview">
-                            <i class="pe-7s-pin"></i>
-                            <p>Overview</p>
-                        </a>
+                    <li>
+                        <nav class="overview">
+                            <ul>
+                                <li><a href="#">
+                                        <i class="pe-7s-pin"></i>
+                                        <p>Overview</p>
+                                    </a>
+                                    <ul>
+                                        #foreach($testName in $listOfTest)
+                                        <li><a href="overview?testname=$linkTool.encode($testName)" style="font-size: 12px;" >$testName<div class="circle"></div></a></li>
+                                        #end
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
                     </li>
                 </ul>
             </div>
         </div>
         <!-- End of side nav bar -->
-
-        <!-- Start horizontal nav bar -->
-
+        <!-- Start main data content display -->
         <div class="main-panel">
-            <nav class="navbar navbar-default navbar-fixed">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navigation-example-2">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <a class="navbar-brand" href="dashboard">Dashboard</a>
-                    </div>
-                    <div class="collapse navbar-collapse">
-                    </div>
-                </div>
-            </nav>
-            <!-- End of horizontal nav bar -->
-            <!-- Start main data content display -->
             <div class="content">
                 <div class="container-fluid">
-
-                        <div class="col-md-9">
-                            <div class="card">
-                                <div class="header">
-                                    <h4 class="title">Configurations Executed: </h4>
-                                    </br>
-                                </div>
+                    <div class="col-md-9">
+                        <div class="card">
+                            <div class="header">
+                                <h4 class="title">Configurations Executed: </h4>
+                                </br>
                             </div>
-                            <div class="wrapping">
-                            #set($index = 1)
-                            #foreach($config in $listOfConfig)
-                                <div class="card">
-                                    <div class="table-responsive table-full-width">
-                                        <table class="table">
-                                            <tbody>
-                                                <tr>
+                        </div>
+                        <div class="result-wrapper">
+                        #set($index = 1)
+                        #foreach($config in $listOfConfig)
+                            <div id="config$index" class="grow card">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <tbody>
+                                            <tr>
+                                                <td style="padding:10 0 0 20; width:40vw">
+                                                    <a class="big-boy" href ="execution?name=$linkTool.encode($config.getConfigName())">$index. $config.getConfigName() - $config.getNumberOfRuns() run(s)</a> </br>
+                                                    <a class="lastRun" href ="tests?id=$linkTool.encode($config.getLatestId())&configname=$linkTool.encode($config.getConfigName())">Last run: $dateTool.format($config.getLatestRun())</a>
+                                                </td>
+                                                <td style="vertical-align:top; text-align:center;width:50px"">
+                                                <i name="config$index" class="pe-7s-plus"></i>
+                                                </td>
+                                            </tr>
+                                            <tr>
                                                 <td>
-                                                    <div class="header">
-                                                        <h4 class="title">$index.$config.getConfigName() - $config.getNumberOfRuns() run(s)</h4>
-                                                        <a class="lastRun" href ="tests?id=$linkTool.encode($config.getLatestId())&configname=$linkTool.encode($config.getConfigName())">Last run: $dateTool.format($config.getLatestRun())</a>
-                                                    </div>
-                                                    <table class="table">
+                                                    <table class="table half-width">
                                                         <thead>
-                                                        <th>Total</th>
-                                                        <th style="background: #42f4aa; color: white;">Success</th>
-                                                        <th style="background: #ff4b30; color: white;">Failed</th>
-                                                        <th style="background: #30b3ff; color: white;">Error</th>
-                                                        <th style="background: grey; color: white;">Pending</th>
-                                                        <th></th>
+                                                            <th>Total</th>
+                                                            <th style="background: #42f4aa; color: white;">Success</th>
+                                                            <th style="background: #ff4b30; color: white;">Failed</th>
+                                                            <th style="background: #30b3ff; color: white;">Error</th>
+                                                            <th style="background: grey; color: white;">Pending</th>
+                                                            <th></th>
                                                         </thead>
                                                         <tbody>
                                                             <tr>
@@ -144,12 +173,12 @@ limitations under the License.
                                                                     <div class="dropdown">
                                                                         <button type="button" class="btn show-more dropdown-toggle" data-toggle="dropdown">Show all run(s) ..</button>
                                                                         <ul class="dropdown-menu">
-                                                                               <li><a href ="execution?name=$linkTool.encode($config.getConfigName())">See all</a></li>
-                                                                               #set($index1 = 1)
-                                                                               #foreach($startTime in $config.getStartTimeList())
-                                                                               <li><a href ="tests?id=$linkTool.encode($config.getId($startTime))&configname=$linkTool.encode($config.getConfigName())">$index1. $dateTool.format($startTime)</a></li>
-                                                                               #set($index1 = $index1 + 1)
-                                                                               #end
+                                                                           <li><a href ="execution?name=$linkTool.encode($config.getConfigName())">See all</a></li>
+                                                                           #set($index1 = 1)
+                                                                           #foreach($startTime in $config.getStartTimeList())
+                                                                           <li><a href ="tests?id=$linkTool.encode($config.getId($startTime))&configname=$linkTool.encode($config.getConfigName())">$index1. $dateTool.format($startTime)</a></li>
+                                                                           #set($index1 = $index1 + 1)
+                                                                           #end
                                                                         </ul>
                                                                     </div>
                                                                 </td>
@@ -157,11 +186,8 @@ limitations under the License.
                                                         </tbody>
                                                     </table>
                                                 </td>
-                                                <td style="height:300px; width:25%; margin:0;"><div class="container" style="position: left; height:20vh; width:15vw; margin:0;">
-                                                      <div>
-                                                        <canvas id="$config.getConfigName()"></canvas>
-                                                      </div>
-                                                    </div>
+                                                <td style="padding-right:0;padding-left:0">
+                                                    <canvas id="$config.getConfigName()"></canvas>
                                                     <script>
                                                         var success = $config.getNumberOfSuccess();
                                                         var failed = $config.getNumberOfFailed();
@@ -185,76 +211,62 @@ limitations under the License.
                                                         options: {
                                                             responsive: false,
                                                             legend: {
-                                                                        display: false,
-                                                                        position: 'top',
-                                                                        labels: {
-                                                                            boxWidth: 30,
-                                                                            fontSize: 12
-                                                                        }
+                                                                display: false,
+                                                                position: 'top',
+                                                                labels: {
+                                                                    boxWidth: 30,
+                                                                    fontSize: 12
                                                                     }
+                                                                }
                                                             }
                                                         });
                                                     </script>
                                                 </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
-                                #set($index = $index+ 1)
-                            #end
+                            </div>
+                            #set($index = $index+ 1)
+                        #end
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="header">
+                                <h4 class="title">Browsers Tested With:</h4>
+                                </br>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card">
-                                <div class="header">
-                                    <h4 class="title">Browsers Tested With:</h4>
-                                    </br>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="content wrapping">
-                                    #foreach($browser in $listOfBrowser)
-                                        <h5>
-                                        #if ($browser.getName() == "firefox")
-                                            <img src="assets/img/firefox.png" height="30" width="30">
-                                        #elseif ($browser.getName() == "chrome")
-                                            <img src="assets/img/chrome.png" height="30 width="30">
-                                        #elseif ($browser.getName() == "MicrosoftEdge")
-                                            <img src="assets/img/edge.png" height="30" width="30">
-                                        #end
-
-                                        $browser.getVersion()
-                                        $browser.getPlatform()</h5>
+                        <div class="card">
+                            <div class="content wrapping">
+                                #foreach($browser in $listOfBrowser)
+                                    <h5><a>
+                                    #if ($browser.getName() == "firefox")
+                                        <img src="assets/img/firefox.png" height="30" width="30">
+                                    #elseif ($browser.getName() == "chrome")
+                                        <img src="assets/img/chrome.png" height="30 width="30">
+                                    #elseif ($browser.getName() == "MicrosoftEdge")
+                                        <img src="assets/img/edge.png" height="30" width="30">
+                                    #elseif ($browser.getName() == "safari")
+                                        <img src="assets/img/safari.png" height="30" width="30">
                                     #end
-                                </div>
+
+                                    $browser.getVersion()
+                                    $browser.getPlatform()</a></h5>
+                                #end
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- End of main data content display -->
-            <!-- Start footer-->
-            <footer class="footer">
-                <div class="container-fluid">
-                    <nav class="pull-left">
-                        <ul>
-                            <li>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </footer>
-           <!-- End of footer-->
+        <!-- End of main data content display -->
         </div>
     </div>
 </body>
     <!--   Core JS Files   -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js" type="text/javascript"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
 
     <!-- Light Bootstrap Table Core javascript and methods for Demo purpose -->
     <script src="assets/js/light-bootstrap-dashboard.js"></script>
-
-
 </html>

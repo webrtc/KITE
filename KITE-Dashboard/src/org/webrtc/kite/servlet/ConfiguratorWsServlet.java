@@ -16,16 +16,17 @@
 
 package org.webrtc.kite.servlet;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.server.ServerEndpoint;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
 
 @ServerEndpoint("/configurator")
 public class ConfiguratorWsServlet {

@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2017 Google Inc.
  * 
@@ -197,5 +196,22 @@ public class ConfigTest {
 
   public List<Integer> getStats() {
     return stats;
+  }
+
+  /**
+   *
+   * @return the Json String containing all properties of this
+   */
+  public String getJsonData(){
+    String res =  "{";
+    res+="\"name\": \""+testName+"\",";
+    res+="\"id\": "+testId+",";
+    res+="\"configId\": "+testId+",";
+    res+="\"total\": "+totalTests+",";
+    res+="\"done\": "+doneTests+",";
+    res+="\"start\": "+startTime+",";
+    res+="\"status\": "+status+",";
+    res+="\"stats\": ["+stats.get(0)+","+stats.get(1)+","+stats.get(2)+","+stats.get(3)+"]}";
+    return  res;
   }
 }

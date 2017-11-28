@@ -16,17 +16,18 @@
 
 package org.webrtc.kite.dao;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.webrtc.kite.Utility;
+import org.webrtc.kite.pojo.ConfigExecution;
+import org.webrtc.kite.pojo.ConfigurationOverall;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.webrtc.kite.Utility;
-import org.webrtc.kite.pojo.ConfigExecution;
-import org.webrtc.kite.pojo.ConfigurationOverall;
 
 /**
  * A class in charged of getting information on executed configurations in the database.

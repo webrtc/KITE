@@ -22,8 +22,8 @@ limitations under the License.
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/pace.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/themes/black/pace-theme-minimal.css" rel="stylesheet" />
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="assets/css/light-bootstrap-dashboard.css" rel="stylesheet"/>
-    <link href="assets/css/first_page.css" rel="stylesheet"/>
+    <link href="assets/css/kite-dashboard.css" rel="stylesheet"/>
+
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
     <link href="https://rawgithub.com/olimsaidov/pixeden-stroke-7-icon/master/pe-icon-7-stroke/dist/pe-icon-7-stroke.css" rel="stylesheet" />
@@ -41,7 +41,7 @@ limitations under the License.
 </head>
 <body>
     <div class="wrapper">
-
+        <!-- Start of side nav bar -->
         <div class="sidebar" data-color="green" data-image="assets/img/sidebarSmall.jpg">
             <div class="sidebar-wrapper">
                 <div class="logo">
@@ -72,43 +72,40 @@ limitations under the License.
                             <p>Dashboard</p>
                         </a>
                     </li>
+                    <li>
+                        <a href="versions">
+                            <i class="pe-7s-way"></i>
+                            <p>Version Info</p>
+                        </a>
+                    </li>
                     <li class="">
                         <a href="config">
                             <i class="pe-7s-note"></i>
                             <p>Configurator</p>
                         </a>
                     </li>
-                    <li class="">
-                        <a href="overview">
-                            <i class="pe-7s-pin"></i>
-                            <p>Overview</p>
-                        </a>
+                    <li>
+                        <nav class="overview">
+                            <ul>
+                                <li><a href="#">
+                                        <i class="pe-7s-pin"></i>
+                                        <p>Overview</p>
+                                    </a>
+                                    <ul>
+                                        #foreach($testName in $listOfTestOverview)
+                                        <li><a href="overview?testname=$linkTool.encode($testName)" style="font-size: 12px;" >$testName<div class="circle"></div></a></li>
+                                        #end
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
                     </li>
                 </ul>
             </div>
         </div>
         <!-- End of side nav bar -->
-
-        <!-- Start horizontal nav bar -->
-
+        <!-- Start main data content display -->
         <div class="main-panel">
-            <nav class="navbar navbar-default navbar-fixed">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navigation-example-2">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <a class="navbar-brand" href="dashboard">Dashboard</a>
-                    </div>
-                    <div class="collapse navbar-collapse">
-                    </div>
-                </div>
-            </nav>
-            <!-- End of horizontal nav bar -->
-            <!-- Start main data content display -->
             <div class="content">
                 <div class="container-fluid">
                     <div class="row">
@@ -121,7 +118,6 @@ limitations under the License.
                                     <h4 class="title">Config found:</h4>
                                     <p class="category">This list shows all configs found with the key word: $result.getSearchKey()</p>
                                 </div>
-
                                 <div class="content table-responsive table-full-width">
                                     <table class="table table-hover table-striped">
                                         <thead>
@@ -152,14 +148,12 @@ limitations under the License.
                                 </div>
                             </div>
                             #end
-
                             #if ($listOfTest.size() > 0)
                             <div class="card">
                                 <div class="header">
                                     <h4 class="title">Tests found:</h4>
                                     <p class="category">This list shows all tests found with the key word: $result.getSearchKey()</p>
                                 </div>
-
                                 <div class="content table-responsive table-full-width">
                                     <table class="table table-hover table-striped">
                                         <thead>
@@ -203,18 +197,6 @@ limitations under the License.
                 </div>
             </div>
             <!-- End of main data content display -->
-            <!-- Start footer-->
-            <footer class="footer">
-                <div class="container-fluid">
-                    <nav class="pull-left">
-                        <ul>
-                            <li>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </footer>
-           <!-- End of footer-->
         </div>
     </div>
 </body>
@@ -222,9 +204,6 @@ limitations under the License.
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js" type="text/javascript"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
 
-
     <!-- Light Bootstrap Table Core javascript and methods for Demo purpose -->
     <script src="assets/js/light-bootstrap-dashboard.js"></script>
-
-
 </html>

@@ -16,8 +16,9 @@
 
 package org.webrtc.kite.pojo;
 
-import javax.json.JsonObject;
 import org.webrtc.kite.Mapping;
+
+import javax.json.JsonObject;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -46,8 +47,8 @@ public class Browser {
   }
 
   /**
-   * Constructs a new Browser from a Json object containing all the needed information and
-   * 'translate' to appropriate name of platform.
+   * Constructs a new Browser from a Json object containing all the needed information
+   * and 'translate' to appropriate name of platform.
    *
    * @param jsonObject Json object obtained from the configuration file.
    */
@@ -56,19 +57,18 @@ public class Browser {
     String browserVersion = "?";
     String browserPlatform = "?";
     if (jsonObject.get("version") != null) {
-      browserVersion = jsonObject.getString("version").split(Pattern.quote("."))[0];
+      browserVersion = jsonObject.getString("version");
       if (browserVersion.equals("ANY"))
         browserVersion = "?";
     }
 
     if (jsonObject.get("platform") != null) {
-      List<String> bPlatform =
-          Arrays.asList(jsonObject.getString("platform").split(Pattern.quote(" ")));
+      List<String> bPlatform = Arrays.asList(jsonObject.getString("platform").split(Pattern.quote(" ")));
       browserPlatform = bPlatform.get(0);
       switch (browserPlatform) {
         case "Mac": {
           bPlatform = Arrays.asList(bPlatform.get(3).split(Pattern.quote(".")));
-          browserPlatform = "OS X " + bPlatform.get(0) + "." + bPlatform.get(1);
+          browserPlatform = "OS X "+ bPlatform.get(0) + "." + bPlatform.get(1);
           break;
         }
         case "Windows": {
@@ -101,10 +101,7 @@ public class Browser {
           browserPlatform = "Linux";
           break;
         default:
-          if (Mapping.OS.containsKey(jsonObject.getString("platform"))) {
-            browserPlatform = Mapping.OS.get(jsonObject.getString("platform"));
-          } else
-            browserPlatform = "?";
+          browserPlatform = jsonObject.getString("platform");
       }
     }
     this.name = browserName;
@@ -134,16 +131,15 @@ public class Browser {
   }
 
   /**
-   * Returns true or false on whether a browser is relevant in term of version to be in the
-   * overview. The list of interesting browsers and their versions can be found in the class
-   * mapping.
+   * Returns true or false on whether a browser is relevant in term of version to be in the overview.
+   * The list of interesting browsers and their versions can be found in the class mapping.
    *
    */
   public boolean shouldBeInOverView() {
     if (version.equals("UNKNOWN"))
       return false;
     else {
-      switch (name) {
+      switch (name){
         case "firefox":
           if (!Mapping.FirefoxVersionList.contains(version))
             return false;
@@ -156,6 +152,10 @@ public class Browser {
           if (!Mapping.EdgeVersionList.contains(version))
             return false;
           break;
+        case "safari":
+          if (!Mapping.SafariVersionList.contains(version))
+            return false;
+          break;
       }
     }
     if (boringOSList.contains(platform))
@@ -165,8 +165,7 @@ public class Browser {
   }
 
   /**
-   * Returns true or false on whether a browser has a certain name and version (to use in overview
-   * template only).
+   * Returns true or false on whether a browser has a certain name and version (to use in overview template only).
    *
    */
   public boolean hasNameAndVersion(List<String> browser) {
@@ -177,15 +176,42 @@ public class Browser {
       return false;
     return res;
   }
-  
+
   /**
-   * Returns String representatoin for this Browser object.
+   * Returns true or false on whether a browser is equal to another one.
    *
    */
-  @Override
-  public String toString() {
-    return new StringBuilder("Browser-name:").append(name).append("-version:")
-        .append(version).append("-platform:").append(platform).toString();
+  public boolean isEqualTo(Browser browser) {
+    if (!this.name.equals(browser.getName()))
+      return false;
+    if (!this.version.equals(browser.getVersion()))
+      return false;
+    if (!this.platform.equals(browser.getPlatform()))
+      return false;
+    return true;
   }
-
+  /**
+   * Returns Json string of the browser
+   *
+   */
+  public String toJson() {
+    String res="";
+    switch (this.name){
+      case "safari":
+        res+="Sa";
+        break;
+      case "chrome":
+        res+="Cr";
+        break;
+      case "firefox":
+        res+="FF";
+        break;
+      case "MicrosoftEdge":
+        res+="E";
+        break;
+    }
+    res+=this.version;
+    res+=this.platform.replaceAll(" ","");
+    return "\"name\":\""+res+"\",\"children\":[{";
+  }
 }
