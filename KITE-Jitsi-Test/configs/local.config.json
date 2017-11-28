@@ -1,0 +1,25 @@
+{
+  "name": "local selenium example",
+  "callback": "http://localhost:8080/kiteweb/datacenter",
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://localhost:4444/wd/hub"
+    }
+  ],
+  "tests": [
+    {
+      "name": "JitsiTest",
+      "tupleSize": 3,
+      "testImpl": "org.webrtc.kite.JitsiTest"
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "firefox"
+    },
+    {
+      "browserName": "chrome"
+    }
+  ]
+}
