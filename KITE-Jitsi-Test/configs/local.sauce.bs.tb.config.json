@@ -1,0 +1,43 @@
+{
+  "name": "local, saucelabs, browserstack, testingbot grid example",
+  "callback": "http://localhost:8080/kiteweb/datacenter",
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://localhost:4444/wd/hub"
+    },
+    {
+      "type": "saucelabs",
+      "username": "username",
+      "accesskey": "Access Key"
+    },
+    {
+      "type": "browserstack",
+      "username": "Username",
+      "accesskey": "Access Key"
+    },
+    {
+      "type": "testingbot",
+      "username": "Key",
+      "accesskey": "Secret"
+    }
+  ],
+  "tests": [
+    {
+      "name": "JitsiTest",
+      "tupleSize": 3,
+      "testImpl": "org.webrtc.kite.JitsiTest"
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "chrome"
+    },
+    {
+      "browserName": "firefox"
+    },
+    {
+      "browserName": "MicrosoftEdge"
+    }
+  ]
+}
