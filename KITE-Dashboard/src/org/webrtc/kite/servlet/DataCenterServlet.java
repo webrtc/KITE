@@ -16,6 +16,10 @@
 
 package org.webrtc.kite.servlet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.webrtc.kite.DataCenterQueueManager;
+
 import javax.json.Json;
 import javax.json.JsonException;
 import javax.json.JsonObject;
@@ -25,9 +29,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.webrtc.kite.DataCenterQueueManager;
 import java.io.IOException;
 
 @WebServlet("/datacenter")

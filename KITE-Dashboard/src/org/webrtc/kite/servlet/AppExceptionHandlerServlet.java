@@ -16,17 +16,18 @@
 
 package org.webrtc.kite.servlet;
 
-import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.webrtc.kite.exception.KiteNoKeyException;
+import org.webrtc.kite.exception.KiteSQLException;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.webrtc.kite.exception.KiteNoKeyException;
-import org.webrtc.kite.exception.KiteSQLException;
+import java.io.IOException;
 
 /**
  * Servlet implementation class DashboardServlet

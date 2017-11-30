@@ -16,19 +16,21 @@
 
 package org.webrtc.kite.servlet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.webrtc.kite.Utility;
+import org.webrtc.kite.dao.ConfigExecutionDao;
+import org.webrtc.kite.dao.ConfigTestDao;
+import org.webrtc.kite.exception.KiteNoKeyException;
+import org.webrtc.kite.exception.KiteSQLException;
+import org.webrtc.kite.pojo.ConfigExecution;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.webrtc.kite.Utility;
-import org.webrtc.kite.dao.ConfigExecutionDao;
-import org.webrtc.kite.exception.KiteNoKeyException;
-import org.webrtc.kite.exception.KiteSQLException;
-import org.webrtc.kite.pojo.ConfigExecution;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -63,9 +65,12 @@ public class ExecutionServlet extends HttpServlet {
       log.debug("in->name: " + configName);
 
     List<ConfigExecution> listOfExecution;
+    List<String> listOfDistinctTest;
     try {
+      listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
+      request.setAttribute("listOfTest", listOfDistinctTest);
       listOfExecution = new ConfigExecutionDao(Utility.getDBConnection(this.getServletContext()))
-          .getConfigExecutionList(configName);
+              .getConfigExecutionList(configName);
       if (log.isDebugEnabled())
         log.debug("out->listOfExecution: " + listOfExecution);
       request.setAttribute("listOfExecution", listOfExecution);

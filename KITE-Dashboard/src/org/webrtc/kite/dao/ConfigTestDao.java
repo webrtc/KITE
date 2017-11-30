@@ -16,16 +16,17 @@
 
 package org.webrtc.kite.dao;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.webrtc.kite.Utility;
+import org.webrtc.kite.pojo.ConfigTest;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.webrtc.kite.Utility;
-import org.webrtc.kite.pojo.ConfigTest;
 
 /**
  * A class in charged of getting information on executed tests in the database.
@@ -166,7 +167,11 @@ public class ConfigTestDao {
     return resultTestList;
   }
 
-  private ConfigTest getTestById(int id) throws SQLException {
+  /**
+   * Returns a ConfigTest object of a test with specific ID.
+   *
+   */
+  public ConfigTest getTestById(int id) throws SQLException {
     String query = "SELECT * FROM TESTS WHERE TEST_ID=" + id + ";";
     PreparedStatement ps = null;
     ResultSet rs = null;

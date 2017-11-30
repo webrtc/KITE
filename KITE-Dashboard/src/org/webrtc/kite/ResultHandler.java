@@ -16,22 +16,19 @@
 
 package org.webrtc.kite;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.webrtc.kite.dao.BrowserDao;
 import org.webrtc.kite.dao.DBConnectionManager;
 import org.webrtc.kite.pojo.Browser;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A class handling the input into the database
@@ -60,7 +57,8 @@ public class ResultHandler {
   }
 
   /**
-   * Inserts new config and test to appropriate table and create result table for new test.
+   * Inserts new config and test to appropriate table
+   * and create result table for new test.
    *
    * @param connection a JDBC connection to the database.
    * @param configName name of the new configuration.
@@ -69,28 +67,25 @@ public class ResultHandler {
    * @param testSuiteBrowserPairList list of participating browser pairs in the test suite.
    * @param totalTests number of test cases in this test.
    */
-  private void preliminaryInsert(Connection connection, String configName, String resultTableName,
-      JsonObject jsonObject, List<List<Browser>> testSuiteBrowserPairList, int totalTests)
-      throws SQLException {
+  private void preliminaryInsert(Connection connection, String configName, String testName, String resultTableName, JsonObject jsonObject, List<List<Browser>> testSuiteBrowserPairList, int totalTests) throws SQLException {
     List<String> queryList = new ArrayList<>();
     long startTime = jsonObject.getJsonNumber("timeStamp").longValue();
-    queryList.add("INSERT INTO CONFIG_EXECUTION(CONFIG_NAME, START_TIME) VALUES('" + configName
-        + "'," + startTime + ");");
+    queryList.add("INSERT INTO CONFIG_EXECUTION(CONFIG_NAME, START_TIME) VALUES('" + configName + "'," + startTime
+            + ");");
 
-    queryList.add(
-        "INSERT INTO TESTS(START_TIME,TEST_NAME, IMPL, TUPLE_SIZE, RESULT_TABLE, TOTAL_TESTS, CONFIG_ID) "
+    queryList.add("INSERT INTO TESTS(START_TIME,TEST_NAME, IMPL, TUPLE_SIZE, RESULT_TABLE, TOTAL_TESTS, CONFIG_ID) "
             + "VALUES(" + startTime + ",'" + jsonObject.getString("testName") + "','"
-            + jsonObject.getString("testImpl") + "'," + jsonObject.getInt("tupleSize") + ",'"
-            + resultTableName + "'," + totalTests + "," + "(SELECT CONFIG_ID FROM CONFIG_EXECUTION"
-            + " WHERE START_TIME=" + startTime + ")" + ");");
+            + jsonObject.getString("testImpl") + "'," + jsonObject.getInt("tupleSize") + ",'" + resultTableName
+            + "'," + totalTests + "," + "(SELECT CONFIG_ID FROM CONFIG_EXECUTION" + " WHERE START_TIME=" + startTime
+            + ")" + ");");
 
-    queryList.add("UPDATE CONFIG_EXECUTION SET TEST_COUNT="
-        + "(SELECT COUNT(*) FROM TESTS WHERE RESULT_TABLE LIKE '%" + startTime + "')"
-        + " WHERE CONFIG_NAME='" + configName + "' AND START_TIME=" + startTime + " ;");
+    queryList.add("UPDATE CONFIG_EXECUTION SET TEST_COUNT=" +
+            "(SELECT COUNT(*) FROM TESTS WHERE RESULT_TABLE LIKE '%" + startTime + "')" +
+            " WHERE CONFIG_NAME='" + configName + "' AND START_TIME=" + startTime + " ;");
 
     int tupleSize = testSuiteBrowserPairList.get(0).size();
-    String resultTableQuery = "CREATE TABLE IF NOT EXISTS " + resultTableName
-        + "(RESULT TEXT NOT NULL," + " DURATION INTEGER NOT NULL,";
+    String resultTableQuery = "CREATE TABLE IF NOT EXISTS " + resultTableName + "(RESULT TEXT NOT NULL,"
+            + " DURATION INTEGER NOT NULL,";
     for (int i = 0; i < tupleSize; i++) {
       resultTableQuery += " BROWSER_" + (i + 1) + " INTEGER NOT NULL";
       if (i < tupleSize - 1)
@@ -100,8 +95,31 @@ public class ResultHandler {
     }
     queryList.add(resultTableQuery);
 
-    for (List<Browser> testCaseBrowserList : testSuiteBrowserPairList) {
-      String blankResult = "INSERT INTO " + resultTableName + " VALUES('SCHEDULED', 0,";
+    String overviewTableQuery = "CREATE TABLE IF NOT EXISTS kiteOVERVIEW" + testName.trim().replaceAll("[^a-zA-Z0-9]", "_") + " (";
+    for (int i = 0; i < tupleSize; i++) {
+      overviewTableQuery += " BROWSER_" + (i + 1) + " INTEGER NOT NULL";
+      overviewTableQuery += ", ";
+
+    }
+    overviewTableQuery += " TEST_NAME TEXT NOT NULL, " +
+            "START_TIME INTEGER NOT NULL, " +
+            "DURATION INTEGER NOT NULL, " +
+            "RESULT TEXT, " +
+            "PRIMARY KEY(";
+    for (int i = 0; i < tupleSize; i++) {
+      overviewTableQuery += " BROWSER_" + (i + 1);
+      if (i!=tupleSize-1)
+        overviewTableQuery += ", ";
+      else
+        overviewTableQuery += ")); ";
+
+
+    }
+
+    queryList.add(overviewTableQuery);
+
+    for (List<Browser> testCaseBrowserList: testSuiteBrowserPairList){
+      String blankResult = "INSERT INTO "+resultTableName+" VALUES('SCHEDULED', 0,";
       for (int i = 0; i < testCaseBrowserList.size(); i++) {
         int browserID = new BrowserDao(connection).getBrowserId(testCaseBrowserList.get(i));
         blankResult += browserID;
@@ -116,7 +134,7 @@ public class ResultHandler {
     Statement statement = null;
     try {
       statement = connection.createStatement();
-      for (String query : queryList) {
+      for (String query: queryList){
         if (log.isDebugEnabled())
           log.debug("Executing Preliminary Insert:" + query);
         statement.addBatch(query);
@@ -128,7 +146,8 @@ public class ResultHandler {
   }
 
   /**
-   * Inserts new browser in BROWSERS table update new result in appropriate place result table
+   * Inserts new browser in BROWSERS table
+   * update new result in appropriate place result table
    * Inserts new result in OVERVIEW table if qualified.
    *
    * @param connection a JDBC connection to the database.
@@ -140,12 +159,11 @@ public class ResultHandler {
    * @param startTime start time of the test.
    * @param timeTaken duration of the test.
    */
-  private void postResultInsert(Connection connection, String tableName, List<Browser> targetList,
-      List<Browser> destinationList, String testName, String payload, long startTime,
-      long timeTaken) throws SQLException {
+  private void postResultInsert(Connection connection, String tableName, List<Browser> targetList, List<Browser> destinationList, String testName, String payload,
+                                long startTime, long timeTaken) throws SQLException {
     List<String> queryList = new ArrayList<>();
-
-    /* Get targeted id list and destination id list */
+    boolean browserChange = false;
+		/* Get targeted id list and destination id list */
     List<Integer> targetIdList = new ArrayList<>();
     List<Integer> destinationIdList = new ArrayList<>();
     int tupleSize = destinationList.size();
@@ -159,107 +177,58 @@ public class ResultHandler {
       destinationIdList.add(new BrowserDao(connection).getBrowserId(destination));
     if (log.isDebugEnabled())
       log.debug("destinationIdList:" + Arrays.deepToString(destinationIdList.toArray()));
-
-//    /* Create query Strings */
-//    String resultUpdate =
-//        "UPDATE " + tableName + " SET RESULT='" + payload + "', DURATION=" + timeTaken + " WHERE";
-//    for (int i = 0; i < tupleSize; i++) {
-//      if (targetIdList.get(i) != destinationIdList.get(i)) {
-//        queryList
-//            .add("UPDATE " + tableName + " SET BROWSER_" + (i + 1) + "=" + destinationIdList.get(i)
-//                + " WHERE BROWSER_" + (i + 1) + "=" + targetIdList.get(i) + ";");
-//      }
-//      resultUpdate += " BROWSER_" + (i + 1) + "=" + destinationIdList.get(i);
-//      if (i < tupleSize - 1)
-//        resultUpdate += " AND";
-//      else
-//        resultUpdate += ";";
-//    }
-    
-    // selects the row
-    String whereClause = "SELECT rowid FROM " + tableName + " WHERE";
-    for (int i = 0; i < tupleSize; i++) {
-      whereClause += " BROWSER_" + (i + 1) + " = " + targetIdList.get(i);
-      if (i < tupleSize - 1)
-        whereClause += " AND";
-    }
-    whereClause += " LIMIT 1";
-    
-    // updates the row
-    String setClause = " SET";
-    for (int i = 0; i < tupleSize; i++) {
-      setClause += " BROWSER_" + (i + 1) + "=" + destinationIdList.get(i);
-      if (i < tupleSize - 1)
-        setClause += ",";
-    }
-    
-    // builds the query to update the browser ids
-    String updateClause = "UPDATE " + tableName + setClause + " WHERE rowid IN ( " + whereClause + " );";
-    queryList.add(updateClause);
-    
-    // updates the result after browser ids are eventually updated
-    String resultUpdate =
-        "UPDATE " + tableName + " SET RESULT='" + payload + "', DURATION=" + timeTaken + " WHERE";
-    for (int i = 0; i < tupleSize; i++) {
-      resultUpdate += " BROWSER_" + (i + 1) + "=" + destinationIdList.get(i);
+		/* Create query Strings */
+    String resultUpdate = "UPDATE " + tableName + " SET RESULT='"+payload.replaceAll("\n", "").replaceAll("\\\\", "")+"', DURATION="+timeTaken + " WHERE";
+    String browserUpdate = "UPDATE " + tableName + " SET";
+    for (int i=0; i< tupleSize;i++){
+      if (targetIdList.get(i)!=destinationIdList.get(i)) {
+        if (!browserChange) {
+          browserChange = true;
+          browserUpdate += " BROWSER_" + (i + 1) + "=" + destinationIdList.get(i);
+        } else
+          browserUpdate += " ,BROWSER_" + (i + 1) + "=" + destinationIdList.get(i);
+      }
+      resultUpdate += " BROWSER_"+(i+1)+"="+destinationIdList.get(i);
       if (i < tupleSize - 1)
         resultUpdate += " AND";
       else
         resultUpdate += ";";
     }
+    browserUpdate += " WHERE";
+    for (int i=0;i<tupleSize;i++){
+      browserUpdate +=  " BROWSER_" + (i + 1) + "=" + targetIdList.get(i);
+      if (i < tupleSize - 1)
+        browserUpdate += " AND";
+      else
+        browserUpdate += ";";
+    }
+    if (browserChange)
+      queryList.add(browserUpdate);
     queryList.add(resultUpdate);
 
-    if (shouldBeInOverView(destinationList)) {
-      String overviewQuery =
-          "REPLACE INTO OVERVIEW(BROWSER_1, BROWSER_2, TEST_NAME, START_TIME, DURATION, RESULT) VALUES (";
+    if (shouldBeInOverView(destinationList)){
+      String overviewQuery = "REPLACE INTO kiteOVERVIEW"+testName.trim().replaceAll("[^a-zA-Z0-9]", "_")+" (";
+      for (int i=0;i<tupleSize;i++)
+        overviewQuery +="BROWSER_"+(i+1)+", ";
+      overviewQuery+=	"TEST_NAME, START_TIME, DURATION, RESULT) VALUES (";
       for (int i = 0; i < tupleSize; i++) {
-        overviewQuery += destinationIdList.get(i) + ", ";
+        overviewQuery += destinationIdList.get(i)+ ", ";
       }
 
-      overviewQuery +=
-          "'" + testName + "'," + startTime + ", " + timeTaken + ",'" + payload + "');";
+      overviewQuery += "'" + testName + "'," + startTime + ", " + timeTaken + ",'" + payload + "');";
       queryList.add(overviewQuery);
     }
     Statement statement = null;
     try {
       statement = connection.createStatement();
-      for (String query : queryList) {
+      for (String query: queryList) {
         if (log.isDebugEnabled())
           log.debug("Executing Result Insert:" + query);
         statement.addBatch(query);
       }
-      final int[] batchResult = statement.executeBatch();
-      if (log.isDebugEnabled())
-        log.debug("Batch result: " + Arrays.toString(batchResult));
+      statement.executeBatch();
     } finally {
       Utility.closeDBResources(statement, null);
-    }
-
-    if (log.isDebugEnabled()) {
-      final String logQuery = "SELECT * FROM " + tableName + ";";
-      PreparedStatement logPs = null;
-      ResultSet logRs = null;
-      try {
-        logPs = connection.prepareStatement(logQuery);
-        if (log.isDebugEnabled())
-          log.debug("Executing: " + logQuery);
-        logRs = logPs.executeQuery();
-        while (logRs.next()) {
-          if (log.isDebugEnabled()) {
-            final StringBuilder rsLog = new StringBuilder();
-            for (int c = 1; c <= logRs.getMetaData().getColumnCount(); c++) {
-              final String fullCAsStr = logRs.getString(c);
-              final int cHasNewLine = fullCAsStr.indexOf('\n');
-              final String cAsStr = (cHasNewLine < 0 ? fullCAsStr : (fullCAsStr.substring(0, cHasNewLine) + "..."));
-              rsLog.append(logRs.getMetaData().getColumnName(c)).append(":")
-                  .append(cAsStr).append("-");
-            }
-            log.debug(rsLog.toString());
-          }
-        }
-      } finally {
-        Utility.closeDBResources(logPs, logRs);
-      }
     }
   }
 
@@ -347,7 +316,7 @@ public class ResultHandler {
    * @param tupleSize tuple size
    * @return a matrix of browser tuples as List<List<Browser>>
    */
-  private List<List<Browser>> buildTuples(List<Browser> browserList, int tupleSize) {
+  public static List<List<Browser>> buildTuples(List<Browser> browserList, int tupleSize) {
 
     List<List<Browser>> listOfBrowserList = new ArrayList<List<Browser>>();
 
@@ -371,6 +340,43 @@ public class ResultHandler {
     return listOfBrowserList;
   }
 
+  /**
+   * Updates version of different clients in database.
+   *
+   */
+  private void updateClientVersion (Connection connection, String payload, long timeStamp) throws SQLException {
+    List<String> queryList = new ArrayList<>();
+    String version;
+    String client;
+    List<String> entryPrime;
+    if (log.isDebugEnabled())
+      log.debug("Incoming update payload: " + payload.toString());
+    String trimmedPayload = payload.substring(1,payload.length()-1);
+    List<String> jsonPayload = new ArrayList<>(Arrays.asList(trimmedPayload.split(",")));
+
+
+    for (String entry: jsonPayload){
+      entryPrime = new ArrayList<>(Arrays.asList(entry.split(":")));
+      client = entryPrime.get(0).replaceAll("^\"|\"$", "");
+      version = entryPrime.get(1).replaceAll("^\"|\"$", "");
+
+      queryList.add("UPDATE CLIENT_VERSION SET LAST_VERSION = (select VERSION WHERE NAME = '"+client+"'), LAST_UPDATE="+timeStamp+", VERSION = '"+version+"' WHERE NAME = '"+client
+              +"'");
+    }
+    Statement statement = null;
+    try {
+      statement = connection.createStatement();
+      for (String query : queryList) {
+        statement.addBatch(query);
+        if (log.isDebugEnabled())
+          log.debug("Executing client version Update: " + query);
+      }
+      statement.executeBatch();
+    } finally {
+      Utility.closeDBResources(statement, null);
+    }
+  }
+
 
   /**
    * Puts received results into the database accordingly from a json object containing every thing.
@@ -379,86 +385,109 @@ public class ResultHandler {
    */
   public void dumpResult(JsonObject jsonObject) throws SQLException, ClassNotFoundException {
     JsonObject testObject = jsonObject.getJsonObject("test");
-
-    String testName = testObject.getString("testName");
-    String configName = testObject.getString("configName");
-    long timeStamp = testObject.getJsonNumber("timeStamp").longValue();
-    int tupleSize = testObject.getInt("tupleSize");
-    String resultTableName =
-        "TN" + testName.trim().replaceAll("[^a-zA-Z0-9]", "_") + "_" + timeStamp;
-
-    JsonArray testCaseBrowserJsonTargetList = jsonObject.getJsonArray("target");
-    JsonArray testCaseBrowserJsonDestinationList = jsonObject.getJsonArray("destination");
-    List<Browser> testCaseBrowserTargetList = new ArrayList<>();
-    List<Browser> testCaseBrowserDestinationList = new ArrayList<>();
-    for (int i = 0; i < tupleSize; i++) {
-      testCaseBrowserTargetList.add(new Browser((JsonObject) testCaseBrowserJsonTargetList.get(i)));
-      testCaseBrowserDestinationList
-          .add(new Browser((JsonObject) testCaseBrowserJsonDestinationList.get(i)));
-    }
-
-    JsonObject resultObject = jsonObject.getJsonObject("result");
-
     Connection connection = null;
-    try {
-      connection = this.getDatabaseConnection();
-      JsonObject metaObject = jsonObject.getJsonObject("meta");
-      if (metaObject != null) {
-        int totalTests = metaObject.getInt("totalTests", 0);
+    String testName = testObject.getString("testName");
+    if (!testName.equalsIgnoreCase("SYSTEM_UPDATE Client version update")){
+      String configName = testObject.getString("configName");
+      long timeStamp = testObject.getJsonNumber("timeStamp").longValue();
+      int tupleSize = testObject.getInt("tupleSize");
+      String resultTableName =
+              "TN" + testName.trim().replaceAll("[^a-zA-Z0-9]", "_") + "_" + timeStamp;
 
-        if (totalTests > 0) {
-          JsonArray testSuiteBrowserJsonList = (JsonArray) metaObject.get("browsers");
-          if (log.isDebugEnabled())
-            log.debug("test suite json browser list ->>" + testSuiteBrowserJsonList.toString());
-
-          List<Browser> testSuiteBrowserList = new ArrayList<>();
-          for (JsonValue jsonBrowser : testSuiteBrowserJsonList)
-            testSuiteBrowserList.add(new Browser((JsonObject) jsonBrowser));
-
-          if (log.isDebugEnabled()) {
-            log.debug("test suite browser list ->>"
-                + Arrays.deepToString(testSuiteBrowserList.toArray()));
-          }
-          List<List<Browser>> testSuiteBrowserPairMatrix =
-              buildTuples(testSuiteBrowserList, tupleSize);
-          connection.setAutoCommit(false);
-          this.putInBrowserTable(connection, testSuiteBrowserList);
-          connection.commit();
-          this.preliminaryInsert(connection, configName, resultTableName, testObject,
-              testSuiteBrowserPairMatrix, totalTests);
-          connection.commit();
-          connection.setAutoCommit(true);
-        }
-        if (metaObject.get("lastTest") != null) {
-          long endTime = System.currentTimeMillis();
-          this.updateStatus(connection, configName, testName, resultTableName, timeStamp, endTime);
-        }
+      JsonArray testCaseBrowserJsonTargetList = jsonObject.getJsonArray("target");
+      JsonArray testCaseBrowserJsonDestinationList = jsonObject.getJsonArray("destination");
+      List<Browser> testCaseBrowserTargetList = new ArrayList<>();
+      List<Browser> testCaseBrowserDestinationList = new ArrayList<>();
+      for (int i = 0; i < tupleSize; i++) {
+        testCaseBrowserTargetList.add(new Browser((JsonObject) testCaseBrowserJsonTargetList.get(i)));
+        testCaseBrowserDestinationList
+                .add(new Browser((JsonObject) testCaseBrowserJsonDestinationList.get(i)));
       }
-      this.putInBrowserTable(connection, testCaseBrowserDestinationList);
+
+      JsonObject resultObject = jsonObject.getJsonObject("result");
+
+
       try {
-        String payload = resultObject.getString("payload");
-        if (payload.equals("SUCCESSFUL") || payload.equals("TIME OUT") || payload.equals("FAILED"))
-          this.postResultInsert(connection, resultTableName, testCaseBrowserTargetList,
-              testCaseBrowserDestinationList, testName,
-              resultObject.getString("payload").replaceAll("'", "\''"), timeStamp,
-              resultObject.getJsonNumber("timeTaken").longValue());
-      } catch (ClassCastException e) {
-        JsonObject jsonPayload = (JsonObject) resultObject.getJsonObject("payload");
-        this.postResultInsert(connection, resultTableName, testCaseBrowserTargetList,
-            testCaseBrowserDestinationList, testName,
-            jsonPayload.getString("message").replaceAll("'", "\''"), timeStamp,
-            resultObject.getJsonNumber("timeTaken").longValue());
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-      if (connection != null)
-        try {
-          connection.rollback();
-        } catch (SQLException e1) {
+        connection = this.getDatabaseConnection();
+        JsonObject metaObject = jsonObject.getJsonObject("meta");
+        if (metaObject != null) {
+          int totalTests = metaObject.getInt("totalTests", 0);
+
+          if (totalTests > 0) {
+            JsonArray testSuiteBrowserJsonList = (JsonArray) metaObject.get("browsers");
+            if (log.isDebugEnabled())
+              log.debug("test suite json browser list ->>" + testSuiteBrowserJsonList.toString());
+
+            List<Browser> testSuiteBrowserList = new ArrayList<>();
+            for (JsonValue jsonBrowser : testSuiteBrowserJsonList)
+              testSuiteBrowserList.add(new Browser((JsonObject) jsonBrowser));
+
+            if (log.isDebugEnabled()) {
+              log.debug("test suite browser list ->>"
+                      + Arrays.deepToString(testSuiteBrowserList.toArray()));
+            }
+            List<List<Browser>> testSuiteBrowserPairMatrix =
+                    buildTuples(testSuiteBrowserList, tupleSize);
+            connection.setAutoCommit(false);
+            this.putInBrowserTable(connection, testSuiteBrowserList);
+            connection.commit();
+            this.preliminaryInsert(connection, configName, testName,resultTableName, testObject,
+                    testSuiteBrowserPairMatrix, totalTests);
+            connection.commit();
+            connection.setAutoCommit(true);
+          }
+          if (metaObject.get("lastTest") != null) {
+            long endTime = System.currentTimeMillis();
+            this.updateStatus(connection, configName, testName, resultTableName, timeStamp, endTime);
+          }
         }
-    } finally {
-      if (connection != null)
-        connection.close();
+        this.putInBrowserTable(connection, testCaseBrowserDestinationList);
+        try {
+          String payload = resultObject.getString("payload");
+          if (payload.equals("SUCCESSFUL") || payload.equals("TIME OUT") || payload.equals("FAILED"))
+            this.postResultInsert(connection, resultTableName, testCaseBrowserTargetList,
+                    testCaseBrowserDestinationList, testName,
+                    resultObject.getString("payload").replaceAll("'", "\''"), timeStamp,
+                    resultObject.getJsonNumber("timeTaken").longValue());
+        } catch (ClassCastException e) {
+          JsonObject jsonPayload = (JsonObject) resultObject.getJsonObject("payload");
+          this.postResultInsert(connection, resultTableName, testCaseBrowserTargetList,
+                  testCaseBrowserDestinationList, testName,
+                  jsonPayload.getString("message").replaceAll("'", "\''"), timeStamp,
+                  resultObject.getJsonNumber("timeTaken").longValue());
+        }
+      } catch (SQLException e) {
+        e.printStackTrace();
+
+        if (connection != null)
+          try {
+            connection.rollback();
+          } catch (SQLException e1) {
+          }
+      } finally {
+        if (connection != null)
+          connection.close();
+      }
+
+      // For updating client version purpose only
+    } else {
+      try {
+        connection = this.getDatabaseConnection();
+        JsonObject resultObject = jsonObject.getJsonObject("result");
+        String payload = (String) resultObject.getString("payload");
+        long timeStamp = testObject.getJsonNumber("timeStamp").longValue();
+        this.updateClientVersion(connection,payload,timeStamp);
+      } catch (SQLException e) {
+        e.printStackTrace();
+        if (connection != null)
+          try {
+            connection.rollback();
+          } catch (SQLException e1) {
+          }
+      } finally {
+        if (connection != null)
+          connection.close();
+      }
     }
   }
 

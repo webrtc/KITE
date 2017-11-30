@@ -16,6 +16,8 @@
 
 package org.webrtc.kite;
 
+import org.webrtc.kite.pojo.Browser;
+
 import java.util.*;
 
 /**
@@ -30,75 +32,50 @@ public class Mapping {
   public static List<String> FirefoxVersionList = new ArrayList<>();
   public static List<String> ChromeVersionList = new ArrayList<>();
   public static List<String> EdgeVersionList = new ArrayList<>();
+  public static List<String> SafariVersionList = new ArrayList<>();
+  public static List<Browser> CurrentBrowserList = new ArrayList<>();
+
+  public static List<String> ClientList = new ArrayList<>();
 
   public static final Map<String, String> resultColorMap = new HashMap<>();
-  public static final Map<String, String> ErrorMessageMap = new HashMap<>();
-  public static final Map<Integer, String> ErrorCodeMap = new HashMap<>();
 
   static {
-    FirefoxVersionList.add("53");
-    FirefoxVersionList.add("54");
-    FirefoxVersionList.add("55");
-    ChromeVersionList.add("58");
-    ChromeVersionList.add("59");
-    ChromeVersionList.add("60");
-    ChromeVersionList.add("61");
-    EdgeVersionList.add("14");
-    EdgeVersionList.add("15");
+    FirefoxVersionList.add("57.0");
+    FirefoxVersionList.add("59.0");
+    ChromeVersionList.add("62.0.3202.94");
+    ChromeVersionList.add("64.0");
+    EdgeVersionList.add("16.16299");
+    EdgeVersionList.add("16.17035");
+    SafariVersionList.add("11");
+    SafariVersionList.add("11.1");
 
-
-    OVERVIEW.add("Vista");
-    OVERVIEW.add("Windows 8.1");
     OVERVIEW.add("Windows 10");
-    OVERVIEW.add("OS X 10.11");
-    OVERVIEW.add("OS X 10.12");
+    OVERVIEW.add("OS X 10.13");
     OVERVIEW.add("Linux");
 
-    OS.put("WIN10", "Windows 10");
-    OS.put("WIN8_1", "Windows 8.1");
-    OS.put("Vista", "Vista");
-    OS.put("SIERRA", "OS X 10.12");
-    OS.put("EL_CAPITAN", "OS X 10.11");
-    OS.put("LINUX", "Linux");
-    OS.put("WIN8", "Windows 8");
-    OS.put("XP", "XP");
-    OS.put("YOSEMITE", "OS X 10.10");
-    OS.put("MAVERICKS", "OS X 10.9");
-    OS.put("MOUNTAIN_LION", "OS X 10.8");
-    OS.put("SNOW_LEOPARD", "OS X 10.6");
-    OS.put("UNIX", "BSD");
-    OS.put("ANDROID", "Android");
-    OS.put("WINDOWS", "Windows");
-    OS.put("MAC", "OS X");
-    OS.put("ANY", "Any");
+    for (String os:OVERVIEW){
+      for (String ver: FirefoxVersionList)
+        CurrentBrowserList.add(new Browser("firefox",ver,os));
+      for (String ver: ChromeVersionList)
+        CurrentBrowserList.add(new Browser("chrome",ver,os));
+      for (String ver: EdgeVersionList)
+        CurrentBrowserList.add(new Browser("MicrosoftEdge",ver,os));
+    }
 
 
-    // Errors
-    ErrorMessageMap.put("TIME OUT", "The test has timed out after 60 seconds");
-    ErrorMessageMap.put("untestable", "The requested browser was untestable");
-    ErrorMessageMap.put("Insufficient", "Not enough credits on TestingBot account");
-    ErrorMessageMap.put("forwarding",
-        "Selenium couldn't forward your request to an appropriate remote");
-    ErrorMessageMap.put("Unable", "Selenium couldn't create the requested remote session");
-    ErrorMessageMap.put("The",
-        "The Sauce VM failed to prepare for this test. For help, please check https://wiki.saucelabs.com/display/DOCS/Common+Error+Messages");
-    ErrorMessageMap.put("", "");
-    ErrorMessageMap.put("", "");
-    ErrorMessageMap.put("", "");
-    ErrorMessageMap.put("", "");
-    ErrorMessageMap.put("", "");
-
-    // something for wrong username and key
-    // something for wrong address
-    // something for connection failure
-    ErrorCodeMap.put(0, "The test has timed out after 60 seconds");
-    ErrorCodeMap.put(1, "untestable");
-    ErrorCodeMap.put(2, "Not enough credits on TestingBot account");
-    ErrorCodeMap.put(3,
-        "Selenium couldn't forward your request to an appropriate remote, choose another grid or another DesiredCapabilities");
-    ErrorCodeMap.put(4, "Selenium couldn't create the requested remote session");
-    ErrorCodeMap.put(5,
-        "The Sauce VM failed to prepare for this test. For help, please check https://wiki.saucelabs.com/display/DOCS/Common+Error+Messages");
+    ClientList.add("Selenium");
+    ClientList.add("Chromedriver");
+    ClientList.add("Geckodriver");
+    ClientList.add("MicrosoftWebDriver");
+    ClientList.add("Firefox Stable");
+    ClientList.add("Firefox Nightly");
+    ClientList.add("Edge Stable");
+    ClientList.add("Edge Insider");
+    ClientList.add("Safari Stable");
+    ClientList.add("Safari Technology Preview");
+    ClientList.add("Chrome Stable");
+    ClientList.add("Chrome Dev");
+    ClientList.add("Chrome Canary");
 
 
     resultColorMap.put("SUCCESSFUL", "ok");

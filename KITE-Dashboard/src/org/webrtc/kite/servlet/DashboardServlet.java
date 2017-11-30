@@ -16,20 +16,22 @@
 
 package org.webrtc.kite.servlet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.webrtc.kite.Utility;
+import org.webrtc.kite.dao.BrowserDao;
+import org.webrtc.kite.dao.ConfigExecutionDao;
+import org.webrtc.kite.dao.ConfigTestDao;
+import org.webrtc.kite.exception.KiteSQLException;
+import org.webrtc.kite.pojo.Browser;
+import org.webrtc.kite.pojo.ConfigurationOverall;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.webrtc.kite.Utility;
-import org.webrtc.kite.dao.BrowserDao;
-import org.webrtc.kite.dao.ConfigExecutionDao;
-import org.webrtc.kite.exception.KiteSQLException;
-import org.webrtc.kite.pojo.Browser;
-import org.webrtc.kite.pojo.ConfigurationOverall;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -59,11 +61,14 @@ public class DashboardServlet extends HttpServlet {
 
     List<ConfigurationOverall> listOfConfig;
     List<Browser> listOfBrowser;
+    List<String> listOfDistinctTest;
     try {
+      listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
+      request.setAttribute("listOfTest", listOfDistinctTest);
       listOfConfig = new ConfigExecutionDao(Utility.getDBConnection(this.getServletContext()))
-          .getDistinctConfigExecutionList();
-      listOfBrowser =
-          new BrowserDao(Utility.getDBConnection(this.getServletContext())).getBrowserList();
+              .getDistinctConfigExecutionList();
+      listOfBrowser = new BrowserDao(Utility.getDBConnection(this.getServletContext()))
+              .getBrowserList();
       if (log.isDebugEnabled())
         log.debug("out->listOfConfigName: " + listOfConfig);
       request.setAttribute("listOfConfig", listOfConfig);

@@ -16,11 +16,11 @@
 
 package org.webrtc.kite;
 
+import javax.servlet.ServletContext;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import javax.servlet.ServletContext;
 
 /**
  * Created by hussainsajid on 3/23/17.
