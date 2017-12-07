@@ -49,6 +49,8 @@ java -Dwebdriver.chrome.driver=./chromedriver.exe -Dwebdriver.gecko.driver=./gec
 
 ## B. Build and KITE Engine and the basic sample AppRTC Test
 
+Build uses [*maven*](https://maven.apache.org/) tool. Installable maven packages are available for common platforms, see [*link*](https://maven.apache.org/install.html) for manual installation.
+
 ### Build KITE-Engine and KITE-AppRTC-Test
 
 1. Build and install running the command
