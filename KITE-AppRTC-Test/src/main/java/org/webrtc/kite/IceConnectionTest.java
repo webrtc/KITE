@@ -19,6 +19,7 @@ package org.webrtc.kite;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.KiteTest;
 import java.util.*;
@@ -60,6 +61,11 @@ public class IceConnectionTest extends KiteTest {
 
     for (WebDriver webDriver : this.getWebDriverList()) {
       webDriver.get(APPRTC_URL + channel);
+      try {
+        webDriver.switchTo().alert().accept();
+      } catch (NoAlertPresentException e) {
+        logger.warn(e.getLocalizedMessage());
+      }
       webDriver.findElement(By.id("confirm-join-button")).click();
     }
   }

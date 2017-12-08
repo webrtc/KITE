@@ -16,8 +16,6 @@
 
 package org.webrtc.kite;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
 import org.apache.log4j.Logger;
 import org.webrtc.kite.config.Browser;
 import org.webrtc.kite.config.TestConf;
@@ -103,7 +101,7 @@ public class MatrixRunner {
   /**
    * This method builds up singleThreadedList and multiThreadedList as follows:
    * <p>
-   * 1) Omit all the test cases having 2 identical mobile browsers. 2) Put all the test cases
+   * 1) Omit all the test cases having 2 microsoft edges and safaris. 2) Put all the test cases
    * having only 1 microsoft edge or safari into singleThreadedList. 3) Put all the rest of test
    * cases into multiThreadedList.
    */

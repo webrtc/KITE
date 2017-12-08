@@ -1,0 +1,20 @@
+***************
+*** 143,150 ****
+          if (size < 1)
+              throw new KiteInsufficientValueException("Browser objects are less than one.");
+          jsonObjectList = new ArrayList<JsonObject>(new LinkedHashSet<JsonObject>(jsonObjectList));
+-         if (jsonObjectList.size()!=size)
+-             logger.warn("Duplicated browser configurations in the config file!");
+  
+          logger.info("Finished reading the configuration file.");
+  
+--- 143,151 ----
+          if (size < 1)
+              throw new KiteInsufficientValueException("Browser objects are less than one.");
+          jsonObjectList = new ArrayList<JsonObject>(new LinkedHashSet<JsonObject>(jsonObjectList));
++         if (jsonObjectList.size() != size) {
++             logger.warn("Duplicate browser configurations in the config file have been removed.");
++         }
+  
+          logger.info("Finished reading the configuration file.");
+  
