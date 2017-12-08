@@ -107,7 +107,7 @@ public class MatrixRunner {
    */
   private void purgeListOfBrowserList() {
     for (List<Browser> browserList : this.listOfBrowserList) {
-      int numEdge = 0, numSafari = 0;
+      /*int numEdge = 0, numSafari = 0;
       for (Browser browser : browserList)
         if ((browser.getBrowserName().equalsIgnoreCase("MicrosoftEdge") && ++numEdge > 1)
             || (browser.getBrowserName().equalsIgnoreCase("safari") && ++numSafari > 1))
@@ -118,7 +118,16 @@ public class MatrixRunner {
       else if (numEdge == 1 || numSafari == 1)
         this.singleThreadedList.add(browserList);
       else
-        this.multiThreadedList.add(browserList);
+        this.multiThreadedList.add(browserList);*/
+      boolean jumpToOuterLoop = false;
+      for (Browser browser : browserList)
+        if (browser.getBrowserName().equalsIgnoreCase("MicrosoftEdge") || browser.getBrowserName().equalsIgnoreCase("safari")) {
+          this.singleThreadedList.add(browserList);
+          jumpToOuterLoop = true;
+          break;
+        }
+      if (jumpToOuterLoop) continue;
+      this.multiThreadedList.add(browserList);
     }
   }
 
