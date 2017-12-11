@@ -109,18 +109,36 @@ public class MatrixRunner {
    */
   private void purgeListOfBrowserList() {
     for (List<Browser> browserList : this.listOfBrowserList) {
-      int numEdge = 0, numSafari = 0;
-      for (Browser browser : browserList)
-        if ((browser.getBrowserName().equalsIgnoreCase("MicrosoftEdge") && ++numEdge > 1)
-            || (browser.getBrowserName().equalsIgnoreCase("safari") && ++numSafari > 1))
-          break;
 
-      if (numEdge > 1 || numSafari > 1)
-        ; // Do nothing
-      else if (numEdge == 1 || numSafari == 1)
-        this.singleThreadedList.add(browserList);
-      else
-        this.multiThreadedList.add(browserList);
+      // Omit test cases with two identical mobile clients in them.
+      int mobileCount = 0;
+      Set<Browser> set = new LinkedHashSet<Browser>();
+      for (Browser browser: browserList) {
+        if (browser.getMobile() != null) {
+          set.add(browser);
+          mobileCount++;
+        }
+      }
+
+      // Add all the test cases having mobile in single thread list.
+      if (mobileCount > 0) {
+        if (mobileCount == set.size())
+          this.singleThreadedList.add(browserList);
+        continue;
+      }
+
+      // Add all the test cases having MicrosoftEdge and safari in single thread list.
+      boolean jumpToOuterLoop = false;
+      for (Browser browser : browserList)
+        if (browser.getBrowserName().equalsIgnoreCase("MicrosoftEdge") || browser.getBrowserName().equalsIgnoreCase("safari")) {
+          this.singleThreadedList.add(browserList);
+          jumpToOuterLoop = true;
+          break;
+        }
+      if (jumpToOuterLoop) continue;
+
+      // Add the rest of the test cases in multi thread list.
+      this.multiThreadedList.add(browserList);
     }
   }
 
