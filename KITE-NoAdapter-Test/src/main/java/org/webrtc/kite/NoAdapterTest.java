@@ -123,6 +123,7 @@ public class NoAdapterTest extends KiteTest {
   private final static String JS_CHECK =
       "var retValue; try {retValue = peerConn.iceConnectionState;} catch (exception) {} "
           + "if (retValue) {return retValue;} else {return 'unknown';}";
+
   private String testJavaScript() {
     return JS_CHECK;
   }
