@@ -14,6 +14,7 @@
     <module>KITE-AppRTC-Test</module>
     <module>KITE-Jitsi-Test</module>
     <module>KITE-Dashboard</module>
+    <module>KITE-NoAdapter-Test</module>
   </modules>
 
 </project>

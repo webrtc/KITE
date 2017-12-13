@@ -1,0 +1,34 @@
+{
+   "tests" : [
+      {
+         "name" : "NoAdapterTest",
+         "tupleSize" : 2,
+         "testImpl" : "org.webrtc.kite.NoAdapterTest"
+      }
+   ],
+   "name" : "NoAdapter test run on the grid",
+   "remotes" : [
+      {
+         "type" : "local",
+         "remoteAddress" : "http://localhost:4444/wd/hub"
+      }
+   ],
+   "callback" : "http://localhost:8080/kiteweb/datacenter",
+   "browsers" : [
+      {
+         "browserName" : "firefox",
+         "version" : "59",
+         "platform" : "MAC"
+      },
+      {
+         "version" : "59",
+         "browserName" : "firefox",
+         "platform" : "LINUX"
+      },
+      {
+         "version" : "59",
+         "browserName" : "firefox",
+         "platform" : "WINDOWS"
+      }
+   ]
+}
