@@ -13,7 +13,7 @@ See LICENSE for licensing.
 ### Install prerequisite software
 
 * Install the browsers you would like to test, available for your machine. Chrome, Edge, Firefox and Safari are supported at this stage. See the wiki for some limitations or hints for each browser.
-* Make sure you have a recent Java SDK installed (or get e.g. [*JDK 8.1*](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html))
+* Make sure you have a recent Java JDK installed, at least Java 8 (get e.g. [*JDK 8.1*](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html))
 
 ### Download webdrivers and selenium server standalone
 
@@ -48,6 +48,8 @@ java -Dwebdriver.chrome.driver=./chromedriver.exe -Dwebdriver.gecko.driver=./gec
 *  Depending on platform and the testing needs, command line can include one, two or the three drivers
 
 ## B. Build and KITE Engine and the basic sample AppRTC Test
+
+Build uses [*maven*](https://maven.apache.org/) tool. Installable maven packages are available for common platforms, see [*link*](https://maven.apache.org/install.html) for manual installation.
 
 ### Build KITE-Engine and KITE-AppRTC-Test
 
