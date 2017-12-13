@@ -33,7 +33,6 @@ limitations under the License.
     <script src="assets/js/sunburstv2.js"></script>
     <script type="text/javascript" src="assets/js/jquery-git.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
-    <script src="assets/js/chroma.min.js"></script>
     <script src="assets/js/sunburstv2.js"></script>
     <script src="assets/js/result.js"></script>
 
