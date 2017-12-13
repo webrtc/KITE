@@ -13,7 +13,7 @@ See LICENSE for licensing.
 ### Install prerequisite software
 
 * Install the browsers you would like to test, available for your machine. Chrome, Edge, Firefox and Safari are supported at this stage. See the wiki for some limitations or hints for each browser.
-* Make sure you have a recent Java JDK installed, at least Java 8 (get e.g. [*JDK 8.1*](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html))
+* Make sure you have a recent Java JDK installed, at least Java 8 (e.g. from [*Java SE downloads*](http://www.oracle.com/technetwork/java/javase/downloads/index.html))
 
 ### Download webdrivers and selenium server standalone
 
