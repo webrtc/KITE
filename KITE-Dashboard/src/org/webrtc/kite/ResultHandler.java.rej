@@ -1,0 +1,13 @@
+--- KITE-Dashboard/src/org/webrtc/kite/ResultHandler.java
++++ KITE-Dashboard/src/org/webrtc/kite/ResultHandler.java
+@@ -180,7 +180,9 @@ public class ResultHandler {
+     if (log.isDebugEnabled())
+       log.debug("destinationIdList:" + Arrays.deepToString(destinationIdList.toArray()));
+ 		/* Create query Strings */
+-    String resultUpdate = "UPDATE " + tableName + " SET RESULT='"+Utility.escapeSpecialCharacter(payload)+"', DURATION="+timeTaken + " WHERE";
++    String resultString = Utility.escapeSpecialCharacter(payload.getString("result"));
++    String statString = payload.getJsonObject("stats").toString();
++    String resultUpdate = "UPDATE " + tableName + " SET RESULT='"+resultString+"', DURATION="+timeTaken +", STATS='"+ statString +"' WHERE";
+     String browserUpdate = "UPDATE " + tableName + " SET";
+     for (int i=0; i< tupleSize;i++){
+       if (targetIdList.get(i)!=destinationIdList.get(i)) {

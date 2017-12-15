@@ -47,61 +47,12 @@ public class OverviewDao {
     this.connection = connection;
   }
 
-  /**
-   * Returns a list of all the results of a test in the overview table.
-   *
-   * @param testName the name of the test in question.
-   */
-  public List<ResultTable> getOverviewResultList(String testName) throws SQLException{
-    String query = "SELECT BROWSERS1.NAME, BROWSERS1.VERSION, BROWSERS1.PLATFORM," +
-            " BROWSERS2.NAME, BROWSERS2.VERSION, BROWSERS2.PLATFORM," +
-            " RES.TEST_NAME, RES.START_TIME, RES.DURATION, RES.RESULT" +
-            " FROM BROWSERS AS BROWSERS1, BROWSERS AS BROWSERS2, OVERVIEW AS RES" +
-            " WHERE RES.BROWSER_1 = BROWSERS1.BROWSER_ID" +
-            " AND RES.BROWSER_2 = BROWSERS2.BROWSER_ID" +
-            " AND RES.TEST_NAME='"+testName+"'" +
-            " ORDER BY BROWSERS1.NAME DESC, BROWSERS2.NAME DESC, BROWSERS1.VERSION ASC, BROWSERS2.VERSION ASC;" ;
-
-    List<ResultTable> resultTableList = new ArrayList<ResultTable>();
-
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-    try {
-      ps = this.connection.prepareStatement(query);
-      if (log.isDebugEnabled())
-        log.debug("Executing: " + query);
-      rs = ps.executeQuery();
-      while(rs.next()) {
-        if (log.isTraceEnabled()) {
-          final StringBuilder rsLog = new StringBuilder();
-          for (int c = 1; c <= rs.getMetaData().getColumnCount(); c++) {
-            rsLog.append(rs.getMetaData().getColumnName(c)).append(":").append(rs.getString(c))
-                    .append("-");
-          }
-          log.trace(rsLog.toString());
-        }
-        String result = rs.getString("RESULT");
-        long startTime = rs.getLong("START_TIME");
-        long duration = rs.getLong("DURATION");
-        ResultTable resultTable = new ResultTable(result, duration);
-        resultTable.setTableName("TN"+testName+"_"+startTime);
-        resultTable.setStartTime(startTime);
-        resultTable.addBrowser(new Browser(rs.getString(1),rs.getString(2),rs.getString(3)));
-        resultTable.addBrowser(new Browser(rs.getString(4),rs.getString(5),rs.getString(6)));
-        resultTableList.add(resultTable);
-      }
-    } finally {
-      Utility.closeDBResources(ps, rs);
-    }
-
-
-    return resultTableList;
-  }
 
   /**
    * Returns a list of all the results of a test in the overview table.
    *
    * @param testName the name of the test in question.
+   * @param tupleSize size of the tuple.
    */
   public List<ResultTable> getOverviewResultList(String testName, int tupleSize) throws SQLException{
     String query = "SELECT";
@@ -145,7 +96,7 @@ public class OverviewDao {
         String result = rs.getString("RESULT");
         long startTime = rs.getLong("START_TIME");
         long duration = rs.getLong("DURATION");
-        ResultTable resultTable = new ResultTable(result, duration);
+        ResultTable resultTable = new ResultTable(result, duration, "NA");
         resultTable.setTableName("TN"+testName+"_"+startTime);
         resultTable.setStartTime(startTime);
         for (int i=0;i<tupleSize;i++)
@@ -159,11 +110,11 @@ public class OverviewDao {
 
     return resultTableList;
   }
-  /**
+ /* *//**
    * Returns a list of all the OK results of a test in the overview table.
    *
    * @param testName the name of the test in question.
-   */
+   *//*
   public List<ResultTable> getOverviewOKResultList(String testName, int tupleSize) throws SQLException{
     String query = "SELECT";
     for (int i=1;i<=tupleSize;i++)
@@ -221,11 +172,11 @@ public class OverviewDao {
 
     return resultTableList;
   }
-  /**
+  *//**
    * Returns a list of all the FAILED results of a test in the overview table.
    *
    * @param testName the name of the test in question.
-   */
+   *//*
   public List<ResultTable> getOverviewFAILEDResultList(String testName, int tupleSize) throws SQLException{
     String query = "SELECT";
     for (int i=1;i<=tupleSize;i++)
@@ -282,11 +233,13 @@ public class OverviewDao {
 
 
     return resultTableList;
-  }
+  }*/
   /**
-   * Returns a list of all the FAILED results of a test in the overview table.
+   * Returns a list of all the requested results (with filter) of a test, in a specific table.
    *
-   * @param testName the name of the test in question.
+   * @param testName name of the test we want to query.
+   * @param tupleSize size of the tuple.
+   * @param filter filter string to get the right results, format X-X-X-X with X either 1 ot 0.
    */
   public List<ResultTable> getRequestedOverviewResultList(String testName, int tupleSize, String filter) throws SQLException{
     String query = "SELECT";
@@ -380,7 +333,7 @@ public class OverviewDao {
         String result = rs.getString("RESULT");
         long startTime = rs.getLong("START_TIME");
         long duration = rs.getLong("DURATION");
-        ResultTable resultTable = new ResultTable(result, duration);
+        ResultTable resultTable = new ResultTable(result, duration, "NA");
         resultTable.setTableName("TN"+testName+"_"+startTime);
         resultTable.setStartTime(startTime);
         for (int i=0;i<tupleSize;i++)

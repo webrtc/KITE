@@ -20,9 +20,7 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
+import org.webrtc.kite.KiteTest;
 import java.util.*;
 
 /**
@@ -79,31 +77,6 @@ public class IceConnectionTest extends KiteTest {
   }
 
   /**
-   *
-   * @return the JavaScript as string.
-   */
-  private String stashStatsScript() {
-    return  "const getStatsValues = () =>" +
-            "  appController.call_.pcClient_.pc_.getStats()" +
-            "    .then(data => {" +
-            "      return [...data.values()];" +
-            "    });" +
-            "const stashStats = async () => {" +
-            "  window.KITEStats = await getStatsValues();" +
-            "  return 0;" +
-            "};" +
-            "stashStats();";
-  }
-
-  /**
-   *
-   * @return the JavaScript as string.
-   */
-  private String getStatsScript() {
-    return  "return window.KITEStats;";
-  }
-
-  /**
    * Checks whether all of the result strings match at least one entry from the expectedResultMap.
    *
    * @param resultList ice connection states for the browsers as List<String>
@@ -134,9 +107,9 @@ public class IceConnectionTest extends KiteTest {
     this.takeAction();
 
     String result = "TIME OUT";
-    Map<String,Object> resultMap = new HashMap<String,Object>();  ;
 
     for (int i = 0; i < TIMEOUT; i += INTERVAL) {
+
       List<String> resultList = new ArrayList<String>();
       for (WebDriver webDriver : this.getWebDriverList()) {
         String resultOfScript =
@@ -148,35 +121,16 @@ public class IceConnectionTest extends KiteTest {
 
       if (this.checkForFailed(resultList)) {
         result = "FAILED";
-        int count = 1;
-        JsonObjectBuilder statListBuilder = Json.createObjectBuilder();
-        for (WebDriver webDriver : this.getWebDriverList()) {
-          ((JavascriptExecutor) webDriver).executeScript(this.stashStatsScript());
-          Thread.sleep(INTERVAL);
-          Object stats = ((JavascriptExecutor) webDriver).executeScript(this.getStatsScript());
-          resultMap.put("client_" + count,stats);
-          count+=1;
-        }
         break;
       } else if (this.validateResults(resultList)) {
         result = "SUCCESSFUL";
-        int count = 1;
-        JsonObjectBuilder statListBuilder = Json.createObjectBuilder();
-        for (WebDriver webDriver : this.getWebDriverList()) {
-          ((JavascriptExecutor) webDriver).executeScript(this.stashStatsScript());
-          Thread.sleep(INTERVAL);
-          Object stats = ((JavascriptExecutor) webDriver).executeScript(this.getStatsScript());
-          resultMap.put("client_" + count,stats);
-          count+=1;
-        }
         break;
       } else {
         Thread.sleep(INTERVAL);
       }
     }
 
-    resultMap.put("result",result);
-    return resultMap;
+    return result;
   }
 
 }

@@ -370,7 +370,6 @@ public class OverviewResult {
       res += "{";
       res += "\"result\": \""+resultTable.getResult().replaceAll("\n", "").replaceAll("\\\\", "")+"\",";
       res += "\"duration\": \""+resultTable.getDuration()+"\",";
-      res += "\"stats\":"+resultTable.getStats()+",";
       res += "\"browsers\": [";
       List<Browser> bList = resultTable.getBrowserList();
       for (int j=0; j<bList.size();j++ ){

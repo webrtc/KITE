@@ -1,0 +1,70 @@
+--- KITE-Dashboard/WebContent/assets/js/result.js
++++ KITE-Dashboard/WebContent/assets/js/result.js
+@@ -16,18 +16,20 @@
+ 
+ 
+ function updateResult (load,total){
++    var statMap = new Map();
+     var div = $("#resultTable");
+     var htmlString = "";
+     for (i=0;i<total;i++){
+-        htmlString+="<tr class=\"result\" style=\"cursor:pointer;\" data=\""+load[i].result+"\">";
++        statMap.set("result"+i,load[i].stats);
++        htmlString+="<tr class=\"result\" id =\"result"+i+"\" style=\"cursor:pointer;\">";
+         htmlString+="<td id=\"r"+i+"\" width=5%>";
+-        var tmp = "<i class=\"pe-7s-news-paper\" style=\"color:blue;\">";
++        var tmp = "<i class=\"pe-7s-news-paper\" style=\"color:blue;\" data-toggle=\"popover\" data-placement=\"bottom\" data-content=\""+load[i].result+"\">";
+         if(load[i].result == "SUCCESSFUL")
+-            tmp="<i class=\"pe-7s-smile\" style=\"color:green;\">";
++            tmp="<i class=\"pe-7s-smile\" style=\"color:green;\" data-toggle=\"popover\" data-placement=\"bottom\" data-content=\""+load[i].result+"\">";
+         if(load[i].result == "TIME OUT" || load[i].result == "FAILED")
+-            tmp="<i class=\"pe-7s-close\"  style=\"color:red;\">";
++            tmp="<i class=\"pe-7s-close\"  style=\"color:red;\" data-toggle=\"popover\" data-placement=\"bottom\" data-content=\""+load[i].result+"\">";
+         if(load[i].result == "SCHEDULED")
+-            tmp="<i class=\"pe-7s-wristwatch\">";
++            tmp="<i class=\"pe-7s-wristwatch\" data-toggle=\"popover\" data-placement=\"bottom\" data-content=\""+load[i].result+"\">";
+ 
+         htmlString+=tmp;
+         htmlString+="</td><td class=\"status\" id=\"d"+i+"\" width=5%>";
+@@ -49,19 +51,35 @@ function updateResult (load,total){
+         htmlString+="</tr>";
+     }
+     div.html(htmlString);
++    window.statMap = statMap;
+ }
+ 
+-function updateExtendedResult (log){
+-    var div = $("#extended-result");
+-    div.html(log);
+-}
++function updateExtendedPlot (statObj){
++    var div = $("#extended-plot");
++    div.jsonbrowser({
++
++      // custom URI scheme
++      'scheme'      : 'http',
++
++      // parse and link URLs
++      'parseURLs'   : true,
+ 
++      // allows to collapse and expand nodes
++      'collapsible' : true,
++
++      // collapsed by default
++      'collapsed'   : true
++
++    });
++    div.jsonbrowser(JSON.stringify(statObj));
++}
+ 
+ $(document).on("click", ".result", function(e) {
+-    var log = $(this).attr('data');
++    var id = $(this).attr('id');
+     $(".result").attr('style','cursor:pointer;background:white;opacity:0.6;');
+     $(this).attr('style','cursor:pointer;background:#aff7c8;opacity:1;');
+-    updateExtendedResult(log);
++    var log = window.statMap.get(id);
++    updateExtendedPlot(log);
+ });
+ 
+ 

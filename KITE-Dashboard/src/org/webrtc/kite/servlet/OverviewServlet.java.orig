@@ -82,6 +82,7 @@ public class OverviewServlet extends HttpServlet {
         int tupleSize = testList.get(0).getTupleSize();
         listOfResult = new OverviewResult(new OverviewDao(Utility.getDBConnection(this.getServletContext())).getOverviewResultList(testName, tupleSize),true, false);
         request.setAttribute("tupleSize", tupleSize);
+        request.setAttribute("firstRun", testList.get(0).getStartTime());
         request.setAttribute("lastRun", testList.get(testList.size()-1).getStartTime());
         request.setAttribute("testname", testName);
         request.setAttribute("listOfVersion", versionList);

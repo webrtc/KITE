@@ -1,0 +1,131 @@
+--- KITE-Dashboard/WebContent/templates/results.vm
++++ KITE-Dashboard/WebContent/templates/results.vm
+@@ -144,52 +152,8 @@ limitations under the License.
+                                                     <div id="oldLayer" style="margin-top:80px;"></div>
+                                                     <div id="sequence"></div>
+                                                 </td>
+-                                                <td style="vertical-align: top;"><div class="container" style=" width:70%; margin:0; align-content: top;">
+-                                                    <div>
+-                                                        <canvas id="overall"></canvas>
+-                                                    </div>
+-                                                    <script>
+-                                                        var success = $test.getStats().get(0);
+-                                                        var failed = $test.getStats().get(1);
+-                                                        var error = $test.getStats().get(2);
+-                                                        var pending = $test.getStats().get(3);
+-                                                        var ctx = document.getElementById("overall").getContext('2d');
+-                                                        var myChart = new Chart(ctx, {
+-                                                        type: 'bar',
+-                                                        data: {
+-                                                            labels: ["Success", "Failed", "Error", "Pending"],
+-                                                            datasets: [{
+-                                                                backgroundColor: [
+-                                                                "#42f4aa",
+-                                                                "#ff4b30",
+-                                                                "#30b3ff",
+-                                                                "grey"
+-                                                                ],
+-                                                                data: [success, failed, error, pending]
+-                                                                }]
+-                                                            },
+-                                                        options: {
+-                                                            responsive: false,
+-                                                            legend: {
+-                                                                display: false,
+-                                                                position: 'top',
+-                                                                labels: {
+-                                                                    boxWidth: 30,
+-                                                                    fontSize: 12
+-                                                                    }
+-                                                                }
+-                                                            }
+-                                                        });
+-                                                    </script>
+-                                                </td>
+-                                                <td class="extend-result"  style="vertical-align: top;">
+-                                                    <div id="extended-result">
+-                                                    </div>
+-                                                </td>
+                                                 <td class="extend-plot"  style="vertical-align: top;">
+-                                                    <div id="extended-plot">
+-                                                        <h3> stats </h3>
+-                                                    </div>
++                                                    <div id="extended-plot" class="stat-wrapping small-boy jsonbrowser"></div>
+                                                 </td>
+                                             </tr>
+                                         </tbody>
+@@ -215,21 +179,59 @@ limitations under the License.
+                         </div>
+                         <div class="col-md-6 col-sm-12">
+                             <div class="card">
+-                                <div class="content table-responsive result-wrapping">
+-                                    <table class="table table-hover">
+-                                        <thead>
+-                                            <th>status</th>
+-                                            <th>Duration</th>
+-                                            <th width="280">Browser(s)</th>
+-                                        </thead>
+-                                        <tbody id="resultTable" class="small-boy">
+-                                            <script>
+-                                                var total = $total;
+-                                                myData=$jsonData;
+-                                                updateResult(myData.results, total);
+-                                            </script>
+-                                        </tbody>
+-                                    </table>
++                                <div class="content">
++                                    <div>
++                                        <canvas id="overall"></canvas>
++                                    </div>
++                                    <script>
++                                        var success = $test.getStats().get(0);
++                                        var failed = $test.getStats().get(1);
++                                        var error = $test.getStats().get(2);
++                                        var pending = $test.getStats().get(3);
++                                        var ctx = document.getElementById("overall").getContext('2d');
++                                        var myChart = new Chart(ctx, {
++                                        type: 'bar',
++                                        data: {
++                                            labels: ["Success", "Failed", "Error", "Pending"],
++                                            datasets: [{
++                                                backgroundColor: [
++                                                "#42f4aa",
++                                                "#ff4b30",
++                                                "#30b3ff",
++                                                "grey"
++                                                ],
++                                                data: [success, failed, error, pending]
++                                                }]
++                                            },
++                                        options: {
++                                            responsive: false,
++                                            legend: {
++                                                display: false,
++                                                position: 'top',
++                                                labels: {
++                                                    boxWidth: 30,
++                                                    fontSize: 12
++                                                    }
++                                                }
++                                            }
++                                        });
++                                    </script>
++                                    <div class="table-responsive result-wrapping">
++                                        <table class="table table-hover">
++                                            <thead>
++                                                <th>status</th>
++                                                <th>Duration</th>
++                                                <th width="280">Browser(s)</th>
++                                            </thead>
++                                            <tbody id="resultTable" class="small-boy">
++                                                <script>
++                                                    var total = $total;
++                                                    myData=$jsonData;
++                                                    updateResult(myData.results, total);
++                                                </script>
++                                            </tbody>
++                                        </table>
++                                    </div>
+                                 </div>
+                             </div>
+                         </div>

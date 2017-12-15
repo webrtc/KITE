@@ -114,10 +114,6 @@ limitations under the License.
         font-size:12px;
         font-weight: 200;
     }
-    .stat{
-        font-size:9px;
-        font-weight: bold;
-    }
 
     .status{
         font-weight: 200;
@@ -278,12 +274,6 @@ limitations under the License.
     .result-wrapping{
         max-height: 800px;
         overflow-y: scroll;
-    }
-
-    .run-wrapping{
-        max-height: 300px;
-        overflow-y: scroll;
-        min-width:100px;
     }
 
 <!-- overview page -->

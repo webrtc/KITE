@@ -27,6 +27,7 @@ public class ResultTable {
   private String tableName;
   private String result;
   private long duration;
+  private String stats;
   private long startTime;
   private List<Browser> browserList = new ArrayList<>();
 
@@ -36,10 +37,11 @@ public class ResultTable {
    * @param result a string representing actual result of the test case.
    * @param duration duration of the test case.
    */
-  public ResultTable(String result, long duration) {
+  public ResultTable(String result, long duration, String stats) {
     super();
     this.result = result;
     this.duration = duration;
+    this.stats = stats;
   }
 
   /**
@@ -119,4 +121,7 @@ public class ResultTable {
     return startTime;
   }
 
+  public String getStats() {
+    return stats;
+  }
 }

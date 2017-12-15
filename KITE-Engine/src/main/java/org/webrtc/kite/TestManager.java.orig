@@ -30,7 +30,6 @@ import javax.json.*;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
@@ -188,21 +187,10 @@ public class TestManager implements Callable<Object> {
     if (object instanceof Exception) {
       Exception e = (Exception) object;
       String message = e.getLocalizedMessage();
-/*      payload = Json.createObjectBuilder().add("type", e.getClass().getName()).add("message",
-          message == null ? "Message not found in the exception" : message);*/
-      payload = Json.createObjectBuilder().add("result",
-              message == null ? "Message not found in the exception" : message);
+      payload = Json.createObjectBuilder().add("type", e.getClass().getName()).add("message",
+          message == null ? "Message not found in the exception" : message);
     } else {
-      Map<String, Object> resultMap = (Map<String, Object>) object;
-      JsonObjectBuilder tmp = Json.createObjectBuilder();
-      for (int i = 1; i <= this.browserList.size(); i++) {
-        String name = "client_"+i;
-        String browser = i+"_"+browserList.get(i-1).getBrowserName()+"_"+browserList.get(i-1).getVersion()+"_"+browserList.get(i-1).getPlatform();
-        if (resultMap.get(name)!=null)
-          tmp.add(browser, Utility.buildStatObject(resultMap.get(name)));
-      }
-      payload = Json.createObjectBuilder().add("result", (String) resultMap.get("result"))
-              .add("stats", tmp);
+      payload = object.toString();
     }
 
     JsonObjectBuilder jsonObjectBuilder =
@@ -306,6 +294,7 @@ public class TestManager implements Callable<Object> {
         }
 
       JsonObject jsonObject = this.developResult(object);
+
       if (ENABLE_CALLBACK) {
         if (this.testConf.getCallbackURL() == null)
           logger.warn("No callback specified for " + this.testConf);

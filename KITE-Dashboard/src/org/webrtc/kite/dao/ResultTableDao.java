@@ -56,7 +56,7 @@ public class ResultTableDao {
     String query = "SELECT";
     for (int i=1;i<=tupleSize;i++)
       query += " BROWSERS"+i+".NAME, BROWSERS"+i+".VERSION, BROWSERS"+i+".PLATFORM,";
-    query += " RES.RESULT, RES.DURATION FROM";
+    query += " RES.RESULT, RES.DURATION, RES.STATS FROM";
     for (int i=1;i<=tupleSize;i++)
       query += " BROWSERS AS BROWSERS"+i+", ";
     query += tableName + " AS RES WHERE";
@@ -91,7 +91,8 @@ public class ResultTableDao {
         }
         String result = rs.getString("RESULT");
         long duration = rs.getLong("DURATION");
-        ResultTable resultTable = new ResultTable(result, duration);
+        String stats = rs.getString("STATS");
+        ResultTable resultTable = new ResultTable(result, duration, stats);
         resultTable.setTableName(tableName);
         for (int i=0;i<tupleSize;i++)
           resultTable.addBrowser(new Browser(rs.getString(i*3+1), rs.getString(i*3+2), rs.getString(i*3+3)));
@@ -103,12 +104,15 @@ public class ResultTableDao {
 
     return resultTableList;
   }
+/*
 
-  /**
+  */
+/**
    * Returns a list of all the OK result of a test, in a specific table.
    *
    * @param tableName name of the table which contains the results of the test.
-   */
+   *//*
+
   public List<ResultTable>getOKResultList(String tableName, int tupleSize) throws SQLException {
     String query = "SELECT";
     for (int i=1;i<=tupleSize;i++)
@@ -162,11 +166,13 @@ public class ResultTableDao {
     return resultTableList;
   }
 
-  /**
+  */
+/**
    * Returns a list of all the NOT OK result of a test, in a specific table.
    *
    * @param tableName name of the table which contains the results of the test.
-   */
+   *//*
+
   public List<ResultTable>getFAILEDResultList(String tableName, int tupleSize) throws SQLException {
     String query = "SELECT";
     for (int i=1;i<=tupleSize;i++)
@@ -219,11 +225,14 @@ public class ResultTableDao {
 
     return resultTableList;
   }
+*/
 
   /**
-   * Returns a list of all the NOT OK result of a test, in a specific table.
+   * Returns a list of all the requested results (with filter) of a test, in a specific table.
    *
    * @param tableName name of the table which contains the results of the test.
+   * @param tupleSize size of the tuple.
+   * @param filter filter string to get the right results, format X-X-X-X with X either 1 ot 0.
    */
   public List<ResultTable>getJsonResultList(String tableName, int tupleSize, String filter) throws SQLException {
     String query = "SELECT";
@@ -314,7 +323,8 @@ public class ResultTableDao {
         }
         String result = rs.getString("RESULT");
         long duration = rs.getLong("DURATION");
-        ResultTable resultTable = new ResultTable(result, duration);
+        String stats = rs.getString("STATS");
+        ResultTable resultTable = new ResultTable(result, duration, stats);
         resultTable.setTableName(tableName);
         for (int i=0;i<tupleSize;i++)
           resultTable.addBrowser(new Browser(rs.getString(i*3+1), rs.getString(i*3+2), rs.getString(i*3+3)));
