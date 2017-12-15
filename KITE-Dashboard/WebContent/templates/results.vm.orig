@@ -21,29 +21,21 @@ limitations under the License.
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/pace.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/themes/black/pace-theme-minimal.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
     <!--  Light Bootstrap Table core CSS    -->
     <link href="assets/css/light-bootstrap-dashboard.css" rel="stylesheet"/>
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
     <link href="https://rawgithub.com/olimsaidov/pixeden-stroke-7-icon/master/pe-icon-7-stroke/dist/pe-icon-7-stroke.css" rel="stylesheet" />
     <link href="assets/css/kite-dashboard.css" rel="stylesheet"/>
-    <link href="assets/css/jquery.jsonbrowser.css" rel="stylesheet"/>
 
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script src="assets/js/sunburstv2.js"></script>
     <script type="text/javascript" src="assets/js/jquery-git.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
     <script src="assets/js/sunburstv2.js"></script>
-    <script src="assets/js/jquery.jsonbrowser.js"></script>
     <script src="assets/js/result.js"></script>
-    <style>
-        .popover{
-            max-width: 100%;
-        }
-    </style>
+
     <script>
         var width = $( window ).width()/3.5;
         var testName = '$test.getResultTable()';

@@ -125,6 +125,11 @@ limitations under the License.
                         </a>
                     </li>
                     <li class="active">
+                        <ul class="filter">
+                            <li><p class="small-boy">Filter:</li>
+                            <li><button id="0" type="button" class="btn btn-success"><i class="pe-7s-smile"></i></button><button id="1" type="button" class="btn btn-danger"><i class="pe-7s-close"></i></button></li>
+                            <li><button id="2" type="button" class="btn btn-info"><i class="pe-7s-news-paper"></i></button><button id="3" type="button" class="btn btn-warning"><i class="pe-7s-wristwatch"></i></button></li>
+                        </ul>
                         <nav class="overview">
                             <ul>
                                 <li><a href="#">
@@ -174,36 +179,29 @@ limitations under the License.
                                         </tbody>
                                     </table>
                                     <div class="wrapping">
-                                        <h5>Details:</h5>
-                                        <a>First run: $dateTool.format($firstRun)</a></br>
-                                        <a>Last run: $dateTool.format($lastRun)</a>
-                                        <hr>
-                                        <table class="table table-hover">
-                                            <tbody>
-                                            <h5>$listOfTests.size() run(s):</h5>
-                                                #set($index = 1)
-                                                #foreach($test in $listOfTests)
-                                                <tr>
-                                                    <td style="border:none"><a class="small-boy" href="results?test=$linkTool.encode($test.getTestId())">$index. $dateTool.format($test.getStartTime()) </a></td>
-                                                    <td style="border:none"><a class="small-boy" href="results?test=$linkTool.encode($test.getTestId())">$test.getTotalTests() test case(s) </a></td>
-                                                </tr>
-                                                #set($index = $index + 1)
-                                                #end
-                                            </tbody>
-                                        </table>
+                                        <div class="content table-responsive run-wrapping">
+                                            <table class="table table-hover">
+                                                <tbody>
+                                                <a>Last run: $dateTool.format($lastRun)</a>
+                                                <hr>
+                                                <h5>$listOfTests.size() run(s):</h5>
+                                                    #set($index = 1)
+                                                    #foreach($test in $listOfTests)
+                                                    <tr>
+                                                        <td style="border:none"><a class="small-boy" href="results?test=$linkTool.encode($test.getTestId())">$index. $dateTool.format($test.getStartTime()) </a></td>
+                                                        <td style="border:none"><a class="small-boy" href="results?test=$linkTool.encode($test.getTestId())">$test.getTotalTests() test case(s) </a></td>
+                                                    </tr>
+                                                    #set($index = $index + 1)
+                                                    #end
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div id="overviewCard" class="card col-md-7 col-sm-12">
                             <div class="header">
-                                <table class="table table-half-width" style="table-layout: fixed">
-                                    <thead>
-                                        <th><button id="0" type="button" class="btn btn-success">Success</button></th>
-                                        <th><button id="1" type="button" class="btn btn-danger">Failed</button></th>
-                                        <th><button id="2" type="button" class="btn btn-info">Error</button></th>
-                                    </thead>
-                                </table>
                                 <h5>*Showing results for browsers with versions stable, dev and beta only</h5>
                                 <div id="oldLayer"></div>
                                 <div id="sequence" style="margin-right:70px"></div>

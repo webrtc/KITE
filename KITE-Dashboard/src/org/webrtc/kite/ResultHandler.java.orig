@@ -85,7 +85,7 @@ public class ResultHandler {
 
     int tupleSize = testSuiteBrowserPairList.get(0).size();
     String resultTableQuery = "CREATE TABLE IF NOT EXISTS " + resultTableName + "(RESULT TEXT NOT NULL,"
-            + " DURATION INTEGER NOT NULL,STATS TEXT,";
+            + " DURATION INTEGER NOT NULL,";
     for (int i = 0; i < tupleSize; i++) {
       resultTableQuery += " BROWSER_" + (i + 1) + " INTEGER NOT NULL";
       if (i < tupleSize - 1)
@@ -119,7 +119,7 @@ public class ResultHandler {
     queryList.add(overviewTableQuery);
 
     for (List<Browser> testCaseBrowserList: testSuiteBrowserPairList){
-      String blankResult = "INSERT INTO "+resultTableName+" VALUES('SCHEDULED', 0, '{\"stats\":\"NA\"}' ,";
+      String blankResult = "INSERT INTO "+resultTableName+" VALUES('SCHEDULED', 0,";
       for (int i = 0; i < testCaseBrowserList.size(); i++) {
         int browserID = new BrowserDao(connection).getBrowserId(testCaseBrowserList.get(i));
         blankResult += browserID;
@@ -159,7 +159,7 @@ public class ResultHandler {
    * @param startTime start time of the test.
    * @param timeTaken duration of the test.
    */
-  private void postResultInsert(Connection connection, String tableName, List<Browser> targetList, List<Browser> destinationList, String testName, JsonObject payload,
+  private void postResultInsert(Connection connection, String tableName, List<Browser> targetList, List<Browser> destinationList, String testName, String payload,
                                 long startTime, long timeTaken) throws SQLException {
     List<String> queryList = new ArrayList<>();
     boolean browserChange = false;
@@ -215,7 +215,7 @@ public class ResultHandler {
         overviewQuery += destinationIdList.get(i)+ ", ";
       }
 
-      overviewQuery += "'" + testName + "'," + startTime + ", " + timeTaken + ",'" + resultString + "');";
+      overviewQuery += "'" + testName + "'," + startTime + ", " + timeTaken + ",'" + payload + "');";
       queryList.add(overviewQuery);
     }
     Statement statement = null;
@@ -442,11 +442,20 @@ public class ResultHandler {
           }
         }
         this.putInBrowserTable(connection, testCaseBrowserDestinationList);
-          JsonObject jsonPayload = resultObject.getJsonObject("payload");
+        try {
+          String payload = resultObject.getString("payload");
+          if (payload.equals("SUCCESSFUL") || payload.equals("TIME OUT") || payload.equals("FAILED"))
+            this.postResultInsert(connection, resultTableName, testCaseBrowserTargetList,
+                    testCaseBrowserDestinationList, testName,
+                    resultObject.getString("payload").replaceAll("'", "\''"), timeStamp,
+                    resultObject.getJsonNumber("timeTaken").longValue());
+        } catch (ClassCastException e) {
+          JsonObject jsonPayload = (JsonObject) resultObject.getJsonObject("payload");
           this.postResultInsert(connection, resultTableName, testCaseBrowserTargetList,
                   testCaseBrowserDestinationList, testName,
-                  jsonPayload, timeStamp,
+                  jsonPayload.getString("message").replaceAll("'", "\''"), timeStamp,
                   resultObject.getJsonNumber("timeTaken").longValue());
+        }
       } catch (SQLException e) {
         e.printStackTrace();
 

@@ -1,0 +1,37 @@
+--- KITE-Dashboard/WebContent/assets/css/kite-dashboard.css
++++ KITE-Dashboard/WebContent/assets/css/kite-dashboard.css
+@@ -255,19 +259,11 @@ limitations under the License.
+ 
+ <!-- result page -->
+ 
+-
+-    td.extend-result{
+-        font-size: 12px;
+-        font-weight: 300;
+-        max-height:250px;
+-        border-style: none none double double;
+-    }
+-
+     td.extend-plot{
+         font-size: 12px;
+         font-weight: 300;
+         height:270px;
+-        border-style: none double double none;
++        border-style: none none double double;
+     }
+ 
+     text{
+@@ -277,9 +273,10 @@ limitations under the License.
+     }
+ 
+ 
+-    .result-wrapper{
+-        max-height: 550px;
+-        overflow-y: visible;
++    .stat-wrapping{
++        max-height: 200px;
++        overflow-y: scroll;
++        min-width:100px;
+     }
+ 
+ 

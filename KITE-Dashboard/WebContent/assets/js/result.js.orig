@@ -94,10 +94,3 @@ $(document).on("click", "button", function(e) {
         });
     })();
 });
-
-$(document).ready(function(){
-    $('[data-toggle="popover"]').popover({
-        trigger:'click hover',
-        placement:'right'
-    });
-});

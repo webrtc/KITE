@@ -35,7 +35,7 @@ public class IceConnectionTestTest extends TestCase {
     firefox.setRemoteAddress(SELENIUM_SERVER_URL);
     final Browser chrome = new Browser("chrome");
     chrome.setRemoteAddress(SELENIUM_SERVER_URL);
-    webDriverList.add(WebDriverFactory.createWebDriver(firefox, TEST_NAME));
+    webDriverList.add(WebDriverFactory.createWebDriver(chrome, TEST_NAME));
     webDriverList.add(WebDriverFactory.createWebDriver(chrome, TEST_NAME));
   }
 
