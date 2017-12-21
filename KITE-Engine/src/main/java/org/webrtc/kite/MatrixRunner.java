@@ -107,6 +107,13 @@ public class MatrixRunner {
    * having only 1 microsoft edge or safari into singleThreadedList. 3) Put all the rest of test
    * cases into multiThreadedList.
    */
+  /**
+   * This method builds up singleThreadedList and multiThreadedList as follows:
+   * <p>
+   * 1) Omit all the test cases having 2 identical mobile browsers. 2) Put all the test cases
+   * having only 1 microsoft edge or safari into singleThreadedList. 3) Put all the rest of test
+   * cases into multiThreadedList.
+   */
   private void purgeListOfBrowserList() {
     for (List<Browser> browserList : this.listOfBrowserList) {
 

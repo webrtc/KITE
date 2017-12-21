@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.webrtc.kite</groupId>
-    <artifactId>jitsi-test</artifactId>
+    <artifactId>noadapter-test</artifactId>
     <version>1.0</version>
 
     <build>
@@ -36,10 +36,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>provided</scope>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>3.8.1</version>
+          <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.webrtc.kite</groupId>
