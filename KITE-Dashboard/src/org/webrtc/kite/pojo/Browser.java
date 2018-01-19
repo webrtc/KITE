@@ -17,6 +17,7 @@
 package org.webrtc.kite.pojo;
 
 import org.webrtc.kite.Mapping;
+import org.webrtc.kite.Utility;
 
 import javax.json.JsonObject;
 import java.util.Arrays;
@@ -27,8 +28,7 @@ import java.util.regex.Pattern;
  * Browser object containing the information as name, version and platform.
  */
 public class Browser {
-  private static List<String> boringOSList = Arrays.asList("MAC", "WINDOWS", "UNKNOWN");
-
+  private int id;
   private String name;
   private String version;
   private String platform;
@@ -42,8 +42,8 @@ public class Browser {
    */
   public Browser(String name, String version, String platform) {
     this.name = name;
-    this.version = version;
-    this.platform = platform;
+    this.version = processVersion(version);
+    this.platform = processPlatform(platform);
   }
 
   /**
@@ -57,52 +57,16 @@ public class Browser {
     String browserVersion = "?";
     String browserPlatform = "?";
     if (jsonObject.get("version") != null) {
-      browserVersion = jsonObject.getString("version");
-      if (browserVersion.equals("ANY"))
-        browserVersion = "?";
+      browserVersion = processVersion(jsonObject.getString("version"));
     }
-
-    if (jsonObject.get("platform") != null) {
-      List<String> bPlatform = Arrays.asList(jsonObject.getString("platform").split(Pattern.quote(" ")));
-      browserPlatform = bPlatform.get(0);
-      switch (browserPlatform) {
-        case "Mac": {
-          bPlatform = Arrays.asList(bPlatform.get(3).split(Pattern.quote(".")));
-          browserPlatform = "OS X "+ bPlatform.get(0) + "." + bPlatform.get(1);
-          break;
-        }
-        case "Windows": {
-          if (jsonObject.getString("platform").equals("Windows"))
-            browserPlatform = "Windows 10";
-          else {
-            switch (bPlatform.get(1)) {
-              case "XP":
-                browserPlatform = "XP";
-                break;
-              case "7":
-                browserPlatform = "Vista";
-                break;
-              case "8":
-                browserPlatform = "Windows 8";
-              case "8.1":
-                browserPlatform = "Windows 8.1";
-                break;
-              case "10":
-                browserPlatform = "Windows 10";
-                break;
-            }
-            break;
-          }
-        }
-        case "Linux":
-          browserPlatform = "Linux";
-          break;
-        case "Ubuntu":
-          browserPlatform = "Linux";
-          break;
-        default:
-          browserPlatform = jsonObject.getString("platform");
-      }
+    if (jsonObject.get("mobile") != null){
+      JsonObject mobile = jsonObject.getJsonObject("mobile");
+      browserPlatform = mobile.getString("platformName");
+    } else {
+      if (browserName.equalsIgnoreCase("MicrosoftEdge"))
+        browserPlatform = "Windows 10";
+      else
+        browserPlatform = processPlatform(jsonObject.getString("platform"));
     }
     this.name = browserName;
     this.version = browserVersion;
@@ -136,45 +100,11 @@ public class Browser {
    *
    */
   public boolean shouldBeInOverView() {
-    if (version.equals("UNKNOWN"))
-      return false;
-    else {
-      switch (name){
-        case "firefox":
-          if (!Mapping.FirefoxVersionList.contains(version))
-            return false;
-          break;
-        case "chrome":
-          if (!Mapping.ChromeVersionList.contains(version))
-            return false;
-          break;
-        case "MicrosoftEdge":
-          if (!Mapping.EdgeVersionList.contains(version))
-            return false;
-          break;
-        case "safari":
-          if (!Mapping.SafariVersionList.contains(version))
-            return false;
-          break;
-      }
-    }
-    if (boringOSList.contains(platform))
-      return false;
-
-    return true;
-  }
-
-  /**
-   * Returns true or false on whether a browser has a certain name and version (to use in overview template only).
-   *
-   */
-  public boolean hasNameAndVersion(List<String> browser) {
-    boolean res = true;
-    if (!name.equals(browser.get(0)))
-      return false;
-    if (!version.equals(browser.get(1)))
-      return false;
-    return res;
+    for (String version : Mapping.VersionList)
+      if (this.version.startsWith(version))
+        if (Mapping.OsList.contains(this.platform))
+          return true;
+    return false;
   }
 
   /**
@@ -190,11 +120,74 @@ public class Browser {
       return false;
     return true;
   }
+
+
+  /**
+   * Preprocesses browser platform.
+   *
+   */
+  public String processPlatform(String platform) {
+    String browserPlatform;
+    List<String> bPlatform = Arrays.asList(platform.toLowerCase().split(Pattern.quote(" ")));
+    browserPlatform = bPlatform.get(0);
+    switch (browserPlatform) {
+      case "mac": {
+            /*bPlatform = Arrays.asList(bPlatform.get(3).split(Pattern.quote(".")));
+            browserPlatform = "OS X " + bPlatform.get(0) + "." + bPlatform.get(1);*/
+        browserPlatform = "OS X 10.13";
+        break;
+      }
+      case "windows": {
+              /*if (jsonObject.getString("platform").equalsIgnoreCase("Windows"))*/
+        browserPlatform = "Windows 10";
+            /*else {
+              switch (bPlatform.get(1)) {
+                case "XP":
+                  browserPlatform = "XP";
+                  break;
+                case "7":
+                  browserPlatform = "Vista";
+                  break;
+                case "8.1":
+                  browserPlatform = "Windows 8.1";
+                  break;
+                case "10":
+                  browserPlatform = "Windows 10";
+                  break;
+              }
+            }*/
+        break;
+      }
+      case "xp":
+        browserPlatform = "Windows 10";
+        break;
+      case "ubuntu":
+        browserPlatform = "Linux";
+        break;
+      case "linux":
+        browserPlatform = "Linux";
+        break;
+      default:
+        browserPlatform = platform;
+    }
+    return browserPlatform.toUpperCase();
+  }
+  /**
+   * Preprocesses browser version.
+   *
+   */
+  public String processVersion(String version) {
+    String browserVersion = version;
+      if (!browserVersion.contains("."))
+        browserVersion += ".0";
+    return browserVersion;
+  }
+
   /**
    * Returns Json string of the browser
    *
    */
-  public String toJson() {
+  public String toSunburstJson() {
     String res="";
     switch (this.name){
       case "safari":
@@ -213,5 +206,62 @@ public class Browser {
     res+=this.version;
     res+=this.platform.replaceAll(" ","");
     return "\"name\":\""+res+"\",\"children\":[{";
+  }
+
+  /**
+   * Checks whether the given platform equals the receiver's platform.
+   *
+   * @param platform Platform
+   * @return true if the provided platform is equal to the receiver's platform.
+   */
+  private boolean isEqualToPlatform(String platform) {
+    if (Utility.areBothNull(this.platform, platform)) {
+      return true;
+    } else if (Utility.areBothNotNull(this.platform, platform)) {
+      return this.platform.equalsIgnoreCase(platform);
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+
+    Browser temp = (Browser) obj;
+    if (this.name.equalsIgnoreCase(temp.getName())) {
+      if (Utility.areBothNull(this.version, temp.getVersion())) {
+        return this.isEqualToPlatform(temp.getPlatform());
+      } else if (Utility.areBothNotNull(this.version, temp.getVersion())) {
+        if (this.version.equalsIgnoreCase(temp.getVersion())) {
+          return this.isEqualToPlatform(temp.getPlatform());
+        }
+      }
+    }
+
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    long hashCode = this.name.hashCode();
+    if (this.version != null)
+      hashCode += this.version.hashCode();
+    if (this.platform != null)
+      hashCode += this.platform.hashCode();
+    return (int) hashCode;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public int getId() {
+    return id;
   }
 }

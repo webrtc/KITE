@@ -16,52 +16,44 @@
 
 package org.webrtc.kite;
 
-import org.webrtc.kite.pojo.Browser;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A class containing the information on browsers, versioning and platforms.
  */
 public class Mapping {
 
-  public static final Map<String, String> OS = new LinkedHashMap<String, String>();
-  public static List<String> BrowserTypeList =
-      Arrays.asList("firefox", "chrome", "MicrosoftEdge", "safari", "opera");
-  public static List<String> OVERVIEW = new ArrayList<>();
-  public static List<String> FirefoxVersionList = new ArrayList<>();
-  public static List<String> ChromeVersionList = new ArrayList<>();
-  public static List<String> EdgeVersionList = new ArrayList<>();
-  public static List<String> SafariVersionList = new ArrayList<>();
-  public static List<Browser> CurrentBrowserList = new ArrayList<>();
-
+  public static List<String> IrrelevantList =
+      Arrays.asList("beta", "dev", "?", "Unknown", "UNKNOWN");
+  public static List<String> OsList = new ArrayList<>();
+  public static List<String> VersionList = new ArrayList<>();
+  public static String StableEdge = "16.16299";
+  public static String StableSafari = "11.0";
+  public static String NightlyEdge= "17.17063";
+  public static String NightlySafari = "11.1";
   public static List<String> ClientList = new ArrayList<>();
+  public static List<String> StableList = new ArrayList<>();
 
-  public static final Map<String, String> resultColorMap = new HashMap<>();
 
   static {
-    FirefoxVersionList.add("57.0");
-    FirefoxVersionList.add("59.0");
-    ChromeVersionList.add("62.0.3202.94");
-    ChromeVersionList.add("64.0");
-    EdgeVersionList.add("16.16299");
-    EdgeVersionList.add("16.17035");
-    SafariVersionList.add("11");
-    SafariVersionList.add("11.1");
+    VersionList.add("57");
+    VersionList.add("59");
+    VersionList.add("63");
+    VersionList.add("65");
+    VersionList.add("16.16");
+    VersionList.add("17.17");
+    VersionList.add("11");
 
-    OVERVIEW.add("Windows 10");
-    OVERVIEW.add("OS X 10.13");
-    OVERVIEW.add("Linux");
+    StableList.add("57.0");
+    StableList.add("63.0");
+    StableList.add("16.16");
+    StableList.add("11.0");
 
-    for (String os:OVERVIEW){
-      for (String ver: FirefoxVersionList)
-        CurrentBrowserList.add(new Browser("firefox",ver,os));
-      for (String ver: ChromeVersionList)
-        CurrentBrowserList.add(new Browser("chrome",ver,os));
-      for (String ver: EdgeVersionList)
-        CurrentBrowserList.add(new Browser("MicrosoftEdge",ver,os));
-    }
-
+    OsList.add("WINDOWS 10");
+    OsList.add("OS X 10.13");
+    OsList.add("LINUX");
 
     ClientList.add("Selenium");
     ClientList.add("Chromedriver");
@@ -77,12 +69,6 @@ public class Mapping {
     ClientList.add("Chrome Dev");
     ClientList.add("Chrome Canary");
 
-
-    resultColorMap.put("SUCCESSFUL", "ok");
-    resultColorMap.put("TIME OUT", "notok");
-    resultColorMap.put("FAILED", "notok");
-    resultColorMap.put("NA", "tbd");
-    resultColorMap.put("NP", "untestable");
   }
 
 }

@@ -27,6 +27,7 @@ public class ResultTable {
   private String tableName;
   private String result;
   private long duration;
+  private String stats;
   private long startTime;
   private List<Browser> browserList = new ArrayList<>();
 
@@ -36,10 +37,22 @@ public class ResultTable {
    * @param result a string representing actual result of the test case.
    * @param duration duration of the test case.
    */
-  public ResultTable(String result, long duration) {
+  public ResultTable(String result, long duration, String stats) {
     super();
     this.result = result;
     this.duration = duration;
+    this.stats = stats;
+  }
+
+  /**
+   * Returns true if the browserList contains a specific browser
+   */
+  public boolean hasBrowser(Browser aBrowser){
+    for (Browser browser: browserList){
+      if (browser.equals(aBrowser))
+        return true;
+    }
+    return false;
   }
 
   /**
@@ -85,24 +98,10 @@ public class ResultTable {
   }
 
   /**
-   * Returns true or false on whether this test case has the same participating browser as another.
-   */
-  public boolean hasTheSameBrowserListAs(ResultTable otherOne) {
-    return (this.browserList.equals(otherOne.browserList));
-  }
-
-  /**
    * Sets test case's result table's name.
    */
   public void setTableName(String tableName) {
     this.tableName = tableName;
-  }
-
-  /**
-   * Returns test case's result table's name.
-   */
-  public String getTableName() {
-    return tableName;
   }
 
   /**
@@ -119,4 +118,7 @@ public class ResultTable {
     return startTime;
   }
 
+  public String getStats() {
+    return stats;
+  }
 }

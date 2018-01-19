@@ -41,6 +41,14 @@
               <targetPath>assets/css</targetPath>
             </resource>
             <resource>
+              <directory>${project.basedir}/../third_party/json-browser/css</directory>
+              <targetPath>assets/css</targetPath>
+            </resource>
+            <resource>
+              <directory>${project.basedir}/../third_party/json-browser/js</directory>
+              <targetPath>assets/js</targetPath>
+            </resource>
+            <resource>
               <directory>${project.basedir}/../third_party/light-bootstrap-dashboard/js</directory>
               <targetPath>assets/js</targetPath>
             </resource>

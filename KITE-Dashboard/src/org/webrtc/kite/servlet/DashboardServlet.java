@@ -24,6 +24,7 @@ import org.webrtc.kite.dao.ConfigExecutionDao;
 import org.webrtc.kite.dao.ConfigTestDao;
 import org.webrtc.kite.exception.KiteSQLException;
 import org.webrtc.kite.pojo.Browser;
+import org.webrtc.kite.pojo.ConfigTest;
 import org.webrtc.kite.pojo.ConfigurationOverall;
 
 import javax.servlet.RequestDispatcher;
@@ -34,6 +35,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -61,7 +64,7 @@ public class DashboardServlet extends HttpServlet {
 
     List<ConfigurationOverall> listOfConfig;
     List<Browser> listOfBrowser;
-    List<String> listOfDistinctTest;
+    List<ConfigTest> listOfDistinctTest;
     try {
       listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
       request.setAttribute("listOfTest", listOfDistinctTest);
@@ -69,6 +72,7 @@ public class DashboardServlet extends HttpServlet {
               .getDistinctConfigExecutionList();
       listOfBrowser = new BrowserDao(Utility.getDBConnection(this.getServletContext()))
               .getBrowserList();
+      listOfBrowser = new ArrayList<Browser>(new LinkedHashSet<Browser>(listOfBrowser));
       if (log.isDebugEnabled())
         log.debug("out->listOfConfigName: " + listOfConfig);
       request.setAttribute("listOfConfig", listOfConfig);

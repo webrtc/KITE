@@ -23,6 +23,9 @@ import is.tagomor.woothee.Classifier;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+
+import org.apache.log4j.Logger;
 import org.webrtc.kite.Utility;
 import java.util.Map;
 
@@ -35,10 +38,13 @@ import java.util.Map;
  */
 public class Browser extends KiteConfigObject {
 
+  private static final Logger logger = Logger.getLogger(Browser.class.getName());
+
   private String browserName;
   private String version;
   private String platform;
   private String remoteAddress;
+  private Mobile mobile;
 
   private String webDriverVersion;
   private String webDriverPlatform;
@@ -64,11 +70,12 @@ public class Browser extends KiteConfigObject {
   public Browser(String remoteAddress, JsonObject jsonObject) {
     this.browserName = jsonObject.getString("browserName");
 
-    this.version = jsonObject.getString("version", null);
-    this.platform = jsonObject.getString("platform", null);
-    this.remoteAddress = jsonObject.getString("remoteAddress", null);
-    if (this.remoteAddress == null)
-      this.remoteAddress = remoteAddress;
+    this.version = (String) Utility.throwNoKeyOrBadValueException(jsonObject, "version", String.class, false);
+    this.platform = (String) Utility.throwNoKeyOrBadValueException(jsonObject, "platform", String.class, false);
+    this.remoteAddress = jsonObject.getString("remoteAddress", remoteAddress);
+    JsonValue jsonValue = jsonObject.getOrDefault("mobile", null);
+    if (jsonValue != null)
+      this.mobile = new Mobile((JsonObject) jsonValue);
   }
 
   /**
@@ -81,6 +88,7 @@ public class Browser extends KiteConfigObject {
     this.version = browser.getVersion();
     this.platform = browser.getPlatform();
     this.remoteAddress = browser.getRemoteAddress();
+    this.mobile = browser.getMobile();
   }
 
   public String getBrowserName() {
@@ -114,6 +122,10 @@ public class Browser extends KiteConfigObject {
   public void setRemoteAddress(String remoteAddress) {
     this.remoteAddress = remoteAddress;
   }
+
+  public Mobile getMobile() { return mobile; }
+
+  public void setMobile(Mobile mobile) { this.mobile = mobile; }
 
   public String getWebDriverVersion() {
     return webDriverVersion;
@@ -177,19 +189,46 @@ public class Browser extends KiteConfigObject {
     }
   }
 
+  /**
+   * Checks whether the given mobile object equals the receiver's mobile object.
+   *
+   * @param mobile Mobile
+   * @return true if the provided mobile object is equal to the receiver's mobile object.
+   */
+  private boolean isEqualToMobile(Mobile mobile) {
+    if (Utility.areBothNull(this.mobile, mobile)) {
+      return true;
+    } else if (Utility.areBothNotNull(this.mobile, mobile)) {
+      return this.mobile.equals(mobile);
+    } else {
+      return false;
+    }
+  }
+
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof Browser) {
-      Browser temp = (Browser) obj;
-      if (this.browserName.equalsIgnoreCase(temp.getBrowserName())) {
-        if (Utility.areBothNull(this.version, temp.getVersion())) {
-          return this.isEqualToPlatform(temp.getPlatform());
-        } else if (Utility.areBothNotNull(this.version, temp.getVersion())) {
-          if (this.version.equalsIgnoreCase(temp.getVersion()))
-            return this.isEqualToPlatform(temp.getPlatform());
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+
+    Browser temp = (Browser) obj;
+    if (this.browserName.equalsIgnoreCase(temp.getBrowserName())) {
+      if (Utility.areBothNull(this.version, temp.getVersion())) {
+        if (this.isEqualToPlatform(temp.getPlatform())) {
+          return this.isEqualToMobile(temp.getMobile());
+        }
+      } else if (Utility.areBothNotNull(this.version, temp.getVersion())) {
+        if (this.version.equalsIgnoreCase(temp.getVersion())) {
+          if (this.isEqualToPlatform(temp.getPlatform())) {
+            return this.isEqualToMobile(temp.getMobile());
+          }
         }
       }
     }
+
     return false;
   }
 
@@ -200,6 +239,8 @@ public class Browser extends KiteConfigObject {
       hashCode += this.version.hashCode();
     if (this.platform != null)
       hashCode += this.platform.hashCode();
+    if (this.mobile != null)
+      hashCode += this.mobile.hashCode();
     return (int) hashCode;
   }
 
@@ -212,6 +253,8 @@ public class Browser extends KiteConfigObject {
       jsonObjectBuilder.add("version", this.version);
     if (this.platform != null)
       jsonObjectBuilder.add("platform", this.platform);
+    if (this.mobile != null)
+      jsonObjectBuilder.add("mobile", this.mobile.getJsonObjectBuilder());
 
     return jsonObjectBuilder;
   }
@@ -243,6 +286,55 @@ public class Browser extends KiteConfigObject {
     } else if (Utility.isNotNullAndNotEmpty(this.platform)) {
       myPlatform = this.platform;
     }
+    if (myPlatform != null)
+      jsonObjectBuilder.add("platform", myPlatform);
+
+    if (this.mobile != null)
+      jsonObjectBuilder.add("mobile", this.mobile.getJsonObjectBuilder());
+
+    return jsonObjectBuilder;
+  }
+
+  public JsonObjectBuilder getJsonObjectBuilderForResult(String osName, String osVersion) {
+    JsonObjectBuilder jsonObjectBuilder =
+        Json.createObjectBuilder().add("browserName", this.getBrowserName());
+
+    // Select the version
+    String myVersion = null;
+    if (Utility.isNotNullAndNotEmpty(this.userAgentVersion))
+      myVersion = this.userAgentVersion;
+    else if (Utility.isNotNullAndNotEmpty(this.webDriverVersion))
+      myVersion = this.webDriverVersion;
+    else if (Utility.isNotNullAndNotEmpty(this.version))
+      myVersion = this.version;
+    if (myVersion != null)
+      jsonObjectBuilder.add("version", myVersion);
+
+    // Select the platform
+    String myPlatform = null;
+    if (Utility.isNotNullAndNotEmpty(this.userAgentPlatform)) {
+      myPlatform = this.userAgentPlatform;
+    } else if (Utility.isNotNullAndNotEmpty(this.webDriverPlatform)) {
+      myPlatform = this.webDriverPlatform;
+      if (myPlatform.equalsIgnoreCase("ANY") && Utility.isNotNullAndNotEmpty(this.platform))
+        myPlatform = this.platform;
+    } else if (Utility.isNotNullAndNotEmpty(this.platform)) {
+      myPlatform = this.platform;
+    }
+    
+    if (osName != null && osVersion != null) {
+      if (!myPlatform.toLowerCase().contains("linux") && !myPlatform.matches("[0-9]")) {
+        if (myPlatform.toLowerCase().startsWith("win") && osName.toLowerCase().startsWith("win")
+            || myPlatform.toLowerCase().startsWith("mac")
+                && osName.toLowerCase().startsWith("mac")) {
+          myPlatform = osName + osVersion;
+          if (logger.isDebugEnabled())
+            logger.debug("replacing platform info from exception info - replacing: " + myPlatform
+                + " with: " + osName + osVersion);
+        }
+      }
+    }
+    
     if (myPlatform != null)
       jsonObjectBuilder.add("platform", myPlatform);
 

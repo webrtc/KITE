@@ -57,7 +57,7 @@ public class NoAdapterTest extends KiteTest {
   private final static String RESULT_SUCCESSFUL = "SUCCESSFUL";
   private final static String RESULT_FAILED = "FAILED";
 
-  private final static String NOADAPTER_URL = "http://192.168.40.74:8082";
+  private final static String NOADAPTER_URL = "http://localhost:8082";
   private final static String CHANNEL_INPUT = "channelId";
   private final static String START_BUTTON = "startButton";
   

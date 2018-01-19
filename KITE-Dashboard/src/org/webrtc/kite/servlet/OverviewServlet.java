@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.webrtc.kite.Mapping;
 import org.webrtc.kite.OverviewResult;
 import org.webrtc.kite.Utility;
+import org.webrtc.kite.dao.BrowserDao;
 import org.webrtc.kite.dao.ConfigTestDao;
 import org.webrtc.kite.dao.OverviewDao;
 import org.webrtc.kite.exception.KiteNoKeyException;
@@ -36,7 +37,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -63,16 +63,13 @@ public class OverviewServlet extends HttpServlet {
           throws ServletException, IOException {
 
     String testName = request.getParameter("testname");
+    String size = request.getParameter("size");
     if (testName == null)
       throw new KiteNoKeyException("test name");
 
-    List<String> listOfDistinctTest;
+    List<ConfigTest> listOfDistinctTest;
     OverviewResult listOfResult;
     List<ConfigTest> testList;
-    List<List<String>> versionList = new ArrayList<>();
-    versionList.add(Mapping.FirefoxVersionList);
-    versionList.add(Mapping.ChromeVersionList);
-    versionList.add(Mapping.EdgeVersionList);
 
     try {
       listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
@@ -80,17 +77,18 @@ public class OverviewServlet extends HttpServlet {
       if (testName!=null){
         testList = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getConfigTestList(testName);
         int tupleSize = testList.get(0).getTupleSize();
-        listOfResult = new OverviewResult(new OverviewDao(Utility.getDBConnection(this.getServletContext())).getOverviewResultList(testName, tupleSize),true, false);
+        listOfResult = new OverviewResult(new OverviewDao(Utility.getDBConnection(this.getServletContext())).getOverviewResultList(testName, tupleSize),
+                new BrowserDao(Utility.getDBConnection(this.getServletContext())).getOverviewBrowserList());
         request.setAttribute("tupleSize", tupleSize);
-        request.setAttribute("firstRun", testList.get(0).getStartTime());
         request.setAttribute("lastRun", testList.get(testList.size()-1).getStartTime());
+        request.setAttribute("description", testList.get(0).getDescription());
         request.setAttribute("testname", testName);
-        request.setAttribute("listOfVersion", versionList);
+        request.setAttribute("listOfVersion", Mapping.VersionList);
         request.setAttribute("listOfTests", testList);
         request.setAttribute("listOfResult", listOfResult);
         request.setAttribute("stats", listOfResult.getStat());
-        request.setAttribute("jsonData", listOfResult.getJsonData());
-
+        request.setAttribute("jsonData", listOfResult.getSunburstJsonData());
+        request.setAttribute("browserList", listOfResult.getDistincBrowserList());
       }
     } catch (SQLException e) {
       // TODO Auto-generated catch block
@@ -99,8 +97,12 @@ public class OverviewServlet extends HttpServlet {
     }
     // get UI
     if (log.isDebugEnabled())
-      log.debug("Displaying: overview.vm");
-    RequestDispatcher requestDispatcher = request.getRequestDispatcher("overview.vm");
+      log.debug("Displaying: overview_circle.vm");
+    RequestDispatcher requestDispatcher = null;
+/*    if (size.equalsIgnoreCase("2"))
+      requestDispatcher = request.getRequestDispatcher("overview_2D.vm");
+    else*/
+      requestDispatcher = request.getRequestDispatcher("overview_circle.vm");
     requestDispatcher.forward(request, response);
   }
 

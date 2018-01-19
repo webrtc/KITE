@@ -24,9 +24,14 @@ limitations under the License.
     button{
         padding:0;
         height:40;
-        width:7vw;
-        min-width:80px;
-        font-size:1vw;
+        width:70px;
+        min-width:30px;
+        font-size:10px;
+        margin:5px;
+    }
+
+    .filter{
+        border-left: 5px dashed white;
     }
 
     .unpick{
@@ -55,6 +60,23 @@ limitations under the License.
     g{
         cursor:pointer;
     }
+    .description {
+        font-size:15px;
+        font-style: italic;
+    }
+
+    .grow{
+        overflow: hidden;
+        height:60px;
+        width: 90%;
+        -webkit-transition:width 200ms;
+        -moz-transition:width 200ms;
+        transition:width 200ms;
+        -webkit-transition:height 200ms;
+        -moz-transition:height 200ms;
+        transition:height 200ms;
+        margin:10px;
+    }
 
 <!-- color code -->
 
@@ -68,9 +90,11 @@ limitations under the License.
         color:#666b69;
     }
 
-    h5:hover{
-        color: #42f4aa;
+
+    p {
+        font-weight: 200;
     }
+
 
     a {
         font-weight: 300;
@@ -84,29 +108,55 @@ limitations under the License.
     }
 
     .show-more {
-        border: none;
-        font-weight: 200;
+        border: 1px solid #42f4aa;;
+        font-weight: 400;
+        font-size:15px;
         font-style: italic;
-        background-color: #42f4aa;
         color: black;
+        background: white;
+        width: 200px;
     }
 
     .show-more:hover{
-        border: solid 1px black;
-        background-color: white;
-        color:black;
+        background: #42f4aa;
+        color:green;
     }
 
-    .lastRun{
-        font-weight: 200;
-        font-size: 12px;
+    .pick-option {
+        border: 1px solid #42f4aa;;
+        font-weight: 400;
+        font-size:15px;
         font-style: italic;
-        color:grey;
-        cursor:pointer;
+        color: black;
+        background: white;
+        width: 240px;
+        height:50px;
+    }
+
+    .pick-option:hover{
+        background: #42f4aa;
+        color:green;
+    }
+
+    .last-run{
+        padding-left: 70px;
+        font-weight: 200;
+        font-size: 15px;
+        font-style: italic;
+    }
+    .config-name{
+        padding-left: 20px;
+        font-size:20px;
+        font-weight: 200;
+    }
+
+    .big-boy{
+        font-size:30px;
+        font-weight: 200;
     }
 
     .medium-boy{
-        font-size:22px;
+        font-size:20px;
         font-weight: 200;
     }
 
@@ -114,11 +164,19 @@ limitations under the License.
         font-size:12px;
         font-weight: 200;
     }
+    .stat{
+        font-size:9px;
+        font-weight: bold;
+    }
+    .stat-type{
+        font-weight: bold;
+    }
 
     .status{
         font-weight: 200;
-        font-size: 15px;
+        font-size: 13px;
         font-style: italic;
+        margin:0px;
     }
     .ended{
         color: #42f4aa;
@@ -133,12 +191,23 @@ limitations under the License.
     }
 
     i{
-        font-weight: 300;
+        font-weight: 200;
         font-style: italic;
-        color:black;
     }
-    i:hover{
-        color: #42f4aa;
+    i.green{
+        color: green;
+    }
+    i.gold{
+        color: #c1b915;
+    }
+    i.red{
+        color: red;
+    }
+    i.grey{
+        color: grey;
+    }
+    i.blue{
+        color: blue;
     }
 
 <!-- form -->
@@ -235,27 +304,19 @@ limitations under the License.
     .form-style-1 .required{
         color:red;
     }
-
-<!-- result page -->
-
     input, select, textarea{
-        color: #000000;
+        color: black;
         border-radius: 8px;
         padding: 2px 2px;
     }
 
-    td.extend-result{
-        font-size: 12px;
-        font-weight: 300;
-        height:300px;
-        border-style: none none double double;
-    }
+<!-- result page -->
 
     td.extend-plot{
         font-size: 12px;
         font-weight: 300;
-        height:300px;
-        border-style: none double double none;
+        height:270px;
+        border-style: none none double double;
     }
 
     text{
@@ -265,17 +326,60 @@ limitations under the License.
     }
 
 
-    .result-wrapper{
-        max-height: 800px;
-        overflow-y: visible;
+    .stat-wrapping{
+        max-height: 230px;
+        overflow-y: scroll;
+        min-width:100px;
     }
 
 
     .result-wrapping{
-        max-height: 800px;
+        max-height: 300px;
+        overflow-y: scroll;
+        min-width:100px;
+    }
+
+    .config-wrapping{
+        max-height: 650px;
+        overflow-y: scroll;
+        min-width:100px;
+    }
+
+
+    .search-wrapping{
+        max-height: 350px;
         overflow-y: scroll;
     }
 
+    .run-wrapping{
+        max-height: 300px;
+        overflow-y: scroll;
+        min-width:100px;
+    }
+
+    .filter-by-browser{
+        font-size: 15px;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 3px;
+        border: 2px solid #42f4aa;
+
+    }
+
+    .stat-table td{
+        border: 1px solid black;
+        text-align:left;
+        cursor: pointer;
+        margin-top:0px;
+    }
+
+    .stat-table td:hover{
+        background: #42f4aa;
+    }
+
+    .no-margin{
+        margin:0px;
+    }
 <!-- overview page -->
 
     nav.overview {
@@ -390,4 +494,35 @@ limitations under the License.
         box-sizing: border-box;
     }
 
+<!-- public page -->
 
+    .square{
+        align:center;
+    }
+
+    .run-time{
+        margin:0px;
+    }
+
+    .chart{
+        padding:10px;
+    }
+
+    .tinted{
+        background:#eaedec;
+    }
+
+    .fixed{
+        table-layout: fixed;
+
+    }
+
+    .center{
+        text-align: center;
+    }
+    .test-link{
+        font-weight: 200;
+        font-size: 16px;
+        font-style: italic;
+        margin:0px;
+            }

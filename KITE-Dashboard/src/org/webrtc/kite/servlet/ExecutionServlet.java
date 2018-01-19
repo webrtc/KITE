@@ -24,6 +24,7 @@ import org.webrtc.kite.dao.ConfigTestDao;
 import org.webrtc.kite.exception.KiteNoKeyException;
 import org.webrtc.kite.exception.KiteSQLException;
 import org.webrtc.kite.pojo.ConfigExecution;
+import org.webrtc.kite.pojo.ConfigTest;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -65,7 +66,7 @@ public class ExecutionServlet extends HttpServlet {
       log.debug("in->name: " + configName);
 
     List<ConfigExecution> listOfExecution;
-    List<String> listOfDistinctTest;
+    List<ConfigTest> listOfDistinctTest;
     try {
       listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
       request.setAttribute("listOfTest", listOfDistinctTest);

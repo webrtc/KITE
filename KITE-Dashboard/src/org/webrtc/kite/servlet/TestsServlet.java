@@ -74,7 +74,7 @@ public class TestsServlet extends HttpServlet {
       log.debug("in->configname: " + strConfigId);
 
     List<ConfigTest> listOfTest;
-    List<String> listOfDistinctTest;
+    List<ConfigTest> listOfDistinctTest;
     try {
       listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
       request.setAttribute("listOfTestOverview", listOfDistinctTest);

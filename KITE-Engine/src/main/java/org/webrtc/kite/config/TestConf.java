@@ -37,6 +37,7 @@ public class TestConf extends KiteConfigObject {
     private int maxRetryCount;
     private JsonValue payload;
     private String callbackURL;
+    private String description;
 
     /**
      * Constructs a new TestConf with the given callback url and JsonObject.
@@ -62,6 +63,8 @@ public class TestConf extends KiteConfigObject {
         // Override the global value with the local value
         this.callbackURL = jsonObject.getString("callback", null);
         if (this.callbackURL == null) this.callbackURL = callbackURL;
+
+        this.description = jsonObject.getString("description", "No description was provided fot this test.");
     }
 
     public String getName() {
@@ -104,6 +107,10 @@ public class TestConf extends KiteConfigObject {
 
     public void setCallbackURL(String callbackURL) {
         this.callbackURL = callbackURL;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     /**

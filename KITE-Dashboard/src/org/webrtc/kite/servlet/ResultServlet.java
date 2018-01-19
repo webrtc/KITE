@@ -71,7 +71,7 @@ public class ResultServlet extends HttpServlet {
 
 
     OverviewResult listOfResult;
-    List<String> listOfDistinctTest;
+    List<ConfigTest> listOfDistinctTest;
     ConfigTest test;
     int testIDInt = Integer.parseInt(testID);
     try {
@@ -80,10 +80,12 @@ public class ResultServlet extends HttpServlet {
       test = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestById(testIDInt);
       request.setAttribute("test", test);
       listOfResult = new OverviewResult(
-              new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getResultList(test.getResultTable(),test.getTupleSize()),false, false);
+              new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getResultList(test.getResultTable(),test.getTupleSize()));
       request.setAttribute("listOfResult", listOfResult);
       request.setAttribute("total", listOfResult.getListOfResultTable().size());
-      request.setAttribute("jsonData", listOfResult.getJsonData());
+      request.setAttribute("jsonData", listOfResult.getSunburstJsonData());
+      request.setAttribute("testJsonData", test.getJsonData());
+      request.setAttribute("browserList", listOfResult.getDistincBrowserList());
     } catch (SQLException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

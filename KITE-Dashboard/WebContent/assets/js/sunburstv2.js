@@ -13,16 +13,16 @@
 //	See the License for the specific language governing permissions and
 //	limitations under the License.
 //
-//  Based on the apache license sequence sunburst example
-//  at https://gist.github.com/kerryrodden/7090426
+//  Based on the sequence sunburst example
+//  at https://gist.github.com/kerryrodden/7090426 - Apache 2.0 license
 
 function drawCircle(myData){
     var height = width,
       radius = (Math.min(width, height) / 2) - 10;
     // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
     var b = {
-      w: 110,
-      h: 30,
+      w: 100,
+      h: 20,
       s: 3,
       t: 10
     };
@@ -46,7 +46,7 @@ function drawCircle(myData){
     }
     var maxTextLegendWidth = 0;
     for (i = 0; i < allItems.length; i++) {
-      maxTextLegendWidth = Math.max(maxTextLegendWidth, getTextWidth(allItems[i], "12pt sans-serif"));
+      maxTextLegendWidth = Math.max(maxTextLegendWidth, getTextWidth(allItems[i], "14pt sans-serif"));
     }
 
     b.w = maxTextLegendWidth;
@@ -141,7 +141,7 @@ function drawCircle(myData){
         .attr("dx", "7") // margin
         .attr("dy", ".35em")
         .attr("style", function (d){
-            return "font-size:9px;cursor:pointer;";
+            return "font-size:8px;cursor:pointer;";
         })// vertical-align
         .text(function(d) {
         if(d.depth==0)
@@ -150,7 +150,8 @@ function drawCircle(myData){
             return "";
         if(d.depth<=currentDepth)
             return d.name;
-        });
+        })
+        .on("click", click);
 
 
 
@@ -283,9 +284,9 @@ function drawCircle(myData){
       var data = getChildren(dota)
       // Dimensions of legend item: height, spacing, radius of rounded rect. width will be set dynamically
       var li = {
-        w: 80,
-        h: 17,
-        s: 3,
+        w: 150,
+        h: 25,
+        s: 5,
         r: 3
       };
       $( ".legend" ).remove();
@@ -328,7 +329,7 @@ function drawCircle(myData){
         .attr("y", li.h / 2)
         .attr("dy", "0.35em")
         .attr("text-anchor", "middle")
-        .attr("style", "font-size:9px;cursor:pointer;")
+        .attr("style", "font-size:12px;cursor:pointer;color:black;")
         .style("pointer-events", "none")
         .text(function(d) {
           return d.key;
@@ -370,7 +371,7 @@ function drawCircle(myData){
         .attr("y", b.h / 2)
         .attr("dy", "0.35em")
         .attr("text-anchor", "middle")
-        .attr("style", "font-size:11px;cursor:pointer;")
+        .attr("style", "font-size:10px;cursor:pointer;color:black;")
         .text(function(d) {
           return d.name;
         });
@@ -430,7 +431,7 @@ function drawCircle(myData){
         .attr("y", b.h / 2)
         .attr("dy", "0.35em")
         .attr("text-anchor", "middle")
-        .attr("style", "font-size:12px;cursor:pointer;")
+        .attr("style", "font-size:10px;cursor:pointer;color:black;")
         .text(function(d) {
             if(d.name=="result")
                 return "HOME";

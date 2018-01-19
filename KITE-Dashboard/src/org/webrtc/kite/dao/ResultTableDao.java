@@ -47,16 +47,21 @@ public class ResultTableDao {
     this.connection = connection;
   }
 
+
   /**
    * Returns a list of all the result of a test, in a specific table.
    *
    * @param tableName name of the table which contains the results of the test.
+   * @param tupleSize number of participating browsers
    */
   public List<ResultTable>getResultList(String tableName, int tupleSize) throws SQLException {
-    String query = "SELECT";
+    String query = "SELECT DISTINCT";
     for (int i=1;i<=tupleSize;i++)
       query += " BROWSERS"+i+".NAME, BROWSERS"+i+".VERSION, BROWSERS"+i+".PLATFORM,";
-    query += " RES.RESULT, RES.DURATION FROM";
+    query += " RES.RESULT, RES.DURATION, ";
+    for (int i=1;i<=tupleSize;i++)
+      query += " RES.BROWSER_"+i+", ";
+    query +=" RES.STATS FROM";
     for (int i=1;i<=tupleSize;i++)
       query += " BROWSERS AS BROWSERS"+i+", ";
     query += tableName + " AS RES WHERE";
@@ -65,12 +70,13 @@ public class ResultTableDao {
       if (i < tupleSize)
         query += " AND";
     }
-    query+=" ORDER BY";
+    /*query+=" ORDER BY";
     for (int i=1;i<=tupleSize;i++) {
-      query += " BROWSERS" + i + ".NAME DESC, BROWSERS" + i + ".VERSION DESC, BROWSERS" + i + ".PLATFORM DESC";
+      //query += " BROWSERS" + i + ".PLATFORM DESC, BROWSERS" + i + ".NAME ASC, BROWSERS" + i + ".VERSION DESC";
+      query += " RES.BROWSER_" + i;
       if (i<tupleSize)
         query+=",";
-    }
+    }*/
     List<ResultTable> resultTableList = new ArrayList<ResultTable>();
 
     PreparedStatement ps = null;
@@ -91,10 +97,14 @@ public class ResultTableDao {
         }
         String result = rs.getString("RESULT");
         long duration = rs.getLong("DURATION");
-        ResultTable resultTable = new ResultTable(result, duration);
+        String stats = rs.getString("STATS");
+        ResultTable resultTable = new ResultTable(result, duration, stats);
         resultTable.setTableName(tableName);
-        for (int i=0;i<tupleSize;i++)
-          resultTable.addBrowser(new Browser(rs.getString(i*3+1), rs.getString(i*3+2), rs.getString(i*3+3)));
+        for (int i=0;i<tupleSize;i++) {
+          Browser tmp = new Browser(rs.getString(i*3+1), rs.getString(i*3+2), rs.getString(i*3+3));
+          tmp.setId(rs.getInt("BROWSER_"+(i+1)));
+          resultTable.addBrowser(tmp);
+        }
         resultTableList.add(resultTable);
       }
     } finally {
@@ -105,32 +115,20 @@ public class ResultTableDao {
   }
 
   /**
-   * Returns a list of all the OK result of a test, in a specific table.
+   * Get corresponded stat by id.
    *
    * @param tableName name of the table which contains the results of the test.
+   * @param idList id of browsers.
    */
-  public List<ResultTable>getOKResultList(String tableName, int tupleSize) throws SQLException {
-    String query = "SELECT";
-    for (int i=1;i<=tupleSize;i++)
-      query += " BROWSERS"+i+".NAME, BROWSERS"+i+".VERSION, BROWSERS"+i+".PLATFORM,";
-    query += " RES.RESULT, RES.DURATION FROM";
-    for (int i=1;i<=tupleSize;i++)
-      query += " BROWSERS AS BROWSERS"+i+", ";
-    query += tableName + " AS RES WHERE";
-    for (int i=1;i<=tupleSize;i++) {
-      query += " RES.BROWSER_" + i + " = BROWSERS" + i + ".BROWSER_ID";
-      if (i < tupleSize)
-        query += " AND";
+  public String getStatById(String tableName, List<Integer> idList) throws SQLException {
+    String res ="";
+    int tupleSize = idList.size();
+    String query = "SELECT STATS FROM "+tableName+" WHERE ";
+    for (int i=0;i<tupleSize;i++) {
+      query += "BROWSER_" + (i + 1) + "=" + idList.get(i);
+      if (i < tupleSize-1)
+        query += " AND ";
     }
-    query+=" AND RES.RESULT='SUCCESSFUL'";
-    query+=" ORDER BY";
-    for (int i=1;i<=tupleSize;i++) {
-      query += " BROWSERS" + i + ".NAME DESC, BROWSERS" + i + ".VERSION DESC, BROWSERS" + i + ".PLATFORM DESC";
-      if (i<tupleSize)
-        query+=",";
-    }
-    List<ResultTable> resultTableList = new ArrayList<ResultTable>();
-
     PreparedStatement ps = null;
     ResultSet rs = null;
     try {
@@ -147,89 +145,27 @@ public class ResultTableDao {
           }
           log.trace(rsLog.toString());
         }
-        String result = rs.getString("RESULT");
-        long duration = rs.getLong("DURATION");
-        ResultTable resultTable = new ResultTable(result, duration);
-        resultTable.setTableName(tableName);
-        for (int i=0;i<tupleSize;i++)
-          resultTable.addBrowser(new Browser(rs.getString(i*3+1), rs.getString(i*3+2), rs.getString(i*3+3)));
-        resultTableList.add(resultTable);
+          res = rs.getString("STATS");
       }
     } finally {
       Utility.closeDBResources(ps, rs);
     }
-
-    return resultTableList;
+    return res;
   }
 
   /**
-   * Returns a list of all the NOT OK result of a test, in a specific table.
+   * Returns a list of all resquested result of a test, in a specific table.
    *
    * @param tableName name of the table which contains the results of the test.
    */
-  public List<ResultTable>getFAILEDResultList(String tableName, int tupleSize) throws SQLException {
+  public List<ResultTable>getRequestedResultList(String tableName, int tupleSize, String filter) throws SQLException {
     String query = "SELECT";
     for (int i=1;i<=tupleSize;i++)
       query += " BROWSERS"+i+".NAME, BROWSERS"+i+".VERSION, BROWSERS"+i+".PLATFORM,";
-    query += " RES.RESULT, RES.DURATION FROM";
+    query += " RES.RESULT, RES.DURATION, ";
     for (int i=1;i<=tupleSize;i++)
-      query += " BROWSERS AS BROWSERS"+i+", ";
-    query += tableName + " AS RES WHERE";
-    for (int i=1;i<=tupleSize;i++) {
-      query += " RES.BROWSER_" + i + " = BROWSERS" + i + ".BROWSER_ID";
-      if (i < tupleSize)
-        query += " AND";
-    }
-    query+=" AND RES.RESULT<>'SUCCESSFUL'";
-    query+=" ORDER BY";
-    for (int i=1;i<=tupleSize;i++) {
-      query += " BROWSERS" + i + ".NAME DESC, BROWSERS" + i + ".VERSION DESC, BROWSERS" + i + ".PLATFORM DESC";
-      if (i<tupleSize)
-        query+=",";
-    }
-    List<ResultTable> resultTableList = new ArrayList<ResultTable>();
-
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-    try {
-      ps = this.connection.prepareStatement(query);
-      if (log.isDebugEnabled())
-        log.debug("Executing: " + query);
-      rs = ps.executeQuery();
-      while (rs.next()) {
-        if (log.isTraceEnabled()) {
-          final StringBuilder rsLog = new StringBuilder();
-          for (int c = 1; c <= rs.getMetaData().getColumnCount(); c++) {
-            rsLog.append(rs.getMetaData().getColumnName(c)).append(":").append(rs.getString(c))
-                    .append("-");
-          }
-          log.trace(rsLog.toString());
-        }
-        String result = rs.getString("RESULT");
-        long duration = rs.getLong("DURATION");
-        ResultTable resultTable = new ResultTable(result, duration);
-        resultTable.setTableName(tableName);
-        for (int i=0;i<tupleSize;i++)
-          resultTable.addBrowser(new Browser(rs.getString(i*3+1), rs.getString(i*3+2), rs.getString(i*3+3)));
-        resultTableList.add(resultTable);
-      }
-    } finally {
-      Utility.closeDBResources(ps, rs);
-    }
-
-    return resultTableList;
-  }
-
-  /**
-   * Returns a list of all the NOT OK result of a test, in a specific table.
-   *
-   * @param tableName name of the table which contains the results of the test.
-   */
-  public List<ResultTable>getJsonResultList(String tableName, int tupleSize, String filter) throws SQLException {
-    String query = "SELECT";
-    for (int i=1;i<=tupleSize;i++)
-      query += " BROWSERS"+i+".NAME, BROWSERS"+i+".VERSION, BROWSERS"+i+".PLATFORM,";
-    query += " RES.RESULT, RES.DURATION FROM";
+      query += " RES.BROWSER_"+i+", ";
+    query +=" RES.STATS FROM";
     for (int i=1;i<=tupleSize;i++)
       query += " BROWSERS AS BROWSERS"+i+", ";
     query += tableName + " AS RES WHERE";
@@ -290,7 +226,8 @@ public class ResultTableDao {
     }
     query+=" ORDER BY";
     for (int i=1;i<=tupleSize;i++) {
-      query += " BROWSERS" + i + ".NAME DESC, BROWSERS" + i + ".VERSION DESC, BROWSERS" + i + ".PLATFORM DESC";
+      //query += " BROWSERS" + i + ".PLATFORM DESC, BROWSERS" + i + ".NAME ASC, BROWSERS" + i + ".VERSION DESC";
+      query += " RES.BROWSER_" + i;
       if (i<tupleSize)
         query+=",";
     }
@@ -314,10 +251,14 @@ public class ResultTableDao {
         }
         String result = rs.getString("RESULT");
         long duration = rs.getLong("DURATION");
-        ResultTable resultTable = new ResultTable(result, duration);
+        String stats = rs.getString("STATS");
+        ResultTable resultTable = new ResultTable(result, duration, stats);
         resultTable.setTableName(tableName);
-        for (int i=0;i<tupleSize;i++)
-          resultTable.addBrowser(new Browser(rs.getString(i*3+1), rs.getString(i*3+2), rs.getString(i*3+3)));
+        for (int i=0;i<tupleSize;i++) {
+          Browser tmp = new Browser(rs.getString(i*3+1), rs.getString(i*3+2), rs.getString(i*3+3));
+          tmp.setId(rs.getInt("BROWSER_"+(i+1)));
+          resultTable.addBrowser(tmp);
+        }
         resultTableList.add(resultTable);
       }
     } finally {

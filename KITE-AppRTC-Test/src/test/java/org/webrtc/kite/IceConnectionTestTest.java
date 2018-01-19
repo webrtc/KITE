@@ -31,11 +31,13 @@ public class IceConnectionTestTest extends TestCase {
 
   public void setUp() throws Exception {
     super.setUp();
+
     final Browser firefox = new Browser("firefox");
     firefox.setRemoteAddress(SELENIUM_SERVER_URL);
+    webDriverList.add(WebDriverFactory.createWebDriver(firefox, TEST_NAME));
+
     final Browser chrome = new Browser("chrome");
     chrome.setRemoteAddress(SELENIUM_SERVER_URL);
-    webDriverList.add(WebDriverFactory.createWebDriver(firefox, TEST_NAME));
     webDriverList.add(WebDriverFactory.createWebDriver(chrome, TEST_NAME));
   }
 

@@ -48,7 +48,7 @@ public class ClientVersionDao {
     }
 
     /**
-     * Returns a list of all client version infomation.
+     * Returns a list of all client version information.
      */
     public List<ClientVersion> getClientVersionList() throws SQLException {
         String query = "SELECT * FROM CLIENT_VERSION;";

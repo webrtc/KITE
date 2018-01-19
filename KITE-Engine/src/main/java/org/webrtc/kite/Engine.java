@@ -18,97 +18,121 @@ package org.webrtc.kite;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import javax.json.JsonException;
+
 import org.apache.log4j.Logger;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.KeyMatcher;
 import org.webrtc.kite.config.Configurator;
-import org.webrtc.kite.config.TestConf;
-import org.webrtc.kite.exception.KiteBadValueException;
-import org.webrtc.kite.exception.KiteInsufficientValueException;
-import org.webrtc.kite.exception.KiteNoKeyException;
-import org.webrtc.kite.exception.KiteUnsupportedRemoteException;
+import org.webrtc.kite.exception.*;
+import org.webrtc.kite.scheduler.MatrixRunnerJob;
+import org.webrtc.kite.scheduler.MatrixRunnerJobListener;
+
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
  * Entry point of the program
  */
 public class Engine {
 
-  private final static Logger logger = Logger.getLogger(Engine.class.getName());
+    private final static String IDENTITY_GROUP = "KITE";
+    private final static Logger logger = Logger.getLogger(Engine.class.getName());
 
-  /**
-   * main method
-   *
-   * @param args relative or absolute path of the configuration file.
-   */
-  public static void main(String[] args) {
+    /**
+     * main method
+     *
+     * @param args relative or absolute path of the configuration file.
+     */
+    public static void main(String[] args) {
 
-    if (args.length < 1) {
-      logger.error("Error [Missing Argument]: Use java -jar KITE.jar <absolute path/config.json>");
-      return;
-    }
-
-    try {
-      Configurator.getInstance().buildConfig(new File(args[0]));
-
-      Configurator.getInstance().setTimeStamp();
-
-      for (TestConf testConf : Configurator.getInstance().getTestList()) {
-
-        logger.info("Running " + testConf + " ...");
-
-        List<Future<Object>> listOfResults = new MatrixRunner(testConf,
-            Configurator.getInstance().buildTuples(testConf.getTupleSize()), testConf.getName())
-                .run();
-
-        logger.info("\nThe following are results for " + testConf + ":\n");
-        if (listOfResults != null) {
-          for (Future<Object> future : listOfResults)
-            try {
-              logger.info(future.get().toString());
-            } catch (Exception e) {
-              Utility.printStackTrace(e);
-            }
-        } else {
-          logger.error("No test case found");
+        if (args.length < 1) {
+            logger.error("Error [Missing Argument]: Use java -jar KITE.jar <absolute path/config.json>");
+            return;
         }
-      }
-    } catch (FileNotFoundException e) {
-      logger.error(
-          "Error [File Not Found]: '" + args[0] + "' either doesn't exist or is not a file.");
-      Utility.printStackTrace(e);
-    } catch (JsonException | IllegalStateException e) {
-      logger.error(
-          "Error [Config Parsing]: Unable to parse the provided configuration file with the following error: "
-              + e.getLocalizedMessage());
-      Utility.printStackTrace(e);
-    } catch (KiteNoKeyException e) {
-      logger.error("Error [Config Parsing]: '" + e.getKey()
-          + "' is not found in the configuration file or is null.");
-      Utility.printStackTrace(e);
-    } catch (KiteBadValueException e) {
-      logger.error("Error [Config Parsing]: '" + e.getKey()
-          + "' has an inappropriate value in the configuration file.");
-      Utility.printStackTrace(e);
-    } catch (KiteInsufficientValueException e) {
-      logger.error("Error [Config Parsing]: " + e.getLocalizedMessage());
-      Utility.printStackTrace(e);
-    } catch (KiteUnsupportedRemoteException e) {
-      logger.error(
-          "Error [Unrecognized remote]: '" + e.getRemoteName() + "' is unrecognized to KITE.");
-      Utility.printStackTrace(e);
-    } catch (InterruptedException e) {
-      logger.error(
-          "Error [Interruption]: The execution has been interrupted with the following error: "
-              + e.getLocalizedMessage());
-      Utility.printStackTrace(e);
-    } catch (ExecutionException e) {
-      logger.error("Error [Execution]: The execution has been ended with the following error: "
-          + e.getLocalizedMessage());
-      Utility.printStackTrace(e);
-    }
 
-  }
+        Scheduler scheduler = null;
+        try {
+            Configurator.getInstance().buildConfig(new File(args[0]));
+            int interval = Configurator.getInstance().getInterval();
+
+            // Grab the Scheduler instance from the Factory
+            scheduler = StdSchedulerFactory.getDefaultScheduler();
+            // and start it off
+            scheduler.start();
+
+            // define the job and tie it to our MatrixRunnerJob class
+            JobDetail job = newJob(MatrixRunnerJob.class)
+                    .withIdentity(MatrixRunnerJob.class.getName(), Engine.IDENTITY_GROUP)
+                    .usingJobData("shouldShutdown", interval <= 0)
+                    .build();
+
+            // Trigger the job to run now, and then repeat every 'interval' number of hours
+            Trigger trigger = null;
+            if (interval > 0) {
+                trigger = newTrigger()
+                        .withIdentity(MatrixRunnerJob.class.getName(), Engine.IDENTITY_GROUP)
+                        .startNow()
+                        .withSchedule(simpleSchedule()
+                                .withIntervalInHours(interval)
+                                .repeatForever())
+                        .build();
+            } else {
+                trigger = newTrigger()
+                        .withIdentity(MatrixRunnerJob.class.getName(), Engine.IDENTITY_GROUP)
+                        .startNow()
+                        .build();
+                // Adding MatrixRunnerJobListener to shutdown the scheduler after the job is finished.
+                scheduler.getListenerManager().addJobListener(new MatrixRunnerJobListener(), KeyMatcher.keyEquals(new JobKey(MatrixRunnerJob.class.getName(), Engine.IDENTITY_GROUP)));
+            }
+
+            // Tell quartz to schedule the job using the trigger
+            scheduler.scheduleJob(job, trigger);
+
+        } catch (FileNotFoundException e) {
+            logger.error(
+                    "Error [File Not Found]: '" + args[0] + "' either doesn't exist or is not a file.", e);
+        } catch (JsonException | IllegalStateException e) {
+            logger.error(
+                    "Error [Config Parsing]: Unable to parse the provided configuration file with the following error: "
+                            + e.getLocalizedMessage(), e);
+        } catch (KiteNoKeyException e) {
+            logger.error("Error [Config Parsing]: '" + e.getKey()
+                    + "' is not found in the configuration file or is null.", e);
+        } catch (KiteBadValueException e) {
+            logger.error("Error [Config Parsing]: '" + e.getKey()
+                    + "' has an inappropriate value in the configuration file.", e);
+        } catch (KiteUnsupportedIntervalException e) {
+            logger.error("Error [Unrecognized interval]: '" + e.getIntervalName()
+                    + "' is unrecognized to KITE.", e);
+        } catch (KiteInsufficientValueException e) {
+            logger.error("Error [Config Parsing]: " + e.getLocalizedMessage(), e);
+        } catch (KiteUnsupportedRemoteException e) {
+            logger.error(
+                    "Error [Unrecognized remote]: '" + e.getRemoteName() + "' is unrecognized to KITE.", e);
+        } catch (SchedulerException e) {
+            logger.error(
+                    "FATAL Error: KITE has failed to start execution.", e);
+            try {
+                if (scheduler != null && (scheduler.isStarted() || !scheduler.isShutdown())) {
+                    try {
+                        scheduler.clear();
+                    } catch (SchedulerException se) {
+
+                    }
+                    try {
+                        scheduler.shutdown();
+                    } catch (SchedulerException se) {
+
+                    }
+                }
+            } catch (SchedulerException se) {
+
+            }
+        }
+
+    }
 
 }

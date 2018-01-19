@@ -27,6 +27,7 @@ import org.openqa.selenium.safari.SafariOptions;
 import org.webrtc.kite.config.Browser;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.webrtc.kite.config.Mobile;
 
 /**
  * Factory object for creating a web driver.
@@ -104,6 +105,20 @@ public class WebDriverFactory {
         options.setUseTechnologyPreview(true);
         capabilities.setCapability(SafariOptions.CAPABILITY, options);
         break;
+    }
+
+    // Capabilities for mobile browsers
+    Mobile mobile = browser.getMobile();
+    if (mobile != null) {
+      capabilities.setCapability("deviceName", mobile.getDeviceName());
+      capabilities.setCapability("platformName", mobile.getPlatformName());
+      capabilities.setCapability("platformVersion", mobile.getPlatformVersion());
+      if (mobile.getPlatformName().equalsIgnoreCase("iOS")) {
+        capabilities.setCapability("automationName", "XCUITest");
+      } else {
+        capabilities.setCapability("autoGrantPermissions", true);
+        capabilities.setCapability("noReset", true);
+      }
     }
 
     return capabilities;
