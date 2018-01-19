@@ -16,11 +16,11 @@
 
 function initialSetup(testId){
     $.ajax({
-        url: 'getprogress?id='+testId,
+        url: 'getprogress?id='+testId+'&result=false',
         success: function(load){
             var result = JSON.parse(load);
             var stats = result.stats;
-            drawChart(result.name, stats);
+            initChart(result.name, stats);
         }
     });
 }
@@ -28,7 +28,7 @@ function initialSetup(testId){
 
 function getProgress(testId, index) {
     $.ajax({
-        url: 'getprogress?id='+testId,
+        url: 'getprogress?id='+testId+'&result=false',
         success: function(load){
             var result = JSON.parse(load);
             var total = result.total;
@@ -39,8 +39,9 @@ function getProgress(testId, index) {
             if(done<100){
                 var id = '#test'+index;
                 if( percentage!=0){
-                    console.log(result);
                     var tmp = percentage.toFixed(2) + "%";
+                    var realPercentage = percentage+done;
+                    realPercentage = realPercentage.toFixed(2) + "%";
                     var start = result.start;
                     var currentTime = new Date().getTime();
                     var ETA = (currentTime - start)/finished/1000*(total-finished);
@@ -48,12 +49,12 @@ function getProgress(testId, index) {
                     ETA = ETA-hour*3600;
                     var min =  Math.floor(ETA/60);
                     ETA = ETA-min*60;
-                    $('#progress'+index).text(finished+'/'+total+'  ('+tmp+')');
+                    $('#progress'+index).text(finished+'/'+total+'  ('+realPercentage+')');
                     $('#endTime'+index).text(hour+'h'+min+'m'+ETA.toFixed(0)+'s');
                     drawProgressBar(id, tmp);
-                    drawChart(result.name, stats);
+                    updateChart(result.name, stats);
                 }
-                setTimeout(function(){getProgress(testId,index)}, 30000);
+                setTimeout(function(){getProgress(testId,index)}, 7000);
             }
             else{
                 location.reload();
@@ -80,7 +81,13 @@ function drawProgressBar(id, tmp){
     bar.animate(1.0);
 }
 
-function drawChart(name, dataX){
+function updateChart(name, dataX){
+    chartMap.get(name).data.datasets.forEach((dataset) => {
+        dataset.data = dataX;
+    });
+    chartMap.get(name).update();
+}
+function initChart(name, dataX){
     var ctx = document.getElementById(name).getContext('2d');
     $("#"+name).empty();
     var myChart = new Chart(ctx, {
@@ -109,4 +116,5 @@ function drawChart(name, dataX){
                 }
         }
     });
+    chartMap.set(name,myChart);
 }

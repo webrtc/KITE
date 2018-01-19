@@ -1,0 +1,22 @@
+{
+  "name": "SYSTEM_UPDATE Client version update",
+  "callback":  "http://localhost:8080/kiteweb/datacenter",
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://localhost:4444/wd/hub"
+    }
+  ],
+  "tests": [
+    {
+      "name": "SYSTEM_UPDATE Client version update",
+      "tupleSize": 1,
+      "testImpl": "org.webrtc.kite.GetUpdateTest"
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "chrome"
+    }
+  ]
+}

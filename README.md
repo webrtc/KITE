@@ -118,15 +118,25 @@ The example local.config.json file is almost the simplest config file you can ge
     {
       "name": "IceConnectionTest",
       "tupleSize": 2,
+      "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
       "testImpl": "org.webrtc.kite.IceConnectionTest"
     }
   ],
   "browsers": [
     {
-      "browserName": "firefox"
+      "browserName": "chrome",
+      "version": "63.0",
+      "platform": "MAC"
     },
     {
-      "browserName": "chrome"
+      "browserName": "firefox",
+      "version": "57.0",
+      "platform": "LINUX"
+    },
+    {
+      "browserName": "MicrosoftEdge",
+      "version": "16.16299",
+      "platform": "WINDOWS"
     }
   ]
 }
@@ -153,22 +163,32 @@ It registers IceConnectionTest class as a test (this class is implemented in KIT
     {
       "name": "IceConnectionTest",
       "tupleSize": 2,
+      "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
       "testImpl": "org.webrtc.kite.IceConnectionTest"
     }
   ],
 ```
 
-It requests for firefox and chrome, but without specifying a platform or a version, so it should run on any computer with those browsers installed. The version and platform actually used will be reported in the result, will appear in the dashboard.
+It requests for firefox and chrome. Version and platform are required fields. Version and platform actually used in the tests will be reported in the result, and will appear in the dashboard.
 
-Sample config files in ```KITE-AppRTC-Test/configs``` contain different examples for explicit version and platform configuration, take a look
+Sample config files in ```KITE-AppRTC-Test/configs``` contain different examples with different browser, version and platform configuration, take a look
 
 ```json
   "browsers": [
     {
-      "browserName": "firefox"
+      "browserName": "chrome",
+      "version": "63.0",
+      "platform": "MAC"
     },
     {
-      "browserName": "chrome"
+      "browserName": "firefox",
+      "version": "57.0",
+      "platform": "LINUX"
+    },
+    {
+      "browserName": "MicrosoftEdge",
+      "version": "16.16299",
+      "platform": "WINDOWS"
     }
   ]
 ```

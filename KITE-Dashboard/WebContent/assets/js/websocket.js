@@ -42,7 +42,6 @@ window.onload = function() {
 
     // Handle any errors that occur.
     socket.onerror = function(error) {
-    console.log('WebSocket Error: ' + error);
     };
 
 
@@ -115,7 +114,6 @@ window.onload = function() {
             gridCount+=1;
         }
 
-        console.log('gridCount: '+gridCount);
 
     });
     $(document).on("click", ".remote", function(e) {
@@ -157,7 +155,6 @@ window.onload = function() {
             gridCount+=1;
         }
 
-        console.log('gridCount: '+gridCount);
     });
 
     $(document).on("click", ".add-test", function(e) {
@@ -195,7 +192,6 @@ window.onload = function() {
             testCount+=1;
         }
 
-        console.log('testCount: '+testCount);
     });
 
 
@@ -232,7 +228,6 @@ window.onload = function() {
             +'&nbsp;<input type="text" id="'+tmp+'-platform" class="field-divided" placeholder="Platform" /></li>';
             browserCount+=1;
         }
-        console.log('browserCount: '+browserCount);
     });
 
     $(document).on("click", ".minus-test", function(e) {

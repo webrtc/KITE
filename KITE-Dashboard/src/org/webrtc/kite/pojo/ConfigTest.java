@@ -35,6 +35,7 @@ public class ConfigTest {
   private int doneTests;
   private List<Integer> stats;
   private boolean status;
+  private String description;
 
   /**
    * Sets test's start time.
@@ -121,14 +122,14 @@ public class ConfigTest {
   }
 
   /**
-   * Returns the name of test's resultable.
+   * Returns the name of test's resulttable.
    */
   public String getResultTable() {
     return resultTable;
   }
 
   /**
-   * Sets the name of test's resultable.
+   * Sets the name of test's resulttable.
    */
   public void setResultTable(String resultTable) {
     this.resultTable = resultTable;
@@ -198,6 +199,14 @@ public class ConfigTest {
     return stats;
   }
 
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
   /**
    *
    * @return the Json String containing all properties of this
@@ -206,7 +215,8 @@ public class ConfigTest {
     String res =  "{";
     res+="\"name\": \""+testName+"\",";
     res+="\"id\": "+testId+",";
-    res+="\"configId\": "+testId+",";
+    res+="\"tupleSize\": "+tupleSize+",";
+    res+="\"configId\": "+configId+",";
     res+="\"total\": "+totalTests+",";
     res+="\"done\": "+doneTests+",";
     res+="\"start\": "+startTime+",";

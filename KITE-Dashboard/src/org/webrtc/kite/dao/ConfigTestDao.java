@@ -85,6 +85,10 @@ public class ConfigTestDao {
           configTest.setStatus(true);
           configTest.setEndTime(rs.getLong(3));
         }
+        if (rs.getString("DESCRIPTION")!=null)
+          configTest.setDescription(rs.getString("DESCRIPTION"));
+        else
+          configTest.setDescription("No description was provided fot this test.");
         configTestList.add(configTest);
       }
     } finally {
@@ -100,7 +104,7 @@ public class ConfigTestDao {
    * @param testName name of the test.
    */
   public List<ConfigTest> getConfigTestList(String testName) throws SQLException {
-    String query = "SELECT * FROM TESTS WHERE TEST_NAME LIKE '%" + testName + "%'";
+    String query = "SELECT * FROM TESTS WHERE TEST_NAME LIKE '%" + testName + "%' ORDER BY START_TIME DESC";
 
     List<ConfigTest> configTestList = new ArrayList<ConfigTest>();
 
@@ -132,6 +136,10 @@ public class ConfigTestDao {
           configTest.setStatus(true);
           configTest.setEndTime(rs.getLong(3));
         }
+        if (rs.getString("DESCRIPTION")!=null)
+          configTest.setDescription(rs.getString("DESCRIPTION"));
+        else
+          configTest.setDescription("No description was provided fot this test.");
         configTestList.add(configTest);
       }
     } finally {
@@ -145,8 +153,40 @@ public class ConfigTestDao {
    * Returns a list of all the executed tests, non-repetitively.
    *
    */
-  public List<String> getTestList() throws SQLException {
-    String query = "SELECT DISTINCT TEST_NAME FROM TESTS ORDER BY TEST_NAME DESC";
+  public List<ConfigTest> getTestList() throws SQLException {
+    String query = "SELECT DISTINCT TEST_NAME,TUPLE_SIZE,DESCRIPTION FROM TESTS ORDER BY TEST_NAME DESC, DESCRIPTION DESC";
+
+    List<ConfigTest> resultTestList = new ArrayList<>();
+    List<String> testNameList = new ArrayList<>();
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    try {
+      ps = this.connection.prepareStatement(query);
+      if (log.isDebugEnabled())
+        log.debug("Executing: " + query);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        ConfigTest tmp = new ConfigTest();
+        tmp.setTestName(rs.getString(1));
+        tmp.setTupleSize(rs.getInt(2));
+        tmp.setDescription(rs.getString(3));
+        if (!testNameList.contains(tmp.getTestName())) {
+          testNameList.add(tmp.getTestName());
+          resultTestList.add(tmp);
+        }
+      }
+    } finally {
+      Utility.closeDBResources(ps, rs);
+    }
+
+    return resultTestList;
+  }
+  /**
+   * Returns a list of all the executed 1v1 tests, non-repetitively.
+   *
+   */
+  public List<String> get1v1TestList() throws SQLException {
+    String query = "SELECT DISTINCT TEST_NAME FROM TESTS WHERE TUPLE_SIZE=2 ORDER BY TEST_NAME DESC";
 
     List<String> resultTestList = new ArrayList<>();
 
@@ -201,6 +241,10 @@ public class ConfigTestDao {
           configTest.setStatus(true);
           configTest.setEndTime(rs.getLong(3));
         }
+        if (rs.getString("DESCRIPTION")!=null)
+          configTest.setDescription(rs.getString("DESCRIPTION"));
+        else
+          configTest.setDescription("No description was provided fot this test.");
         return configTest;
       }
     } finally {
@@ -325,7 +369,7 @@ public class ConfigTestDao {
     ConfigTest test = getTestById(id);
     int total = test.getTotalTests();
     int finished = getNumberOfFinishedTestCase(test.getResultTable());
-    int percentage = (int) 100 * finished / total;
+    int percentage = 100 * finished / total;
     if (log.isDebugEnabled())
       log.debug("percentage -> " + percentage + "%");
     return percentage;

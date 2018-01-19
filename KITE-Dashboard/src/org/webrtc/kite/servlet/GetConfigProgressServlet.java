@@ -18,8 +18,10 @@ package org.webrtc.kite.servlet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.webrtc.kite.OverviewResult;
 import org.webrtc.kite.Utility;
 import org.webrtc.kite.dao.ConfigTestDao;
+import org.webrtc.kite.dao.ResultTableDao;
 import org.webrtc.kite.exception.KiteNoKeyException;
 import org.webrtc.kite.pojo.ConfigTest;
 
@@ -62,13 +64,30 @@ public class GetConfigProgressServlet extends HttpServlet {
     if (log.isDebugEnabled())
       log.debug("in->id: " + strTestID);
     int testID = Integer.parseInt(strTestID);
-
+    String result = request.getParameter("result");
+    if (result == null)
+      throw new KiteNoKeyException("result");
+    boolean resultBool = Boolean.parseBoolean(result);
     ConfigTest test;
+    OverviewResult listOfResult;
     try {
       test = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestById(testID);
       if (log.isDebugEnabled())
         log.debug("testJson : " + test.getJsonData());
-      response.getWriter().print(test.getJsonData());
+      else {
+        if (resultBool) {
+          listOfResult = new OverviewResult(
+                  new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getResultList(test.getResultTable(), test.getTupleSize()));
+          if (log.isDebugEnabled())
+            log.debug("listOfResultJson : " + listOfResult.getSunburstJsonData());
+          if (test.getStatus())
+            response.getWriter().print("done");
+          else
+            response.getWriter().print(listOfResult.getSunburstJsonData());
+        } else {
+          response.getWriter().print(test.getJsonData());
+        }
+      }
     } catch (SQLException e) {
       e.printStackTrace();
     }

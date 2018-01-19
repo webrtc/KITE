@@ -23,4 +23,4 @@ By default server listens in 8082 port, to change this, edit server.http.js
 
 By default server listens in all interfaces, to change this, edit server.http.js
 
-If the test is to be run on a Selenium Grid, the IP address for the server should be the IP address of the machine on which it is being run
+If the test is to be run on a Selenium Grid, the IP address for the server should be the IP address of the machine on which it is being run, instead of http://localhost:8080.

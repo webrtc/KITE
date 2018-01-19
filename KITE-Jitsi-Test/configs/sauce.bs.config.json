@@ -17,6 +17,7 @@
     {
       "name": "JitsiTest",
       "tupleSize": 3,
+      "description":"This test verifies the ICEConnection state of the browsers participating in a conference room of meet.jit.si, as well as the number of people in the room",
       "testImpl": "org.webrtc.kite.JitsiTest"
     }
   ],

@@ -1,0 +1,39 @@
+.jsonbrowser{
+
+}
+
+.jsonbrowser ul {
+    margin : 0;
+    padding : 0;
+    list-style-type : none;
+}
+
+.jsonbrowser ul ul { padding-left : 20px; }
+
+.jsonbrowser li {
+    margin : 3px;
+    padding : 2px 0;
+}
+
+.jsonbrowser li.collapsible > .key {
+    cursor : pointer;
+    font-style: italic;
+    text-decoration : underline;
+}
+
+.jsonbrowser ul.collapsed { display : none; }
+
+.jsonbrowser .key {
+    color: #4f6991;
+    font-weight : bold;
+}
+
+.jsonbrowser .value {
+    color: #595a5b;
+    font-style : italic;
+    font-weight : 200;
+}
+
+.jsonbrowser .empty-value { font-style : italic; }
+
+.jsonbrowser a { color : #42f4aa; }

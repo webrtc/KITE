@@ -70,7 +70,7 @@ public class MatrixRunner {
         if (objectClass.isInstance(object))
           listOfObject.add(object);
       } catch (InterruptedException | ExecutionException e) {
-        Utility.printStackTrace(e);
+        logger.error(e);
       }
     }
     return listOfObject;
@@ -94,19 +94,12 @@ public class MatrixRunner {
         if (!objectClass.isInstance(object))
           listOfFutureObjects.add(future);
       } catch (InterruptedException | ExecutionException e) {
-        Utility.printStackTrace(e);
+        logger.error(e);
       }
     }
     return listOfFutureObjects;
   }
 
-  /**
-   * This method builds up singleThreadedList and multiThreadedList as follows:
-   * <p>
-   * 1) Omit all the test cases having 2 identical mobile browsers. 2) Put all the test cases
-   * having only 1 microsoft edge or safari into singleThreadedList. 3) Put all the rest of test
-   * cases into multiThreadedList.
-   */
   /**
    * This method builds up singleThreadedList and multiThreadedList as follows:
    * <p>
@@ -121,7 +114,7 @@ public class MatrixRunner {
       int mobileCount = 0;
       Set<Browser> set = new LinkedHashSet<Browser>();
       for (Browser browser: browserList) {
-        if (browser.getMobile() != null) {
+        if (browser.getMobile() != null || browser.getVersion().equalsIgnoreCase("fennec")) {
           set.add(browser);
           mobileCount++;
         }
@@ -136,12 +129,15 @@ public class MatrixRunner {
 
       // Add all the test cases having MicrosoftEdge and safari in single thread list.
       boolean jumpToOuterLoop = false;
-      for (Browser browser : browserList)
-        if (browser.getBrowserName().equalsIgnoreCase("MicrosoftEdge") || browser.getBrowserName().equalsIgnoreCase("safari")) {
+      for (Browser browser : browserList) {
+        String browserName = browser.getBrowserName();
+        if (browserName.equalsIgnoreCase("MicrosoftEdge") || browserName
+            .equalsIgnoreCase("safari")) {
           this.singleThreadedList.add(browserList);
           jumpToOuterLoop = true;
           break;
         }
+      }
       if (jumpToOuterLoop) continue;
 
       // Add the rest of the test cases in multi thread list.

@@ -113,8 +113,12 @@ public class WebDriverFactory {
       capabilities.setCapability("deviceName", mobile.getDeviceName());
       capabilities.setCapability("platformName", mobile.getPlatformName());
       capabilities.setCapability("platformVersion", mobile.getPlatformVersion());
-      if (mobile.getPlatformName().equalsIgnoreCase("iOS"))
+      if (mobile.getPlatformName().equalsIgnoreCase("iOS")) {
         capabilities.setCapability("automationName", "XCUITest");
+      } else {
+        capabilities.setCapability("autoGrantPermissions", true);
+        capabilities.setCapability("noReset", true);
+      }
     }
 
     return capabilities;

@@ -21,20 +21,31 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
-import org.webrtc.kite.KiteTest;
+
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import java.util.*;
 
 /**
  * IceConnectionTest implementation of KiteTest.
  * <p>
  * The testScript() implementation does the following in sequential manner on the provided array of
- * WebDriver: 1) Opens all the browsers with the url specified in APPRTC_URL. 2) Clicks
- * 'confirm-join-button'. 3) Do the following every 1 second for 1 minute: a) Executes the
- * JavaScript on all browsers given via testJavaScript() which returns iceConnectionState. b) Checks
- * whether all the browsers have returned either 'completed' or 'connected'. 4) The test is
- * considered as successful if all the browsers either returns 'completed' or 'connected' within 1
- * minute. 5) A successful test returns a boolean 'true' while the unsuccessful test returns a
- * boolean 'false'
+ * WebDriver:
+ * <ul>
+ * <li>1) Opens all the browsers with the url specified in APPRTC_URL.</li>
+ * <li>2) Clicks 'confirm-join-button'.</li>
+ * <li>3) Do the following every 1 second for 1 minute:</li>
+ * <ul>
+ * <li>a) Executes the JavaScript on all browsers given via testJavaScript() which returns
+ * iceConnectionState.</li>
+ * <li>b) Checks whether all the browsers have returned either 'completed' or 'connected'.</li>
+ * </ul>
+ * <li>4) The test is considered as successful if all the browsers either returns 'completed' or
+ * 'connected' within 1 minute.</li>
+ * <li>5) A successful test returns a boolean 'true' while the unsuccessful test returns a boolean
+ * 'false'.</li>
+ * </ul>
+ * </p>
  */
 public class IceConnectionTest extends KiteTest {
 
@@ -76,10 +87,35 @@ public class IceConnectionTest extends KiteTest {
    *
    * @return the JavaScript as string.
    */
-  private String testJavaScript() {
+  private final static String testJavaScript() {
     return "var retValue;"
         + "try {retValue = appController.call_.pcClient_.pc_.iceConnectionState;} catch (exception) {} "
         + "if (retValue) {return retValue;} else {return 'unknown';}";
+  }
+
+  /**
+   *
+   * @return the JavaScript as string.
+   */
+  private final static String stashStatsScript() {
+    return  "const getStatsValues = () =>" +
+            "  appController.call_.pcClient_.pc_.getStats()" +
+            "    .then(data => {" +
+            "      return [...data.values()];" +
+            "    });" +
+            "const stashStats = async () => {" +
+            "  window.KITEStats = await getStatsValues();" +
+            "  return 0;" +
+            "};" +
+            "stashStats();";
+  }
+
+  /**
+   *
+   * @return the JavaScript as string.
+   */
+  private final static String getStatsScript() {
+    return  "return window.KITEStats;";
   }
 
   /**
@@ -113,9 +149,9 @@ public class IceConnectionTest extends KiteTest {
     this.takeAction();
 
     String result = "TIME OUT";
+    Map<String,Object> resultMap = new HashMap<String,Object>();  ;
 
     for (int i = 0; i < TIMEOUT; i += INTERVAL) {
-
       List<String> resultList = new ArrayList<String>();
       for (WebDriver webDriver : this.getWebDriverList()) {
         String resultOfScript =
@@ -127,16 +163,35 @@ public class IceConnectionTest extends KiteTest {
 
       if (this.checkForFailed(resultList)) {
         result = "FAILED";
+        int count = 1;
+        JsonObjectBuilder statListBuilder = Json.createObjectBuilder();
+        for (WebDriver webDriver : this.getWebDriverList()) {
+          ((JavascriptExecutor) webDriver).executeScript(this.stashStatsScript());
+          Thread.sleep(INTERVAL);
+          Object stats = ((JavascriptExecutor) webDriver).executeScript(this.getStatsScript());
+          resultMap.put("client_" + count,stats);
+          count+=1;
+        }
         break;
       } else if (this.validateResults(resultList)) {
         result = "SUCCESSFUL";
+        int count = 1;
+        JsonObjectBuilder statListBuilder = Json.createObjectBuilder();
+        for (WebDriver webDriver : this.getWebDriverList()) {
+          ((JavascriptExecutor) webDriver).executeScript(this.stashStatsScript());
+          Thread.sleep(INTERVAL);
+          Object stats = ((JavascriptExecutor) webDriver).executeScript(this.getStatsScript());
+          resultMap.put("client_" + count,stats);
+          count+=1;
+        }
         break;
       } else {
         Thread.sleep(INTERVAL);
       }
     }
 
-    return result;
+    resultMap.put("result",result);
+    return resultMap;
   }
 
 }

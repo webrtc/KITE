@@ -67,12 +67,8 @@ public class DataCenterQueueManager extends Thread {
           log.debug("Dumping: " + jsonObject);
         try {
           this.resultHandler.dumpResult(jsonObject);
-        } catch (ClassNotFoundException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (SQLException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+        } catch (ClassNotFoundException | SQLException e) {
+          log.error("dumping result", e);
         }
       }
     } catch (InterruptedException e) {

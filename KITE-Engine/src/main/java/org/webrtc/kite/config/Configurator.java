@@ -18,12 +18,11 @@ package org.webrtc.kite.config;
 
 import org.apache.log4j.Logger;
 import org.webrtc.kite.Utility;
-import org.webrtc.kite.exception.KiteBadValueException;
-import org.webrtc.kite.exception.KiteInsufficientValueException;
-import org.webrtc.kite.exception.KiteNoKeyException;
-import org.webrtc.kite.exception.KiteUnsupportedRemoteException;
+import org.webrtc.kite.exception.*;
 import org.webrtc.kite.grid.RemoteAddressManager;
 import org.webrtc.kite.grid.RemoteGridFetcher;
+import org.webrtc.kite.scheduler.Interval;
+
 import javax.json.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,6 +38,7 @@ import java.util.Set;
  * <p>
  * {
  * "name": "config_name",
+ * "interval": "HOURLY|DAILY|WEEKLY",
  * "callback": "http://localhost:8080/kiteweb/datacenter",
  * "remotes": [],
  * "tests": [],
@@ -63,12 +63,11 @@ public class Configurator {
     private long timeStamp = System.currentTimeMillis();
 
     private String name;
+    private int interval;
     private List<TestConf> testList;
     private List<Browser> browserList;
 
-    public long getTimeStamp() {
-        return this.timeStamp;
-    }
+    public long getTimeStamp() { return this.timeStamp; }
 
     public void setTimeStamp() {
         this.timeStamp = System.currentTimeMillis();
@@ -78,13 +77,13 @@ public class Configurator {
         return this.name;
     }
 
+    public int getInterval() { return this.interval; }
+
     public List<TestConf> getTestList() {
         return this.testList;
     }
 
-    public List<Browser> getBrowserList() {
-        return this.browserList;
-    }
+    public List<Browser> getBrowserList() { return this.browserList; }
 
     /**
      * Builds itself based on the content of the config file.
@@ -97,8 +96,9 @@ public class Configurator {
      * @throws KiteBadValueException          if the value of any key is invalid.
      * @throws KiteInsufficientValueException if the number of remotes, tests and browsers is less than 1.
      * @throws KiteUnsupportedRemoteException if an unsupported remote is found in 'remotes'.
+     * @throws KiteUnsupportedIntervalException if an unsupported interval is found in 'interval'.
      */
-    public void buildConfig(File file) throws FileNotFoundException, JsonException, IllegalStateException, KiteNoKeyException, KiteBadValueException, KiteInsufficientValueException, KiteUnsupportedRemoteException {
+    public void buildConfig(File file) throws FileNotFoundException, JsonException, IllegalStateException, KiteNoKeyException, KiteBadValueException, KiteInsufficientValueException, KiteUnsupportedRemoteException, KiteUnsupportedIntervalException {
 
         FileReader fileReader = null;
         JsonReader jsonReader = null;
@@ -118,17 +118,19 @@ public class Configurator {
                 jsonReader.close();
         }
 
-        this.name = (String) Utility.throwNoKeyOrBadValueException(jsonObject, "name", String.class);
+        this.name = (String) Utility.throwNoKeyOrBadValueException(jsonObject, "name", String.class, false);
+
+        this.interval = Interval.interval((String) Utility.throwNoKeyOrBadValueException(jsonObject, "interval", String.class, true));
 
         String callbackURL = jsonObject.getString("callback", null);
 
-        List<JsonObject> jsonObjectList = (List<JsonObject>) Utility.throwNoKeyOrBadValueException(jsonObject, "remotes", JsonArray.class);
+        List<JsonObject> jsonObjectList = (List<JsonObject>) Utility.throwNoKeyOrBadValueException(jsonObject, "remotes", JsonArray.class, false);
         if (jsonObjectList.size() < 1)
             throw new KiteInsufficientValueException("Remote objects are less than one.");
 
         RemoteManager remoteManager = new RemoteManager(jsonObjectList);
 
-        jsonObjectList = (List<JsonObject>) Utility.throwNoKeyOrBadValueException(jsonObject, "tests", JsonArray.class);
+        jsonObjectList = (List<JsonObject>) Utility.throwNoKeyOrBadValueException(jsonObject, "tests", JsonArray.class, false);
         if (jsonObjectList.size() < 1)
             throw new KiteInsufficientValueException("Test objects are less than one.");
 
@@ -136,9 +138,14 @@ public class Configurator {
         for (JsonObject object : jsonObjectList)
             this.testList.add(new TestConf(callbackURL, object));
 
-        jsonObjectList = (List<JsonObject>) Utility.throwNoKeyOrBadValueException(jsonObject, "browsers", JsonArray.class);
-        if (jsonObjectList.size() < 1)
+        jsonObjectList = (List<JsonObject>) Utility.throwNoKeyOrBadValueException(jsonObject, "browsers", JsonArray.class, false);
+        int size = jsonObjectList.size();
+        if (size < 1)
             throw new KiteInsufficientValueException("Browser objects are less than one.");
+        jsonObjectList = new ArrayList<JsonObject>(new LinkedHashSet<JsonObject>(jsonObjectList));
+        if (jsonObjectList.size() != size) {
+            logger.warn("Duplicate browser configurations in the config file have been removed.");
+        }
 
         logger.info("Finished reading the configuration file.");
 
@@ -205,14 +212,14 @@ public class Configurator {
      */
     public List<List<Browser>> buildTuples(int tupleSize) {
 
-        List<List<Browser>> listOfBrowserList = new ArrayList<List<Browser>>();
+        List<List<Browser>> listOfTuples = new ArrayList<List<Browser>>();
 
         double totalTuples = Math.pow(this.browserList.size(), tupleSize);
 
         logger.info(totalTuples + " test cases to run.");
 
         for (int i = 0; i < totalTuples; i++)
-            listOfBrowserList.add(new ArrayList<Browser>());
+            listOfTuples.add(new ArrayList<Browser>());
 
         for (int i = 0; i < tupleSize; i++) {
             double marge = totalTuples / Math.pow(this.browserList.size(), i + 1);
@@ -220,10 +227,10 @@ public class Configurator {
             for (int x = 0; x < rep; x++)
                 for (int j = 0; j < this.browserList.size(); j++)
                     for (int k = 0; k < marge; k++)
-                        (listOfBrowserList.get((int) (x * totalTuples / rep + j * marge + k))).add(i, new Browser(this.browserList.get(j)));
+                        (listOfTuples.get((int) (x * totalTuples / rep + j * marge + k))).add(i, new Browser(this.browserList.get(j)));
         }
 
-        return listOfBrowserList;
+        return listOfTuples;
     }
 
     /**

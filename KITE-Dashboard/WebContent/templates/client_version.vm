@@ -63,16 +63,16 @@ limitations under the License.
                             <p>Dashboard</p>
                         </a>
                     </li>
+                    <li>
+                        <a href="score">
+                            <i class="pe-7s-keypad"></i>
+                            <p>Scoreboard</p>
+                        </a>
+                    </li>
                     <li class="active">
                         <a href="versions">
                             <i class="pe-7s-way"></i>
                             <p>Version Info</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="config">
-                            <i class="pe-7s-note"></i>
-                            <p>Configurator</p>
                         </a>
                     </li>
                     <li>
@@ -83,8 +83,8 @@ limitations under the License.
                                         <p>Overview</p>
                                     </a>
                                     <ul>
-                                        #foreach($testName in $listOfTest)
-                                        <li><a href="overview?testname=$linkTool.encode($testName)" style="font-size: 12px;" >$testName<div class="circle"></div></a></li>
+                                        #foreach($test in $listOfTest)
+                                        <li><a href="overview?testname=$linkTool.encode($test.getTestName())&size=$linkTool.encode($test.getTupleSize())" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
                                         #end
                                     </ul>
                                 </li>
@@ -97,6 +97,20 @@ limitations under the License.
         <!-- End of side nav bar -->
         <!-- Start main data content display -->
         <div class="main-panel">
+        <!-- Start horizontal nav bar -->
+            <nav class="navbar navbar-default navbar-fixed">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#">
+                            <i class="pe-7s-menu"></i>
+                        </button>
+                        <a class="navbar-brand" href="dashboard">Dashboard</a>
+                    </div>
+                    <div class="collapse navbar-collapse">
+                    </div>
+                </div>
+            </nav>
+        <!-- End of horizontal nav bar -->
             <div class="col-md-9" style="margin-top:20px;">
                 <div class="card content">
                     <div class="content table-responsive">
@@ -165,7 +179,5 @@ limitations under the License.
 </body>
     <!--   Core JS Files   -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
-
-    <!-- Light Bootstrap Table Core javascript and methods for Demo purpose -->
     <script src="assets/js/light-bootstrap-dashboard.js"></script>
 </html>

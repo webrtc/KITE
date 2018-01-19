@@ -32,8 +32,10 @@ limitations under the License.
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js" type="text/javascript"></script>
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script src="assets/js/sunburstv2.js"></script>
+    <script src="assets/js/overview.js"></script>
     <script>
         var width = $( window ).width()/2.8;
+        var browser = 'all';
         var testName = '$testname';
         var tupleSize = $tupleSize;
         var classes = ['btn btn-success', 'btn btn-danger', 'btn btn-info', 'btn btn-warning'];
@@ -42,35 +44,6 @@ limitations under the License.
         display[1] = true;
         display[2] = true;
         display[3] = false;
-        console.log(display);
-        $(document).on("click", "button", function(e) {
-            var id = $(this).attr('id');
-            if($(this).attr('class')=='btn unpick')
-                $(this).attr('class', classes[id]);
-            else
-                $(this).attr('class', 'btn unpick');
-            display[id]=!display[id];
-            var val='';
-            for(i=0; i<4;i++){
-                if(display[i])
-                    val+='-1';
-                else
-                    val+='-0';
-            }
-            console.log(val);
-            (function updateChart() {
-                $.ajax({
-                    url: 'getjson?name='+testName+'&size='+tupleSize+'&val='+val+'&location=overview',
-                    success: function(result){
-                        $( "#legend" ).empty();
-                        $( "#sequence" ).empty();
-                        $( "#oldLayer" ).empty();
-                        $( "#chart" ).empty();
-                        drawCircle(JSON.parse(result).sunburst);
-                    }
-                });
-            })();
-        });
     </script>
     <style>
         text{
@@ -82,7 +55,7 @@ limitations under the License.
 <body>
     <div class="wrapper">
         <!-- Start of side nav bar -->
-        <div class="sidebar" data-color="green" data-image="assets/img/sidebarSmall.jpg">
+        <div class="sidebar" data-color="black" data-image="assets/img/sidebarSmall.jpg">
             <div class="sidebar-wrapper">
                 <div class="logo">
                     <a href="dashboard" class="simple-text">
@@ -107,21 +80,21 @@ limitations under the License.
                         </div>
                     </li>
                     <li>
-                        <a href="dashboard">
+                        <a href="dashboard"> <!-- change link to dashboard -->
                             <i class="pe-7s-note2"></i>
                             <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="score">
+                            <i class="pe-7s-keypad"></i>
+                            <p>Scoreboard</p>
                         </a>
                     </li>
                     <li>
                         <a href="versions">
                             <i class="pe-7s-way"></i>
                             <p>Version Info</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="config">
-                            <i class="pe-7s-note"></i>
-                            <p>Configurator</p>
                         </a>
                     </li>
                     <li class="active">
@@ -132,8 +105,8 @@ limitations under the License.
                                         <p>Overview</p>
                                     </a>
                                     <ul>
-                                        #foreach($testName in $listOfTest)
-                                        <li><a href="overview?testname=$linkTool.encode($testName)" style="font-size: 12px;" >$testName<div class="circle"></div></a></li>
+                                        #foreach($test in $listOfTest)
+                                        <li><a href="overview?testname=$linkTool.encode($test.getTestName())&size=$linkTool.encode($test.getTupleSize())" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
                                         #end
                                     </ul>
                                 </li>
@@ -146,13 +119,56 @@ limitations under the License.
         <!-- End of side nav bar -->
         <!-- Start main data content display -->
         <div class="main-panel">
+        <!-- Start horizontal nav bar -->
+            <nav class="navbar navbar-default navbar-fixed">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#">
+                            <i class="pe-7s-menu"></i>
+                        </button>
+                        <a class="navbar-brand" href="dashboard">Dashboard</a>
+                    </div>
+                    <div class="collapse navbar-collapse">
+                    </div>
+                </div>
+            </nav>
+        <!-- End of horizontal nav bar -->
             <div class="content">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-4 col-sm-12" style="margin-right:70px">
                             <div class="card">
                                 <div class="header">
+                                    <h5>*Showing results for browsers with latest versions stable and canary (nightly) only</h5>
+                                    <div class="dropdown">
+                                        <h5>Filter:
+                                        <button id="0" type="button" class="btn btn-success"><i class="pe-7s-check"></i></button><button id="1" type="button" class="btn btn-danger"><i class="pe-7s-close-circle"></i></button>
+                                        <button id="2" type="button" class="btn btn-info"><i class="pe-7s-attention"></i></button><button id="3" type="button" class="btn btn-warning"><i class="pe-7s-timer"></i></button></h5>
+                                        <h5 class="filter-by-browser dropdown-toggle" data-toggle="dropdown" id="filter-by-browser">All browsers</h5>
+                                        <ul class="dropdown-menu result-wrapping">
+                                            <li class="by-browser" id="all"><a >All browsers</a></li>
+                                            #foreach($browser in $browserList)
+                                                <li class="by-browser" id="$browser.getName()-$browser.getVersion()-$browser.getPlatform()"><a>
+                                                #if ($browser.getName()=="safari")
+                                                    <img src="assets/img/safari.png" height="20" width="20">
+                                                #elseif ($browser.getName()=="firefox")
+                                                    <img src="assets/img/firefox.png" height="20" width="20">
+                                                #elseif ($browser.getName()=="chrome")
+                                                    <img src="assets/img/chrome.png" height="20" width="20">
+                                                #elseif ($browser.getName()=="MicrosoftEdge")
+                                                    <img src="assets/img/edge.png" height="20" width="20">
+                                                #end
+                                                $browser.getVersion() - $browser.getPlatform()</a></li>
+                                            #end
+                                        </ul>
+                                    </div>
+                                    <hr>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="header">
                                     <h4 class="title">Overview: $testname</h4>
+                                    <h5 class="small-boy">$description</h5>
                                     <p><p>
                                 </div>
                                 <div class="content">
@@ -165,7 +181,7 @@ limitations under the License.
                                             <th>Error</th>
                                         </thead>
                                         <tbody>
-                                            <tr>
+                                            <tr class="status">
                                                 <td id="total">$stats.get(0)</td>
                                                 <td id="successful">$stats.get(1) ($stats.get(5) %)</td>
                                                 <td id="failed">$stats.get(2) ($stats.get(6) %)</td>
@@ -174,41 +190,30 @@ limitations under the License.
                                         </tbody>
                                     </table>
                                     <div class="wrapping">
-                                        <h5>Details:</h5>
-                                        <a>First run: $dateTool.format($firstRun)</a></br>
-                                        <a>Last run: $dateTool.format($lastRun)</a>
-                                        <hr>
-                                        <table class="table table-hover">
-                                            <tbody>
-                                            <h5>$listOfTests.size() run(s):</h5>
-                                                #set($index = 1)
-                                                #foreach($test in $listOfTests)
-                                                <tr>
-                                                    <td style="border:none"><a class="small-boy" href="results?test=$linkTool.encode($test.getTestId())">$index. $dateTool.format($test.getStartTime()) </a></td>
-                                                    <td style="border:none"><a class="small-boy" href="results?test=$linkTool.encode($test.getTestId())">$test.getTotalTests() test case(s) </a></td>
-                                                </tr>
-                                                #set($index = $index + 1)
-                                                #end
-                                            </tbody>
-                                        </table>
+                                        <div class="content table-responsive run-wrapping">
+                                            <table class="table table-hover">
+                                                <tbody>
+                                                <a>Last run: $dateTool.format($lastRun)</a>
+                                                <hr>
+                                                <h5>$listOfTests.size() run(s):</h5>
+                                                    #set($index = 1)
+                                                    #foreach($test in $listOfTests)
+                                                    <tr>
+                                                        <td style="border:none"><a class="small-boy" href="results?test=$linkTool.encode($test.getTestId())">$index. $dateTool.format($test.getStartTime()) </a></td>
+                                                        <td style="border:none"><a class="small-boy" href="results?test=$linkTool.encode($test.getTestId())">$test.getTotalTests() test case(s) </a></td>
+                                                    </tr>
+                                                    #set($index = $index + 1)
+                                                    #end
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div id="overviewCard" class="card col-md-7 col-sm-12">
-                            <div class="header">
-                                <table class="table table-half-width" style="table-layout: fixed">
-                                    <thead>
-                                        <th><button id="0" type="button" class="btn btn-success">Success</button></th>
-                                        <th><button id="1" type="button" class="btn btn-danger">Failed</button></th>
-                                        <th><button id="2" type="button" class="btn btn-info">Error</button></th>
-                                    </thead>
-                                </table>
-                                <h5>*Showing results for browsers with versions stable, dev and beta only</h5>
-                                <div id="oldLayer"></div>
-                                <div id="sequence" style="margin-right:70px"></div>
-                                <hr>
-                            </div>
+                            <div id="oldLayer"></div>
+                            <div id="sequence" style="margin-right:70px"></div>
                             <!-- start content -->
                             <div class="content row" style="height:40vw">
                                 <div class="col-md-2 col-sm-2">
@@ -233,7 +238,5 @@ limitations under the License.
 </body>
     <!--   Core JS Files   -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
-
-    <!-- Light Bootstrap Table Core javascript and methods for Demo purpose -->
     <script src="assets/js/light-bootstrap-dashboard.js"></script>
 </html>
