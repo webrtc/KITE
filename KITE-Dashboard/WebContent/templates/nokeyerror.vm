@@ -23,7 +23,8 @@ limitations under the License.
     <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/themes/black/pace-theme-minimal.css" rel="stylesheet" />
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
     <link href="assets/css/light-bootstrap-dashboard.css" rel="stylesheet"/>
-    <link href="assets/css/first_page.css" rel="stylesheet"/>
+    <link href="assets/css/kite-dashboard.css" rel="stylesheet"/>
+
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
     <link href="https://rawgithub.com/olimsaidov/pixeden-stroke-7-icon/master/pe-icon-7-stroke/dist/pe-icon-7-stroke.css" rel="stylesheet" />
@@ -36,50 +37,62 @@ limitations under the License.
 </head>
 <body>
     <div class="wrapper">
+        <!-- Start of side nav bar -->
+        <div class="sidebar" data-color="red" data-image="assets/img/sidebarSmall.jpg">
+            <div class="sidebar-wrapper">
+                <div class="logo">
+                <a href="dashboard" class="simple-text">
+                    KITE
+                </a>
+                </div>
 
-            <div class="sidebar" data-color="red" data-image="assets/img/sidebarSmall.jpg">
-                <div class="sidebar-wrapper">
-                    <div class="logo">
-                    <a href="dashboard" class="simple-text">
-                        KITE
-                    </a>
-                    </div>
-
-                    <ul class="nav">
-                        <li class="">
-                            <a href="dashboard">
-                                <i class="pe-7s-note2"></i>
-                                <p>Dashboard</p>
-                            </a>
-                        </li>
-                        <li class="">
-                            <a href="config">
-                                <i class="pe-7s-note"></i>
-                                <p>Configurator</p>
-                            </a>
-                        </li>
-                    <li class="">
-                        <a href="overview">
-                            <i class="pe-7s-pin"></i>
-                            <p>Overview</p>
+                <ul class="nav">
+                    <li>
+                        <a href="dashboard">
+                            <i class="pe-7s-note2"></i>
+                            <p>Dashboard</p>
                         </a>
                     </li>
-                    </ul>
-                </div>
+                    <li>
+                        <a href="score">
+                            <i class="pe-7s-keypad"></i>
+                            <p>Scoreboard</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="versions">
+                            <i class="pe-7s-way"></i>
+                            <p>Version Info</p>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <nav class="overview">
+                            <ul>
+                                <li><a href="#">
+                                        <i class="pe-7s-pin"></i>
+                                        <p>Overview</p>
+                                    </a>
+                                    <ul>
+                                        #foreach($test in $listOfTest)
+                                        <li><a href="overview?testname=$linkTool.encode($test.getTestName())&size=$linkTool.encode($test.getTupleSize())" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
+                                        #end
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </li>
+                </ul>
             </div>
+        </div>
         <!-- End of side nav bar -->
-
-        <!-- Start horizontal nav bar -->
-
+        <!-- Start main data content display -->
         <div class="main-panel">
+        <!-- Start horizontal nav bar -->
             <nav class="navbar navbar-default navbar-fixed">
                 <div class="container-fluid">
                     <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navigation-example-2">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#">
+                            <i class="pe-7s-menu"></i>
                         </button>
                         <a class="navbar-brand" href="dashboard">Dashboard</a>
                     </div>
@@ -87,8 +100,7 @@ limitations under the License.
                     </div>
                 </div>
             </nav>
-            <!-- End of horizontal nav bar -->
-            <!-- Start main data content display -->
+        <!-- End of horizontal nav bar -->
             <div class="content">
                 <div class="container-fluid">
                     <div class="row">
@@ -117,28 +129,11 @@ limitations under the License.
                 </div>
             </div>
             <!-- End of main data content display -->
-            <!-- Start footer-->
-            <footer class="footer">
-                <div class="container-fluid">
-                    <nav class="pull-left">
-                        <ul>
-                            <li>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </footer>
-           <!-- End of footer-->
         </div>
     </div>
 </body>
     <!--   Core JS Files   -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js" type="text/javascript"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
-
-
-    <!-- Light Bootstrap Table Core javascript and methods for Demo purpose -->
     <script src="assets/js/light-bootstrap-dashboard.js"></script>
-
-
 </html>

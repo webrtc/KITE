@@ -16,11 +16,11 @@
 
 package org.webrtc.kite;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
 import org.webrtc.kite.pojo.Browser;
 import org.webrtc.kite.pojo.ResultTable;
-import org.webrtc.kite.pojo.TimeChart;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class containing the information for the display of the overview.
@@ -28,26 +28,26 @@ import org.webrtc.kite.pojo.TimeChart;
 public class OverviewResult {
 
   private List<ResultTable> listOfResultTable;
-  private List<String> OSList;
+  private int tupleSize;
 
   /**
    * Constructs a new OverviewResult object from given information.
    *
    * @param listOfResultTable list of test case's result in the OVERVIEW table in the database.
-   * @param filtered determine whether the list of results should be filtered.
    */
-  public OverviewResult(List<ResultTable> listOfResultTable, boolean filtered) {
-    if (filtered)
-      this.listOfResultTable = versionFilter(listOfResultTable);
-    else
+  public OverviewResult(List<ResultTable> listOfResultTable) {
       this.listOfResultTable = listOfResultTable;
-    OSList = Mapping.OVERVIEW;
-    for (ResultTable result : listOfResultTable) {
-      String platform = result.getBrowserList().get(0).getPlatform();
-      if (!OSList.contains(platform)) {
-        OSList.add(platform);
-      }
-    }
+  }
+  /**
+   * Constructs a new OverviewResult object from given information.
+   *
+   * @param listOfResultTable list of test case's result in the OVERVIEW table in the database.
+   * @param listOfOverviewBrowser filter out the relevant result.
+   */
+  public OverviewResult(List<ResultTable> listOfResultTable, List<Browser> listOfOverviewBrowser) {
+      this.listOfResultTable = versionFilter(listOfResultTable, listOfOverviewBrowser);
+      if (!this.listOfResultTable.isEmpty())
+      this.tupleSize = this.listOfResultTable.get(0).getBrowserList().size();
   }
 
   /**
@@ -55,67 +55,58 @@ public class OverviewResult {
    *
    * @param listOfResultTable list of test case's result in the OVERVIEW table in the database.
    */
-  private List<ResultTable> versionFilter(List<ResultTable> listOfResultTable) {
+  private List<ResultTable> versionFilter(List<ResultTable> listOfResultTable, List<Browser> listOfOverviewBrowsers){
     List<ResultTable> res = new ArrayList<>();
-    for (ResultTable result : listOfResultTable) {
-      if (checkBrowserVersion(result.getBrowserList().get(0))
-          && checkBrowserVersion(result.getBrowserList().get(1)))
+    for (ResultTable result: listOfResultTable){
+      boolean add = true;
+      for (Browser browser : result.getBrowserList())
+        //if (!browser.shouldBeInOverView())
+        if (!listOfOverviewBrowsers.contains(browser))
+          add = false;
+      if (add)
         res.add(result);
     }
     return res;
   }
-
   /**
-   * Verifies whether the version of a certain browser is relevant in the overview.
+   * Filters out the non-interesting results.
    *
-   * @param browser browser object in question.
+   * @param filter the browser we want to filter with.
    */
-  private boolean checkBrowserVersion(Browser browser) {
-    String version = browser.getVersion();
-    switch (browser.getName()) {
-      case "MicrosoftEdge":
-        return Mapping.EdgeVersionList.contains(version);
-      case "chrome":
-        return Mapping.ChromeVersionList.contains(version);
-      case "firefox":
-        return Mapping.FirefoxVersionList.contains(version);
-      default:
-        return false;
+  public void browserFilter(Browser filter){
+    List<ResultTable> res = new ArrayList<>();
+    for (ResultTable result: listOfResultTable){
+      boolean add = false;
+      for (Browser browser : result.getBrowserList())
+        if (browser.equals(filter))
+          add = true;
+      if (add)
+        res.add(result);
     }
+    this.setListOfResultTable(res);
   }
 
   /**
-   * Designed for getting browserName and version for displaying purpose. Gets the list of browsers
-   * at a designated position.
+   * Filters out the non-stable results.
    *
-   * @param index position of browser in a test case.
    */
-  public List<List<String>> getBrowserListAtCertainPosition(int index) {
-    List<List<String>> listOfFirstBrowser = new ArrayList<>();
-    for (ResultTable result : listOfResultTable) {
-      List<String> browser = Arrays.asList(result.getBrowserList().get(index - 1).getName(),
-          result.getBrowserList().get(index - 1).getVersion());
-      listOfFirstBrowser.add(browser);
+  public void stableFilter(){
+    List<ResultTable> tmp = new ArrayList<>();
+    for (ResultTable result: this.getListOfResultTable()){
+      boolean ok = true;
+      List<Boolean> checkList = new ArrayList<>();
+      for (Browser browser: result.getBrowserList()){
+        boolean stable = false;
+        for (String version: Mapping.StableList){
+          if (browser.getVersion().startsWith(version))
+            stable=true;
+        }
+        checkList.add(stable);
+      }
+      if (!checkList.contains(false))
+        tmp.add(result);
     }
-    listOfFirstBrowser = new ArrayList<>(new LinkedHashSet<List<String>>(listOfFirstBrowser));
-
-    return listOfFirstBrowser;
-  }
-
-  /**
-   * Returns the information of a test case with 2 browsers.
-   *
-   * @param browser1 first browser (caller).
-   * @param browser2 second browser (callee).
-   */
-  public long getInfo(List<String> browser1, List<String> browser2) {
-    List<List<String>> listOfBrowser = new ArrayList<>();
-    listOfBrowser.add(browser1);
-    listOfBrowser.add(browser2);
-    for (ResultTable result : this.listOfResultTable)
-      if (result.getBrowserList().equals(listOfBrowser))
-        return result.getDuration();
-    return 0;
+    setListOfResultTable(tmp);
   }
 
   /**
@@ -126,119 +117,10 @@ public class OverviewResult {
   }
 
   /**
-   * Returns a map with browsers' OS pair as keys and result as value. These browsers are not
-   * Browser Object, but list of strings representing name, version and platform.
-   *
-   * @param browser1 first browser.
-   * @param browser2 second browser.
+   * Returns the tupleSize.
    */
-  private HashMap<List<String>, ResultTable> getResultMapByOSPair(List<String> browser1,
-      List<String> browser2) {
-    HashMap<List<String>, ResultTable> res = new HashMap<>();
-    for (ResultTable result : listOfResultTable) {
-      List<Browser> browserList = result.getBrowserList();
-      if (browserList.get(0).hasNameAndVersion(browser1)
-          && browserList.get(1).hasNameAndVersion(browser2)) {
-        res.put(Arrays.asList(browserList.get(0).getPlatform(), browserList.get(1).getPlatform()),
-            result);
-      }
-    }
-    return res;
-  }
-
-  /**
-   * Returns a 2D matrix of result with OSes as axes, columns are callers, rows are callees. 'NA'
-   * represents the untested cases. 'NP' represents the untestable cases.
-   *
-   * @param browser1 first browser.
-   * @param browser2 second browser.
-   */
-  public List<List<ResultTable>> getResultTableListInOSGrid(List<String> browser1,
-      List<String> browser2) {
-    List<List<ResultTable>> res = new ArrayList<>();
-    HashMap<List<String>, ResultTable> resultMap = getResultMapByOSPair(browser1, browser2);
-    for (String OS1 : this.OSList) {
-      List<ResultTable> row = new ArrayList<>();
-      for (String OS2 : this.OSList) {
-        List<String> OSPair = Arrays.asList(OS1, OS2);
-
-        if (resultMap.containsKey(OSPair)) {
-          row.add(resultMap.get(OSPair));
-        } else {
-          if (isTestable(browser1.get(0), OS1)) {
-            if (isTestable(browser2.get(0), OS2))
-              row.add(new ResultTable("NA", 0));
-            else
-              row.add(new ResultTable("NP", 0));
-          } else
-            row.add(new ResultTable("NP", 0));
-        }
-      }
-      res.add(row);
-    }
-    return res;
-  }
-
-  /**
-   * Verifies whether a browser is testable on a platform.
-   *
-   * @param browserName browser's name.
-   * @param OS platform on which we intent to test this browser.
-   * @return true if testable, false otherwise.
-   */
-  private boolean isTestable(String browserName, String OS) {
-    switch (browserName) {
-      case "MicrosoftEdge":
-        return OS.equals("Windows 10");
-      default:
-        return true;
-    }
-  }
-
-  /**
-   * Returns a TimeChart object containing information to display the time chart in overview.
-   */
-  public TimeChart getTimeChartInfo() {
-    List<String> fullDateList = new ArrayList<>();
-    for (ResultTable result : listOfResultTable) {
-      Date tmp = new Date(result.getStartTime());
-      SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yy");
-      String formatted = df2.format(tmp);
-      fullDateList.add(formatted);
-    }
-    Collections.sort(fullDateList);
-    List<String> distinctDateList = new ArrayList<String>(new HashSet<String>(fullDateList));
-    List<Integer> freqList = new ArrayList<>();
-    for (String aDate : distinctDateList) {
-      freqList.add(Collections.frequency(fullDateList, aDate));
-    }
-    return new TimeChart(distinctDateList, freqList);
-  }
-
-  /**
-   * Return a TimeChart object containing the information to display a time chart in a grid view.
-   *
-   * @param browser1 first browser.
-   * @param browser2 second browser.
-   */
-  public TimeChart getGridTimeChartInfo(List<String> browser1, List<String> browser2) {
-    List<List<ResultTable>> gridResultList = getResultTableListInOSGrid(browser1, browser2);
-    List<String> fullDateList = new ArrayList<>();
-    for (List<ResultTable> listOfResult : gridResultList) {
-      for (ResultTable result : listOfResult) {
-        Date tmp = new Date(result.getStartTime());
-        SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yy");
-        String formatted = df2.format(tmp);
-        fullDateList.add(formatted);
-      }
-    }
-    Collections.sort(fullDateList);
-    List<String> distinctDateList = new ArrayList<String>(new HashSet<String>(fullDateList));
-    List<Integer> freqList = new ArrayList<>();
-    for (String aDate : distinctDateList) {
-      freqList.add(Collections.frequency(fullDateList, aDate));
-    }
-    return new TimeChart(distinctDateList, freqList);
+  public int getTupleSize() {
+    return this.tupleSize;
   }
 
   /**
@@ -248,7 +130,214 @@ public class OverviewResult {
     return listOfResultTable;
   }
 
-  public List<String> getOSList() {
-    return OSList;
+  /**
+   * Returns the list of browsers.
+   */
+  public List<Browser> getDistincBrowserList(){
+    List<Browser> res = new ArrayList<Browser>();
+    for (ResultTable result: this.getListOfResultTable()){
+      for (Browser browser: result.getBrowserList()){
+        if (!res.contains(browser))
+          res.add(browser);
+      }
+    }
+    return res;
+  }
+
+  /**
+   * Resort the result list by browser for better sunburst (1st level only).
+   */
+  private void sort(){
+    List<ResultTable> temp = new ArrayList<>(this.listOfResultTable);
+    List<ResultTable> res = new ArrayList<ResultTable>();
+    Browser anchor = null;
+    while(this.listOfResultTable.size()>0){
+      for (ResultTable resultTable: temp){
+        Browser firstBrowser = resultTable.getBrowserList().get(0);
+        if (anchor==null){
+          anchor = firstBrowser;
+          res.add(resultTable);
+          this.listOfResultTable.remove(resultTable);
+        }
+        else{
+          if (anchor.isEqualTo(firstBrowser)){
+            res.add(resultTable);
+            this.listOfResultTable.remove(resultTable);
+          }
+        }
+      }
+      if (this.listOfResultTable.size() == 0)
+        break;
+      temp.clear();
+      temp =  new ArrayList<>(this.listOfResultTable);
+      anchor = null;
+    }
+    this.listOfResultTable = res;
+  }
+
+  /**
+   * Returns the String of this under Json form to create sunburst Chart.
+   */
+  public String getSunburstJsonData(){
+    int tupleSize;
+    String res = "";
+    String result = ",\"results\": [";
+    String sunburst="{\"sunburst\": {";
+    sunburst+="\"name\":\"result\",";
+    sunburst+="\"children\": [{";
+    int ok = 0,failed = 0, error = 0, pending = 0 ;
+    if (this.listOfResultTable.size()>0) {
+      tupleSize = this.listOfResultTable.get(0).getBrowserList().size();
+      List<Browser> anchorList = new ArrayList<>();
+      int index = 0;
+      for (int l =0; l< this.listOfResultTable.size(); l++) {
+        ResultTable resultTable = this.listOfResultTable.get(l);
+        result += "{";
+        result += "\"result\": \"" + resultTable.getResult().replaceAll("\n", "").replaceAll("\\\\", "") + "\",";
+        result += "\"duration\": \"" + resultTable.getDuration() + "\",";
+        //result += "\"stats\":"+resultTable.getStats()+",";
+        result += "\"browsers\": [";
+        List<Browser> bList = resultTable.getBrowserList();
+        for (int j = 0; j < bList.size(); j++) {
+          Browser browser = bList.get(j);
+          result += "{";
+          result += "\"id\":"  + browser.getId() + ",";
+          result += "\"name\":" + "\"" + browser.getName() + "\",";
+          result += "\"version\":" + "\"" + browser.getVersion() + "\",";
+          result += "\"platform\":" + "\"" + browser.getPlatform() + "\"";
+          result += "}";
+          if (j < bList.size() - 1)
+            result += ",";
+          else
+            result += "]";
+        }
+        result += "}";
+        if (l < this.listOfResultTable.size() - 1)
+          result += ",";
+      }
+      sort();
+      for (int l =0; l< this.listOfResultTable.size(); l++){
+        ResultTable resultTable = this.listOfResultTable.get(l);
+        List<Browser> bList = resultTable.getBrowserList();
+        if (anchorList.isEmpty()){
+          for (Browser browser: bList){
+            anchorList.add(browser);
+            sunburst+=browser.toSunburstJson();
+          }
+          if (resultTable.getResult().equals("SUCCESSFUL")) {
+            sunburst += "\"name\":\"OK\",";
+            ok +=1;
+          }else {
+            if (resultTable.getResult().equals("FAILED") || resultTable.getResult().equals("TIME OUT")) {
+              sunburst += "\"name\":\"FAILED\",";
+              failed +=1;
+            }else {
+              if (resultTable.getResult().equals("SCHEDULED")) {
+                sunburst += "\"name\":\"PENDING\",";
+                pending +=1;
+              }else {
+                sunburst += "\"name\":\"ERROR\",";
+                error +=1;
+              }
+            }
+          }
+          sunburst += "\"size\": 1}]}";
+        }
+        else {
+          for (int i =0; i<tupleSize; i++){
+            if (!anchorList.get(i).equals(bList.get(i))){
+              anchorList = bList;
+              index = i;
+              for (int j=tupleSize-1; j>i; j--){
+                sunburst+="]}";
+              }
+              sunburst+=",{";
+              for (int k = i; k<tupleSize; k++){
+                sunburst+=bList.get(k).toSunburstJson();
+              }
+              if (resultTable.getResult().equals("SUCCESSFUL")) {
+                sunburst += "\"name\":\"OK\",";
+                ok +=1;
+              }else {
+                if (resultTable.getResult().equals("FAILED") || resultTable.getResult().equals("TIME OUT")) {
+                  sunburst += "\"name\":\"FAILED\",";
+                  failed +=1;
+                }else {
+                  if (resultTable.getResult().equals("SCHEDULED")) {
+                    sunburst += "\"name\":\"PENDING\",";
+                    pending +=1;
+                  }else {
+                    sunburst += "\"name\":\"ERROR\",";
+                    error += 1;
+                  }
+                }
+              }
+              sunburst += "\"size\": 1}]}";
+              break;
+            }
+          }
+
+        }
+      }
+      for (int x = 0; x < tupleSize; x++) {
+        sunburst += "]}";
+      }
+    }else{
+      sunburst += "}]}";
+    }
+    result += "]";
+    res+=sunburst;
+    res+=result;
+    res +=",\"overall\": ["+ok+","+failed+","+error+","+pending+"]";
+    res +=",\"total\":"+this.listOfResultTable.size()+"}";
+    return res;
+  }
+
+  /**
+   * Returns the list of stats concerning the result.
+   */
+  public List<Long> getStat(){
+    List<Long> stats = new ArrayList<>();
+    long total=0,success=0,failed=0,error=0, pending=0;
+    for (ResultTable resultTable: this.listOfResultTable){
+      total+=1;
+      switch (resultTable.getResult()){
+        case "SUCCESSFUL":
+          success += 1;
+          break;
+        case "FAILED":
+          failed += 1;
+          break;
+        case "TIME OUT":
+          failed += 1;
+          break;
+        case "SCHEDULED":
+          pending += 1;
+          break;
+        default:
+          error +=1;
+      }
+    }
+    stats.add(total);
+    stats.add(success);
+    stats.add(failed);
+    stats.add(error);
+    stats.add(pending);
+    if (total > 0) {
+      stats.add(100 * success / total);
+      stats.add(100 * failed / total);
+      stats.add(100 * error / total);
+      stats.add(100 * pending / total);
+    } else {
+      stats.add((long) 0);
+      stats.add((long) 0);
+      stats.add((long) 0);
+      stats.add((long) 0);
+    }
+    return stats;
+  }
+
+  public void setListOfResultTable(List<ResultTable> listOfResultTable) {
+    this.listOfResultTable = listOfResultTable;
   }
 }

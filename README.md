@@ -13,7 +13,7 @@ See LICENSE for licensing.
 ### Install prerequisite software
 
 * Install the browsers you would like to test, available for your machine. Chrome, Edge, Firefox and Safari are supported at this stage. See the wiki for some limitations or hints for each browser.
-* Make sure you have a recent Java SDK installed (or get e.g. [*JDK 8.1*](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html))
+* Make sure you have a recent Java JDK installed, at least Java 8 (e.g. from [*Java SE downloads*](http://www.oracle.com/technetwork/java/javase/downloads/index.html))
 
 ### Download webdrivers and selenium server standalone
 
@@ -48,6 +48,8 @@ java -Dwebdriver.chrome.driver=./chromedriver.exe -Dwebdriver.gecko.driver=./gec
 *  Depending on platform and the testing needs, command line can include one, two or the three drivers
 
 ## B. Build and KITE Engine and the basic sample AppRTC Test
+
+Build uses [*maven*](https://maven.apache.org/) tool. Installable maven packages are available for common platforms, see [*link*](https://maven.apache.org/install.html) for manual installation.
 
 ### Build KITE-Engine and KITE-AppRTC-Test
 
@@ -116,15 +118,25 @@ The example local.config.json file is almost the simplest config file you can ge
     {
       "name": "IceConnectionTest",
       "tupleSize": 2,
+      "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
       "testImpl": "org.webrtc.kite.IceConnectionTest"
     }
   ],
   "browsers": [
     {
-      "browserName": "firefox"
+      "browserName": "chrome",
+      "version": "63.0",
+      "platform": "MAC"
     },
     {
-      "browserName": "chrome"
+      "browserName": "firefox",
+      "version": "57.0",
+      "platform": "LINUX"
+    },
+    {
+      "browserName": "MicrosoftEdge",
+      "version": "16.16299",
+      "platform": "WINDOWS"
     }
   ]
 }
@@ -151,22 +163,32 @@ It registers IceConnectionTest class as a test (this class is implemented in KIT
     {
       "name": "IceConnectionTest",
       "tupleSize": 2,
+      "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
       "testImpl": "org.webrtc.kite.IceConnectionTest"
     }
   ],
 ```
 
-It requests for firefox and chrome, but without specifying a platform or a version, so it should run on any computer with those browsers installed. The version and platform actually used will be reported in the result, will appear in the dashboard.
+It requests for firefox and chrome. Version and platform are required fields. Version and platform actually used in the tests will be reported in the result, and will appear in the dashboard.
 
-Sample config files in ```KITE-AppRTC-Test/configs``` contain different examples for explicit version and platform configuration, take a look
+Sample config files in ```KITE-AppRTC-Test/configs``` contain different examples with different browser, version and platform configuration, take a look
 
 ```json
   "browsers": [
     {
-      "browserName": "firefox"
+      "browserName": "chrome",
+      "version": "63.0",
+      "platform": "MAC"
     },
     {
-      "browserName": "chrome"
+      "browserName": "firefox",
+      "version": "57.0",
+      "platform": "LINUX"
+    },
+    {
+      "browserName": "MicrosoftEdge",
+      "version": "16.16299",
+      "platform": "WINDOWS"
     }
   ]
 ```

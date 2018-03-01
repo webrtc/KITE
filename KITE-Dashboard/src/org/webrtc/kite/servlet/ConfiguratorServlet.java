@@ -16,17 +16,18 @@
 
 package org.webrtc.kite.servlet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.webrtc.kite.Utility;
+import org.webrtc.kite.dao.CompatibilityDao;
+import org.webrtc.kite.exception.KiteSQLException;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.webrtc.kite.Utility;
-import org.webrtc.kite.dao.CompatibilityDao;
-import org.webrtc.kite.exception.KiteSQLException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ public class ConfiguratorServlet extends HttpServlet {
     // get UI
     if (log.isDebugEnabled())
       log.debug("Displaying: configurator.vm");
-    RequestDispatcher requestDispatcher = request.getRequestDispatcher("configurator_new.vm");
+    RequestDispatcher requestDispatcher = request.getRequestDispatcher("configurator.vm");
     requestDispatcher.forward(request, response);
   }
 

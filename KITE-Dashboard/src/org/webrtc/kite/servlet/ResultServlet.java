@@ -16,21 +16,25 @@
 
 package org.webrtc.kite.servlet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.webrtc.kite.OverviewResult;
+import org.webrtc.kite.Utility;
+import org.webrtc.kite.dao.ConfigTestDao;
+import org.webrtc.kite.dao.ResultTableDao;
+import org.webrtc.kite.exception.KiteNoKeyException;
+import org.webrtc.kite.exception.KiteSQLException;
+import org.webrtc.kite.pojo.ConfigTest;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.webrtc.kite.OverviewResult;
-import org.webrtc.kite.Utility;
-import org.webrtc.kite.dao.ResultTableDao;
-import org.webrtc.kite.exception.KiteNoKeyException;
-import org.webrtc.kite.exception.KiteSQLException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Servlet implementation class ResultServlet
@@ -58,35 +62,30 @@ public class ResultServlet extends HttpServlet {
     // response.getWriter().append("Served at:
     // ").append(request.getContextPath());
 
-    String tableName = request.getParameter("name");
-    if (tableName == null)
-      throw new KiteNoKeyException("name");
+    String testID = request.getParameter("test");
+    if (testID == null)
+      throw new KiteNoKeyException("testID");
     if (log.isDebugEnabled())
-      log.debug("in->name: " + tableName);
+      log.debug("in->test ID: " + testID);
 
-    String testName = request.getParameter("testname");
-    if (testName == null)
-      throw new KiteNoKeyException("testname");
-    if (log.isDebugEnabled())
-      log.debug("in->testname: " + testName);
+
 
     OverviewResult listOfResult;
+    List<ConfigTest> listOfDistinctTest;
+    ConfigTest test;
+    int testIDInt = Integer.parseInt(testID);
     try {
-      listOfResult =
-          new OverviewResult(new ResultTableDao(Utility.getDBConnection(this.getServletContext()))
-              .getResultTestList(tableName), false);
-      if (log.isDebugEnabled())
-        log.debug("out->listOfResult: " + listOfResult);
+      listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
+      request.setAttribute("listOfTest", listOfDistinctTest);
+      test = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestById(testIDInt);
+      request.setAttribute("test", test);
+      listOfResult = new OverviewResult(
+              new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getResultList(test.getResultTable(),test.getTupleSize()));
       request.setAttribute("listOfResult", listOfResult);
-      request.setAttribute("listOfFirstBrowser", listOfResult.getBrowserListAtCertainPosition(1));
-      request.setAttribute("listOfSecondBrowser", listOfResult.getBrowserListAtCertainPosition(2));
-
-      request.setAttribute("listOfOS", listOfResult.getOSList());
-      request.setAttribute("numberOfOS", listOfResult.getOSList().size() - 1);
-      // request.setAttribute("resultColorMap", Mapping.resultColorMap);
-      if (log.isDebugEnabled())
-        log.debug("out->testName: " + testName);
-      request.setAttribute("testName", testName);
+      request.setAttribute("total", listOfResult.getListOfResultTable().size());
+      request.setAttribute("jsonData", listOfResult.getSunburstJsonData());
+      request.setAttribute("testJsonData", test.getJsonData());
+      request.setAttribute("browserList", listOfResult.getDistincBrowserList());
     } catch (SQLException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

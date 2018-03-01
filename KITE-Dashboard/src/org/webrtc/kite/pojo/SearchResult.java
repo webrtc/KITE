@@ -25,6 +25,7 @@ public class SearchResult {
 
   private List<ConfigExecution> listOfConfigResult;
   private List<ConfigTest> listOfConfigTestResult;
+  private List<ResultTable> listOfResult;
   private String searchKey;
 
   public SearchResult() {}
@@ -72,4 +73,14 @@ public class SearchResult {
     return listOfConfigTestResult;
   }
 
+  public void setListOfResult(List<ResultTable> listOfResult) {
+    this.listOfResult = listOfResult;
+  }
+
+  /**
+   * Returns the list of found results.
+   */
+  public List<ResultTable> getListOfResult() {
+    return listOfResult;
+  }
 }

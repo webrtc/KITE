@@ -1,0 +1,20 @@
+{
+  "name": "kite-noadapt-server",
+  "version": "0.0.1",
+  "description": "server for KITE basic interop test without adapter.js",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.14.1",
+    "pem": "^1.9.4",
+    "helmet": "^1.1.0",
+    "socket.io": "^2.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "npm install && node server.http.js KITE_NOADAPTER_SERVER",
+    "stop": "pkill -f --signal SIGINT KITE_NOADAPTER_SERVER"
+  },
+  "author": "jose.recio@cosmosoftware.io",
+  "license": "Apache-2.0"
+}
+

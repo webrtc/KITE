@@ -1,0 +1,50 @@
+{
+  "name": "local, saucelabs, browserstack, testingbot grid example",
+  "callback": "http://localhost:8080/kiteweb/datacenter",
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://localhost:4444/wd/hub"
+    },
+    {
+      "type": "saucelabs",
+      "username": "username",
+      "accesskey": "Access Key"
+    },
+    {
+      "type": "browserstack",
+      "username": "Username",
+      "accesskey": "Access Key"
+    },
+    {
+      "type": "testingbot",
+      "username": "Key",
+      "accesskey": "Secret"
+    }
+  ],
+  "tests": [
+    {
+      "name": "JitsiTest",
+      "tupleSize": 3,
+      "description":"This test verifies the ICEConnection state of the browsers participating in a conference room of meet.jit.si, as well as the number of people in the room",
+      "testImpl": "org.webrtc.kite.JitsiTest"
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "chrome",
+      "version": "57.0",
+      "platform": "MAC"
+    },
+    {
+      "browserName": "firefox",
+      "version": "45.0",
+      "platform": "LINUX"
+    },
+    {
+      "browserName": "MicrosoftEdge",
+      "version": "14.0",
+      "platform": "WINDOWS"
+    }
+  ]
+}

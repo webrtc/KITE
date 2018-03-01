@@ -16,96 +16,60 @@
 
 package org.webrtc.kite;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A class containing the information on browsers, versioning and platforms.
  */
 public class Mapping {
 
-  public static final Map<String, String> OS = new LinkedHashMap<String, String>();
-  public static List<String> BrowserTypeList =
-      Arrays.asList("firefox", "chrome", "MicrosoftEdge", "safari", "opera");
-  public static List<String> OVERVIEW = new ArrayList<>();
-  public static List<String> FirefoxVersionList = new ArrayList<>();
-  public static List<String> ChromeVersionList = new ArrayList<>();
-  public static List<String> EdgeVersionList = new ArrayList<>();
+  public static List<String> IrrelevantList =
+          Arrays.asList("beta", "dev", "?", "Unknown", "UNKNOWN");
+  public static List<String> OsList = new ArrayList<>();
+  public static List<String> VersionList = new ArrayList<>();
+  public static String StableEdge = "16.16299";
+  public static String StableSafari = "11.0";
+  public static String NightlyEdge= "17.17083";
+  public static String NightlySafari = "11.1";
+  public static List<String> ClientList = new ArrayList<>();
+  public static List<String> StableList = new ArrayList<>();
 
-  public static final Map<String, String> resultColorMap = new HashMap<>();
-  public static final Map<String, String> ErrorMessageMap = new HashMap<>();
-  public static final Map<Integer, String> ErrorCodeMap = new HashMap<>();
 
   static {
-    FirefoxVersionList.add("53");
-    FirefoxVersionList.add("54");
-    FirefoxVersionList.add("55");
-    ChromeVersionList.add("58");
-    ChromeVersionList.add("59");
-    ChromeVersionList.add("60");
-    ChromeVersionList.add("61");
-    EdgeVersionList.add("14");
-    EdgeVersionList.add("15");
+    VersionList.add("58");
+    VersionList.add("60");
+    VersionList.add("64");
+    VersionList.add("65");
+    VersionList.add("66");
+    VersionList.add("16.16");
+    VersionList.add("17.17");
+    VersionList.add("11");
 
+    StableList.add("58.0");
+    StableList.add("64.0");
+    StableList.add("16.16");
+    StableList.add("11.0");
 
-    OVERVIEW.add("Vista");
-    OVERVIEW.add("Windows 8.1");
-    OVERVIEW.add("Windows 10");
-    OVERVIEW.add("OS X 10.11");
-    OVERVIEW.add("OS X 10.12");
-    OVERVIEW.add("Linux");
+    OsList.add("WINDOWS 10");
+    OsList.add("OS X 10.13");
+    OsList.add("LINUX");
 
-    OS.put("WIN10", "Windows 10");
-    OS.put("WIN8_1", "Windows 8.1");
-    OS.put("Vista", "Vista");
-    OS.put("SIERRA", "OS X 10.12");
-    OS.put("EL_CAPITAN", "OS X 10.11");
-    OS.put("LINUX", "Linux");
-    OS.put("WIN8", "Windows 8");
-    OS.put("XP", "XP");
-    OS.put("YOSEMITE", "OS X 10.10");
-    OS.put("MAVERICKS", "OS X 10.9");
-    OS.put("MOUNTAIN_LION", "OS X 10.8");
-    OS.put("SNOW_LEOPARD", "OS X 10.6");
-    OS.put("UNIX", "BSD");
-    OS.put("ANDROID", "Android");
-    OS.put("WINDOWS", "Windows");
-    OS.put("MAC", "OS X");
-    OS.put("ANY", "Any");
+    ClientList.add("Selenium");
+    ClientList.add("Chromedriver");
+    ClientList.add("Geckodriver");
+    ClientList.add("MicrosoftWebDriver");
+    ClientList.add("Firefox Stable");
+    ClientList.add("Firefox Nightly");
+    ClientList.add("Edge Stable");
+    ClientList.add("Edge Insider");
+    ClientList.add("Safari Stable");
+    ClientList.add("Safari Technology Preview");
+    ClientList.add("Chrome Stable");
+    ClientList.add("Chrome Dev");
+    ClientList.add("Chrome Canary");
 
-
-    // Errors
-    ErrorMessageMap.put("TIME OUT", "The test has timed out after 60 seconds");
-    ErrorMessageMap.put("untestable", "The requested browser was untestable");
-    ErrorMessageMap.put("Insufficient", "Not enough credits on TestingBot account");
-    ErrorMessageMap.put("forwarding",
-        "Selenium couldn't forward your request to an appropriate remote");
-    ErrorMessageMap.put("Unable", "Selenium couldn't create the requested remote session");
-    ErrorMessageMap.put("The",
-        "The Sauce VM failed to prepare for this test. For help, please check https://wiki.saucelabs.com/display/DOCS/Common+Error+Messages");
-    ErrorMessageMap.put("", "");
-    ErrorMessageMap.put("", "");
-    ErrorMessageMap.put("", "");
-    ErrorMessageMap.put("", "");
-    ErrorMessageMap.put("", "");
-
-    // something for wrong username and key
-    // something for wrong address
-    // something for connection failure
-    ErrorCodeMap.put(0, "The test has timed out after 60 seconds");
-    ErrorCodeMap.put(1, "untestable");
-    ErrorCodeMap.put(2, "Not enough credits on TestingBot account");
-    ErrorCodeMap.put(3,
-        "Selenium couldn't forward your request to an appropriate remote, choose another grid or another DesiredCapabilities");
-    ErrorCodeMap.put(4, "Selenium couldn't create the requested remote session");
-    ErrorCodeMap.put(5,
-        "The Sauce VM failed to prepare for this test. For help, please check https://wiki.saucelabs.com/display/DOCS/Common+Error+Messages");
-
-
-    resultColorMap.put("SUCCESSFUL", "ok");
-    resultColorMap.put("TIME OUT", "notok");
-    resultColorMap.put("FAILED", "notok");
-    resultColorMap.put("NA", "tbd");
-    resultColorMap.put("NP", "untestable");
   }
 
 }

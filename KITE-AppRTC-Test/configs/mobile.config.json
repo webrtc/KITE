@@ -1,0 +1,40 @@
+{
+  "name": "Appium Nodes Example",
+  "callback": "http://localhost:8080/kiteweb/datacenter",
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://localhost:4444/wd/hub"
+    }
+  ],
+  "tests": [
+    {
+      "name": "IceConnectionTest",
+      "tupleSize": 2,
+      "description":"This test check the ICEConnection state between two browsers communicating via appr.tc",
+      "testImpl": "org.webrtc.kite.IceConnectionTest"
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "safari",
+      "version": "11",
+      "platform": "MAC",
+      "mobile": {
+        "deviceName": "iPhone",
+        "platformName": "iOS",
+        "platformVersion": "11"
+      }
+    },
+    {
+      "browserName": "chrome",
+      "version": "62",
+      "platform": "MAC",
+      "mobile": {
+        "deviceName": "OPPO A57",
+        "platformName": "Android",
+        "platformVersion": "6"
+      }
+    }
+  ]
+}

@@ -19,8 +19,11 @@ package org.webrtc.kite;
 import org.apache.log4j.Logger;
 import org.webrtc.kite.config.Browser;
 import org.webrtc.kite.config.TestConf;
+
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,6 +39,7 @@ public class MatrixRunner {
   private TestConf testConf;
   private String testName;
   private List<List<Browser>> listOfBrowserList;
+  private int numberOfThread;
 
   private List<List<Browser>> multiThreadedList = new ArrayList<List<Browser>>();
   private List<List<Browser>> singleThreadedList = new ArrayList<List<Browser>>();
@@ -51,6 +55,7 @@ public class MatrixRunner {
     this.testConf = testConf;
     this.testName = testName;
     this.listOfBrowserList = listOfBrowserList;
+    this.numberOfThread = testConf.getNoOfThreads();
   }
 
   /**
@@ -68,7 +73,7 @@ public class MatrixRunner {
         if (objectClass.isInstance(object))
           listOfObject.add(object);
       } catch (InterruptedException | ExecutionException e) {
-        Utility.printStackTrace(e);
+        logger.error(e);
       }
     }
     return listOfObject;
@@ -92,7 +97,7 @@ public class MatrixRunner {
         if (!objectClass.isInstance(object))
           listOfFutureObjects.add(future);
       } catch (InterruptedException | ExecutionException e) {
-        Utility.printStackTrace(e);
+        logger.error(e);
       }
     }
     return listOfFutureObjects;
@@ -101,25 +106,67 @@ public class MatrixRunner {
   /**
    * This method builds up singleThreadedList and multiThreadedList as follows:
    * <p>
-   * 1) Omit all the test cases having 2 microsoft edges and safaris. 2) Put all the test cases
+   * 1) Omit all the test cases having 2 identical mobile browsers. 2) Put all the test cases
    * having only 1 microsoft edge or safari into singleThreadedList. 3) Put all the rest of test
    * cases into multiThreadedList.
    */
   private void purgeListOfBrowserList() {
     for (List<Browser> browserList : this.listOfBrowserList) {
-      int numEdge = 0, numSafari = 0;
-      for (Browser browser : browserList)
-        if ((browser.getBrowserName().equalsIgnoreCase("MicrosoftEdge") && ++numEdge > 1)
-            || (browser.getBrowserName().equalsIgnoreCase("safari") && ++numSafari > 1))
-          break;
 
-      if (numEdge > 1 || numSafari > 1)
-        ; // Do nothing
-      else if (numEdge == 1 || numSafari == 1)
-        this.singleThreadedList.add(browserList);
-      else
-        this.multiThreadedList.add(browserList);
+      // Omit test cases with two identical mobile clients in them.
+      int mobileCount = 0;
+      Set<Browser> set = new LinkedHashSet<Browser>();
+      for (Browser browser: browserList) {
+        if (browser.getMobile() != null || browser.getVersion().startsWith("fennec")) {
+          set.add(browser);
+          mobileCount++;
+        }
+      }
+
+      // Add all the test cases having mobile in single thread list.
+      if (mobileCount > 0) {
+        if (mobileCount == set.size())
+          this.singleThreadedList.add(browserList);
+        continue;
+      }
+
+/*      // Add all the test cases having MicrosoftEdge and safari in single thread list.
+      boolean jumpToOuterLoop = false;
+      for (Browser browser : browserList) {
+        String browserName = browser.getBrowserName();
+        if (browserName.equalsIgnoreCase("MicrosoftEdge") || browserName
+            .equalsIgnoreCase("safari")) {
+            this.singleThreadedList.add(browserList);
+          jumpToOuterLoop = true;
+          break;
+        }
+      }
+      if (jumpToOuterLoop) continue;*/
+
+      // Add the rest of the test cases in multi thread list.
+      this.multiThreadedList.add(browserList);
     }
+
+/*    List<List<Browser>> tmp = new ArrayList<>(this.singleThreadedList);
+
+    int counter =0;
+    for (List<Browser> browserList: tmp){
+      boolean mobile=false;
+      for (Browser browser: browserList){
+        if (browser.getMobile()!=null)
+         mobile = true;
+      }
+      if (!mobile) {
+        if (counter % this.numberOfThread == 1 || counter % this.numberOfThread == 3) {
+          if (counter > this.multiThreadedList.size())
+            break;
+          this.multiThreadedList.add(counter, browserList);
+          this.singleThreadedList.remove(browserList);
+        }
+        counter += 1;
+      }
+    }*/
+
   }
 
   /**

@@ -12,6 +12,9 @@
     <module>KITE-Engine-IF</module>
     <module>KITE-Engine</module>
     <module>KITE-AppRTC-Test</module>
+    <module>KITE-GetUpdate-Test</module>
+    <module>KITE-Jitsi-Test</module>
+    <module>KITE-NoAdapter-Test</module>
     <module>KITE-Dashboard</module>
   </modules>
 

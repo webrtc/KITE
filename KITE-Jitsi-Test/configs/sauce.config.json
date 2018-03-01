@@ -1,0 +1,36 @@
+{
+  "name": "saucelabs grid example",
+  "callback": "http://localhost:8080/kiteweb/datacenter",
+  "remotes": [
+    {
+      "type": "saucelabs",
+      "username": "username",
+      "accesskey": "Access Key"
+    }
+  ],
+  "tests": [
+    {
+      "name": "JitsiTest",
+      "tupleSize": 3,
+      "description":"This test verifies the ICEConnection state of the browsers participating in a conference room of meet.jit.si, as well as the number of people in the room",
+      "testImpl": "org.webrtc.kite.JitsiTest"
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "chrome",
+      "version": "57.0",
+      "platform": "MAC"
+    },
+    {
+      "browserName": "firefox",
+      "version": "45.0",
+      "platform": "LINUX"
+    },
+    {
+      "browserName": "MicrosoftEdge",
+      "version": "14.0",
+      "platform": "WINDOWS"
+    }
+  ]
+}

@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2017 Google Inc.
  * 
@@ -36,6 +35,7 @@ public class ConfigTest {
   private int doneTests;
   private List<Integer> stats;
   private boolean status;
+  private String description;
 
   /**
    * Sets test's start time.
@@ -122,14 +122,14 @@ public class ConfigTest {
   }
 
   /**
-   * Returns the name of test's resultable.
+   * Returns the name of test's resulttable.
    */
   public String getResultTable() {
     return resultTable;
   }
 
   /**
-   * Sets the name of test's resultable.
+   * Sets the name of test's resulttable.
    */
   public void setResultTable(String resultTable) {
     this.resultTable = resultTable;
@@ -197,5 +197,31 @@ public class ConfigTest {
 
   public List<Integer> getStats() {
     return stats;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  /**
+   *
+   * @return the Json String containing all properties of this
+   */
+  public String getJsonData(){
+    String res =  "{";
+    res+="\"name\": \""+testName+"\",";
+    res+="\"id\": "+testId+",";
+    res+="\"tupleSize\": "+tupleSize+",";
+    res+="\"configId\": "+configId+",";
+    res+="\"total\": "+totalTests+",";
+    res+="\"done\": "+doneTests+",";
+    res+="\"start\": "+startTime+",";
+    res+="\"status\": "+status+",";
+    res+="\"stats\": ["+stats.get(0)+","+stats.get(1)+","+stats.get(2)+","+stats.get(3)+"]}";
+    return  res;
   }
 }

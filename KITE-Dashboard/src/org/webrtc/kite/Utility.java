@@ -16,11 +16,11 @@
 
 package org.webrtc.kite;
 
+import javax.servlet.ServletContext;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import javax.servlet.ServletContext;
 
 /**
  * Created by hussainsajid on 3/23/17.
@@ -78,4 +78,36 @@ public class Utility {
     return (Connection) servletContext.getAttribute("CompDBConnection");
   }
 
+  /**
+   * Replaces all the unwanted characters that might cause problems to the DB
+   *
+   * @param payload raw payload received from KITE
+   * @return String with (all) special characters replaced
+   */
+  public static String escapeSpecialCharacter(String payload){
+    return payload.replaceAll("\n", "").replaceAll("\\\\", "").replaceAll("\"", "").replaceAll("\'", "");
+  }
+
+
+  /**
+   * Checks whether both the given objects are null.
+   *
+   * @param object1 Object
+   * @param object2 Object
+   * @return true if both the provided objects are null.
+   */
+  public static boolean areBothNull(Object object1, Object object2) {
+    return object1 == null && object2 == null;
+  }
+
+  /**
+   * Checks whether both the given objects are not null.
+   *
+   * @param object1 Object
+   * @param object2 Object
+   * @return true if both the provided objects are not null.
+   */
+  public static boolean areBothNotNull(Object object1, Object object2) {
+    return object1 != null && object2 != null;
+  }
 }

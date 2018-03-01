@@ -1,0 +1,183 @@
+<!--
+Copyright 2017 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html lang="en">
+<head>
+
+    <meta charset="utf-8" />
+    <title>Client Versions</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/pace.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/themes/black/pace-theme-minimal.css" rel="stylesheet" />
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="assets/css/light-bootstrap-dashboard.css" rel="stylesheet"/>
+    <link href="assets/css/kite-dashboard.css" rel="stylesheet"/>
+
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
+    <link href="https://rawgithub.com/olimsaidov/pixeden-stroke-7-icon/master/pe-icon-7-stroke/dist/pe-icon-7-stroke.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js" type="text/javascript"></script>
+
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Start of side nav bar -->
+        <div class="sidebar" data-color="black" data-image="assets/img/sidebarSmall.jpg">
+            <div class="sidebar-wrapper">
+                <div class="logo">
+                    <a href="dashboard" class="simple-text">
+                        KITE
+                    </a>
+                </div>
+                <ul class="nav">
+                    <li>
+                        <div class="row">
+                            <div class="col-sm-1 col-sm-offset-1">
+                                <i class="pe-7s-search"></i>
+                            </div>
+                            <div class="col-sm-9 ">
+                                <form action="search" method="get">
+                                  <div>
+                                    <input name="key" id="key" placeholder="Search">
+                                  </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </li>
+                    <li>
+                        <a href="dashboard">
+                            <i class="pe-7s-note2"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="score">
+                            <i class="pe-7s-keypad"></i>
+                            <p>Scoreboard</p>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="versions">
+                            <i class="pe-7s-way"></i>
+                            <p>Version Info</p>
+                        </a>
+                    </li>
+                    <li>
+                        <nav class="overview">
+                            <ul>
+                                <li><a href="#">
+                                        <i class="pe-7s-pin"></i>
+                                        <p>Overview</p>
+                                    </a>
+                                    <ul>
+                                        #foreach($test in $listOfTest)
+                                        <li><a href="overview?testname=$linkTool.encode($test.getTestName())&size=$linkTool.encode($test.getTupleSize())" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
+                                        #end
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- End of side nav bar -->
+        <!-- Start main data content display -->
+        <div class="main-panel">
+        <!-- Start horizontal nav bar -->
+            <nav class="navbar navbar-default navbar-fixed">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#">
+                            <i class="pe-7s-menu"></i>
+                        </button>
+                        <a class="navbar-brand" href="dashboard">Dashboard</a>
+                    </div>
+                    <div class="collapse navbar-collapse">
+                    </div>
+                </div>
+            </nav>
+        <!-- End of horizontal nav bar -->
+            <div class="col-md-9" style="margin-top:20px;">
+                <div class="card content">
+                    <div class="content table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <td class="index">N.</td>
+                                    <td class="name">Name</td>
+                                    <td>Current Version</td>
+                                    <td>Last Version</td>
+                                    <td>Last Updated</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                #set($index = 1)
+                                #foreach($client in $clientVersionList)
+                                <tr>
+                                    <td class="index">$index</td>
+                                    <td class="name">$client.getName()</td>
+                                    #if(!$client.getVersion().equalsIgnoreCase($client.getLastVersion()))
+                                        <td style="color:green">$client.getVersion()</td>
+                                    #else
+                                        <td>$client.getVersion()</td>
+                                    #end
+                                    <td>$client.getLastVersion()</td>
+                                    <td>$client.getLastUpdate()</td>
+                                    #if($client.getName().equalsIgnoreCase("Selenium"))
+                                        <td><a href="http://www.seleniumhq.org/download/">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("ChromeDriver"))
+                                        <td><a href="https://sites.google.com/a/chromium.org/chromedriver/home">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("GeckoDriver"))
+                                        <td><a href="https://github.com/mozilla/geckodriver/releases">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("MicrosoftWebDriver"))
+                                        <td><a href="https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("Firefox Stable"))
+                                        <td><a href="https://www.mozilla.org/en-US/firefox/new/">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("Firefox Nightly"))
+                                        <td><a href="https://www.mozilla.org/en-US/firefox/channel/desktop/">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("Chrome Stable"))
+                                        <td><a href="https://www.chromium.org/getting-involved/dev-channel">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("Chrome dev"))
+                                        <td><a href="https://www.chromium.org/getting-involved/dev-channel">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("Chrome Canary"))
+                                        <td><a href="https://www.chromium.org/getting-involved/dev-channel">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("Edge Stable"))
+                                        <td><a href="https://www.microsoft.com/en-sg/windows/microsoft-edge">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("Edge Insider"))
+                                        <td><a href="https://developer.microsoft.com/en-us/microsoft-edge/platform/changelog/insider/">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("Safari Stable"))
+                                        <td><a href="https://www.apple.com/safari/">Download</a></td>
+                                    #elseif($client.getName().equalsIgnoreCase("Safari Technology Preview"))
+                                        <td><a href="https://developer.apple.com/safari/technology-preview/">Download</a></td>
+                                    #end
+                                </tr>
+                                #set($index = $index+ 1)
+                                #end
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- End of main data content display -->
+        </div>
+    </div>
+</body>
+    <!--   Core JS Files   -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="assets/js/light-bootstrap-dashboard.js"></script>
+</html>

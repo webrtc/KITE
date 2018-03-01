@@ -61,6 +61,10 @@ public class CallbackThread extends Thread {
     CloseableHttpClient client = null;
     CloseableHttpResponse response = null;
 
+    if (logger.isTraceEnabled()) {
+      logger.trace("Posting to " + callbackURL + ":" + jsonObject.toString());
+    }
+
     try {
       client = HttpClients.createDefault();
       HttpPost httpPost = new HttpPost(callbackURL);

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!--
+Copyright 2017 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!--
+Based on basic PeerConnection sample from https://webrtc.github.io/samples
+https://github.com/webrtc/samples/blob/gh-pages/LICENSE.md
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="KITE basic interop without adapter.js">
+  <meta id="theme-color" name="theme-color" content="#ffffff">
+  <base target="_blank">
+  <title>Basic peer connection</title>
+  <link href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+
+<body>
+
+  <div id="container">
+
+    <h1><span>Basic peer connection</span></h1>
+
+    <div>
+      <form action="" onsubmit="start(); return false;">
+      Enter channel id: <input id="channelId" type="text">
+      </form>
+      <button id="startButton">Start</button>
+      <button id="hangupButton">Hang Up</button>
+    </div>
+
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>

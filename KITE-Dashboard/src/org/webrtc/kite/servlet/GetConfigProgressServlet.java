@@ -16,17 +16,20 @@
 
 package org.webrtc.kite.servlet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.webrtc.kite.OverviewResult;
+import org.webrtc.kite.Utility;
+import org.webrtc.kite.dao.ConfigTestDao;
+import org.webrtc.kite.dao.ResultTableDao;
+import org.webrtc.kite.exception.KiteNoKeyException;
+import org.webrtc.kite.pojo.ConfigTest;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.webrtc.kite.Utility;
-import org.webrtc.kite.dao.ConfigTestDao;
-import org.webrtc.kite.exception.KiteNoKeyException;
-import org.webrtc.kite.exception.KiteSQLException;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -51,7 +54,7 @@ public class GetConfigProgressServlet extends HttpServlet {
    * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
    */
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
+          throws ServletException, IOException {
     // TODO Auto-generated method stub
 
 
@@ -61,47 +64,33 @@ public class GetConfigProgressServlet extends HttpServlet {
     if (log.isDebugEnabled())
       log.debug("in->id: " + strTestID);
     int testID = Integer.parseInt(strTestID);
-    String strType = request.getParameter("type");
-    if (strType == null)
-      throw new KiteNoKeyException("type");
-    int type = Integer.parseInt(strType);
-    switch (type) {
-      case 1:
-        try {
-          int percentage = new ConfigTestDao(Utility.getDBConnection(this.getServletContext()))
-              .getPercentage(testID);
-          response.getWriter().print(percentage);
-        } catch (SQLException e) {
-          e.printStackTrace();
-          throw new KiteSQLException(e.getLocalizedMessage());
+    String result = request.getParameter("result");
+    if (result == null)
+      throw new KiteNoKeyException("result");
+    boolean resultBool = Boolean.parseBoolean(result);
+    ConfigTest test;
+    OverviewResult listOfResult;
+    try {
+      test = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestById(testID);
+      if (log.isDebugEnabled())
+        log.debug("testJson : " + test.getJsonData());
+      else {
+        if (resultBool) {
+          listOfResult = new OverviewResult(
+                  new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getResultList(test.getResultTable(), test.getTupleSize()));
+          if (log.isDebugEnabled())
+            log.debug("listOfResultJson : " + listOfResult.getSunburstJsonData());
+          if (test.getStatus())
+            response.getWriter().print("done");
+          else
+            response.getWriter().print(listOfResult.getSunburstJsonData());
+        } else {
+          response.getWriter().print(test.getJsonData());
         }
-        break;
-      case 2:
-        try {
-          long ETA =
-              new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getETA(testID);
-          ETA = ETA / 1000;
-          int hour = (int) ETA / 3600;
-          int minute = (int) (ETA - hour * 3600) / 60;
-          int second = (int) ETA - hour * 3600 - minute * 60;
-          String res = hour + "h" + minute + "m" + second + "s";
-          response.getWriter().print(res);
-        } catch (SQLException e) {
-          e.printStackTrace();
-          throw new KiteSQLException(e.getLocalizedMessage());
-        }
-        break;
-      case 3:
-        try {
-          int finishedTestCase =
-              new ConfigTestDao(Utility.getDBConnection(this.getServletContext()))
-                  .getNumberOfFinishedTestCase(testID);
-          response.getWriter().print(finishedTestCase);
-        } catch (SQLException e) {
-          e.printStackTrace();
-          throw new KiteSQLException(e.getLocalizedMessage());
-        }
-        break;
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
     }
+
   }
 }

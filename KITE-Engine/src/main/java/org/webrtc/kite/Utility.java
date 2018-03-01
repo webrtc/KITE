@@ -16,9 +16,11 @@
 
 package org.webrtc.kite;
 
-import javax.json.JsonObject;
+import org.apache.log4j.Logger;
 import org.webrtc.kite.exception.KiteBadValueException;
 import org.webrtc.kite.exception.KiteNoKeyException;
+
+import javax.json.JsonObject;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -44,22 +46,23 @@ public class Utility {
   }
 
   /**
-   * Checks if the given key exists in the given JsonObject.
+   * Checks if the given key exists in the given JsonObject with a valid value.
    *
    * @param jsonObject JsonObject
    * @param key key
    * @param valueClass Class object for the value of the key.
+   * @param isOptional A boolean specifying that the value may be optional. Note: This only works if the valueClass is String.
    * @return the value of the key
    * @throws KiteNoKeyException if the key is not mapped in the JsonObject.
    * @throws KiteBadValueException if the value of the key is invalid.
    */
   public static Object throwNoKeyOrBadValueException(JsonObject jsonObject, String key,
-      Class<?> valueClass) throws KiteNoKeyException, KiteBadValueException {
+      Class<?> valueClass, boolean isOptional) throws KiteNoKeyException, KiteBadValueException {
     Object value = null;
     try {
       switch (valueClass.getSimpleName()) {
         case "String":
-          value = jsonObject.getString(key);
+          value = (isOptional) ? jsonObject.getString(key, null) : jsonObject.getString(key);
           break;
         case "JsonArray":
           value = jsonObject.getJsonArray(key);
@@ -121,8 +124,8 @@ public class Utility {
    *
    * @param e Exception
    */
-  public static void printStackTrace(Exception e) {
-    e.printStackTrace();
+  public static void printStackTrace(Logger logger, Exception e) {
+    logger.error(e.getStackTrace());
   }
 
   /**
@@ -133,7 +136,7 @@ public class Utility {
    * @return true if both the provided objects are null.
    */
   public static boolean areBothNull(Object object1, Object object2) {
-    return object1 == null & object2 == null;
+    return object1 == null && object2 == null;
   }
 
   /**
@@ -144,7 +147,7 @@ public class Utility {
    * @return true if both the provided objects are not null.
    */
   public static boolean areBothNotNull(Object object1, Object object2) {
-    return object1 != null & object2 != null;
+    return object1 != null && object2 != null;
   }
 
 }
