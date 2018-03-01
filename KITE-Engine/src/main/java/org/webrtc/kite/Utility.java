@@ -16,14 +16,11 @@
 
 package org.webrtc.kite;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import org.apache.log4j.Logger;
 import org.webrtc.kite.exception.KiteBadValueException;
 import org.webrtc.kite.exception.KiteNoKeyException;
-import org.webrtc.kite.stat.*;
 
+import javax.json.JsonObject;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -155,19 +152,6 @@ public class Utility {
    */
   public static boolean areBothNotNull(Object object1, Object object2) {
     return object1 != null && object2 != null;
-  }
-
-  /**
-   * Obtain a value of a key in the data map if not null
-   *
-   * @param statObject data Map
-   * @param statName name of the key
-   * @return true if both the provided objects are not null.
-   */
-  public static String getStatByName(Map<Object, Object> statObject, String statName){
-    if(statObject.get(statName)!=null)
-      return statObject.get(statName).toString();
-    return "NA";
   }
 
 

@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite;
+package org.webrtc.kite.NetworkTest;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
+import org.webrtc.kite.KiteTest;
 import org.webrtc.kite.stat.Utility;
 
 import javax.json.Json;
@@ -25,7 +26,7 @@ import javax.json.JsonObjectBuilder;
 import java.util.*;
 
 /**
- * IceConnectionTest implementation of KiteTest.
+ * LoopBackTest implementation of KiteTest.
  * <p>
  * The testScript() implementation does the following in sequential manner on the provided array of
  * WebDriver:
@@ -34,9 +35,12 @@ import java.util.*;
  * <li>2) Clicks 'confirm-join-button'.</li>
  * <li>3) Do the following every 1 second for 1 minute:</li>
  * <ul>
- * <li>a) Executes the JavaScript on all browsers given via getIceConnectionScript() which returns
+ * <li>a) Executes the JavaScript on the browser given via getIceConnectionScript() which returns
  * iceConnectionState.</li>
- * <li>b) Checks whether all the browsers have returned either 'completed' or 'connected'.</li>
+ * <li>b) Checks whether the browser has returned either 'completed' or 'connected'.</li>
+ * <li>c) Executes the JavaScript on the given via stashStatsScript() which store stats
+ * in a global variable to fetch later.</li>
+ * stashed earlier.</li>
  * </ul>
  * <li>4) The test is considered as successful if all the browsers either returns 'completed' or
  * 'connected' within 1 minute.</li>
@@ -45,9 +49,9 @@ import java.util.*;
  * </ul>
  * </p>
  */
-public class IceConnectionTest extends KiteTest {
+public class LoopBackTest extends KiteTest {
 
-    private final static Logger logger = Logger.getLogger(IceConnectionTest.class.getName());
+    private final static Logger logger = Logger.getLogger(LoopBackTest.class.getName());
 
     private final static Map<String, String> expectedResultMap = new HashMap<String, String>();
     private final static String APPRTC_URL = "https://appr.tc/r/";
@@ -59,6 +63,9 @@ public class IceConnectionTest extends KiteTest {
         expectedResultMap.put("completed", "completed");
         expectedResultMap.put("connected", "connected");
     }
+
+    private final String value = "loopback";
+    private final String option = "debug=" + value;
 
     /**
      * Returns the test's getIceConnectionScript to retrieve appController.call_.pcClient_.pc_.iceConnectionState.
@@ -76,7 +83,6 @@ public class IceConnectionTest extends KiteTest {
                 "} else {" +
                 "   return 'unknown';}";
     }
-
     /**
      * Returns the test's stashStatsScript to stash the stats of the test in a global variable to retrieve later.
      *
@@ -97,7 +103,7 @@ public class IceConnectionTest extends KiteTest {
     }
 
     /**
-     * Returns the test's getResultScript to get the stashed stats.
+     * Returns the test getResultScript to get the stashed stats.
      *
      * @return the getStatsScript as string.
      */
@@ -108,12 +114,13 @@ public class IceConnectionTest extends KiteTest {
     /**
      * Opens the APPRTC_URL and clicks 'confirm-join-button'.
      */
-    private void takeAction() {
+    private void takeAction() throws Exception {
         Random rand = new Random(System.currentTimeMillis());
         long channel = Math.abs(rand.nextLong());
-
+        if (this.getWebDriverList().size() > 1)
+            throw new Exception("This test is limited to 1 browser only");
         for (WebDriver webDriver : this.getWebDriverList()) {
-            webDriver.get(APPRTC_URL + channel);
+            webDriver.get(APPRTC_URL + channel + "?" + option);
             try {
                 Alert alert = webDriver.switchTo().alert();
                 alertText = alert.getText();
@@ -136,7 +143,6 @@ public class IceConnectionTest extends KiteTest {
             if (expectedResultMap.get(result) == null)
                 return false;
         return true;
-
     }
 
     /**
@@ -207,4 +213,4 @@ public class IceConnectionTest extends KiteTest {
                 .add("stats", tmp).build().toString();
     }
 
-    }
+}

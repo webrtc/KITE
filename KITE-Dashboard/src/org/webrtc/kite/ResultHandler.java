@@ -22,9 +22,10 @@ import org.webrtc.kite.dao.BrowserDao;
 import org.webrtc.kite.dao.DBConnectionManager;
 import org.webrtc.kite.pojo.Browser;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
+import javax.json.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -44,7 +45,7 @@ public class ResultHandler {
 
   /**
    * Constructs a ResultHandler object with a given path to the database.
-   * 
+   *
    * @param pathToDB path to the database
    */
   public ResultHandler(String pathToDB) {
@@ -179,10 +180,17 @@ public class ResultHandler {
     if (log.isDebugEnabled())
       log.debug("destinationIdList:" + Arrays.deepToString(destinationIdList.toArray()));
 		/* Create query Strings */
-    String resultString = Utility.escapeSpecialCharacter(payload.getString("result"));
+
+
+
+    String resultString = payload.getString("result");
+    InputStream stream = new ByteArrayInputStream(resultString.getBytes(StandardCharsets.UTF_8));
+    JsonReader reader = Json.createReader(stream);
+    JsonObject resultObject = reader.readObject();
+    resultString = Utility.escapeSpecialCharacter(resultObject.getString("result"));
     String resultUpdate = "";
-    if (payload.get("stats")!=null) {
-      String statString = payload.getJsonObject("stats").toString();
+    if (resultObject.get("stats")!=null) {
+      String statString = resultObject.getJsonObject("stats").toString();
       resultUpdate = "UPDATE " + tableName + " SET RESULT='" + resultString + "', DURATION=" + timeTaken + ", STATS='" + statString + "' WHERE";
     }
     else
@@ -235,7 +243,7 @@ public class ResultHandler {
       for (String query: queryList) {
         if (log.isDebugEnabled())
           log.debug("Executing Result Insert:" + query);
-          System.out.println("Executing Result Insert:" + query);
+        System.out.println("Executing Result Insert:" + query);
         statement.addBatch(query);
       }
       statement.executeBatch();
@@ -256,12 +264,12 @@ public class ResultHandler {
    * @param endTime end time of the configuration.
    */
   private void updateStatus(Connection connection, String configName, String testName,
-      String resultTableName, long timeStamp, long endTime) throws SQLException {
+                            String resultTableName, long timeStamp, long endTime) throws SQLException {
     String query1 = "UPDATE TESTS SET STATUS='DONE', END_TIME=" + endTime + " WHERE TEST_NAME='"
-        + testName + "' AND RESULT_TABLE='" + resultTableName + "';";
+            + testName + "' AND RESULT_TABLE='" + resultTableName + "';";
 
     String query2 = "UPDATE CONFIG_EXECUTION SET STATUS='DONE', END_TIME=" + endTime
-        + " WHERE CONFIG_NAME='" + configName + "' AND START_TIME=" + timeStamp + " ;";
+            + " WHERE CONFIG_NAME='" + configName + "' AND START_TIME=" + timeStamp + " ;";
     Statement statement = null;
     try {
       statement = connection.createStatement();
@@ -284,14 +292,14 @@ public class ResultHandler {
    * @param browserList list of browsers to put in the BROWSERS Table if not already exist
    */
   private void putInBrowserTable(Connection connection, List<Browser> browserList)
-      throws SQLException {
+          throws SQLException {
     List<String> queryList = new ArrayList<>();
     for (Browser browser : browserList) {
       queryList.add(
-          "INSERT INTO BROWSERS(NAME, VERSION, PLATFORM) " + "SELECT '" + browser.getName() + "','"
-              + browser.getVersion() + "','" + browser.getPlatform() + "' " + "WHERE NOT EXISTS( "
-              + "SELECT 1 FROM BROWSERS " + "WHERE NAME='" + browser.getName() + "' AND VERSION='"
-              + browser.getVersion() + "' AND PLATFORM='" + browser.getPlatform() + "');");
+              "INSERT INTO BROWSERS(NAME, VERSION, PLATFORM) " + "SELECT '" + browser.getName() + "','"
+                      + browser.getVersion() + "','" + browser.getPlatform() + "' " + "WHERE NOT EXISTS( "
+                      + "SELECT 1 FROM BROWSERS " + "WHERE NAME='" + browser.getName() + "' AND VERSION='"
+                      + browser.getVersion() + "' AND PLATFORM='" + browser.getPlatform() + "');");
     }
     Statement statement = null;
     try {
@@ -329,9 +337,19 @@ public class ResultHandler {
       double rep = Math.pow(browserList.size(), i);
       for (int x = 0; x < rep; x++)
         for (int j = 0; j < browserList.size(); j++)
-          for (int k = 0; k < marge; k++)
+          for (int k = 0; k < marge; k++) {
             (listOfBrowserList.get((int) (x * totalTuples / rep + j * marge + k))).add(i,
-                browserList.get(j));
+                    browserList.get(j));
+          }
+    }
+    for(Browser browser: browserList){
+      if (browser.getPlatform().equalsIgnoreCase("android")||browser.getPlatform().equalsIgnoreCase("ios")) {
+        List<Browser> tmp = new ArrayList<>();
+        for (int i = 0; i< tupleSize; i++){
+          tmp.add(browser);
+        }
+        listOfBrowserList.remove(tmp);
+      }
     }
     if (log.isDebugEnabled())
       log.debug("matrix-->" + listOfBrowserList.toString());
@@ -440,11 +458,11 @@ public class ResultHandler {
           }
         }
         this.putInBrowserTable(connection, testCaseBrowserDestinationList);
-          JsonObject jsonPayload = resultObject.getJsonObject("payload");
-          this.postResultInsert(connection, resultTableName, testCaseBrowserTargetList,
-                  testCaseBrowserDestinationList, testName,
-                  jsonPayload, timeStamp,
-                  resultObject.getJsonNumber("timeTaken").longValue());
+        JsonObject jsonPayload = resultObject.getJsonObject("payload");
+        this.postResultInsert(connection, resultTableName, testCaseBrowserTargetList,
+                testCaseBrowserDestinationList, testName,
+                jsonPayload, timeStamp,
+                resultObject.getJsonNumber("timeTaken").longValue());
       } catch (SQLException e) {
         e.printStackTrace();
 

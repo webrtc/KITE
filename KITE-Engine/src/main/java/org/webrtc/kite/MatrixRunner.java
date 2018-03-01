@@ -21,8 +21,11 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.webrtc.kite.config.Browser;
 import org.webrtc.kite.config.TestConf;
+
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,6 +41,7 @@ public class MatrixRunner {
   private TestConf testConf;
   private String testName;
   private List<List<Browser>> listOfBrowserList;
+  private int numberOfThread;
 
   private List<List<Browser>> multiThreadedList = new ArrayList<List<Browser>>();
   private List<List<Browser>> singleThreadedList = new ArrayList<List<Browser>>();
@@ -53,6 +57,7 @@ public class MatrixRunner {
     this.testConf = testConf;
     this.testName = testName;
     this.listOfBrowserList = listOfBrowserList;
+    this.numberOfThread = testConf.getNoOfThreads();
   }
 
   /**
@@ -114,7 +119,7 @@ public class MatrixRunner {
       int mobileCount = 0;
       Set<Browser> set = new LinkedHashSet<Browser>();
       for (Browser browser: browserList) {
-        if (browser.getMobile() != null || browser.getVersion().equalsIgnoreCase("fennec")) {
+        if (browser.getMobile() != null || browser.getVersion().startsWith("fennec")) {
           set.add(browser);
           mobileCount++;
         }
@@ -127,22 +132,43 @@ public class MatrixRunner {
         continue;
       }
 
-      // Add all the test cases having MicrosoftEdge and safari in single thread list.
+/*      // Add all the test cases having MicrosoftEdge and safari in single thread list.
       boolean jumpToOuterLoop = false;
       for (Browser browser : browserList) {
         String browserName = browser.getBrowserName();
         if (browserName.equalsIgnoreCase("MicrosoftEdge") || browserName
             .equalsIgnoreCase("safari")) {
-          this.singleThreadedList.add(browserList);
+            this.singleThreadedList.add(browserList);
           jumpToOuterLoop = true;
           break;
         }
       }
-      if (jumpToOuterLoop) continue;
+      if (jumpToOuterLoop) continue;*/
 
       // Add the rest of the test cases in multi thread list.
       this.multiThreadedList.add(browserList);
     }
+
+/*    List<List<Browser>> tmp = new ArrayList<>(this.singleThreadedList);
+
+    int counter =0;
+    for (List<Browser> browserList: tmp){
+      boolean mobile=false;
+      for (Browser browser: browserList){
+        if (browser.getMobile()!=null)
+         mobile = true;
+      }
+      if (!mobile) {
+        if (counter % this.numberOfThread == 1 || counter % this.numberOfThread == 3) {
+          if (counter > this.multiThreadedList.size())
+            break;
+          this.multiThreadedList.add(counter, browserList);
+          this.singleThreadedList.remove(browserList);
+        }
+        counter += 1;
+      }
+    }*/
+
   }
 
   /**

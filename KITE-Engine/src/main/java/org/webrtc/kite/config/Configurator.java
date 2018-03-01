@@ -28,10 +28,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Representation of the config file as a singleton.
@@ -230,6 +227,7 @@ public class Configurator {
                         (listOfTuples.get((int) (x * totalTuples / rep + j * marge + k))).add(i, new Browser(this.browserList.get(j)));
         }
 
+        Collections.shuffle(listOfTuples);
         return listOfTuples;
     }
 

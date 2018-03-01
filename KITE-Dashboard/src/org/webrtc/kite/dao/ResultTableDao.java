@@ -70,13 +70,13 @@ public class ResultTableDao {
       if (i < tupleSize)
         query += " AND";
     }
-    /*query+=" ORDER BY";
+    query+=" ORDER BY";
     for (int i=1;i<=tupleSize;i++) {
-      //query += " BROWSERS" + i + ".PLATFORM DESC, BROWSERS" + i + ".NAME ASC, BROWSERS" + i + ".VERSION DESC";
-      query += " RES.BROWSER_" + i;
+      query += " BROWSERS" + i + ".PLATFORM DESC, BROWSERS" + i + ".NAME ASC, BROWSERS" + i + ".VERSION DESC";
+      //query += " RES.BROWSER_" + i;
       if (i<tupleSize)
         query+=",";
-    }*/
+    }
     List<ResultTable> resultTableList = new ArrayList<ResultTable>();
 
     PreparedStatement ps = null;
@@ -226,8 +226,8 @@ public class ResultTableDao {
     }
     query+=" ORDER BY";
     for (int i=1;i<=tupleSize;i++) {
-      //query += " BROWSERS" + i + ".PLATFORM DESC, BROWSERS" + i + ".NAME ASC, BROWSERS" + i + ".VERSION DESC";
-      query += " RES.BROWSER_" + i;
+      query += " BROWSERS" + i + ".PLATFORM DESC, BROWSERS" + i + ".NAME ASC, BROWSERS" + i + ".VERSION DESC";
+      //query += " RES.BROWSER_" + i;
       if (i<tupleSize)
         query+=",";
     }
@@ -246,6 +246,7 @@ public class ResultTableDao {
           for (int c = 1; c <= rs.getMetaData().getColumnCount(); c++) {
             rsLog.append(rs.getMetaData().getColumnName(c)).append(":").append(rs.getString(c))
                     .append("-");
+
           }
           log.trace(rsLog.toString());
         }
@@ -267,7 +268,5 @@ public class ResultTableDao {
 
     return resultTableList;
   }
-
-
 }
 

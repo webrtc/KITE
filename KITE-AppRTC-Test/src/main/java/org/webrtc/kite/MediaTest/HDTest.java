@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite;
+package org.webrtc.kite.MediaTest;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
+import org.webrtc.kite.KiteTest;
 import org.webrtc.kite.stat.Utility;
 
 import javax.json.Json;
@@ -25,30 +26,34 @@ import javax.json.JsonObjectBuilder;
 import java.util.*;
 
 /**
- * IceConnectionTest implementation of KiteTest.
+ * HDTest implementation of KiteTest.
  * <p>
  * The testScript() implementation does the following in sequential manner on the provided array of
  * WebDriver:
  * <ul>
- * <li>1) Opens all the browsers with the url specified in APPRTC_URL.</li>
+ * <li>1) Opens the browser with the url specified in APPRTC_URL with option argument.</li>
  * <li>2) Clicks 'confirm-join-button'.</li>
  * <li>3) Do the following every 1 second for 1 minute:</li>
  * <ul>
- * <li>a) Executes the JavaScript on all browsers given via getIceConnectionScript() which returns
+ * <li>a) Executes the JavaScript on the given via getIceConnectionScript() which returns
  * iceConnectionState.</li>
  * <li>b) Checks whether all the browsers have returned either 'completed' or 'connected'.</li>
+ * <li>c) Executes the JavaScript on the given via stashResultScript() which store result and stats
+ * in a global variable to fetch later.</li>
+ * <li>d) Executes the JavaScript on the given via checkResultScript() which returns the result
+ * stashed earlier.</li>
+ * <li>e) Executes the JavaScript on the given via getStatsScript() which returns the stats
+ * stashed earlier.</li>
  * </ul>
- * <li>4) The test is considered as successful if all the browsers either returns 'completed' or
- * 'connected' within 1 minute.</li>
+ * <li>4) The test is considered as successful if the video resolution is HD (1280x720).</li>
  * <li>5) A successful test returns a boolean 'true' while the unsuccessful test returns a boolean
  * 'false'.</li>
  * </ul>
  * </p>
  */
-public class IceConnectionTest extends KiteTest {
+public class HDTest extends KiteTest {
 
-    private final static Logger logger = Logger.getLogger(IceConnectionTest.class.getName());
-
+    private final static Logger logger = Logger.getLogger(HDTest.class.getName());
     private final static Map<String, String> expectedResultMap = new HashMap<String, String>();
     private final static String APPRTC_URL = "https://appr.tc/r/";
     private final static int TIMEOUT = 60000;
@@ -59,6 +64,9 @@ public class IceConnectionTest extends KiteTest {
         expectedResultMap.put("completed", "completed");
         expectedResultMap.put("connected", "connected");
     }
+
+    private final String value = "true";
+    private final String option = "hd=" + value;
 
     /**
      * Returns the test's getIceConnectionScript to retrieve appController.call_.pcClient_.pc_.iceConnectionState.
@@ -76,6 +84,34 @@ public class IceConnectionTest extends KiteTest {
                 "} else {" +
                 "   return 'unknown';}";
     }
+
+    /**
+     * Returns the test's stashResultScript to stash the result and stats of the test in a global variable to retrieve later.
+     *
+     * @return the stashResultScript as string.
+     */
+    private final static String stashResultScript() {
+        return "window.result  = 'SUCCESSFUL';" +
+                "var track      = false;" +
+                "appController.call_.pcClient_.pc_.getStats().then(data => {" +
+                "   window.KITEStats = [...data.values()];" +
+                "   [...data.values()].forEach(function(e){" +
+                "       if (e.type.startsWith('track')){" +
+                "           track = true;" +
+                "           if ((e.remoteSource==false) && (typeof e.audioLevel =='undefined')) " +
+                // Meaning considering only the local video track
+                "               if ((e.frameWidth<1280) || (e.frameHeight<720))" +
+                "                   window.result = 'FAILED';" +
+                "               else" +
+                "                   window.result = 'SUCCESSFUL';" +
+                "           }" +
+                "       });" +
+                "   if (!track)" +
+                "       window.result = 'ERROR';" +
+                "});" +
+                "return 0"; // Just in case //
+    }
+
 
     /**
      * Returns the test's stashStatsScript to stash the stats of the test in a global variable to retrieve later.
@@ -97,6 +133,15 @@ public class IceConnectionTest extends KiteTest {
     }
 
     /**
+     * Returns the test's getResultScript to get the stashed result.
+     *
+     * @return the getResultScript as string.
+     */
+    private final static String getResultScript() {
+        return "return window.result;";
+    }
+
+    /**
      * Returns the test's getResultScript to get the stashed stats.
      *
      * @return the getStatsScript as string.
@@ -108,12 +153,15 @@ public class IceConnectionTest extends KiteTest {
     /**
      * Opens the APPRTC_URL and clicks 'confirm-join-button'.
      */
+    /**
+     * Opens the APPRTC_URL and clicks 'confirm-join-button'.
+     */
     private void takeAction() {
         Random rand = new Random(System.currentTimeMillis());
         long channel = Math.abs(rand.nextLong());
 
         for (WebDriver webDriver : this.getWebDriverList()) {
-            webDriver.get(APPRTC_URL + channel);
+            webDriver.get(APPRTC_URL + channel + "?" + option);
             try {
                 Alert alert = webDriver.switchTo().alert();
                 alertText = alert.getText();
@@ -124,7 +172,6 @@ public class IceConnectionTest extends KiteTest {
             webDriver.findElement(By.id("confirm-join-button")).click();
         }
     }
-
     /**
      * Checks whether all of the result strings match at least one entry from the expectedResultMap.
      *
@@ -136,7 +183,6 @@ public class IceConnectionTest extends KiteTest {
             if (expectedResultMap.get(result) == null)
                 return false;
         return true;
-
     }
 
     /**
@@ -152,17 +198,20 @@ public class IceConnectionTest extends KiteTest {
         return false;
     }
 
+
     @Override
     public Object testScript() throws Exception {
         this.takeAction();
+        if (alertText != null) {
+            throw new UnhandledAlertException(alertText);
+        }
         String result = "TIME OUT";
-        Map<String,Object> resultMap = new HashMap<String,Object>();  ;
-
+        Map<String, Object> resultMap = new HashMap<String, Object>();
         for (int i = 0; i < TIMEOUT; i += INTERVAL) {
             List<String> resultList = new ArrayList<String>();
             for (WebDriver webDriver : this.getWebDriverList()) {
                 String resultOfScript =
-                        (String) ((JavascriptExecutor) webDriver).executeScript(this.getIceConnectionScript());
+                        (String) ((JavascriptExecutor) webDriver).executeScript(getIceConnectionScript());
                 if (logger.isInfoEnabled())
                     logger.info(webDriver + ": " + resultOfScript);
                 resultList.add(resultOfScript);
@@ -175,27 +224,42 @@ public class IceConnectionTest extends KiteTest {
                     ((JavascriptExecutor) webDriver).executeScript(this.stashStatsScript());
                     Thread.sleep(INTERVAL);
                     Object stats = ((JavascriptExecutor) webDriver).executeScript(this.getStatsScript());
-                    resultMap.put("client_" + count,stats);
-                    count+=1;
+                    resultMap.put("client_" + count, stats);
+                    count += 1;
                 }
                 break;
             } else if (this.validateResults(resultList)) {
-                result = "SUCCESSFUL";
+                resultList.clear();
                 int count = 1;
                 for (WebDriver webDriver : this.getWebDriverList()) {
-                    ((JavascriptExecutor) webDriver).executeScript(this.stashStatsScript());
+                    ((JavascriptExecutor) webDriver).executeScript(stashResultScript());
                     Thread.sleep(INTERVAL);
-                    Object stats = ((JavascriptExecutor) webDriver).executeScript(this.getStatsScript());
-                    resultMap.put("client_" + count,stats);
-                    count+=1;
+                    Object stats = ((JavascriptExecutor) webDriver).executeScript(getStatsScript());
+                    resultList.add((String) ((JavascriptExecutor) webDriver).executeScript(getResultScript()));
+                    resultMap.put("client_" + count, stats);
+                    count += 1;
                 }
+
+                if (resultList.contains("FAILED")||resultList.contains("ERROR")) {
+                    result ="";
+                    for (String tmp : resultList) {
+                        if (resultList.indexOf(tmp) == 0)
+                            result += "Caller: ";
+                        else
+                            result += " - Callee: ";
+                        if (tmp.equalsIgnoreCase("ERROR"))
+                            result += "No track stats was provided";
+                        else
+                            result += tmp;
+                    }
+                } else
+                    result = "SUCCESSFUL";
                 break;
             } else {
                 Thread.sleep(INTERVAL);
             }
         }
-
-        resultMap.put("result",result);
+        resultMap.put("result", result);
         JsonObjectBuilder tmp = Json.createObjectBuilder();
         for (int i = 1; i <= this.getWebDriverList().size(); i++) {
             String name = "client_"+i;
@@ -206,5 +270,4 @@ public class IceConnectionTest extends KiteTest {
         return Json.createObjectBuilder().add("result", (String) resultMap.get("result"))
                 .add("stats", tmp).build().toString();
     }
-
-    }
+}
