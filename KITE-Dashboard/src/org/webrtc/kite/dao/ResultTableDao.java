@@ -246,6 +246,7 @@ public class ResultTableDao {
           for (int c = 1; c <= rs.getMetaData().getColumnCount(); c++) {
             rsLog.append(rs.getMetaData().getColumnName(c)).append(":").append(rs.getString(c))
                     .append("-");
+
           }
           log.trace(rsLog.toString());
         }
@@ -267,7 +268,5 @@ public class ResultTableDao {
 
     return resultTableList;
   }
-
-
 }
 
