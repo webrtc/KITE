@@ -16,24 +16,17 @@
 
 package org.webrtc.kite;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import org.apache.log4j.Logger;
 import org.webrtc.kite.exception.KiteBadValueException;
 import org.webrtc.kite.exception.KiteNoKeyException;
-import org.webrtc.kite.stat.*;
 
+import javax.json.JsonObject;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Utility class holding various static methods.
@@ -157,91 +150,4 @@ public class Utility {
     return object1 != null && object2 != null;
   }
 
-  /**
-   * Obtain a value of a key in the data map if not null
-   *
-   * @param statObject data Map
-   * @param statName name of the key
-   * @return true if both the provided objects are not null.
-   */
-  public static String getStatByName(Map<Object, Object> statObject, String statName){
-    if(statObject.get(statName)!=null)
-      return statObject.get(statName).toString();
-    return "NA";
-  }
-
-
-  /**
-   * Create a JsonObjectBuilder Object to eventually build a Json object
-   * from data obtained via tests.
-   *
-   * @param statArray array of data sent back from test
-   * @return JsonObjectBuilder.
-   */
-  public static JsonObjectBuilder buildStatObject(Object statArray){
-    JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-    Map<String, List<StatObject>> statObjectMap = new HashMap<>();
-    for (Object map: (ArrayList) statArray) {
-      Map<Object, Object> statMap = (Map<Object, Object>) map;
-      String type = (String) statMap.get("type");
-      StatObject statObject = null;
-      switch (type){
-        case "codec":{
-          statObject = new RTCCodecStats(statMap);
-          break;
-        }
-        case "track":{
-          statObject = new RTCMediaStreamTrackStats(statMap);
-          break;
-        }
-        case "stream":{
-          statObject = new RTCMediaStreamStats(statMap);
-          break;
-        }
-        case "inbound-rtp":{
-          statObject = new RTCRTPStreamStats(statMap, true);
-          break;
-        }
-        case "outbound-rtp":{
-          statObject = new RTCRTPStreamStats(statMap, false);
-          break;
-        }
-        case "peer-connection":{
-          statObject = new RTCPeerConnectionStats(statMap);
-          break;
-        }
-        case "transport":{
-          statObject = new RTCTransportStats(statMap);
-          break;
-        }
-        case "candidate-pair":{
-          statObject = new RTCIceCandidatePairStats(statMap);
-          break;
-        }
-        case "remote-candidate":{
-          statObject = new RTCIceCandidateStats(statMap);
-          break;
-        }
-        case "local-candidate":{
-          statObject = new RTCIceCandidateStats(statMap);
-          break;
-        }
-      }
-      if (statObject!=null) {
-        if (statObjectMap.get(type)==null) {
-          statObjectMap.put(type, new ArrayList<StatObject>());
-        }
-        statObjectMap.get(type).add(statObject);
-      }
-    }
-    if (!statObjectMap.isEmpty()){
-      for (String type: statObjectMap.keySet()){
-        JsonObjectBuilder tmp = Json.createObjectBuilder();
-        for (StatObject stat: statObjectMap.get(type))
-          tmp.add(stat.getId(),stat.getJsonObjectBuilder());
-        jsonObjectBuilder.add(type,tmp);
-      }
-    }
-    return jsonObjectBuilder;
-  }
 }

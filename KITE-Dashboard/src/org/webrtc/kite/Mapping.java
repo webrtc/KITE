@@ -26,28 +26,29 @@ import java.util.List;
 public class Mapping {
 
   public static List<String> IrrelevantList =
-      Arrays.asList("beta", "dev", "?", "Unknown", "UNKNOWN");
+          Arrays.asList("beta", "dev", "?", "Unknown", "UNKNOWN");
   public static List<String> OsList = new ArrayList<>();
   public static List<String> VersionList = new ArrayList<>();
   public static String StableEdge = "16.16299";
   public static String StableSafari = "11.0";
-  public static String NightlyEdge= "17.17063";
+  public static String NightlyEdge= "17.17083";
   public static String NightlySafari = "11.1";
   public static List<String> ClientList = new ArrayList<>();
   public static List<String> StableList = new ArrayList<>();
 
 
   static {
-    VersionList.add("57");
-    VersionList.add("59");
-    VersionList.add("63");
+    VersionList.add("58");
+    VersionList.add("60");
+    VersionList.add("64");
     VersionList.add("65");
+    VersionList.add("66");
     VersionList.add("16.16");
     VersionList.add("17.17");
     VersionList.add("11");
 
-    StableList.add("57.0");
-    StableList.add("63.0");
+    StableList.add("58.0");
+    StableList.add("64.0");
     StableList.add("16.16");
     StableList.add("11.0");
 

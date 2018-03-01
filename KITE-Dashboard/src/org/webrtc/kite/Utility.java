@@ -85,7 +85,7 @@ public class Utility {
    * @return String with (all) special characters replaced
    */
   public static String escapeSpecialCharacter(String payload){
-    return payload.replaceAll("\n", "").replaceAll("\\\\", "").replaceAll("\"", "").replaceAll("\'", "");
+    return payload.replaceAll("\\n", "").replaceAll("\\\\", "").replaceAll("\"", "").replaceAll("\'", "");
   }
 
 

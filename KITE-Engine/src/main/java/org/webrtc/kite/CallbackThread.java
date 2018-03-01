@@ -23,6 +23,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
+
 import javax.json.JsonObject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

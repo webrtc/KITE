@@ -59,14 +59,7 @@ Build uses [*maven*](https://maven.apache.org/) tool. Installable maven packages
 mvn clean install
 ```
 
-* If selenium is not running, build will fail, as KITE-AppRTC-Test includes a Junit test that requires local selenium. 
-* Since the NoAdapterTest is included, it requires its own server to be running. To start the server, change to server directory in KITE-NoAdapter-Test and run:
-
-```sh
-npm install && npm start
-```
-You can skip all tests (not recommended) running maven with -DskipTests.
-
+* If selenium is not running, build will fail, as KITE-AppRTC-Test includes a Junit test that requires local selenium. You can skip this (not recommended) running maven with -DskipTests 
 ```
 mvn clean install -DskipTests
 ```

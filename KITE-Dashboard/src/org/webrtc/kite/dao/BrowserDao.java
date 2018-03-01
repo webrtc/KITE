@@ -77,6 +77,38 @@ public class BrowserDao {
   }
 
   /**
+   * Returns the browser with a specific ID.
+   *
+   * @param id the browser ID in question.
+   */
+  public Browser getBrowserById(int id) throws SQLException {
+    String query =
+            "SELECT * FROM BROWSERS WHERE BROWSER_ID=" + id + ";";
+
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    Browser browser = null;
+    try {
+      ps = this.connection.prepareStatement(query);
+      if (log.isDebugEnabled())
+        log.debug("Executing: " + query);
+      rs = ps.executeQuery();
+      if (rs.next()) {
+        String name = rs.getString("NAME");
+        String version = rs.getString("VERSION");
+        String platform = rs.getString("PLATFORM");
+        browser = new Browser( name, version, platform);
+      }
+    } finally {
+      Utility.closeDBResources(ps, rs);
+    }
+    //if (log.isDebugEnabled()) getBrowserList();
+    if (log.isDebugEnabled())
+      log.debug("Returning: " + browser.toString());
+    return browser;
+  }
+
+  /**
    * Returns a list of all registered browsers
    */
   public List<Browser> getBrowserList() throws SQLException {

@@ -54,7 +54,7 @@ public class DataCenterServlet extends HttpServlet {
       jsonObject = jsonReader.readObject();
       if (log.isDebugEnabled())
         log.debug("in->jsonObject: " + jsonObject);
-      System.out.println("Json object data->"+jsonObject);
+        System.out.println("in->jsonObject: " + jsonObject);
       DataCenterQueueManager.getInstance().queue.put(jsonObject);
     } catch (JsonException | IllegalStateException | InterruptedException e) {
       log.error("adding to queue", e);
@@ -63,5 +63,4 @@ public class DataCenterServlet extends HttpServlet {
         jsonReader.close();
     }
   }
-
 }

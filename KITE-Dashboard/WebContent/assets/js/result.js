@@ -117,6 +117,71 @@ function updateResult (load,total){
 
 function showStats (statObj){
     statObject = statObj;
+    $("#stats").html(JSON.stringify(statObj))
+/*
+    var config = {
+        type: 'line',
+        data: {
+            labels: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],
+            datasets: [
+                {
+                    label: 'AudioBytesReceivedOvertime',
+                    backgroundColor: '#42f4aa',
+                    borderColor: '#42f4aa',
+                    fill: false,
+                    data: statObj['AudioBytesReceivedOvertime'],
+                    pointRadius: 2
+                },
+                {
+                    label: 'VideoBytesReceivedOvertime',
+                    backgroundColor: '#42f4aa',
+                    borderColor: '#42f4aa',
+                    fill: false,
+                    data: statObj['VideoBytesReceivedOvertime'],
+                    pointRadius: 2
+                },
+                {
+                    label: 'AudioBytesSentOvertime',
+                    backgroundColor: '#42f4aa',
+                    borderColor: '#42f4aa',
+                    fill: false,
+                    data: statObj['AudioBytesSentOvertime'],
+                    pointRadius: 2
+                },
+                {
+                    label: 'VideoBytesSentOvertime',
+                    backgroundColor: '#42f4aa',
+                    borderColor: '#42f4aa',
+                    fill: false,
+                    data: statObj['VideoBytesSentOvertime'],
+                    pointRadius: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            title:{
+                display:false,
+                text:'Bytes transmission'
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                }],
+                yAxes: [{
+                    display: true,
+                    type: 'linear',
+                }]
+            },
+            showLines: true
+        }
+    };
+    var myLineChart = new Chart($("#stat-plotting"),config);*/
+}
+/*
+
+function showStats (statObj){
+    statObject = statObj;
     $("#stats").empty();
     if (JSON.stringify(statObj)=='{"stats":"NA"}'||JSON.stringify(statObj)=='{}')
         $("#stats").html('No stats are available.');
@@ -137,7 +202,7 @@ function showStats (statObj){
         });
         $("#stats").html(statsHtml);
     }
-}
+}*/
 function updateOverall ( load){
     myChart.data.datasets.forEach((dataset) => {
         dataset.data = load;
@@ -205,16 +270,26 @@ $(document).on("click", ".result", function(e) {
     $(".result").attr('style','cursor:pointer;background:white;');
     $(this).attr('style','cursor:pointer;background:#aff7c8;');
     var id = $(this).attr('id');
+    window.open('stat?name='+testName+'&id='+id, '_blank');
+});
+/*
+
+$(document).on("click", ".result", function(e) {
+    $(".result").attr('style','cursor:pointer;background:white;');
+    $(this).attr('style','cursor:pointer;background:#aff7c8;');
+    var id = $(this).attr('id');
     (function updateStats() {
         $.ajax({
             url: 'getstat?name='+testName+'&id='+id,
             success: function(result){
                 //console.log(result);
                 showStats(JSON.parse(result));
+                //showStats(result);
             }
         });
     })();
 });
+*/
 
 
 $(document).on("click", ".less", function(e) {

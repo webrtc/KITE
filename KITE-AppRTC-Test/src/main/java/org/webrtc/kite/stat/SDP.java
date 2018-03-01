@@ -16,8 +16,6 @@
 
 package org.webrtc.kite.stat;
 
-import org.webrtc.kite.Utility;
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
@@ -26,27 +24,21 @@ import java.util.Map;
  * RTCCertificateStats, with attributes fingerprint,
  * fingerprintAlgorithm, base64Certificate, issuerCertificateId
  */
-public class RTCCertificateStats extends StatObject {
+public class SDP extends StatObject {
 
-    private String fingerprint, fingerprintAlgorithm, base64Certificate, issuerCertificateId;
+    private String type, sdp;
 
-    public RTCCertificateStats(Map<Object, Object> statObject) {
-        this.setId(Utility.getStatByName(statObject, "id"));
-        this.fingerprint = Utility.getStatByName(statObject, "fingerprint");
-        this.fingerprintAlgorithm = Utility.getStatByName(statObject, "fingerprintAlgorithm");
-        this.base64Certificate = Utility.getStatByName(statObject, "base64Certificate");
-        this.issuerCertificateId = Utility.getStatByName(statObject, "issuerCertificateId");
-
+    public SDP(Map<Object, Object> statObject) {
+        this.type = Utility.getStatByName(statObject, "type");
+        this.sdp = Utility.getStatByName(statObject, "sdp");
     }
 
     @Override
     public JsonObjectBuilder getJsonObjectBuilder() {
         JsonObjectBuilder jsonObjectBuilder =
                 Json.createObjectBuilder()
-                        .add("fingerprint", this.fingerprint)
-                        .add("fingerprintAlgorithm", this.fingerprintAlgorithm)
-                        .add("base64Certificate", this.base64Certificate)
-                        .add("issuerCertificateId", this.issuerCertificateId);
+                        .add("type", this.type)
+                        .add("sdp", this.sdp);
         return jsonObjectBuilder;
     }
 }

@@ -16,27 +16,28 @@
 
 package org.webrtc.kite.stat;
 
-import org.webrtc.kite.Utility;
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
 
 /**
- * RTCTransportStats, with attributes bytesSent, bytesReceived, rtcpTransportStatsId, selectedCan
+ * RTCDataChannelStats, with attributes label, protocol, datachannelId, state, messagesSent, bytesSent,
+ * messagesReceived, bytesReceived
  */
-public class RTCTransportStats extends StatObject {
+public class RTCDataChannelStats extends StatObject {
 
-    private String bytesSent, bytesReceived, rtcpTransportStatsId, selectedCandidatePairId,
-            localCertificateId, remoteCertificateId;
+    private String label, protocol, datachannelId, state, messagesSent, bytesSent, messagesReceived, bytesReceived;
 
-    public RTCTransportStats(Map<Object, Object> statObject) {
+
+    public RTCDataChannelStats(Map<Object, Object> statObject) {
         this.setId(Utility.getStatByName(statObject, "id"));
-        this.rtcpTransportStatsId = Utility.getStatByName(statObject, "rtcpTransportStatsId");
-        this.selectedCandidatePairId = Utility.getStatByName(statObject, "selectedCandidatePairId");
-        this.localCertificateId = Utility.getStatByName(statObject, "localCertificateId");
-        this.remoteCertificateId = Utility.getStatByName(statObject, "remoteCertificateId");
+        this.label = Utility.getStatByName(statObject, "label");
+        this.protocol = Utility.getStatByName(statObject, "protocol");
+        this.datachannelId = Utility.getStatByName(statObject, "datachannelId");
+        this.state = Utility.getStatByName(statObject, "state");
+        this.messagesSent = Utility.getStatByName(statObject, "messagesSent");
         this.bytesSent = Utility.getStatByName(statObject, "bytesSent");
+        this.messagesReceived = Utility.getStatByName(statObject, "messagesReceived");
         this.bytesReceived = Utility.getStatByName(statObject, "bytesReceived");
     }
 
@@ -44,11 +45,13 @@ public class RTCTransportStats extends StatObject {
     public JsonObjectBuilder getJsonObjectBuilder() {
         JsonObjectBuilder jsonObjectBuilder =
                 Json.createObjectBuilder()
-                        .add("rtcpTransportStatsId", this.rtcpTransportStatsId)
-                        .add("selectedCandidatePairId", this.selectedCandidatePairId)
-                        .add("localCertificateId", this.localCertificateId)
-                        .add("remoteCertificateId", this.remoteCertificateId)
+                        .add("label", this.label)
+                        .add("protocol", this.protocol)
+                        .add("datachannelId", this.datachannelId)
+                        .add("state", this.state)
+                        .add("messagesSent", this.messagesSent)
                         .add("bytesSent", this.bytesSent)
+                        .add("messagesReceived", this.messagesReceived)
                         .add("bytesReceived", this.bytesReceived);
         return jsonObjectBuilder;
     }

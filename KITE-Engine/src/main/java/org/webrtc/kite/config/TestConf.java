@@ -16,8 +16,12 @@
 
 package org.webrtc.kite.config;
 
-import javax.json.*;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 /**
  * Representation of a test object in the config file.

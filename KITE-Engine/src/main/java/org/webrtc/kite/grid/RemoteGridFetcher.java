@@ -19,6 +19,7 @@ package org.webrtc.kite.grid;
 import org.apache.log4j.Logger;
 import org.webrtc.kite.Utility;
 import org.webrtc.kite.config.Browser;
+
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;

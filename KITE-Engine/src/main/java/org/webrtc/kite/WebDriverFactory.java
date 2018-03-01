@@ -25,9 +25,10 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariOptions;
 import org.webrtc.kite.config.Browser;
+import org.webrtc.kite.config.Mobile;
+
 import java.net.MalformedURLException;
 import java.net.URL;
-import org.webrtc.kite.config.Mobile;
 
 /**
  * Factory object for creating a web driver.

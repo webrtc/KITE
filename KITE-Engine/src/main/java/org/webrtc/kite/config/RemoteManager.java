@@ -16,8 +16,9 @@
 
 package org.webrtc.kite.config;
 
-import javax.json.JsonObject;
 import org.webrtc.kite.exception.KiteUnsupportedRemoteException;
+
+import javax.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -150,6 +150,30 @@ public class ConfigTestDao {
   }
 
   /**
+   * Returns a list of all the test with a specific name.
+   *
+   * @param testName name of the test.
+   */
+  public List<String> getResultTableList(String testName) throws SQLException {
+    String query = "SELECT RESULT_TABLE FROM TESTS WHERE TEST_NAME='" + testName + "' ORDER BY START_TIME DESC";
+    List<String> resultTableList = new ArrayList<String>();
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    try {
+      ps = this.connection.prepareStatement(query);
+      if (log.isDebugEnabled())
+        log.debug("Executing: " + query);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        resultTableList.add(rs.getString("RESULT_TABLE"));
+      }
+    } finally {
+      Utility.closeDBResources(ps, rs);
+    }
+
+    return resultTableList;
+  }
+  /**
    * Returns a list of all the executed tests, non-repetitively.
    *
    */

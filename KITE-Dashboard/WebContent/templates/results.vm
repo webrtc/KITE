@@ -209,9 +209,6 @@ limitations under the License.
                             </div>
                         </div>
                     </div>
-                    <div class="card">
-                        <div id="stats" class="content stat-wrapping small-boy jsonbrowser"></div>
-                    </div>
                 </div>
             </div>
             <!-- End of main data content display -->

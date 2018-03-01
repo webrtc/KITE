@@ -16,10 +16,6 @@
 
 package org.webrtc.kite;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import javax.json.JsonException;
-
 import org.apache.log4j.Logger;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
@@ -28,6 +24,10 @@ import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.exception.*;
 import org.webrtc.kite.scheduler.MatrixRunnerJob;
 import org.webrtc.kite.scheduler.MatrixRunnerJobListener;
+
+import javax.json.JsonException;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;

@@ -16,10 +16,11 @@
 
 package org.webrtc.kite.grid;
 
+import org.webrtc.kite.config.Browser;
+
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import org.webrtc.kite.config.Browser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

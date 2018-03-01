@@ -16,15 +16,6 @@
 
 package org.webrtc.kite;
 
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
@@ -35,6 +26,15 @@ import org.webrtc.kite.config.Browser;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.TestConf;
 import org.webrtc.kite.exception.KiteGridException;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * A thread to execute an implementation of KiteTest.
@@ -101,13 +101,16 @@ public class TestManager implements Callable<Object> {
    */
   private void populateDrivers(String testName) throws MalformedURLException {
     this.webDriverList = new ArrayList<WebDriver>();
+    String tupleName = "";
     for (Browser browser : this.browserList) {
+      tupleName +=" " + browser.getBrowserName()+"_" +browser.getVersion()+"_" +browser.getPlatform();
       WebDriver webDriver = WebDriverFactory.createWebDriver(browser, testName);
       Capabilities capabilities = ((RemoteWebDriver) webDriver).getCapabilities();
       browser.setWebDriverVersion(capabilities.getVersion());
       browser.setWebDriverPlatform(capabilities.getPlatform().name());
       this.webDriverList.add(webDriver);
     }
+    System.out.println("Initiating: " + tupleName);
   }
 
   /**
@@ -163,9 +166,8 @@ public class TestManager implements Callable<Object> {
         if (((RemoteWebDriver) webDriver).getCapabilities().getBrowserName().equalsIgnoreCase("fennec")) {
           webDriver.get("about:config");
           webDriver.close();
-        } else {
-          webDriver.quit();
         }
+          webDriver.quit();
       } catch (Exception e) {
         logger.error("closing driver:", e);
       }
@@ -188,6 +190,7 @@ public class TestManager implements Callable<Object> {
   private JsonObject developResult(Object object) throws KiteGridException {
     JsonArrayBuilder targetArrayBuilder = Json.createArrayBuilder();
     JsonArrayBuilder destinationArrayBuilder = Json.createArrayBuilder();
+
     for (Browser browser : this.browserList) {
       targetArrayBuilder.add(browser.getJsonObjectBuilder());
     }
@@ -198,24 +201,14 @@ public class TestManager implements Callable<Object> {
       String message = e.getLocalizedMessage();
 /*      payload = Json.createObjectBuilder().add("type", e.getClass().getName()).add("message",
           message == null ? "Message not found in the exception" : message);*/
+      message = "{\"result\":\""+message+"\"}";
       payload = Json.createObjectBuilder().add("result",
               message == null ? "Message not found in the exception" : message);
     }
     else if (object instanceof String) {
+      //System.out.println(object);
       payload = Json.createObjectBuilder().add("result",
           object == null ? "Null result" : (String) object);      
-    }
-    else if (object instanceof Map<?, ?>) {
-      Map<String, Object> resultMap = (Map<String, Object>) object;
-      JsonObjectBuilder tmp = Json.createObjectBuilder();
-      for (int i = 1; i <= this.browserList.size(); i++) {
-        String name = "client_"+i;
-        String browser = i+"_"+browserList.get(i-1).getBrowserName()+"_"+browserList.get(i-1).getVersion()+"_"+browserList.get(i-1).getPlatform();
-        if (resultMap.get(name)!=null)
-          tmp.add(browser, Utility.buildStatObject(resultMap.get(name)));
-      }
-      payload = Json.createObjectBuilder().add("result", (String) resultMap.get("result"))
-              .add("stats", tmp);
     }
     else {
       throw new IllegalArgumentException("Unexpected class in result " + object.getClass());

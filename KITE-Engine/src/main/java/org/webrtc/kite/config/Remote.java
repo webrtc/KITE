@@ -16,14 +16,15 @@
 
 package org.webrtc.kite.config;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import org.webrtc.kite.exception.KiteUnsupportedRemoteException;
 import org.webrtc.kite.grid.BrowserStackGridFetcher;
 import org.webrtc.kite.grid.RemoteGridFetcher;
 import org.webrtc.kite.grid.SauceLabsGridFetcher;
 import org.webrtc.kite.grid.TestingBotGridFetcher;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import java.util.HashMap;
 import java.util.Map;
 

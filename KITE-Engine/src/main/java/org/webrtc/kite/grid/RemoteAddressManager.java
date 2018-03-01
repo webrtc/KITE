@@ -16,14 +16,15 @@
 
 package org.webrtc.kite.grid;
 
+import org.apache.log4j.Logger;
+import org.webrtc.kite.config.Browser;
+
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.apache.log4j.Logger;
-import org.webrtc.kite.config.Browser;
 
 /**
  * Container of all the RemoteGridFetchers to communicate with the REST APIs and find the

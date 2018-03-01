@@ -20,13 +20,13 @@ import eu.bitwalker.useragentutils.OperatingSystem;
 import eu.bitwalker.useragentutils.UserAgent;
 import eu.bitwalker.useragentutils.Version;
 import is.tagomor.woothee.Classifier;
+import org.apache.log4j.Logger;
+import org.webrtc.kite.Utility;
+
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
-
-import org.apache.log4j.Logger;
-import org.webrtc.kite.Utility;
 import java.util.Map;
 
 /**

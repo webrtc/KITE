@@ -16,38 +16,28 @@
 
 package org.webrtc.kite.stat;
 
-import org.webrtc.kite.Utility;
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
 
 /**
- * RTCCodecStats, with attributes payloadType, codec, clockRate, channels, sdpFmtpLine
+ * RTCPeerConnectionStats, with attributes dataChannelsOpened, dataChannelsClosed
  */
-public class RTCCodecStats extends StatObject {
+public class RTCPeerConnectionStats extends StatObject {
+    private String dataChannelsOpened, dataChannelsClosed;
 
-    private String payloadType, codec, clockRate, channels, sdpFmtpLine;
-
-
-    public RTCCodecStats(Map<Object, Object> statObject) {
+    public RTCPeerConnectionStats(Map<Object, Object> statObject) {
         this.setId(Utility.getStatByName(statObject, "id"));
-        this.payloadType = Utility.getStatByName(statObject, "payloadType");
-        this.clockRate = Utility.getStatByName(statObject, "clockRate");
-        this.channels = Utility.getStatByName(statObject, "channels");
-        this.codec = Utility.getStatByName(statObject, "codec");
-        this.sdpFmtpLine = Utility.getStatByName(statObject, "sdpFmtpLine");
+        this.dataChannelsOpened = Utility.getStatByName(statObject, "dataChannelsOpened");
+        this.dataChannelsClosed = Utility.getStatByName(statObject, "dataChannelsClosed");
     }
 
     @Override
     public JsonObjectBuilder getJsonObjectBuilder() {
         JsonObjectBuilder jsonObjectBuilder =
                 Json.createObjectBuilder()
-                        .add("payloadType", this.payloadType)
-                        .add("clockRate", this.clockRate)
-                        .add("channels", this.channels)
-                        .add("codec", this.codec)
-                        .add("sdpFmtpLine", this.sdpFmtpLine);
+                        .add("dataChannelsOpened", this.dataChannelsOpened)
+                        .add("dataChannelsClosed", this.dataChannelsClosed);
         return jsonObjectBuilder;
     }
 }
