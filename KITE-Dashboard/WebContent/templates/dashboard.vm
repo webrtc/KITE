@@ -271,9 +271,19 @@ limitations under the License.
                                                     <select>
                                                         <option>Caller</option>
                                                         #foreach($browser in $listOfBrowser)
-                                                            <option>
-                                                                $browser.getName()_$browser.getVersion()_$browser.getPlatform()
-                                                            </option>
+                                                            #if ($browser.getName()=="MicrosoftEdge")
+                                                                #if ($browser.getVersion().length()<=9)
+                                                                <option>
+                                                                    $browser.getName()_$browser.getVersion()_$browser.getPlatform()
+                                                                </option>
+                                                                #end
+                                                            #else)
+                                                                #if ($browser.getVersion().length()<=5)
+                                                                <option>
+                                                                    $browser.getName()_$browser.getVersion()_$browser.getPlatform()
+                                                                </option>
+                                                                #end
+                                                            #end
                                                         #end
                                                     </select>
                                                 </div>
@@ -283,9 +293,19 @@ limitations under the License.
                                                     <select>
                                                         <option>Callee</option>
                                                         #foreach($browser in $listOfBrowser)
-                                                            <option>
-                                                                $browser.getName()_$browser.getVersion()_$browser.getPlatform()
-                                                            </option>
+                                                            #if ($browser.getName()=="MicrosoftEdge")
+                                                                #if ($browser.getVersion().length()<=9)
+                                                                <option>
+                                                                    $browser.getName()_$browser.getVersion()_$browser.getPlatform()
+                                                                </option>
+                                                                #end
+                                                            #else)
+                                                                #if ($browser.getVersion().length()<=5)
+                                                                <option>
+                                                                    $browser.getName()_$browser.getVersion()_$browser.getPlatform()
+                                                                </option>
+                                                                #end
+                                                            #end
                                                         #end
                                                     </select>
                                                 </div>
@@ -328,7 +348,7 @@ limitations under the License.
                                                 </div>
                                                 <div class="col-lg-5 col-md-12 col-sm-12">
                                                     <canvas id="overtime-audio-packets-received"></canvas>
-                                                </div>                                            </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

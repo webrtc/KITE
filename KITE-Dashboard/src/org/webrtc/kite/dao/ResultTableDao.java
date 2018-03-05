@@ -95,10 +95,16 @@ public class ResultTableDao {
           }
           log.trace(rsLog.toString());
         }
+        ResultTable resultTable;
         String result = rs.getString("RESULT");
         long duration = rs.getLong("DURATION");
         String stats = rs.getString("STATS");
-        ResultTable resultTable = new ResultTable(result, duration, stats);
+        if (stats.equalsIgnoreCase("{}")
+                ||stats.equalsIgnoreCase("{\"stats\":\"NA\"}")
+                ||stats==null)
+          resultTable = new ResultTable(result, duration, false);
+        else
+          resultTable = new ResultTable(result, duration, true);
         resultTable.setTableName(tableName);
         for (int i=0;i<tupleSize;i++) {
           Browser tmp = new Browser(rs.getString(i*3+1), rs.getString(i*3+2), rs.getString(i*3+3));
@@ -146,6 +152,45 @@ public class ResultTableDao {
           log.trace(rsLog.toString());
         }
           res = rs.getString("STATS");
+      }
+    } finally {
+      Utility.closeDBResources(ps, rs);
+    }
+    return res;
+  }
+
+  /**
+   * Get corresponded result by id.
+   *
+   * @param tableName name of the table which contains the results of the test.
+   * @param idList id of browsers.
+   */
+  public String getResultById(String tableName, List<Integer> idList) throws SQLException {
+    String res ="";
+    int tupleSize = idList.size();
+    String query = "SELECT RESULT FROM "+tableName+" WHERE ";
+    for (int i=0;i<tupleSize;i++) {
+      query += "BROWSER_" + (i + 1) + "=" + idList.get(i);
+      if (i < tupleSize-1)
+        query += " AND ";
+    }
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    try {
+      ps = this.connection.prepareStatement(query);
+      if (log.isDebugEnabled())
+        log.debug("Executing: " + query);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        if (log.isTraceEnabled()) {
+          final StringBuilder rsLog = new StringBuilder();
+          for (int c = 1; c <= rs.getMetaData().getColumnCount(); c++) {
+            rsLog.append(rs.getMetaData().getColumnName(c)).append(":").append(rs.getString(c))
+                    .append("-");
+          }
+          log.trace(rsLog.toString());
+        }
+          res = rs.getString("RESULT");
       }
     } finally {
       Utility.closeDBResources(ps, rs);
@@ -249,10 +294,16 @@ public class ResultTableDao {
           }
           log.trace(rsLog.toString());
         }
+        ResultTable resultTable;
         String result = rs.getString("RESULT");
         long duration = rs.getLong("DURATION");
         String stats = rs.getString("STATS");
-        ResultTable resultTable = new ResultTable(result, duration, stats);
+        if (stats.equalsIgnoreCase("{}")
+                ||stats.equalsIgnoreCase("{\"stats\":\"NA\"}")
+                ||stats==null)
+          resultTable = new ResultTable(result, duration, false);
+        else
+          resultTable = new ResultTable(result, duration, true);
         resultTable.setTableName(tableName);
         for (int i=0;i<tupleSize;i++) {
           Browser tmp = new Browser(rs.getString(i*3+1), rs.getString(i*3+2), rs.getString(i*3+3));

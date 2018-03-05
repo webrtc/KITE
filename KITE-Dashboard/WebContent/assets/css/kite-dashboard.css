@@ -367,6 +367,9 @@ limitations under the License.
       cursor:pointer;
     }
 
+    stats{
+      color:#42f4aa;
+    }
 
     .stat-wrapping{
         max-height: 230px;
@@ -396,6 +399,11 @@ limitations under the License.
     .search-wrapping{
         max-height: 250px;
         overflow-y: scroll;
+    }
+
+    .show-result-wrapping{
+        max-height: 250px;
+        overflow-y: auto;
     }
 
     .run-wrapping{

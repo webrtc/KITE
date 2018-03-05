@@ -40,8 +40,6 @@ function getProgress(testId, index) {
                 var id = '#test'+index;
                 if( percentage!=0){
                     var tmp = percentage.toFixed(2) + "%";
-                    var realPercentage = percentage+done;
-                    realPercentage = realPercentage.toFixed(2) + "%";
                     var start = result.start;
                     var currentTime = new Date().getTime();
                     var ETA = (currentTime - start)/finished/1000*(total-finished);
@@ -49,9 +47,9 @@ function getProgress(testId, index) {
                     ETA = ETA-hour*3600;
                     var min =  Math.floor(ETA/60);
                     ETA = ETA-min*60;
-                    $('#progress'+index).text(finished+'/'+total+'  ('+realPercentage+')');
+                    $('#progress'+index).text(finished+'/'+total+'  ('+(100*finished/total).toFixed(2)+'%)');
                     $('#endTime'+index).text(hour+'h'+min+'m'+ETA.toFixed(0)+'s');
-                    drawProgressBar(id, tmp);
+                    //drawProgressBar(id, tmp);
                     updateChart(result.name, stats);
                 }
                 setTimeout(function(){getProgress(testId,index)}, 7000);
@@ -108,10 +106,10 @@ function initChart(name, dataX){
         responsive: false,
         legend: {
                     display: true,
-                    position: 'bottom',
+                    position: 'top',
                     labels: {
-                        boxWidth: 30,
-                        fontSize: 12
+                        boxWidth: 10,
+                        fontSize: 10
                     }
                 }
         }

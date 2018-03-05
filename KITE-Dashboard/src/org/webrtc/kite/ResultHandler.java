@@ -243,7 +243,7 @@ public class ResultHandler {
       for (String query: queryList) {
         if (log.isDebugEnabled())
           log.debug("Executing Result Insert:" + query);
-        System.out.println("Executing Result Insert:" + query);
+        //System.out.println("Executing Result Insert:" + query);
         statement.addBatch(query);
       }
       statement.executeBatch();

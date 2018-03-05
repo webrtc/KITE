@@ -27,7 +27,10 @@ public class CandidatePairStat {
                     }
                 }
             }
-            this.numberOfPairs = this.candidate_pair_list.size();
+            if (this.candidate_pair_list!=null)
+                this.numberOfPairs = this.candidate_pair_list.size();
+            else
+                this.numberOfPairs = 0;
         }
     }
 

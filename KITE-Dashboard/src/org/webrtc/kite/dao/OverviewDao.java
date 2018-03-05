@@ -98,7 +98,7 @@ public class OverviewDao {
         String result = rs.getString("RESULT");
         long startTime = rs.getLong("START_TIME");
         long duration = rs.getLong("DURATION");
-        ResultTable resultTable = new ResultTable(result, duration, "\"NA\"");
+        ResultTable resultTable = new ResultTable(result, duration, false);
         resultTable.setTableName("TN"+testName+"_"+startTime);
         resultTable.setStartTime(startTime);
         for (int i=0;i<tupleSize;i++) {
@@ -218,7 +218,7 @@ public class OverviewDao {
         String result = rs.getString("RESULT");
         long startTime = rs.getLong("START_TIME");
         long duration = rs.getLong("DURATION");
-        ResultTable resultTable = new ResultTable(result, duration, "\"NA\"");
+        ResultTable resultTable = new ResultTable(result, duration, false);
         resultTable.setTableName("TN"+testName+"_"+startTime);
         resultTable.setStartTime(startTime);
         for (int i=0;i<tupleSize;i++) {

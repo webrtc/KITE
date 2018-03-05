@@ -132,89 +132,61 @@ limitations under the License.
                         #set($index = 1)
                         #set($marge = $dateTool.getSystemTime() - $listOfTest.get(0).getStartTime())
                         #foreach($test in $listOfTest)
-                        <div class="col-md-12">
+                        <div class="col-lg-12 col-md-12 col-sm-12">
                             <div class="card">
                                 <div class="header">
                                     <a class="medium-boy" href="results?test=$linkTool.encode($test.getTestId())">$index. $test.getTestName()</a>
                                     <h5 class="small-boy">$test.getDescription()</h5>
                                 </div>
-                                <div class="content table-responsive table-full-width">
-                                    <table class="table">
-                                        <thead>
-                                        <th style="width:25%;">Overall
-                                        </th>
-                                        <th>Details</th>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td style="height:300px; width:25%; margin:0;">
-
-                                                <div class="container" style="position: left; height:20vh; width:15vw; margin:0;">
-                                                      <div>
-                                                        <canvas id="$test.getTestName()"></canvas>
-                                                      </div>
+                                <div class="content">
+                                    <div class="row">
+                                        <div class="col-lg-4 col-md-4 col-sm-4">
+                                            <div>
+                                                <canvas id="$test.getTestName()"></canvas>
+                                            </div>
+                                        <script>
+                                            var id = $test.getTestId();
+                                            initialSetup(id);
+                                        </script>
+                                        </div>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="row">
+                                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                                    <h5 class="small-boy">Implementation Class</h5>
+                                                    <h5 class="small-boy">Tuple size</h5>
+                                                    <h5 class="small-boy">Number of test cases</h5>
+                                                    <h5 class="small-boy">Status</h5>
+                                                    <h5 class="small-boy">ETA</h5>
+                                                </div>
+                                                <div class="col-lg-8 col-md-8 col-sm-8">
+                                                    <h5 class="small-boy">: $test.getImpl()</h5>
+                                                    <h5 class="small-boy">: $test.getTupleSize()</h5>
+                                                    <h5 class="small-boy">: $test.getTotalTests()</h5>
+                                                #if($test.getStatus())
+                                                    <h5 class="ended">: Done</h5>
+                                                    <h5 class="ended">: Ended at $dateTool.format($test.getEndTime())</h5>
+                                                #elseif ($marge > 86400000)
+                                                    <h5 class="interrupted">: Interrupted</h5>
+                                                    <h5 class="interrupted">: NC</h5>
+                                                #else
+                                                    <div class="small-boy">
+                                                        <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
                                                     </div>
+                                                    <h5 class="small-boy" id="progress$index"></h5>
+                                                    <h5 class="small-boy" id="endTime$index"></h5>
                                                     <script>
+                                                        var total = $test.getTotalTests();
+                                                        var ETA = '$dateTool.getDate()';
                                                         var id = $test.getTestId();
-                                                        initialSetup(id);
+                                                        var index = $index;
+                                                        var tmp;
+                                                        getProgress(id, index);
                                                     </script>
-                                                </td>
-
-                                                <td>
-                                                    <table class="table">
-                                                        <thead style="">
-                                                        <th style="width:20%; color:black;"><h5 class="small-boy">Implementation Class</h5>
-                                                        </th>
-                                                        <th style="color:black;"><h5 class="small-boy">: $test.getImpl()</h5></th>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td>
-                                                                    <h5>Tuple size</h5>
-                                                                    <h5>Number of test cases</h5>
-                                                                </td>
-
-                                                                <td>
-                                                                    <h5>: $test.getTupleSize()</h5>
-                                                                    <h5>: $test.getTotalTests()</h5>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>
-                                                                    <h5>Status</h5>
-                                                                    <h5>ETA</h5>
-                                                                </td>
-                                                                <td>
-                                                                    #if($test.getStatus())
-                                                                    <h5 class="ended">: Done</h5>
-                                                                    <h5 class="ended">: Ended at $dateTool.format($test.getEndTime())</h5>
-                                                                    #elseif ($marge > 86400000)
-                                                                    <h5 class="interrupted">: Interrupted</h5>
-                                                                    <h5 class="interrupted">: NC</h5>
-                                                                    #else
-                                                                    </br>
-                                                                    <div id="test$index" class="progress"></div>
-                                                                    <h5 class="small-boy" id="progress$index"></h5>
-                                                                    <h5 id="endTime$index"></h5>
-                                                                    <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
-                                                                    <script>
-                                                                        var total = $test.getTotalTests();
-                                                                        var ETA = '$dateTool.getDate()';
-                                                                        var id = $test.getTestId();
-                                                                        var index = $index;
-                                                                        var tmp;
-                                                                        getProgress(id, index);
-                                                                    </script>
-                                                                    #end
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-
+                                                #end
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

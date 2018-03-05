@@ -186,13 +186,19 @@ limitations under the License.
                                     <div class="table-responsive result-wrapping">
                                         <table class="table table-hover">
                                             <thead>
-                                                <th>Result</th>
-                                                <th>Duration</th>
-                                                <th width="280">Browser(s)</th>
+                                                <th width:"5%">Stats</th>
+                                                <th width:"10%">Result</th>
+                                                <th width:"10%">Duration</th>
+                                                <th width:"75%">Browser(s)</th>
                                             </thead>
                                             <tbody id="resultTable" class="small-boy"></tbody>
                                         </table>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div id="result-display" class="content show-result-wrapping">
+
                                 </div>
                             </div>
                         </div>

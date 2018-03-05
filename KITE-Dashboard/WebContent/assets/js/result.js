@@ -65,6 +65,7 @@ function getProgress(testId) {
 
 
 function updateResult (load,total){
+    console.log(load);
     var statMap = new Map();
     var div = $("#resultTable");
 
@@ -72,7 +73,7 @@ function updateResult (load,total){
     for (i=0;i<total;i++){
         //statMap.set("result"+i,load[i].stats);
         var trID = "";
-        var htmlStringTmp="<td class=\"status\" id=\"r"+i+"\" width=12% X>"+i+".";
+        var htmlStringTmp="<td class=\"status\" id=\"r"+i+"\" width:\"10%\" X>";
         var tmp = "<i class=\"pe-7s-attention\" style=\"color:blue;\">";
                 if(load[i].result == "SUCCESSFUL")
                     tmp="<i class=\"pe-7s-check\" style=\"color:green;\">";
@@ -82,9 +83,11 @@ function updateResult (load,total){
                     tmp="<i class=\"pe-7s-timer\">";
 
         htmlStringTmp+=tmp;
-        htmlStringTmp+="</td><td class=\"status\" id=\"d"+i+"\" width=5%>";
+        htmlStringTmp+="</td><td class=\"status\" id=\"d"+i+"\" width:\"10%\">";
         htmlStringTmp+=Math.ceil(load[i].duration/1000)+"s</td>";
-        htmlStringTmp+="<td class=\"status\">";
+
+
+        htmlStringTmp+="<td class=\"status\" width:\"75%\">";
         for (j=0;j<load[i].browsers.length;j++){
             trID+=load[i].browsers[j].id +"_";
             if (load[i].browsers[j].name == "firefox")
@@ -98,7 +101,19 @@ function updateResult (load,total){
             htmlStringTmp+=load[i].browsers[j].version;
             htmlStringTmp+=load[i].browsers[j].platform+"&nbsp;&nbsp;";
         }
-        htmlString+="<tr class=\"result\" id =\""+trID+"\" style=\"cursor:pointer;\" data-toggle=\"popover\" data-content=\""+load[i].result+"\">"+htmlStringTmp;
+        var htmlStatStringTmp ="";
+        if(load[i].stats){
+            htmlStatStringTmp+="<td id=\""+trID+"\" class=\"stats\" width:\"5%\">";
+            htmlStatStringTmp+=i+".<i class=\"pe-7s-graph1\" style=\"color:green;\"></td>";
+        } else {
+           htmlStatStringTmp+="<td width:\"5%\">";
+           htmlStatStringTmp+=i+".<i class=\"pe-7s-graph1\"></td>";
+        }
+
+/*        htmlString+="<tr id=\""+trID+"\" class=\"result\" style=\"cursor:pointer;\" data-toggle=\"popover\" data-content=\""+load[i].result+"\">";*/
+        htmlString+="<tr id=\""+trID+"\" class=\"result\" style=\"cursor:pointer;\">";
+        htmlString+=htmlStatStringTmp;
+        htmlString+=htmlStringTmp;
         htmlString+="</td>";
         htmlString+="</tr>";
         trID ="";
@@ -106,103 +121,20 @@ function updateResult (load,total){
     div.html(htmlString);
 
     window.statMap = statMap;
-    $('[data-toggle="popover"]').popover({
+/*    $('[data-toggle="popover"]').popover({
         trigger:'click',
         placement:'right',
         html: true,
         template: '<div class="popover"><div class="arrow"></div><div class="popover-content"></div><div class="popover-footer"><a class="small-boy" style="color:red">&nbsp;&nbsp;[ Close ]</a></div></div>'
-    });
+    });*/
 }
 
 
-function showStats (statObj){
-    statObject = statObj;
-    $("#stats").html(JSON.stringify(statObj))
-/*
-    var config = {
-        type: 'line',
-        data: {
-            labels: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],
-            datasets: [
-                {
-                    label: 'AudioBytesReceivedOvertime',
-                    backgroundColor: '#42f4aa',
-                    borderColor: '#42f4aa',
-                    fill: false,
-                    data: statObj['AudioBytesReceivedOvertime'],
-                    pointRadius: 2
-                },
-                {
-                    label: 'VideoBytesReceivedOvertime',
-                    backgroundColor: '#42f4aa',
-                    borderColor: '#42f4aa',
-                    fill: false,
-                    data: statObj['VideoBytesReceivedOvertime'],
-                    pointRadius: 2
-                },
-                {
-                    label: 'AudioBytesSentOvertime',
-                    backgroundColor: '#42f4aa',
-                    borderColor: '#42f4aa',
-                    fill: false,
-                    data: statObj['AudioBytesSentOvertime'],
-                    pointRadius: 2
-                },
-                {
-                    label: 'VideoBytesSentOvertime',
-                    backgroundColor: '#42f4aa',
-                    borderColor: '#42f4aa',
-                    fill: false,
-                    data: statObj['VideoBytesSentOvertime'],
-                    pointRadius: 2
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            title:{
-                display:false,
-                text:'Bytes transmission'
-            },
-            scales: {
-                xAxes: [{
-                    display: true,
-                }],
-                yAxes: [{
-                    display: true,
-                    type: 'linear',
-                }]
-            },
-            showLines: true
-        }
-    };
-    var myLineChart = new Chart($("#stat-plotting"),config);*/
+function showResult (result){
+    $("#result-display").html(result);
 }
-/*
 
-function showStats (statObj){
-    statObject = statObj;
-    $("#stats").empty();
-    if (JSON.stringify(statObj)=='{"stats":"NA"}'||JSON.stringify(statObj)=='{}')
-        $("#stats").html('No stats are available.');
-    else{
-        var statsHtml='';
-        //var statsHtml='<div class="tab">';
-        var browsers = Object.keys(statObj);
-        browsers.forEach(function(browser){
-            statsHtml+='<h5 class="medium-boy no-margin">'+browser+'<h5>';
-            //statsHtml+='<button class="tablinks" onclick="openCity(event, '+browser+')">'+browser+'</button>';
-            var statTypes = Object.keys(statObj[browser]);
-            var browserHtml='<table class="table fixed stat-table"><tbody id="'+browser+'" class="small-boy"><tr>';
-            statTypes.forEach(function(statType){
-                browserHtml+='<td class="statType" data-browser="'+browser+'" data-type="'+statType+'">'+statType+'</td>'
-            });
-            browserHtml+='</tr></body></table>';
-            statsHtml+=browserHtml;
-        });
-        $("#stats").html(statsHtml);
-    }
-}*/
+
 function updateOverall ( load){
     myChart.data.datasets.forEach((dataset) => {
         dataset.data = load;
@@ -270,26 +202,21 @@ $(document).on("click", ".result", function(e) {
     $(".result").attr('style','cursor:pointer;background:white;');
     $(this).attr('style','cursor:pointer;background:#aff7c8;');
     var id = $(this).attr('id');
-    window.open('stat?name='+testName+'&id='+id, '_blank');
-});
-/*
-
-$(document).on("click", ".result", function(e) {
-    $(".result").attr('style','cursor:pointer;background:white;');
-    $(this).attr('style','cursor:pointer;background:#aff7c8;');
-    var id = $(this).attr('id');
     (function updateStats() {
         $.ajax({
-            url: 'getstat?name='+testName+'&id='+id,
+            url: 'getresult?name='+testName+'&id='+id,
             success: function(result){
                 //console.log(result);
-                showStats(JSON.parse(result));
-                //showStats(result);
+                showResult(result);
             }
         });
     })();
 });
-*/
+
+$(document).on("click", ".stats", function(e) {
+    var id = $(this).attr('id');
+    window.open('stat?name='+testName+'&id='+id, '_blank');
+});
 
 
 $(document).on("click", ".less", function(e) {
