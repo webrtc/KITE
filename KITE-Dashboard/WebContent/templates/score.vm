@@ -17,7 +17,7 @@ limitations under the License.
 <head>
 
     <meta charset="utf-8" />
-    <title>Scoreboard - KITE Dashboard</title>
+    <title>Scorecard</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/pace.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/themes/black/pace-theme-minimal.css" rel="stylesheet" />
@@ -28,62 +28,101 @@ limitations under the License.
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
     <link href="https://rawgithub.com/olimsaidov/pixeden-stroke-7-icon/master/pe-icon-7-stroke/dist/pe-icon-7-stroke.css" rel="stylesheet" />
-
-    <script type="text/javascript" src="assets/js/jquery-git.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js" type="text/javascript"></script>
-    <script src="assets/js/score.js"></script>
-    <script>
-        var scoreJson = $scoreJson;
-        console.log(scoreJson);
-    </script>
+
 </head>
 <body>
     <div class="wrapper">
-        <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
-                <div class="content">
-                    <div class="container-fluid">
-                        <div class="card">
-                            <div class="header">
-                                <h4 class="title">KITE Scoreboard: </h4>
-                                <h5 class="medium-boy">This scoreboard shows the most recent simplified results of all KITE tests against latest stable
-                                                version of 4 major browsers. </h5>
-                                <table class="table fixed">
-                                    <col width="150px" />
-                                    <col width="110px" />
-                                    <col width="200px" />
-                                    <col width="200px" />
-                                    <tbody>
-                                        <tr>
-                                            <td> <div><i class="pe-7s-check green"></i><a class="status">100% Successful</a></div>
-                                            </td>
-                                            <td> <div><i class="pe-7s-close-circle red"></i><a class="status">100% Failed</a></div>
-                                            </td>
-                                            <td> <div><i class="pe-7s-help1 gold"></i><a class="status">Somewhere in the middle</a></div>
-                                            </td>
-                                            <td> <div><i class="pe-7s-power grey"></i><a class="status">Not tested</a></div>
-                                            </td>
-                                            <td> <a href="dashboard" class="medium-boy"><i class="pe-7s-exapnd2"></i> KITE Dashboard </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="content">
-                                <table class="table table-hover fixed">
-                                    <col width="200px" />
-                                    <tbody id="scoreboard">
-                                        <script>displayScoreboard()</script>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Start of side nav bar -->
+        <div class="sidebar" data-color="black" data-image="assets/img/sidebarSmall.jpg">
+            <div class="sidebar-wrapper">
+                <div class="logo">
+                    <a href="dashboard" class="simple-text">
+                        KITE
+                    </a>
                 </div>
+                <ul class="nav">
+                    <li>
+                        <div class="row">
+                            <div class="col-sm-1 col-sm-offset-1">
+                                <i class="pe-7s-search"></i>
+                            </div>
+                            <div class="col-sm-9 ">
+                                <form action="search" method="get">
+                                  <div>
+                                    <input name="key" id="key" placeholder="Search">
+                                  </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </li>
+                    <li>
+                        <a href="dashboard">
+                            <i class="pe-7s-note2"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="score">
+                            <i class="pe-7s-keypad"></i>
+                            <p>Scoreboard</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="versions">
+                            <i class="pe-7s-way"></i>
+                            <p>Version Info</p>
+                        </a>
+                    </li>
+                    <li>
+                        <nav class="overview">
+                            <ul>
+                                <li><a href="#">
+                                        <i class="pe-7s-pin"></i>
+                                        <p>Overview</p>
+                                    </a>
+                                    <ul class="result-wrapping">
+                                        #foreach($test in $listOfTest)
+                                        #if($test.getTupleSize()==2)
+                                          <li><a href="overview?testname=$linkTool.encode($test.getTestName())&1v1=true" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
+                                        #else
+                                          <li><a href="overview?testname=$linkTool.encode($test.getTestName())&1v1=false" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
+                                        #end
+                                        #end
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </li>
+                </ul>
             </div>
         </div>
+        <!-- End of side nav bar -->
+        <!-- Start main data content display -->
+        <div class="main-panel">
+        <!-- Start horizontal nav bar -->
+            <nav class="navbar navbar-default navbar-fixed">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#">
+                            <i class="pe-7s-menu"></i>
+                        </button>
+                        <a class="navbar-brand" href="dashboard">Dashboard</a>
+                    </div>
+                    <div class="collapse navbar-collapse">
+                    </div>
+                </div>
+            </nav>
+        <!-- End of horizontal nav bar -->
+            <div class="col-md-11" style="margin-top:20px;">
+                <div class="card content">
+                    <iframe width="100%" height="1200" src="https://kite-wpt.herokuapp.com/score" frameborder="0" scrolling="yes"></iframe>
+                </div>
+            </div>
+            <!-- End of main data content display -->
+        </div>
     </div>
-    <!-- End of main data content display -->
 </body>
     <!--   Core JS Files   -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>

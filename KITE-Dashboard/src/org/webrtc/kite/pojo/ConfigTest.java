@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,13 +38,6 @@ public class ConfigTest {
   private String description;
 
   /**
-   * Sets test's start time.
-   */
-  public void setStartTime(long startTime) {
-    this.startTime = startTime;
-  }
-
-  /**
    * Returns test's start time.
    */
   public long getStartTime() {
@@ -52,10 +45,10 @@ public class ConfigTest {
   }
 
   /**
-   * Sets test's finish time.
+   * Sets test's start time.
    */
-  public void setEndTime(long endTime) {
-    this.endTime = endTime;
+  public void setStartTime(long startTime) {
+    this.startTime = startTime;
   }
 
   /**
@@ -63,6 +56,13 @@ public class ConfigTest {
    */
   public long getEndTime() {
     return endTime;
+  }
+
+  /**
+   * Sets test's finish time.
+   */
+  public void setEndTime(long endTime) {
+    this.endTime = endTime;
   }
 
   /**
@@ -150,13 +150,6 @@ public class ConfigTest {
   }
 
   /**
-   * Sets test's number of test cases.
-   */
-  public void setTotalTests(int totalTests) {
-    this.totalTests = totalTests;
-  }
-
-  /**
    * Returns test's number of test cases.
    */
   public int getTotalTests() {
@@ -164,10 +157,10 @@ public class ConfigTest {
   }
 
   /**
-   * Sets test's status.
+   * Sets test's number of test cases.
    */
-  public void setStatus(boolean status) {
-    this.status = status;
+  public void setTotalTests(int totalTests) {
+    this.totalTests = totalTests;
   }
 
   /**
@@ -178,10 +171,10 @@ public class ConfigTest {
   }
 
   /**
-   * Sets test's number of finished test cases.
+   * Sets test's status.
    */
-  public void setDoneTests(int doneTests) {
-    this.doneTests = doneTests;
+  public void setStatus(boolean status) {
+    this.status = status;
   }
 
   /**
@@ -191,37 +184,43 @@ public class ConfigTest {
     return doneTests;
   }
 
-  public void setStats(List<Integer> stats) {
-    this.stats = stats;
+  /**
+   * Sets test's number of finished test cases.
+   */
+  public void setDoneTests(int doneTests) {
+    this.doneTests = doneTests;
   }
 
   public List<Integer> getStats() {
     return stats;
   }
 
-  public void setDescription(String description) {
-    this.description = description;
+  public void setStats(List<Integer> stats) {
+    this.stats = stats;
   }
 
   public String getDescription() {
     return description;
   }
 
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
   /**
-   *
    * @return the Json String containing all properties of this
    */
-  public String getJsonData(){
-    String res =  "{";
-    res+="\"name\": \""+testName+"\",";
-    res+="\"id\": "+testId+",";
-    res+="\"tupleSize\": "+tupleSize+",";
-    res+="\"configId\": "+configId+",";
-    res+="\"total\": "+totalTests+",";
-    res+="\"done\": "+doneTests+",";
-    res+="\"start\": "+startTime+",";
-    res+="\"status\": "+status+",";
-    res+="\"stats\": ["+stats.get(0)+","+stats.get(1)+","+stats.get(2)+","+stats.get(3)+"]}";
-    return  res;
+  public String getJsonData() {
+    String res = "{";
+    res += "\"name\": \"" + testName + "\",";
+    res += "\"id\": " + testId + ",";
+    res += "\"tupleSize\": " + tupleSize + ",";
+    res += "\"configId\": " + configId + ",";
+    res += "\"total\": " + totalTests + ",";
+    res += "\"done\": " + doneTests + ",";
+    res += "\"start\": " + startTime + ",";
+    res += "\"status\": " + status + ",";
+    res += "\"stats\": [" + stats.get(0) + "," + stats.get(1) + "," + stats.get(2) + "," + stats.get(3) + "]}";
+    return res;
   }
 }

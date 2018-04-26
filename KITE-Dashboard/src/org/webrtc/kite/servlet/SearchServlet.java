@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,12 +19,10 @@ package org.webrtc.kite.servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.webrtc.kite.Utility;
-import org.webrtc.kite.dao.BrowserDao;
 import org.webrtc.kite.dao.ConfigExecutionDao;
 import org.webrtc.kite.dao.ConfigTestDao;
 import org.webrtc.kite.exception.KiteNoKeyException;
 import org.webrtc.kite.exception.KiteSQLException;
-import org.webrtc.kite.pojo.Browser;
 import org.webrtc.kite.pojo.ConfigExecution;
 import org.webrtc.kite.pojo.ConfigTest;
 import org.webrtc.kite.pojo.SearchResult;
@@ -53,7 +51,6 @@ public class SearchServlet extends HttpServlet {
    */
   public SearchServlet() {
     super();
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -61,9 +58,6 @@ public class SearchServlet extends HttpServlet {
    */
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    // TODO Auto-generated method stub
-    // response.getWriter().append("Served at:
-    // ").append(request.getContextPath());
 
     List<Object> listOfResult = null;
 
@@ -76,48 +70,30 @@ public class SearchServlet extends HttpServlet {
     if (searchKey == null) {
       throw new KiteNoKeyException("searchKey");
     } else {
-      switch (searchKey) {
-        /*case "browser": {
-          String name = request.getParameter("name");
-          String version = request.getParameter("version");
-          String platform = request.getParameter("platform");
-          Browser browserInQuestion = new Browser(name, version, platform);
-          try {
-            int browserId = new BrowserDao(Utility.getDBConnection(this.getServletContext())).getBrowserId(browserInQuestion);
+      try {
+        listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
+        request.setAttribute("listOfTest", listOfDistinctTest);
+        configExecutionList =
+            new ConfigExecutionDao(Utility.getDBConnection(this.getServletContext()))
+                .searchConfigExecutionList(searchKey);
+        if (log.isDebugEnabled())
+          log.debug("out->listOfExecution: " + configExecutionList);
+        result.setListOfConfigResult(configExecutionList);
+      } catch (SQLException e) {
+        e.printStackTrace();
+        throw new KiteSQLException(e.getLocalizedMessage());
+      }
 
-          } catch (SQLException e) {
-            e.printStackTrace();
-          }
-          break;
-        }*/
-        default: {
-          try {
-            listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
-            request.setAttribute("listOfTest", listOfDistinctTest);
-            configExecutionList =
-                    new ConfigExecutionDao(Utility.getDBConnection(this.getServletContext()))
-                            .searchConfigExecutionList(searchKey);
-            if (log.isDebugEnabled())
-              log.debug("out->listOfExecution: " + configExecutionList);
-            result.setListOfConfigResult(configExecutionList);
-          } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            throw new KiteSQLException(e.getLocalizedMessage());
-          }
-          try {
-            configTestList = new ConfigTestDao(Utility.getDBConnection(this.getServletContext()))
-                    .getConfigTestList(searchKey);
-            if (log.isDebugEnabled())
-              log.debug("out->listOfTest: " + configTestList);
-            request.setAttribute("listOfTest", configTestList);
-            result.setListOfConfigTestResult(configTestList);
-          } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            throw new KiteSQLException(e.getLocalizedMessage());
-          }
-        }
+      try {
+        configTestList = new ConfigTestDao(Utility.getDBConnection(this.getServletContext()))
+            .getConfigTestList(searchKey);
+        if (log.isDebugEnabled())
+          log.debug("out->listOfTest: " + configTestList);
+        request.setAttribute("listOfTest", configTestList);
+        result.setListOfConfigTestResult(configTestList);
+      } catch (SQLException e) {
+        e.printStackTrace();
+        throw new KiteSQLException(e.getLocalizedMessage());
       }
       request.setAttribute("result", result);
     }

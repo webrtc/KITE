@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,23 +31,23 @@ public class Mapping {
   public static List<String> VersionList = new ArrayList<>();
   public static String StableEdge = "16.16299";
   public static String StableSafari = "11.0";
-  public static String NightlyEdge= "17.17063";
+  public static String NightlyEdge = "17.17133";
   public static String NightlySafari = "11.1";
   public static List<String> ClientList = new ArrayList<>();
   public static List<String> StableList = new ArrayList<>();
 
 
   static {
-    VersionList.add("57");
     VersionList.add("59");
-    VersionList.add("63");
-    VersionList.add("65");
+    VersionList.add("61");
+    VersionList.add("66");
+    VersionList.add("68");
     VersionList.add("16.16");
     VersionList.add("17.17");
     VersionList.add("11");
 
-    StableList.add("57.0");
-    StableList.add("63.0");
+    StableList.add("59.0");
+    StableList.add("66.0");
     StableList.add("16.16");
     StableList.add("11.0");
 

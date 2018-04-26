@@ -16,15 +16,11 @@
 
 package org.webrtc.kite.servlet;
 
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.webrtc.kite.Utility;
-import org.webrtc.kite.dao.ConfigTestDao;
+import org.webrtc.kite.dao.ResultTableDao;
+import org.webrtc.kite.exception.KiteNoKeyException;
 import org.webrtc.kite.exception.KiteSQLException;
-import org.webrtc.kite.pojo.ConfigTest;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -32,44 +28,48 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * Servlet implementation class DashboardServlet
+ * Servlet implementation class TestServlet
  */
-@WebServlet("/score")
-public class ScoreBoardServlet extends HttpServlet {
-
-  private static final long serialVersionUID = 3456562049892798394L;
-  private static final Log log = LogFactory.getLog(ScoreBoardServlet.class);
+@WebServlet("/getresult")
+public class GetResultServlet extends HttpServlet {
+  private static final long serialVersionUID = 1L;
 
   /**
    * @see HttpServlet#HttpServlet()
    */
-  public ScoreBoardServlet() {
+  public GetResultServlet() {
     super();
   }
 
   /**
-   * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+   * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+   * response)
    */
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-
-
-    List<ConfigTest> listOfDistinctTest;
+    String tableName = request.getParameter("name");
+    String resultString = "";
+    if (tableName == null)
+      throw new KiteNoKeyException("table name");
+    String idStr = request.getParameter("id");
+    if (idStr == null)
+      throw new KiteNoKeyException("id");
+    List<String> idStrList = Arrays.asList(idStr.split("_"));
+    List<Integer> idList = new ArrayList<Integer>();
+    for (String id : idStrList)
+      idList.add(Integer.parseInt(id));
     try {
-      listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
-      request.setAttribute("listOfTest", listOfDistinctTest);
+      resultString = new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getResultById(tableName, idList);
+
     } catch (SQLException e) {
       e.printStackTrace();
       throw new KiteSQLException(e.getLocalizedMessage());
     }
-
-    if (log.isDebugEnabled())
-      log.debug("Displaying: score.vm");
-    RequestDispatcher requestDispatcher = request.getRequestDispatcher("score.vm");
-    requestDispatcher.forward(request, response);
+    response.getWriter().print(resultString);
   }
-
 }

@@ -21,8 +21,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.webrtc.kite.Utility;
 import org.webrtc.kite.dao.ClientVersionDao;
+import org.webrtc.kite.dao.ConfigTestDao;
 import org.webrtc.kite.exception.KiteSQLException;
 import org.webrtc.kite.pojo.ClientVersion;
+import org.webrtc.kite.pojo.ConfigTest;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -40,42 +42,44 @@ import java.util.List;
 @WebServlet("/versions")
 public class ClientVersionServlet extends HttpServlet {
 
-    private static final long serialVersionUID = -6356946115085869023L;
-    private static final Log log = LogFactory.getLog(ConfiguratorServlet.class);
+  private static final long serialVersionUID = -6356946115085869023L;
+  private static final Log log = LogFactory.getLog(ClientVersionServlet.class);
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public ClientVersionServlet() {
-        super();
-        // TODO Auto-generated constructor stub
+  /**
+   * @see HttpServlet#HttpServlet()
+   */
+  public ClientVersionServlet() {
+    super();
+    // TODO Auto-generated constructor stub
+  }
+
+  /**
+   * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+   */
+  protected void doGet(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+
+
+    List<ClientVersion> clientVersionList;
+    List<ConfigTest> listOfDistinctTest;
+    try {
+      listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
+      request.setAttribute("listOfTest", listOfDistinctTest);
+      clientVersionList =
+          new ClientVersionDao(Utility.getDBConnection(this.getServletContext())).getClientVersionList();
+      if (log.isDebugEnabled())
+        log.debug("out->: clientVersionList" + clientVersionList);
+      request.setAttribute("clientVersionList", clientVersionList);
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw new KiteSQLException(e.getLocalizedMessage());
     }
 
-    /**
-     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-     */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-
-        List<ClientVersion> clientVersionList;
-        try {
-            clientVersionList =
-                    new ClientVersionDao(Utility.getDBConnection(this.getServletContext())).getClientVersionList();
-            if (log.isDebugEnabled())
-                log.debug("out->: clientVersionList" + clientVersionList);
-            request.setAttribute("clientVersionList", clientVersionList);
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            throw new KiteSQLException(e.getLocalizedMessage());
-        }
-
-        // get UI
-        if (log.isDebugEnabled())
-            log.debug("Displaying: client_version.vm");
-        RequestDispatcher requestDispatcher = request.getRequestDispatcher("client_version.vm");
-        requestDispatcher.forward(request, response);
-    }
+    // get UI
+    if (log.isDebugEnabled())
+      log.debug("Displaying: client_version.vm");
+    RequestDispatcher requestDispatcher = request.getRequestDispatcher("client_version.vm");
+    requestDispatcher.forward(request, response);
+  }
 
 }

@@ -48,7 +48,7 @@ limitations under the License.
                                         <tr>
                                             <td>
                                                 <div class="dropdown">
-                                                    <button type="button" class="btn pick-option dropdown-toggle" data-toggle="dropdown">$testname</button>
+                                                    <button type="button" class="btn pick-option dropdown-toggle dropdown-button" data-toggle="dropdown"><i class="pe-7s-angle-down-circle big-boy"></i> $testname </button>
                                                     <ul class="dropdown-menu">
                                                         #set($index = 1)
                                                         #foreach($test in $listOfTest)
@@ -60,12 +60,13 @@ limitations under the License.
                                             </td>
                                             <td>
                                                 <a class="medium-boy">$description</a>
+                                                <h5 class="small-boy">(Results for test cases between the latest stable version of browsers)</h5>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>
                                                 <div class="dropdown">
-                                                    <button type="button" class="btn pick-option dropdown-toggle" data-toggle="dropdown">$dateTool.format($startTime)</button>
+                                                    <button type="button" class="btn pick-option dropdown-toggle dropdown-button" data-toggle="dropdown"><i class="pe-7s-angle-down-circle big-boy"></i>$dateTool.format($startTime)</button>
                                                     <ul class="dropdown-menu">
                                                         #set($index1 = 1)
                                                         #foreach($time in $listOfRuns)
@@ -76,15 +77,14 @@ limitations under the License.
                                                 </div>
                                             </td>
                                             <td>
-                                                <a href="dashboard" class="medium-boy"><i class="pe-7s-exapnd2"></i> KITE dashboard </a>
+                                                <a data-link="dashboard" class="medium-boy out-button"><i class="pe-7s-exapnd2"></i> KITE dashboard </a>
                                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                                <a href="score" class="medium-boy"><i class="pe-7s-keypad"></i> KITE scoreboard </a>
+                                                <a data-link="https://kite-wpt.herokuapp.com/score" class="medium-boy out-button"><i class="pe-7s-keypad"></i> KITE scoreboard </a>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
-                                <h5 class="small-boy">(This dashboard shows the results for test cases between the latest stable version of browsers)</h5>
                                 <table class="table table-hover square" id="resultMatrix" style="table-layout:fixed">
                                 </table>
                             </div>

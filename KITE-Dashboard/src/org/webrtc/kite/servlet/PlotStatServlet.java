@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,8 +19,10 @@ package org.webrtc.kite.servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.webrtc.kite.Utility;
-import org.webrtc.kite.dao.CompatibilityDao;
+import org.webrtc.kite.dao.BrowserDao;
+import org.webrtc.kite.exception.KiteNoKeyException;
 import org.webrtc.kite.exception.KiteSQLException;
+import org.webrtc.kite.pojo.Browser;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -34,38 +36,45 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
- * Servlet implementation class DashboardServlet
+ * Servlet implementation class TestServlet
  */
-@WebServlet("/config")
-public class ConfiguratorServlet extends HttpServlet {
-
-  private static final long serialVersionUID = -6356946115085869023L;
-  private static final Log log = LogFactory.getLog(ConfiguratorServlet.class);
+@WebServlet("/stat")
+public class PlotStatServlet extends HttpServlet {
+  private static final long serialVersionUID = 348927983L;
+  private static final Log log = LogFactory.getLog(PublicOverviewServlet.class);
 
   /**
    * @see HttpServlet#HttpServlet()
    */
-  public ConfiguratorServlet() {
+  public PlotStatServlet() {
     super();
-    // TODO Auto-generated constructor stub
   }
 
   /**
-   * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+   * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+   * response)
    */
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    List<String> sourceList = Arrays.asList("SAUCE_LABS", "BROWSER_STACK", "TESTING_BOT");
+    String testName = request.getParameter("name");
+    if (testName == null)
+      throw new KiteNoKeyException("table name");
+    String idStr = request.getParameter("id");
+    if (idStr == null)
+      throw new KiteNoKeyException("id");
 
+    String requestString = "getstat?name=" + testName + "&id=" + idStr + "&overtime=no";
+    request.setAttribute("statRequest", requestString);
+    List<String> idStrList = Arrays.asList(idStr.split("_"));
+    List<Browser> browserList = new ArrayList<>();
     try {
-      List<Object> compabilities = new ArrayList<>();
-      for (String source : sourceList)
-        compabilities
-            .add(new CompatibilityDao(Utility.getCompDBConnection(this.getServletContext()))
-                .getCompabilityList(source));
-      request.setAttribute("compabilityList", compabilities);
+      for (String id : idStrList) {
+        Browser browser = new BrowserDao(Utility.getDBConnection(this.getServletContext()))
+            .getBrowserById(Integer.parseInt(id));
+        browserList.add(browser);
+      }
+      request.setAttribute("browserList", browserList);
     } catch (SQLException e) {
       e.printStackTrace();
       throw new KiteSQLException(e.getLocalizedMessage());
@@ -73,9 +82,9 @@ public class ConfiguratorServlet extends HttpServlet {
 
     // get UI
     if (log.isDebugEnabled())
-      log.debug("Displaying: configurator.vm");
-    RequestDispatcher requestDispatcher = request.getRequestDispatcher("configurator.vm");
+      log.debug("Displaying: stats.vm");
+
+    RequestDispatcher requestDispatcher = request.getRequestDispatcher("stats.vm");
     requestDispatcher.forward(request, response);
   }
-
 }
