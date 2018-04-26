@@ -1,16 +1,32 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.webrtc.kite</groupId>
   <artifactId>kite-base</artifactId>
-  <version>1.0</version>
+  <version>1.0-SNAPSHOT</version>
+  <name>kite-base</name>
   <packaging>pom</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <kite.java.version>1.8</kite.java.version>
+    <kite.version>1.0-SNAPSHOT</kite.version>
+    <kite.selenium.version>3.11.0</kite.selenium.version>
+    <kite.junit.version>4.12</kite.junit.version>
+    <kite.json.version>1.0.4</kite.json.version>
+    <kite.log4j.version>1.2.17</kite.log4j.version>
+    <kite.sqlite.jdbc.version>3.21.0.1</kite.sqlite.jdbc.version>
+    <!-- maven plugin versions, shouldn't need be changed very often -->
+    <kite.mvn.compiler.version>3.6.1</kite.mvn.compiler.version>
+  </properties>
 
   <modules>
     <module>KITE-Engine-IF</module>
     <module>KITE-Engine</module>
+    <module>KITE-Base-Test</module>
     <module>KITE-AppRTC-Test</module>
     <module>KITE-GetUpdate-Test</module>
     <module>KITE-Jitsi-Test</module>
