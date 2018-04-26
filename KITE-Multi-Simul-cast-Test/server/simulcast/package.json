@@ -12,7 +12,7 @@
     "build-client": "make build-client"
   },
   "author": "Soares Chen",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "private": true,
   "dependencies": {
     "body-parser": "^1.18.2",
