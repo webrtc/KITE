@@ -26,8 +26,15 @@ import java.util.Map;
  */
 public enum Interval {
 
-  HOURLY(1),
-  DAILY(24),
+  /**
+   * Hourly interval.
+   */
+  HOURLY(1), /**
+   * Daily interval.
+   */
+  DAILY(24), /**
+   * Weekly interval.
+   */
   WEEKLY(24 * 7);
 
   private final int value;
@@ -41,6 +48,11 @@ public enum Interval {
     this.value = value;
   }
 
+  /**
+   * Value int.
+   *
+   * @return the int
+   */
   public int value() {
     return value;
   }
@@ -57,8 +69,8 @@ public enum Interval {
    * Checks whether the provided interval value is currently supported.
    *
    * @param name string interval value
-   * @throws KiteUnsupportedIntervalException if the 'name' is other than what is specified in
-   * Interval.
+   * @return the int
+   * @throws KiteUnsupportedIntervalException if the 'name' is other than what is specified in Interval.
    */
   public static int interval(String name) throws KiteUnsupportedIntervalException {
     if (name == null) {

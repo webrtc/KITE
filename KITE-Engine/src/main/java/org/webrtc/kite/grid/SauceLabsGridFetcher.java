@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,16 +16,11 @@
 
 package org.webrtc.kite.grid;
 
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.net.ssl.HttpsURLConnection;
+
 import org.webrtc.kite.config.Browser;
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.List;
 
 /**
@@ -36,55 +31,19 @@ public class SauceLabsGridFetcher extends RemoteGridFetcher {
   /**
    * Constructs a new SauceLabsGridFetcher with the given pathToDB, remoteAddress and restApiUrl.
    *
-   * @param pathToDB path to db.
+   * @param pathToDB      path to db.
    * @param remoteAddress string representation of the Selenium hub url.
-   * @param restApiUrl string representation of the rest API url for fetching the supported
-   *        browsers.
+   * @param restApiUrl    string representation of the rest API url for fetching the supported
+   *                      browsers.
    */
   public SauceLabsGridFetcher(String pathToDB, String remoteAddress, String restApiUrl) {
     super(pathToDB, "SAUCE_LABS", remoteAddress, restApiUrl);
   }
 
-  @Override
-  public void fetchConfig() throws IOException {
+  @Override public void fetchConfig() throws IOException {
 
-    URL myurl = new URL(this.restApiUrl);
-
-    JsonReader reader = null;
-    List<JsonObject> availableConfigList = null;
-
-    HttpsURLConnection con = null;
-    InputStream is = null;
-    InputStreamReader isr = null;
-    BufferedReader br = null;
-    try {
-      con = (HttpsURLConnection) myurl.openConnection();
-      is = con.getInputStream();
-      isr = new InputStreamReader(is);
-      br = new BufferedReader(isr);
-      reader = Json.createReader(br);
-      availableConfigList = reader.readArray().getValuesAs(JsonObject.class);
-    } finally {
-      if (reader != null)
-        reader.close();
-      if (br != null)
-        try {
-          br.close();
-        } catch (IOException ioe) {
-        }
-      if (isr != null)
-        try {
-          isr.close();
-        } catch (IOException ioe) {
-        }
-      if (is != null)
-        try {
-          is.close();
-        } catch (IOException ioe) {
-        }
-      if (con != null)
-        con.disconnect();
-    }
+    List<JsonObject> availableConfigList
+        = this.getAvailableConfigList(null, null);
 
     /* might be not necessary, depending on data format it DB */
     for (JsonObject jsonObject : availableConfigList) {

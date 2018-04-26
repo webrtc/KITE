@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,131 +16,130 @@
 
 package org.webrtc.kite.config;
 
-import javax.json.*;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
+
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 /**
  * Representation of a test object in the config file.
  * <p>
  * {
  * "name": "IceConnectionTest",
- * "tupleSize": 2                         ,
- * "testImpl": "org.webrtc.kite.IceConnectionTest"
+ * "description": "Some Description",
+ * "tupleSize": 2,
+ * "testImpl": "org.webrtc.kite.IceConnectionTest",
+ * "payload": "A custom json object",
+ * "noOfThreads": 10,
+ * "maxRetryCount": 2,
+ * "callback": "http://test.com/resulthandler"
  * }
  */
-public class TestConf extends KiteConfigObject {
+public class TestConf extends Test {
 
-    private String name;
-    private int tupleSize;
-    private String testImpl;
-    private int noOfThreads;
-    private int maxRetryCount;
-    private JsonValue payload;
-    private String callbackURL;
-    private String description;
+  // Mandatory
+  private int tupleSize;
 
-    /**
-     * Constructs a new TestConf with the given callback url and JsonObject.
-     *
-     * @param callbackURL a string representation of callback url.
-     * @param jsonObject  JsonObject
-     */
-    public TestConf(String callbackURL, JsonObject jsonObject) throws KiteInsufficientValueException {
-        this.name = jsonObject.getString("name");
-        this.tupleSize = jsonObject.getInt("tupleSize");
-        this.testImpl = jsonObject.getString("testImpl");
+  // Optional
+  private int noOfThreads;
+  private int maxRetryCount;
 
-        this.noOfThreads = jsonObject.getInt("noOfThreads", 1);
-        if (this.noOfThreads < 1)
-            throw new KiteInsufficientValueException("noOfThreads for " + this.name + " is less than one.");
+  /**
+   * Constructs a new TestConf with the given callback url and JsonObject.
+   *
+   * @param callbackURL a string representation of callback url.
+   * @param jsonObject  JsonObject
+   * @throws KiteInsufficientValueException the kite insufficient value exception
+   */
+  public TestConf(String callbackURL, JsonObject jsonObject) throws KiteInsufficientValueException {
+    super(callbackURL, jsonObject);
 
-        this.maxRetryCount = jsonObject.getInt("maxRetryCount", 1);
-        if (this.maxRetryCount < 0)
-            throw new KiteInsufficientValueException("maxRetryCount for " + this.name + " is a negative value.");
+    this.tupleSize = jsonObject.getInt("tupleSize");
 
-        this.payload = jsonObject.getOrDefault("payload", null);
+    this.noOfThreads = jsonObject.getInt("noOfThreads", 1);
+    if (this.noOfThreads < 1)
+      throw new KiteInsufficientValueException(
+          "noOfThreads for " + this.name + " is less than one.");
 
-        // Override the global value with the local value
-        this.callbackURL = jsonObject.getString("callback", null);
-        if (this.callbackURL == null) this.callbackURL = callbackURL;
+    this.maxRetryCount = jsonObject.getInt("maxRetryCount", 1);
+    if (this.maxRetryCount < 0)
+      throw new KiteInsufficientValueException(
+          "maxRetryCount for " + this.name + " is a negative value.");
+  }
 
-        this.description = jsonObject.getString("description", "No description was provided fot this test.");
-    }
+  /**
+   * Gets tuple size.
+   *
+   * @return the tuple size
+   */
+  public int getTupleSize() {
+    return tupleSize;
+  }
 
-    public String getName() {
-        return name;
-    }
+  /**
+   * Sets tuple size.
+   *
+   * @param tupleSize the tuple size
+   */
+  public void setTupleSize(int tupleSize) {
+    this.tupleSize = tupleSize;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  /**
+   * Gets no of threads.
+   *
+   * @return the no of threads
+   */
+  public int getNoOfThreads() {
+    return noOfThreads;
+  }
 
-    public int getTupleSize() {
-        return tupleSize;
-    }
+  /**
+   * Sets no of threads.
+   *
+   * @param noOfThreads the no of threads
+   */
+  public void setNoOfThreads(int noOfThreads) {
+    this.noOfThreads = noOfThreads;
+  }
 
-    public void setTupleSize(int tupleSize) {
-        this.tupleSize = tupleSize;
-    }
+  /**
+   * Gets max retry count.
+   *
+   * @return the max retry count
+   */
+  public int getMaxRetryCount() {
+    return maxRetryCount;
+  }
 
-    public String getTestImpl() {
-        return testImpl;
-    }
+  /**
+   * Sets max retry count.
+   *
+   * @param maxRetryCount the max retry count
+   */
+  public void setMaxRetryCount(int maxRetryCount) {
+    this.maxRetryCount = maxRetryCount;
+  }
 
-    public void setTestImpl(String testImpl) {
-        this.testImpl = testImpl;
-    }
+  /**
+   * Returns an identifier for the TestConf in the following format:
+   * name + "_" + last four digits of the Configurator's timestamp + "_" + index.
+   *
+   * @param index Index of the testcase in the array
+   * @return Remote test identifier
+   */
+  public String getRemoteTestIdentifier(int index) {
+    String identifier = "" + Configurator.getInstance().getTimeStamp();
+    identifier = identifier.substring(identifier.length() - 4);
+    return name + "_" + identifier + "_" + index;
+  }
 
-    public int getNoOfThreads() { return noOfThreads; }
+  @Override public JsonObjectBuilder getJsonObjectBuilder() {
+    return super.getJsonObjectBuilder().add("tupleSize", this.tupleSize);
+  }
 
-    public void setNoOfThreads(int noOfThreads) { this.noOfThreads = noOfThreads; }
-
-    public int getMaxRetryCount() { return maxRetryCount; }
-
-    public void setMaxRetryCount(int maxRetryCount) { this.maxRetryCount = maxRetryCount; }
-
-    public JsonValue getPayload() { return payload; }
-
-    public void setPayload(JsonValue payload) { this.payload = payload; }
-
-    public String getCallbackURL() { return callbackURL; }
-
-    public void setCallbackURL(String callbackURL) {
-        this.callbackURL = callbackURL;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Returns an identifier for the TestConf in the format: name + "_" + last four digits of the Configurator's timestamp + "_" + index.
-     *
-     * @param index Index of the testcase in the array.
-     * @return Remote test identifier
-     */
-    public String getRemoteTestIdentifier(int index) {
-        String identifier = "" + Configurator.getInstance().getTimeStamp();
-        identifier = identifier.substring(identifier.length() - 4);
-        return name + "_" + identifier + "_" + index;
-    }
-
-    @Override
-    public JsonObjectBuilder getJsonObjectBuilder() {
-        return Json.createObjectBuilder()
-                .add("name", this.getName())
-                .add("tupleSize", this.getTupleSize())
-                .add("testImpl", this.getTestImpl());
-    }
-
-    @Override
-    public JsonObjectBuilder getJsonObjectBuilderForResult() {
-        return Json.createObjectBuilder()
-                .add("timeStamp", Configurator.getInstance().getTimeStamp())
-                .add("configName", Configurator.getInstance().getName())
-                .add("testName", this.getName())
-                .add("tupleSize", this.getTupleSize())
-                .add("testImpl", this.getTestImpl());
-    }
+  @Override public JsonObjectBuilder getJsonObjectBuilderForResult() {
+    return super.getJsonObjectBuilderForResult().add("tupleSize", this.tupleSize);
+  }
 
 }

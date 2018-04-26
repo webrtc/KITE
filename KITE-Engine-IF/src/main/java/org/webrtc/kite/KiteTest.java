@@ -17,8 +17,15 @@
 package org.webrtc.kite;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.logging.LogEntries;
+import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.logging.LogType;
+
 import javax.json.JsonValue;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Parent class for a test case.
@@ -64,5 +71,24 @@ public abstract class KiteTest {
    * @throws Exception if an Exception occurs while method execution.
    */
   public abstract Object testScript() throws Exception;
+
+  /**
+   *
+   * @param driver the subject web driver that we want to get console log
+   * @return List of log entries.
+   */
+  public List<String> analyzeLog(WebDriver driver) {
+    List<String> log = new ArrayList<>();
+    Set<String> logTypes =  driver.manage().logs().getAvailableLogTypes();
+    if (logTypes.contains(LogType.BROWSER)) {
+      LogEntries logEntries = driver.manage().logs().get(LogType.BROWSER);
+      for (LogEntry entry : logEntries) {
+        log.add(entry.getLevel() + " " + entry.getMessage());
+      }
+    } else {
+      log.add("This browser does not support getting console log.");
+    }
+    return log;
+  }
 
 }

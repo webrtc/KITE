@@ -14,34 +14,26 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite.exception;
+package org.webrtc.kite.scheduler;
+
+import org.quartz.Job;
+import org.quartz.JobExecutionException;
 
 /**
- * The KiteBadValueException is thrown if the value of the specified key is invalid.
+ * The type Kite job.
  */
-public class KiteBadValueException extends ClassCastException {
-
-  private static final long serialVersionUID = 7060558542316118129L;
-
-  private String key;
+public abstract class KiteJob implements Job {
 
   /**
-   * Constructs a KiteBadValueException with the specified key.
+   * Make up the grid.
    *
-   * @param key key
+   * @throws JobExecutionException the job execution exception
    */
-  public KiteBadValueException(String key) {
-    super();
-    this.key = key;
-  }
+  protected void makeUpTheGrid() throws JobExecutionException { }
 
   /**
-   * Gets key.
-   *
-   * @return the key
+   * Make down the grid.
    */
-  public String getKey() {
-    return key;
-  }
+  protected void makeDownTheGrid() { }
 
 }
