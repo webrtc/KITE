@@ -1,0 +1,51 @@
+{
+   "name" : "Multi-Stream & Simulcast tests run on the grid",
+   "tests" : [
+      {
+         "name": "MulticastTest",
+         "tupleSize": 2,
+         "noOfThreads": 3,
+         "description": "This test checks the capability of doing using multiple streams over webrtc",
+         "testImpl": "org.webrtc.kite.MulticastTest",
+         "payload":{
+            "ip": "kite-testing.dev.cosmosoftware.io",
+            "port": 8085
+         }
+      },
+      {
+         "name": "SimulcastTest",
+         "tupleSize": 1,
+         "noOfThreads": 3,
+         "description": "This test checks the capability of using multiple encoded streams from same source over webrtc",
+         "testImpl": "org.webrtc.kite.SimulcastTest",
+         "payload":{
+            "ip": "kite-testing.dev.cosmosoftware.io",
+            "port": 8083
+         }
+      }
+   ],
+   "remotes" : [
+      {
+         "type" : "local",
+         "remoteAddress" : "http://localhost:4444/wd/hub"
+      }
+   ],
+   "callback" : "http://localhost:8080/kiteweb/datacenter",
+   "browsers" : [
+      {
+         "browserName" : "firefox",
+         "version" : "59",
+         "platform" : "MAC"
+      },
+      {
+         "browserName" : "firefox",
+         "version" : "59",
+         "platform" : "LINUX"
+      },
+      {
+         "browserName" : "firefox",
+         "version" : "59",
+         "platform" : "WINDOWS"
+      }
+   ]
+}
