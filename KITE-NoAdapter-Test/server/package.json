@@ -11,10 +11,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "npm install && node server.http.js KITE_NOADAPTER_SERVER",
-    "stop": "pkill -f --signal SIGINT KITE_NOADAPTER_SERVER"
+    "start": "npm install && node server.js"
   },
   "author": "jose.recio@cosmosoftware.io",
   "license": "Apache-2.0"
 }
-

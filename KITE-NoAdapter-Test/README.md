@@ -19,8 +19,26 @@ To stop the server, just interrupt the starting command or change to the server 
 npm stop
 ```
 
-By default server listens in 8082 port, to change this, edit server.http.js
+By default server listens to port 8083. To change this, launch the server as follow instead:
 
-By default server listens in all interfaces, to change this, edit server.http.js
+```sh
+node server.js PORT
+```
 
-If the test is to be run on a Selenium Grid, the IP address for the server should be the IP address of the machine on which it is being run, instead of http://localhost:8080.
+The port argument are not mandatory.
+
+By default server listens in all interfaces, to change this, edit server.js. If you want to test on lots of different browser configurations. We recommend using a server with a CA to avoid any problem with safari and edge.
+
+If the test is to be run on a Selenium Grid, the IP address for the server should be the IP address of the machine on which it is being run, instead of http(s)://localhost:8082(3). You can change this by adding a payload object in the config file, as follow:
+
+    {
+        "name": "NoAdapterTest",
+        "tupleSize": 2,
+        "noOfThreads": 3,
+        "description": "This test checks the ICEConnection state between two browser peer connections without adapter.js",
+        "testImpl": "org.webrtc.kite.NoAdapterTest",
+        "payload": {
+            "ip": "SERVER_IP",
+            "port": PORT
+        }
+    }

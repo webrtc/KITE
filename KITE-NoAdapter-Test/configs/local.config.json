@@ -1,12 +1,18 @@
 {
+   "name" : "NoAdapter test run on the grid",
    "tests" : [
       {
-         "name" : "NoAdapterTest",
-         "tupleSize" : 2,
-         "testImpl" : "org.webrtc.kite.NoAdapterTest"
+         "name": "NoAdapterTest",
+         "tupleSize": 2,
+         "noOfThreads": 3,
+         "description": "This test checks the ICEConnection state between two browser peer connections without adapter.js",
+         "testImpl": "org.webrtc.kite.NoAdapterTest",
+         "payload": {
+            "ip": "localhost",
+            "port": 8083
+         }
       }
    ],
-   "name" : "NoAdapter test run on the grid",
    "remotes" : [
       {
          "type" : "local",
@@ -21,13 +27,13 @@
          "platform" : "MAC"
       },
       {
-         "version" : "59",
          "browserName" : "firefox",
+         "version" : "59",
          "platform" : "LINUX"
       },
       {
-         "version" : "59",
          "browserName" : "firefox",
+         "version" : "59",
          "platform" : "WINDOWS"
       }
    ]

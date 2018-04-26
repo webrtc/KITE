@@ -14,24 +14,36 @@
 
 'use strict';
 
+//FIXME: use arguments
+var https_port = 8083;
+
 var express = require('express');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
+var helmet = require('helmet');
+var io = require('socket.io');
 
-var app = express();
-var helmet = require('helmet')
-app.use(helmet())
+var app = express()
+  .use(helmet())
+  .use(express.static('./test'));
 
-app.use(express.static('./test'));
+var ioSocket = new io();
 
-// FIXME: use an argument
-var port = 8082;
+if (process.argv.length > 2){
+  https_port = process.argv[2];
+}
 
-// Create an HTTP service.
-var server = http.Server(app);
-var io = require('socket.io')(server);
-server.listen(port);
 
-io.on('connection', function (socket) {
+var options = {
+  key: fs.readFileSync('config/server.key'),
+  cert: fs.readFileSync('config/server.cert')
+};
+// Create HTTPS server and attaches it to socket.io channel
+ioSocket.attach(https.createServer(options, app).listen(https_port));
+console.log('serving on https://'+ '*' + ':' + https_port );
+
+ioSocket.on('connection', function (socket) {
   socket.emit('serverNews', { hello: 'world' });
   socket.on('hello', function (data) {
     var receivedId = data.id;
@@ -45,6 +57,3 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('webrtc', { channel: data.channel, from: data.from, to: data.to, msg: data.msg });
   });
 });
-
-console.log('serving on http://*:' + port );
-
