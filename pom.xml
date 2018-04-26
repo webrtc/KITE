@@ -31,7 +31,9 @@
     <module>KITE-GetUpdate-Test</module>
     <module>KITE-Jitsi-Test</module>
     <module>KITE-NoAdapter-Test</module>
+    <module>KITE-WP-Test</module>
     <module>KITE-Dashboard</module>
+    <module>KITE-Scorecard</module>
   </modules>
 
 </project>

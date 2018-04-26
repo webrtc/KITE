@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toolbox>
+    <tool>
+        <key>linkTool</key>
+        <scope>request</scope>
+        <class>org.apache.velocity.tools.generic.LinkTool</class>
+    </tool>
+    <tool>
+        <key>dateTool</key>
+        <scope>request</scope>
+        <class>org.apache.velocity.tools.generic.DateTool</class>
+    </tool>
+</toolbox>
