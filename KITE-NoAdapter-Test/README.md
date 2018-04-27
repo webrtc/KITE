@@ -42,3 +42,14 @@ If the test is to be run on a Selenium Grid, the IP address for the server shoul
             "port": PORT
         }
     }
+
+## How to generate server's SSL certificate
+
+The files server.cert and server.key, which will be used to create the https server 
+are initially empty. You should create your own sefl-signed certificate and 
+replace them in the config folder.
+
+
+```
+openssl req -new -newkey rsa:2048 -nodes -out server.cert -keyout server.key
+```

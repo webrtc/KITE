@@ -1,3 +1,14 @@
+## How to generate server's SSL certificate (both servers)
+
+The files server.cert and server.key, which will be used to create the https server 
+are initially empty. You should create your own sefl-signed certificate and 
+replace them in the config folder.
+
+
+```
+openssl req -new -newkey rsa:2048 -nodes -out server.cert -keyout server.key
+```
+
 #Simulcast server
 
 This contains the web client and server for compliance testing on
@@ -34,6 +45,7 @@ two ways:
   - `serverAddress` field in [config/config.json](config/config.json)
   - The `MEDIA_SERVER_IP` environment variable. Note that this overrides
     any value in config.json.
+   
 
 ## Simulcast Testing
 

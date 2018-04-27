@@ -45,3 +45,15 @@ and the one echoed from the media server.
 The second row of videos are created with seperate peer connections requesting
 for different version of the Simulcast streams - original resolution, 1/2
 resolution, and 1/4 resolution.
+
+
+## How to generate server's SSL certificate
+
+The files server.cert and server.key, which will be used to create the https server 
+are initially empty. You should create your own sefl-signed certificate and 
+replace them in the config folder.
+
+
+```
+openssl req -new -newkey rsa:2048 -nodes -out server.cert -keyout server.key
+```

@@ -63,7 +63,19 @@ mvn clean install
 
 * If selenium is not running (step mentioned above), build will fail, as KITE-AppRTC-Test includes a Junit test that requires local selenium. 
 
+We'll also need the server to be up for NoAdapterTest, SimulcastTest, Multi-Stream-Test. For this you will 
+need to generate SSL certificate of your own to run these server. The files server.cert and server.key,
+which will be used to create the https server are initially empty. You should create your own sefl-signed certificate and 
+replace them in the config folder of each server.
+
+
+```
+openssl req -new -newkey rsa:2048 -nodes -out server.cert -keyout server.key
+```
+
 * Since the SimulcastTest is included, it requires its own server to be running. To start the server, go into the directory KITE-Multi-Simul-cast-Test/server/simulcast and run:
+
+
 
 ```sh
 npm install
