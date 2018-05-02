@@ -17,8 +17,11 @@
 package org.webrtc.kite;
 
 import org.apache.log4j.Logger;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -52,6 +55,7 @@ public class JitsiTest extends KiteTest {
     private final static String JITSI_URL = "https://meet.jit.si/";
     private final static int TIMEOUT = 600000;
     private final static int INTERVAL = 1000;
+    private static String alertMsg;
 
 
     /**
@@ -63,6 +67,17 @@ public class JitsiTest extends KiteTest {
 
         for (WebDriver webDriver : this.getWebDriverList()) {
             webDriver.get(JITSI_URL + channel);
+            try {
+                Alert alert = webDriver.switchTo().alert();
+                alertMsg = alert.getText();
+                if (alertMsg != null) {
+                    alertMsg = ((RemoteWebDriver) webDriver).getCapabilities().getBrowserName() + " alert: " +alertMsg;
+                    logger.warn(alertMsg);
+                    alert.accept();
+                }
+            } catch (NoAlertPresentException e) {
+                alertMsg = null;
+            }
         }
     }
 
@@ -104,11 +119,12 @@ public class JitsiTest extends KiteTest {
     private boolean validateResults(List<RoomState> resultList) {
         int numberOfParticipants = this.getWebDriverList().size();
         for (RoomState room : resultList)
-            if ( (expectedResultMap.get(room.getState()) == null) || room.getHeadCount() == 0)
+            if ( (expectedResultMap.get(room.getState()) == null) || room.getHeadCount() == 0) {
                 return false;
-            else{
-                if (room.getHeadCount()!=numberOfParticipants)
+            } else{
+                if (room.getHeadCount()!=numberOfParticipants) {
                     return false;
+                }
             }
         return true;
     }
@@ -121,16 +137,20 @@ public class JitsiTest extends KiteTest {
      * @return true if atleast one of the result string matches 'failed'.
      */
     private boolean checkForFailed(List<RoomState> resultList) {
-        for (RoomState room : resultList)
-            if (room.getState().equalsIgnoreCase("failed"))
+        for (RoomState room : resultList) {
+            if (room.getState().equalsIgnoreCase("failed")) {
                 return true;
+            }
+        }
         return false;
     }
 
     @Override
     public Object testScript() throws Exception {
         this.takeAction();
-
+/*    if (alertMsg != null) {
+      return Json.createObjectBuilder().add("result", alertMsg).build().toString();
+    }*/
         String result = "TIME OUT";
 
         for (int i = 0; i < TIMEOUT; i += INTERVAL) {

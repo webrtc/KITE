@@ -15,4 +15,3 @@ See LICENSE for licensing.
 ## [4. KITE scorecard](https://github.com/webrtc/KITE/wiki/KITE-scorecard)
 
 ## [5. Existing KITE tests](https://github.com/webrtc/KITE/wiki/Existing-KITE-Tests)
-

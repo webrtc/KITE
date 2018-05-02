@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,29 +16,24 @@
 
 package org.webrtc.kite;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import org.apache.log4j.Logger;
 import org.webrtc.kite.exception.KiteBadValueException;
 import org.webrtc.kite.exception.KiteNoKeyException;
-import org.webrtc.kite.stat.*;
 
+import javax.json.JsonObject;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Utility class holding various static methods.
  */
 public class Utility {
+
+  private static final Logger logger = Logger.getLogger(Utility.class.getName());
 
   /**
    * Returns stack trace of the given exception.
@@ -46,7 +41,7 @@ public class Utility {
    * @param e Exception
    * @return string representation of e.printStackTrace()
    */
-  public static String getStackTrace(Exception e) {
+  public static String getStackTrace(Throwable e) {
     Writer writer = new StringWriter();
     e.printStackTrace(new PrintWriter(writer));
     return writer.toString();
@@ -56,11 +51,12 @@ public class Utility {
    * Checks if the given key exists in the given JsonObject with a valid value.
    *
    * @param jsonObject JsonObject
-   * @param key key
+   * @param key        key
    * @param valueClass Class object for the value of the key.
-   * @param isOptional A boolean specifying that the value may be optional. Note: This only works if the valueClass is String.
+   * @param isOptional A boolean specifying that the value may be optional. Note: This only works
+   *                   if the valueClass is String.
    * @return the value of the key
-   * @throws KiteNoKeyException if the key is not mapped in the JsonObject.
+   * @throws KiteNoKeyException    if the key is not mapped in the JsonObject.
    * @throws KiteBadValueException if the value of the key is invalid.
    */
   public static Object throwNoKeyOrBadValueException(JsonObject jsonObject, String key,
@@ -69,17 +65,26 @@ public class Utility {
     try {
       switch (valueClass.getSimpleName()) {
         case "String":
-          value = (isOptional) ? jsonObject.getString(key, null) : jsonObject.getString(key);
+          value = jsonObject.getString(key);
+          break;
+        case "Integer":
+          value = jsonObject.getInt(key);
           break;
         case "JsonArray":
           value = jsonObject.getJsonArray(key);
+          break;
+        case "JsonObject":
+          value = jsonObject.getJsonObject(key);
           break;
         default:
           value = jsonObject.get(key);
       }
       return value;
     } catch (NullPointerException e) {
-      throw new KiteNoKeyException(key);
+      if (isOptional)
+        return null;
+      else
+        throw new KiteNoKeyException(key);
     } catch (ClassCastException e) {
       throw new KiteBadValueException(key);
     }
@@ -88,32 +93,22 @@ public class Utility {
   /**
    * Closes the given jdbc resources if they are not null.
    *
-   * @param s Statement
+   * @param s  Statement
    * @param rs ResultSet
    */
   public static void closeDBResources(Statement s, ResultSet rs) {
-    if (s == null && rs == null) {
-      // Both are null, don't do anything.
-    } else if (s == null && rs != null) {
+    if (rs != null)
       try {
         rs.close();
       } catch (SQLException e) {
+        logger.warn("Exception while closing the ResultSet", e);
       }
-    } else if (s != null && rs == null) {
+    if (s != null)
       try {
         s.close();
       } catch (SQLException e) {
+        logger.warn("Exception while closing the Statement", e);
       }
-    } else {
-      try {
-        rs.close();
-      } catch (SQLException e) {
-      }
-      try {
-        s.close();
-      } catch (SQLException e) {
-      }
-    }
   }
 
   /**
@@ -129,10 +124,11 @@ public class Utility {
   /**
    * Prints the stack trace of the provided exception object.
    *
-   * @param e Exception
+   * @param logger the logger
+   * @param e      Exception
    */
   public static void printStackTrace(Logger logger, Exception e) {
-    logger.error(e.getStackTrace());
+    logger.error(Utility.getStackTrace(e));
   }
 
   /**
@@ -157,91 +153,4 @@ public class Utility {
     return object1 != null && object2 != null;
   }
 
-  /**
-   * Obtain a value of a key in the data map if not null
-   *
-   * @param statObject data Map
-   * @param statName name of the key
-   * @return true if both the provided objects are not null.
-   */
-  public static String getStatByName(Map<Object, Object> statObject, String statName){
-    if(statObject.get(statName)!=null)
-      return statObject.get(statName).toString();
-    return "NA";
-  }
-
-
-  /**
-   * Create a JsonObjectBuilder Object to eventually build a Json object
-   * from data obtained via tests.
-   *
-   * @param statArray array of data sent back from test
-   * @return JsonObjectBuilder.
-   */
-  public static JsonObjectBuilder buildStatObject(Object statArray){
-    JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-    Map<String, List<StatObject>> statObjectMap = new HashMap<>();
-    for (Object map: (ArrayList) statArray) {
-      Map<Object, Object> statMap = (Map<Object, Object>) map;
-      String type = (String) statMap.get("type");
-      StatObject statObject = null;
-      switch (type){
-        case "codec":{
-          statObject = new RTCCodecStats(statMap);
-          break;
-        }
-        case "track":{
-          statObject = new RTCMediaStreamTrackStats(statMap);
-          break;
-        }
-        case "stream":{
-          statObject = new RTCMediaStreamStats(statMap);
-          break;
-        }
-        case "inbound-rtp":{
-          statObject = new RTCRTPStreamStats(statMap, true);
-          break;
-        }
-        case "outbound-rtp":{
-          statObject = new RTCRTPStreamStats(statMap, false);
-          break;
-        }
-        case "peer-connection":{
-          statObject = new RTCPeerConnectionStats(statMap);
-          break;
-        }
-        case "transport":{
-          statObject = new RTCTransportStats(statMap);
-          break;
-        }
-        case "candidate-pair":{
-          statObject = new RTCIceCandidatePairStats(statMap);
-          break;
-        }
-        case "remote-candidate":{
-          statObject = new RTCIceCandidateStats(statMap);
-          break;
-        }
-        case "local-candidate":{
-          statObject = new RTCIceCandidateStats(statMap);
-          break;
-        }
-      }
-      if (statObject!=null) {
-        if (statObjectMap.get(type)==null) {
-          statObjectMap.put(type, new ArrayList<StatObject>());
-        }
-        statObjectMap.get(type).add(statObject);
-      }
-    }
-    if (!statObjectMap.isEmpty()){
-      for (String type: statObjectMap.keySet()){
-        JsonObjectBuilder tmp = Json.createObjectBuilder();
-        for (StatObject stat: statObjectMap.get(type))
-          tmp.add(stat.getId(),stat.getJsonObjectBuilder());
-        jsonObjectBuilder.add(type,tmp);
-      }
-    }
-    return jsonObjectBuilder;
-  }
 }

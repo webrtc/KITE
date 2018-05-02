@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,21 +23,21 @@ import java.util.List;
  */
 public class ConfigExecution {
 
+  List<ConfigTest> testList;
   private int configId;
   private String configName;
   private long startTime;
   private long endTime;
   private int testCount;
   private Boolean isDone;
-  List<ConfigTest> testList;
 
   /**
    * Constructs a new ConfigExecution object from given information.
    *
-   * @param configId id of the configuration.
+   * @param configId   id of the configuration.
    * @param configName name of the configuration.
-   * @param startTime time stamp at the beginning of the run.
-   * @param testCount number of test executed in the configuration.
+   * @param startTime  time stamp at the beginning of the run.
+   * @param testCount  number of test executed in the configuration.
    */
   public ConfigExecution(int configId, String configName, long startTime, int testCount) {
     super();
@@ -89,30 +89,27 @@ public class ConfigExecution {
     return testCount;
   }
 
+  public void setTestCount(int testCount) {
+    this.testCount = testCount;
+  }
 
   public Boolean getIsDone() {
     return isDone;
   }
 
+  public long getEndTime() {
+    return endTime;
+  }
 
   public void setEndTime(long endTime) {
     this.endTime = endTime;
   }
 
-
-  public long getEndTime() {
-    return endTime;
-  }
-
-  public void setTestCount(int testCount) {
-    this.testCount = testCount;
+  public List<ConfigTest> getTestList() {
+    return testList;
   }
 
   public void setTestList(List<ConfigTest> testList) {
     this.testList = testList;
-  }
-
-  public List<ConfigTest> getTestList() {
-    return testList;
   }
 }

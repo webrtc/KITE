@@ -30,6 +30,11 @@ limitations under the License.
         margin:5px;
     }
 
+    .dropdown-button {
+      display: inline-flex;
+      align-items: center;
+    }
+
     .filter{
         border-left: 5px dashed white;
     }
@@ -68,15 +73,65 @@ limitations under the License.
     .grow{
         overflow: hidden;
         height:60px;
-        width: 90%;
+        width: 95%;
         -webkit-transition:width 200ms;
         -moz-transition:width 200ms;
         transition:width 200ms;
         -webkit-transition:height 200ms;
         -moz-transition:height 200ms;
         transition:height 200ms;
-        margin:10px;
+        margin:5px;
     }
+
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-indent: 1px;
+        text-overflow: '';
+    }
+
+    .styled-select {
+
+        overflow: hidden;
+        border-radius: 2px;
+    }
+
+    .styled-select-test select {
+        margin:20px;
+        cursor:pointer;
+        border: 1px solid grey;
+        background: transparent;
+        border-radius: 2px;
+        overflow: hidden;
+        font-size: 11px;
+        font-weight: 200;
+        padding: 5px; /* If you add too much padding here, the options won't show in IE */
+    }
+
+    .styled-select-caller select {
+        margin:20px;
+        cursor:pointer;
+        border: 1px solid #42f4aa;
+        background: transparent;
+        border-radius: 2px;
+        overflow: hidden;
+        font-size: 11px;
+        font-weight: 200;
+        padding: 5px; /* If you add too much padding here, the options won't show in IE */
+    }
+
+    .styled-select-callee select {
+        margin:20px;
+        cursor:pointer;
+        border: 1px solid red;
+        background: transparent;
+        border-radius: 2px;
+        overflow: hidden;
+        font-size: 11px;
+        font-weight: 200;
+        padding: 5px; /* If you add too much padding here, the options won't show in IE */
+    }
+
 
 <!-- color code -->
 
@@ -108,18 +163,13 @@ limitations under the License.
     }
 
     .show-more {
-        border: 1px solid #42f4aa;;
+        border: 1px solid #42f4aa;
         font-weight: 400;
         font-size:15px;
         font-style: italic;
         color: black;
         background: white;
-        width: 200px;
-    }
-
-    .show-more:hover{
-        background: #42f4aa;
-        color:green;
+        width: 60px;
     }
 
     .pick-option {
@@ -139,14 +189,14 @@ limitations under the License.
     }
 
     .last-run{
-        padding-left: 70px;
+        padding-left: 30px;
         font-weight: 200;
-        font-size: 15px;
+        font-size: 12px;
         font-style: italic;
     }
     .config-name{
-        padding-left: 20px;
-        font-size:20px;
+        padding-left: 5px;
+        font-size:15px;
         font-weight: 200;
     }
 
@@ -325,11 +375,17 @@ limitations under the License.
       cursor:pointer;
     }
 
+    stats{
+      color:#42f4aa;
+    }
 
     .stat-wrapping{
         max-height: 230px;
         overflow-y: scroll;
         min-width:100px;
+    }
+    .stat-container{
+        min-height: 150px;
     }
 
 
@@ -340,15 +396,22 @@ limitations under the License.
     }
 
     .config-wrapping{
-        max-height: 650px;
+        max-height: 400px;
+        overflow-x: hidden;
         overflow-y: scroll;
         min-width:100px;
+        margin-bottom:30px;
     }
 
 
     .search-wrapping{
-        max-height: 350px;
+        max-height: 250px;
         overflow-y: scroll;
+    }
+
+    .show-result-wrapping{
+        max-height: 250px;
+        overflow-y: auto;
     }
 
     .run-wrapping{
@@ -379,6 +442,18 @@ limitations under the License.
 
     .no-margin{
         margin:0px;
+    }
+
+    .sdp-message{
+        font-size: 11px;
+    }
+
+    .succeeded-candidate{
+        background: #42f4aa;
+    }
+
+    .failed-candidate{
+        background: #ff4242;
     }
 <!-- overview page -->
 
@@ -525,4 +600,12 @@ limitations under the License.
         font-size: 16px;
         font-style: italic;
         margin:0px;
-            }
+    }
+
+<!-- stat page -->
+
+    h4.participant{
+        font-weight: 400;
+        font-size: 20px;
+        font-style: bold;
+    }

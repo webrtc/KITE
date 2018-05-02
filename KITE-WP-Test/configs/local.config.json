@@ -1,0 +1,30 @@
+{
+  "tests": [
+    {
+      "name": "Web Platform Test",
+      "tupleSize": 1,
+      "noOfThreads": 7,
+      "testImpl": "org.webrtc.kite.wpt.WPTest",
+      "payload": {
+        "ip": "localhost",
+        "port": 8000,
+        "all": false
+      }
+    }
+  ],
+  "name": "Web Platform Test",
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://localhost:4444/wd/hub"
+    }
+  ],
+  "callback": "http://localhost:8080/score-card/datacenter",
+  "browsers": [
+    {
+      "browserName": "safari",
+      "platform": "MAC",
+      "version": "11.1"
+    }
+  ]
+}

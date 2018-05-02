@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,16 +58,12 @@ public class ResultServlet extends HttpServlet {
    */
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    // TODO Auto-generated method stub
-    // response.getWriter().append("Served at:
-    // ").append(request.getContextPath());
 
     String testID = request.getParameter("test");
     if (testID == null)
       throw new KiteNoKeyException("testID");
     if (log.isDebugEnabled())
       log.debug("in->test ID: " + testID);
-
 
 
     OverviewResult listOfResult;
@@ -80,14 +76,13 @@ public class ResultServlet extends HttpServlet {
       test = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestById(testIDInt);
       request.setAttribute("test", test);
       listOfResult = new OverviewResult(
-              new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getResultList(test.getResultTable(),test.getTupleSize()));
+          new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getResultList(test.getResultTable(), test.getTupleSize()));
       request.setAttribute("listOfResult", listOfResult);
       request.setAttribute("total", listOfResult.getListOfResultTable().size());
       request.setAttribute("jsonData", listOfResult.getSunburstJsonData());
       request.setAttribute("testJsonData", test.getJsonData());
       request.setAttribute("browserList", listOfResult.getDistincBrowserList());
     } catch (SQLException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
       throw new KiteSQLException(e.getLocalizedMessage());
     }

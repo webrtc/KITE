@@ -17,13 +17,11 @@
 package org.webrtc.kite;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.NoAlertPresentException;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.webrtc.kite.stat.Utility;
 
 import javax.json.Json;
-import javax.json.JsonObjectBuilder;
 import java.util.*;
 
 /**
@@ -52,16 +50,79 @@ public class IceConnectionTest extends KiteTest {
   private final static Logger logger = Logger.getLogger(IceConnectionTest.class.getName());
 
   private final static Map<String, String> expectedResultMap = new HashMap<String, String>();
+  private final static String APPRTC_URL = "https://appr.tc/r/";
+  private final static int TIMEOUT = 60000;
+  private final static int OVERTIME = 10000;
+  private final static int INTERVAL = 1000;
+  private final static String RESULT_TIMEOUT = "TIME OUT";
+  private final static String RESULT_SUCCESSFUL = "SUCCESSFUL";
+  private final static String RESULT_FAILED = "FAILED";
+  private static String alertMsg;
+
 
   static {
     expectedResultMap.put("completed", "completed");
     expectedResultMap.put("connected", "connected");
   }
 
-  private final static String APPRTC_URL = "https://appr.tc/r/";
+  /**
+   * Returns the test JavaScript to retrieve appController.call_.pcClient_.pc_.iceConnectionState.
+   * If it doesn't exist then the method returns 'unknown'.
+   *
+   * @return the JavaScript as string.
+   */
+  private final static String testJavaScript() {
+    return "var retValue;"
+      + "try {retValue = appController.call_.pcClient_.pc_.iceConnectionState;} catch (exception) {} "
+      + "if (retValue) {return retValue;} else {return 'unknown';}";
+  }
 
-  private final static int TIMEOUT = 60000;
-  private final static int INTERVAL = 1000;
+  /**
+   * Returns the test's getSDPOfferScript to retrieve appController.call_.pcClient_.pc_.remoteDescription.
+   * If it doesn't exist then the method returns 'unknown'.
+   *
+   * @return the getSDPOfferScript as string.
+   */
+  private final static String getSDPOfferScript() {
+    return "var SDP;"
+      + "try {SDP = appController.call_.pcClient_.pc_.remoteDescription;} catch (exception) {} "
+      + "if (SDP) {return SDP;} else {return 'unknown';}";
+  }
+
+  /**
+   * Returns the test's getSDPAnswerScript to retrieve appController.call_.pcClient_.pc_.localDescription.
+   * If it doesn't exist then the method returns 'unknown'.
+   *
+   * @return the getSDPAnswerScript as string.
+   */
+  private final static String getSDPAnswerScript() {
+    return "var SDP;"
+      + "try {SDP = appController.call_.pcClient_.pc_.localDescription;} catch (exception) {} "
+      + "if (SDP) {return SDP;} else {return 'unknown';}";
+  }
+
+  /**
+   * @return the JavaScript as string.
+   */
+  private final static String stashStatsScript() {
+    return "const getStatsValues = () =>" +
+      "  appController.call_.pcClient_.pc_.getStats()" +
+      "    .then(data => {" +
+      "      return [...data.values()];" +
+      "    });" +
+      "const stashStats = async () => {" +
+      "  window.KITEStats = await getStatsValues();" +
+      "  return 0;" +
+      "};" +
+      "stashStats();";
+  }
+
+  /**
+   * @return the JavaScript as string.
+   */
+  private final static String getStatsScript() {
+    return "return window.KITEStats;";
+  }
 
   /**
    * Opens the APPRTC_URL and clicks 'confirm-join-button'.
@@ -73,49 +134,18 @@ public class IceConnectionTest extends KiteTest {
     for (WebDriver webDriver : this.getWebDriverList()) {
       webDriver.get(APPRTC_URL + channel);
       try {
-        webDriver.switchTo().alert().accept();
+        Alert alert = webDriver.switchTo().alert();
+        alertMsg = alert.getText();
+        if (alertMsg != null) {
+          alertMsg = ((RemoteWebDriver) webDriver).getCapabilities().getBrowserName() + " alert: " +alertMsg;
+          logger.warn(alertMsg);
+          alert.accept();
+        }
       } catch (NoAlertPresentException e) {
-        logger.warn(e.getLocalizedMessage());
+        alertMsg = null;
       }
       webDriver.findElement(By.id("confirm-join-button")).click();
     }
-  }
-
-  /**
-   * Returns the test JavaScript to retrieve appController.call_.pcClient_.pc_.iceConnectionState.
-   * If it doesn't exist then the method returns 'unknown'.
-   *
-   * @return the JavaScript as string.
-   */
-  private final static String testJavaScript() {
-    return "var retValue;"
-        + "try {retValue = appController.call_.pcClient_.pc_.iceConnectionState;} catch (exception) {} "
-        + "if (retValue) {return retValue;} else {return 'unknown';}";
-  }
-
-  /**
-   *
-   * @return the JavaScript as string.
-   */
-  private final static String stashStatsScript() {
-    return  "const getStatsValues = () =>" +
-            "  appController.call_.pcClient_.pc_.getStats()" +
-            "    .then(data => {" +
-            "      return [...data.values()];" +
-            "    });" +
-            "const stashStats = async () => {" +
-            "  window.KITEStats = await getStatsValues();" +
-            "  return 0;" +
-            "};" +
-            "stashStats();";
-  }
-
-  /**
-   *
-   * @return the JavaScript as string.
-   */
-  private final static String getStatsScript() {
-    return  "return window.KITEStats;";
   }
 
   /**
@@ -147,42 +177,57 @@ public class IceConnectionTest extends KiteTest {
   @Override
   public Object testScript() throws Exception {
     this.takeAction();
-
-    String result = "TIME OUT";
-    Map<String,Object> resultMap = new HashMap<String,Object>();  ;
-
+/*    if (alertMsg != null) {
+      return Json.createObjectBuilder().add("result", alertMsg).build().toString();
+    }*/
+    String result = RESULT_TIMEOUT;
+    Map<String, Object> resultMap = new HashMap<String, Object>();
     for (int i = 0; i < TIMEOUT; i += INTERVAL) {
       List<String> resultList = new ArrayList<String>();
       for (WebDriver webDriver : this.getWebDriverList()) {
         String resultOfScript =
-            (String) ((JavascriptExecutor) webDriver).executeScript(this.testJavaScript());
+          (String) ((JavascriptExecutor) webDriver).executeScript(this.testJavaScript());
         if (logger.isInfoEnabled())
           logger.info(webDriver + ": " + resultOfScript);
         resultList.add(resultOfScript);
       }
 
       if (this.checkForFailed(resultList)) {
-        result = "FAILED";
+        result = RESULT_FAILED;
         int count = 1;
-        JsonObjectBuilder statListBuilder = Json.createObjectBuilder();
         for (WebDriver webDriver : this.getWebDriverList()) {
           ((JavascriptExecutor) webDriver).executeScript(this.stashStatsScript());
           Thread.sleep(INTERVAL);
           Object stats = ((JavascriptExecutor) webDriver).executeScript(this.getStatsScript());
-          resultMap.put("client_" + count,stats);
-          count+=1;
+          resultMap.put("stats_" + count, stats);
+          count += 1;
         }
         break;
       } else if (this.validateResults(resultList)) {
-        result = "SUCCESSFUL";
-        int count = 1;
-        JsonObjectBuilder statListBuilder = Json.createObjectBuilder();
-        for (WebDriver webDriver : this.getWebDriverList()) {
-          ((JavascriptExecutor) webDriver).executeScript(this.stashStatsScript());
-          Thread.sleep(INTERVAL);
-          Object stats = ((JavascriptExecutor) webDriver).executeScript(this.getStatsScript());
-          resultMap.put("client_" + count,stats);
-          count+=1;
+        result = RESULT_SUCCESSFUL;
+        for (int timer = 0; timer < OVERTIME; timer += INTERVAL) {
+          int count = 1;
+          for (WebDriver webDriver : this.getWebDriverList()) {
+            ((JavascriptExecutor) webDriver).executeScript(this.stashStatsScript());
+            Thread.sleep(INTERVAL);
+            Object stats = ((JavascriptExecutor) webDriver).executeScript(this.getStatsScript());
+            if (timer == 0) {
+
+              resultMap.put("client_" + count, new HashMap<String, Object>());
+              Map<String, Object> clientStat = (Map<String, Object>) resultMap.get("client_" + count);
+              clientStat.put("stats", new ArrayList<>());
+
+              Object offer = ((JavascriptExecutor) webDriver).executeScript(this.getSDPOfferScript());
+              Object answer = ((JavascriptExecutor) webDriver).executeScript(this.getSDPAnswerScript());
+              clientStat.put("offer", offer);
+              clientStat.put("answer", answer);
+            }
+            Map<String, Object> clientStatTmp = (Map<String, Object>) resultMap.get("client_" + count);
+            List<Object> tmp = (List) clientStatTmp.get("stats");
+            tmp.add(stats);
+            resultMap.put("client_" + count, clientStatTmp);
+            count += 1;
+          }
         }
         break;
       } else {
@@ -190,8 +235,8 @@ public class IceConnectionTest extends KiteTest {
       }
     }
 
-    resultMap.put("result",result);
-    return resultMap;
+    resultMap.put("result", result);
+    return Utility.developResult(resultMap, this.getWebDriverList().size()).toString();
   }
 
 }

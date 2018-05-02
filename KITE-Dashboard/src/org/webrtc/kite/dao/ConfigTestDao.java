@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -85,7 +85,7 @@ public class ConfigTestDao {
           configTest.setStatus(true);
           configTest.setEndTime(rs.getLong(3));
         }
-        if (rs.getString("DESCRIPTION")!=null)
+        if (rs.getString("DESCRIPTION") != null)
           configTest.setDescription(rs.getString("DESCRIPTION"));
         else
           configTest.setDescription("No description was provided fot this test.");
@@ -136,7 +136,7 @@ public class ConfigTestDao {
           configTest.setStatus(true);
           configTest.setEndTime(rs.getLong(3));
         }
-        if (rs.getString("DESCRIPTION")!=null)
+        if (rs.getString("DESCRIPTION") != null)
           configTest.setDescription(rs.getString("DESCRIPTION"));
         else
           configTest.setDescription("No description was provided fot this test.");
@@ -150,8 +150,32 @@ public class ConfigTestDao {
   }
 
   /**
-   * Returns a list of all the executed tests, non-repetitively.
+   * Returns a list of all the test with a specific name.
    *
+   * @param testName name of the test.
+   */
+  public List<String> getResultTableList(String testName) throws SQLException {
+    String query = "SELECT RESULT_TABLE FROM TESTS WHERE TEST_NAME='" + testName + "' ORDER BY START_TIME DESC";
+    List<String> resultTableList = new ArrayList<String>();
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    try {
+      ps = this.connection.prepareStatement(query);
+      if (log.isDebugEnabled())
+        log.debug("Executing: " + query);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        resultTableList.add(rs.getString("RESULT_TABLE"));
+      }
+    } finally {
+      Utility.closeDBResources(ps, rs);
+    }
+
+    return resultTableList;
+  }
+
+  /**
+   * Returns a list of all the executed tests, non-repetitively.
    */
   public List<ConfigTest> getTestList() throws SQLException {
     String query = "SELECT DISTINCT TEST_NAME,TUPLE_SIZE,DESCRIPTION FROM TESTS ORDER BY TEST_NAME DESC, DESCRIPTION DESC";
@@ -181,9 +205,9 @@ public class ConfigTestDao {
 
     return resultTestList;
   }
+
   /**
    * Returns a list of all the executed 1v1 tests, non-repetitively.
-   *
    */
   public List<String> get1v1TestList() throws SQLException {
     String query = "SELECT DISTINCT TEST_NAME FROM TESTS WHERE TUPLE_SIZE=2 ORDER BY TEST_NAME DESC";
@@ -209,7 +233,6 @@ public class ConfigTestDao {
 
   /**
    * Returns a ConfigTest object of a test with specific ID.
-   *
    */
   public ConfigTest getTestById(int id) throws SQLException {
     String query = "SELECT * FROM TESTS WHERE TEST_ID=" + id + ";";
@@ -241,7 +264,7 @@ public class ConfigTestDao {
           configTest.setStatus(true);
           configTest.setEndTime(rs.getLong(3));
         }
-        if (rs.getString("DESCRIPTION")!=null)
+        if (rs.getString("DESCRIPTION") != null)
           configTest.setDescription(rs.getString("DESCRIPTION"));
         else
           configTest.setDescription("No description was provided fot this test.");
@@ -252,32 +275,6 @@ public class ConfigTestDao {
     }
     return null;
   }
-
-
-  /**
-   * Returns the number of finished test cases in a test.
-   *
-   * @param tableName name of the result table in the database.
-   */
-  private int getNumberOfFinishedTestCase(String tableName) throws SQLException {
-    String query = "SELECT COUNT(*) FROM " + tableName + " WHERE RESULT<>'SCHEDULED';";
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-    try {
-      ps = this.connection.prepareStatement(query);
-      if (log.isDebugEnabled())
-        log.debug("Executing: " + query);
-      rs = ps.executeQuery();
-      while (rs.next()) {
-        return rs.getInt(1);
-      }
-    } finally {
-      Utility.closeDBResources(ps, rs);
-    }
-
-    return 0;
-  }
-
 
   /**
    * Returns the stats on test cases in a test.
@@ -324,74 +321,4 @@ public class ConfigTestDao {
 
     return stats;
   }
-
-  /**
-   * Returns number of finished test cases a test in a configuration
-   *
-   * @param id id of the test in question.
-   */
-  public int getNumberOfFinishedTestCase(int id) throws SQLException {
-    ConfigTest test = getTestById(id);
-    return getNumberOfFinishedTestCase(test.getResultTable());
-  }
-
-  /**
-   * Returns the accumulative duration of all finished case in a test.
-   *
-   * @param tableName name of the result table in the database.
-   */
-  private long getCurrentAccumulatedDuration(String tableName) throws SQLException {
-    String query = "SELECT DURATION FROM " + tableName + ";";
-    long elapsedTime = 0;
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-    try {
-      ps = this.connection.prepareStatement(query);
-      if (log.isDebugEnabled())
-        log.debug("Executing: " + query);
-      rs = ps.executeQuery();
-      while (rs.next()) {
-        elapsedTime += rs.getLong(1);
-      }
-    } finally {
-      Utility.closeDBResources(ps, rs);
-    }
-
-    return elapsedTime;
-  }
-
-  /**
-   * Returns percentage of completion of a test in a configuration
-   *
-   * @param id id of the test in question.
-   */
-  public int getPercentage(int id) throws SQLException {
-    ConfigTest test = getTestById(id);
-    int total = test.getTotalTests();
-    int finished = getNumberOfFinishedTestCase(test.getResultTable());
-    int percentage = 100 * finished / total;
-    if (log.isDebugEnabled())
-      log.debug("percentage -> " + percentage + "%");
-    return percentage;
-  }
-
-  /**
-   * Returns ETA of completion of a test in a configuration
-   *
-   * @param id id of the test in question.
-   */
-  public long getETA(int id) throws SQLException {
-    ConfigTest test = getTestById(id);
-    int total = test.getTotalTests();
-    int finished = getNumberOfFinishedTestCase(test.getResultTable());
-    long elapsedTime = getCurrentAccumulatedDuration(test.getResultTable());
-    long ETA = 0;
-    if (finished != 0)
-      ETA = elapsedTime * (total - finished) / finished;
-    if (log.isDebugEnabled())
-      log.debug(ETA);
-    return ETA;
-  }
-
-
 }

@@ -33,7 +33,8 @@ public class NoAdapterTestTest extends TestCase {
     super.setUp();
     final Browser browser1 = new Browser("firefox");
     browser1.setRemoteAddress(SELENIUM_SERVER_URL);
-    final Browser browser2 = new Browser("firefox");
+
+    final Browser browser2 = new Browser("chrome");
     browser2.setRemoteAddress(SELENIUM_SERVER_URL);
     webDriverList.add(WebDriverFactory.createWebDriver(browser1, TEST_NAME));
     webDriverList.add(WebDriverFactory.createWebDriver(browser2, TEST_NAME));

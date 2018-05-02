@@ -11,14 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-  
+
 package org.webrtc.kite;
 
 import org.apache.log4j.Logger;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
-import org.webrtc.kite.KiteTest;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 import java.util.*;
 
 /**
@@ -52,27 +58,30 @@ public class NoAdapterTest extends KiteTest {
     expectedResultMap.put("completed", "completed");
     expectedResultMap.put("connected", "connected");
   }
-  
+
   private final static String RESULT_TIMEOUT = "TIME OUT";
   private final static String RESULT_SUCCESSFUL = "SUCCESSFUL";
   private final static String RESULT_FAILED = "FAILED";
 
-  private final static String NOADAPTER_URL = "http://localhost:8082";
   private final static String CHANNEL_INPUT = "channelId";
   private final static String START_BUTTON = "startButton";
-  
+  private static String url = null;
+  private static String IP = "localhost";
+  private static int port = 8083;
+
   private final static int TIMEOUT = 30000;
   private final static int INTERVAL = 1000;
+  private static String alertMsg = null;
 
   private final static Random rand = new Random(System.currentTimeMillis());
 
   /**
    * Check whether a browser is ready to take calls
-   * 
+   *
    * @return true if browser is ready to take calls, false otherwise
    */
   private final static String TEST_READY_JS = "return (readyForCalls);";
-  
+
   private boolean readyForCalls(final WebDriver webDriver) {
     final Object browserReturn = ((JavascriptExecutor) webDriver).executeScript(TEST_READY_JS);
     // undefined will return as null
@@ -82,17 +91,49 @@ public class NoAdapterTest extends KiteTest {
     return isReady;
   }
 
+
+  /**
+   * Restructuring the test according to options given in payload object from config file.
+   * This function will not be the same for every test.
+   */
+  private void payloadHandling() {
+    if (this.getPayload() != null) {
+      JsonValue jsonValue = this.getPayload();
+      JsonObject payload = (JsonObject) jsonValue;
+      url = payload.getString("url", null);
+      if (url == null ) {
+        IP = payload.getString("ip", "localhost");
+        port = payload.getInt("port", 8083);
+      }
+    }
+  }
+
   /**
    * Opens the NOADAPTER_URL, fills channelId input and clicks startButton
-   * 
+   *
    * @return true if all browsers are ready for calls, false otherwise
    */
   private boolean takeAction() {
+    payloadHandling();
     final String channelId = Long.toString(Math.abs(rand.nextLong()));
     for (WebDriver webDriver : this.getWebDriverList()) {
-      webDriver.get(NOADAPTER_URL);
+      if (url == null ) {
+        url = new StringBuilder("https://")
+          .append(IP).append(":").append(port).append("/").toString();
+      }
+      webDriver.get(url);
       webDriver.findElement(By.id(CHANNEL_INPUT)).sendKeys(channelId);
       webDriver.findElement(By.id(START_BUTTON)).click();
+      try {
+        Alert alert = webDriver.switchTo().alert();
+        alertMsg = alert.getText();
+        if (alertMsg != null) {
+          alertMsg = ((RemoteWebDriver) webDriver).getCapabilities().getBrowserName() + " alert: " +alertMsg;
+          alert.accept();
+        }
+      } catch (NoAlertPresentException e) {
+        alertMsg = null;
+      }
       // check that browser is ready for taking calls before initializing next one
       boolean isReady = false;
       for (int readinessTries = 0; readinessTries < TIMEOUT; readinessTries += INTERVAL) {
@@ -156,11 +197,17 @@ public class NoAdapterTest extends KiteTest {
 
   @Override
   public Object testScript() throws Exception {
+    payloadHandling();
     final boolean actionResult = this.takeAction();
     if (!actionResult) {
-      return RESULT_FAILED;
+/*      if (alertMsg != null) {
+        return Json.createObjectBuilder().add("result", alertMsg).build().toString();
+      }*/
+      return Json.createObjectBuilder().add("result", RESULT_TIMEOUT).build().toString();
     }
-
+/*    if (alertMsg != null) {
+      return Json.createObjectBuilder().add("result", alertMsg).build().toString();
+    }*/
     String result = RESULT_TIMEOUT;
 
     for (int i = 0; i < TIMEOUT; i += INTERVAL) {
@@ -185,7 +232,7 @@ public class NoAdapterTest extends KiteTest {
       }
     }
 
-    return result;
+    return Json.createObjectBuilder().add("result", result).build().toString();
   }
 
 }

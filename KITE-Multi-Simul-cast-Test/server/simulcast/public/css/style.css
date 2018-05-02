@@ -1,0 +1,13 @@
+video {
+  width: 480px;
+  height: 360px;
+  background-color: #333;
+}
+
+.video-list {
+  display: flex;
+}
+
+.video-container {
+  padding: 1em;
+}
