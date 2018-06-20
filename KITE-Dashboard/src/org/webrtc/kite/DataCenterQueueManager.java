@@ -24,9 +24,7 @@ import java.sql.SQLException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-/**
- * A thread managing the queue concerning the input into the database
- */
+/** A thread managing the queue concerning the input into the database */
 public class DataCenterQueueManager extends Thread {
 
   private static final Log log = LogFactory.getLog(DataCenterQueueManager.class);
@@ -37,8 +35,7 @@ public class DataCenterQueueManager extends Thread {
   private ResultHandler resultHandler;
   /* Singleton boiler plate code */
 
-  private DataCenterQueueManager() {
-  }
+  private DataCenterQueueManager() {}
 
   public static DataCenterQueueManager getInstance() {
     return instance;
@@ -62,8 +59,7 @@ public class DataCenterQueueManager extends Thread {
     try {
       while (true) {
         JsonObject jsonObject = this.queue.take();
-        if (log.isDebugEnabled())
-          log.debug("Dumping: " + jsonObject);
+        if (log.isDebugEnabled()) log.debug("Dumping: " + jsonObject);
         try {
           this.resultHandler.dumpResult(jsonObject);
         } catch (ClassNotFoundException | SQLException e) {
@@ -77,5 +73,4 @@ public class DataCenterQueueManager extends Thread {
       queue.clear();
     }
   }
-
 }

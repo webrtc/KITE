@@ -26,22 +26,16 @@ import javax.servlet.annotation.WebListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/**
- * Application Lifecycle Listener implementation class AppContextListener
- */
+/** Application Lifecycle Listener implementation class AppContextListener */
 @WebListener
 public class AppContextListener implements ServletContextListener {
 
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   public AppContextListener() {
     // TODO Auto-generated constructor stub
   }
 
-  /**
-   * @see ServletContextListener#contextInitialized(ServletContextEvent)
-   */
+  /** @see ServletContextListener#contextInitialized(ServletContextEvent) */
   public void contextInitialized(ServletContextEvent servletContextEvent) {
     ServletContext ctx = servletContextEvent.getServletContext();
 
@@ -66,11 +60,9 @@ public class AppContextListener implements ServletContextListener {
     DataCenterQueueManager.getInstance().startManager();
   }
 
-  /**
-   * @see ServletContextListener#contextDestroyed(ServletContextEvent)
-   */
+  /** @see ServletContextListener#contextDestroyed(ServletContextEvent) */
   public void contextDestroyed(ServletContextEvent servletContextEvent) {
-    //FIXME: release tomcat JDBC driver resources
+    // FIXME: release tomcat JDBC driver resources
     DataCenterQueueManager.getInstance().stopManager();
 
     Connection mainCon =
@@ -89,5 +81,4 @@ public class AppContextListener implements ServletContextListener {
       e.printStackTrace();
     }
   }
-
 }

@@ -34,10 +34,10 @@ public class WPTestTest extends TestCase {
 
   public void setUp() throws Exception {
     super.setUp();
-    final Browser firefox = new Browser("firefox");
-    firefox.setRemoteAddress(SELENIUM_SERVER_URL);
+    final Browser browser = new Browser("chrome");
+    browser.setRemoteAddress(SELENIUM_SERVER_URL);
 
-    webDriverList.add(WebDriverFactory.createWebDriver(firefox, TEST_NAME));
+    webDriverList.add(WebDriverFactory.createWebDriver(browser, TEST_NAME));
   }
 
   public void tearDown() throws Exception {

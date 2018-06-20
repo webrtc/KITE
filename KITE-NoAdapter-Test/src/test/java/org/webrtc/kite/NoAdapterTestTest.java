@@ -16,6 +16,7 @@
 
 package org.webrtc.kite;
 
+import org.webrtc.kite.Utility;
 import java.util.ArrayList;
 import java.util.List;
 import org.openqa.selenium.WebDriver;
@@ -31,10 +32,13 @@ public class NoAdapterTestTest extends TestCase {
 
   public void setUp() throws Exception {
     super.setUp();
-    final Browser browser1 = new Browser("firefox");
+    String platform = Utility.getPlatform();
+    final Browser browser1 = new Browser("chrome");
+    browser1.setPlatform(platform);
     browser1.setRemoteAddress(SELENIUM_SERVER_URL);
 
     final Browser browser2 = new Browser("chrome");
+    browser2.setPlatform(platform);
     browser2.setRemoteAddress(SELENIUM_SERVER_URL);
     webDriverList.add(WebDriverFactory.createWebDriver(browser1, TEST_NAME));
     webDriverList.add(WebDriverFactory.createWebDriver(browser2, TEST_NAME));
@@ -53,6 +57,6 @@ public class NoAdapterTestTest extends TestCase {
   public void testTestScript() throws Exception {
     KiteTest test = new NoAdapterTest();
     test.setWebDriverList(this.webDriverList);
-    System.out.println(test.testScript());
+    //System.out.println(test.testScript());
   }
 }

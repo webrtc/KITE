@@ -32,59 +32,55 @@ import javax.json.JsonValue;
 import java.util.*;
 import java.util.logging.Logger;
 
-/**
- * WPTest implementation of KiteTest.
- */
+/** WPTest implementation of KiteTest.
+ * Checks and retrieves the tests and sub tests from WPT server.
+ * Runs the tests and retrieves the results displayed on the page.
+ *
+ * */
 public class WPTest extends KiteTest {
 
-  private final static Logger logger = Logger.getLogger(WPTest.class.getName());
-  private final static int TEST_TIME_OUT = 40;
-  private static String IP = "localhost";
-  private static int port = 8000;
+  private static final Logger logger = Logger.getLogger(WPTest.class.getName());
+  private static final int TEST_TIME_OUT = 150;
+  private static String url = null;
   private static Map<String, List> testSuiteList = new HashMap<>();
   private boolean RUN_ALL;
   private Test root = null;
 
   /**
-   * Restructuring the test according to options given in payload object from config file.
-   * This function will not be the same for every test.
+   * Restructuring the test according to options given in payload object from config file. This
+   * function will not be the same for every test.
    */
   private void payloadHandling() {
     if (this.getPayload() != null) {
       JsonValue jsonValue = this.getPayload();
       JsonObject payload = (JsonObject) jsonValue;
-      IP = payload.getString("ip", "localhost");
-      port = payload.getInt("port", 8000);
+      url = payload.getString("url", null);
       RUN_ALL = payload.getBoolean("all", false);
     }
   }
 
-
-  /**
-   * Opens the WPT_SERVER_URL and clicks collect wp tests.
-   */
+  /** Opens the WPT_SERVER_URL and clicks collect wp tests. */
   private void takeAction() throws Exception {
+    payloadHandling();
+    if (url == null) {
+      throw new Exception("No URL was specified");
+    }
     this.RUN_ALL = false;
     if (this.getWebDriverList().size() > 1) {
       throw new Exception("This test is limited to 1 browser only");
     }
-    String ROOT_URL = new StringBuilder("http://")
-        .append(IP).append(":").append(port).append("/").toString();
-    root = new Test(ROOT_URL, null);
+
+    root = new Test(url, null);
     retrieveTests(root.getTestLink(), root, RUN_ALL);
-
-
   }
-
 
   /**
    * Retrieve all automated web-platform tests.
    *
-   * @param URL     base URL to find tests
-   * @param root    parent test
+   * @param URL base URL to find tests
+   * @param root parent test
    * @param RUN_ALL decides whether to run all wpt or just webrtc related ones
    */
-
   private void retrieveTests(String URL, Test root, boolean RUN_ALL) {
 
     for (WebDriver webDriver : this.getWebDriverList()) {
@@ -103,8 +99,9 @@ public class WPTest extends KiteTest {
         } else {
           if (RUN_ALL) {
             retrieveTests(file, temp, RUN_ALL);
-            if (temp.getChildren().size() > 0)
+            if (temp.getChildren().size() > 0) {
               temp.setName(testName);
+            }
             root.addChild(temp);
           } else {
             if (root.getParent() == null) {
@@ -112,8 +109,9 @@ public class WPTest extends KiteTest {
               if (TestList.WEBRTC_TEST_LIST.contains(testName)) {
                 temp.setName(testName);
                 retrieveTests(file, temp, RUN_ALL);
-                if (temp.getChildren().size() > 0)
+                if (temp.getChildren().size() > 0) {
                   root.addChild(temp);
+                }
               }
             }
           }
@@ -129,11 +127,13 @@ public class WPTest extends KiteTest {
     List<String> res = new ArrayList<>();
     for (WebElement file : fileList) {
       String fileName = file.getText();
-      if (fileName.startsWith(".") ||
-          fileName.startsWith("css") ||
-          fileName.startsWith("testharness") ||
-          fileName.equalsIgnoreCase("html") ||
-          fileName.equalsIgnoreCase("wpt")) {
+      if (fileName.startsWith(".")
+          || fileName.startsWith("css")
+          || fileName.startsWith("testharness")
+          || fileName.startsWith("segment-break")
+          || fileName.startsWith("text-emphasis")
+          || fileName.equalsIgnoreCase("html")
+          || fileName.equalsIgnoreCase("wpt")) {
         // Skip these files
       } else {
         List<String> breakDown = Arrays.asList(fileName.split("\\."));
@@ -152,19 +152,34 @@ public class WPTest extends KiteTest {
     return res;
   }
 
+  /**
+   * Runs the tests and retrieves the results displayed on the page.
+   *
+   * @param webDriver webdriver of browser configuration to run tests on.
+   * @param test test to run.
+   * @return JsonObjectBuilder of test results.
+   */
   private JsonObjectBuilder runTest(WebDriver webDriver, Test test) {
     Capabilities cap = ((RemoteWebDriver) webDriver).getCapabilities();
     boolean edge16 = false;
-    if (cap.getBrowserName().equalsIgnoreCase("MicrosoftEdge") && cap.getVersion().contains("16299"))
+    if (cap.getBrowserName().equalsIgnoreCase("MicrosoftEdge") && cap.getVersion().contains("16299")) {
       edge16 = true;
+    }
     JsonObjectBuilder result = Json.createObjectBuilder();
     if (test.getChildren().size() == 0) {
-      System.out.println(cap.getBrowserName() + "_" + cap.getVersion() + "_" + cap.getPlatform() + " - running ->> " + test.getName());
+      System.out.println(
+          cap.getBrowserName()
+              + "_"
+              + cap.getVersion()
+              + "_"
+              + cap.getPlatform()
+              + " - running ->> "
+              + test.getName());
       JsonObjectBuilder subTest = Json.createObjectBuilder();
       JsonObjectBuilder unitTests = Json.createObjectBuilder();
 
       if (test.getName().startsWith("RTCConfiguration-iceServers") && edge16) {
-        //skip
+        // skip
         subTest.add("harness", "failed").add("isTest", true);
         subTest.add("passed", 0);
         subTest.add("total", 0);
@@ -174,43 +189,55 @@ public class WPTest extends KiteTest {
       } else {
 
         webDriver.get(test.getTestLink());
-        WebDriverWait wait = new WebDriverWait(webDriver, TEST_TIME_OUT);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("results")));
-        WebElement harness = webDriver.findElement(By.id("summary")).findElement(By.tagName("p"));
-        String harnessStatus = harness.getText();
-        subTest.add("harness", harnessStatus).add("isTest", true);
+        try {
+          WebDriverWait wait = new WebDriverWait(webDriver, TEST_TIME_OUT);
+          wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("results")));
+          WebElement harness = webDriver.findElement(By.id("summary")).findElement(By.tagName("p"));
+          String harnessStatus = harness.getText();
+          subTest.add("harness", harnessStatus).add("isTest", true);
 
-        WebElement resultTable = webDriver.findElement(By.id("results"));
-        List<WebElement> pass = resultTable.findElements(By.className("pass"));
-        List<WebElement> fail = resultTable.findElements(By.className("fail"));
-        List<WebElement> timeout = resultTable.findElements(By.className("timeout"));
-        int count = 0;
-        int total = 0;
-        for (WebElement element : pass) {
-          unitTests.add(element.findElements(By.tagName("td")).get(1).getText(), "passed");
-          count += 1;
+          WebElement resultTable = webDriver.findElement(By.id("results"));
+          List<WebElement> pass = resultTable.findElements(By.className("pass"));
+          List<WebElement> fail = resultTable.findElements(By.className("fail"));
+          List<WebElement> timeout = resultTable.findElements(By.className("timeout"));
+          int count = 0;
+          int total = 0;
+          for (WebElement element : pass) {
+            unitTests.add(element.findElements(By.tagName("td")).get(1).getText(), "passed");
+            count += 1;
+          }
+          subTest.add("passed", count);
+          total += count;
+          test.getParent().setPassed(test.getParent().getPassed() + count);
+          count = 0;
+          for (WebElement element : fail) {
+            unitTests.add(
+                    element.findElements(By.tagName("td")).get(1).getText(),
+                    element.findElements(By.tagName("td")).get(2).getText());
+            // subTest.add(element.findElements(By.tagName("td")).get(1).getText(), "failed");
+            count += 1;
+          }
+          subTest.add("fail", count);
+          total += count;
+          count = 0;
+          for (WebElement element : timeout) {
+            unitTests.add(element.findElements(By.tagName("td")).get(1).getText(), "timeout");
+            count += 1;
+          }
+          subTest.add("timeout", count);
+          total += count;
+          subTest.add("total", total);
+          subTest.add("tests", unitTests);
+          test.getParent().setTotal(test.getParent().getTotal() + total);
+        } catch (Exception e) {
+          logger.warning("Time out running this test: "+ test.getTestLink());
+          subTest.add("harness", "failed").add("isTest", true);
+          subTest.add("passed", 0);
+          subTest.add("total", 0);
+          subTest.add("timeout", 0);
+          subTest.add("failed", 0);
+          subTest.add("tests", unitTests);
         }
-        subTest.add("passed", count);
-        total += count;
-        test.getParent().setPassed(test.getParent().getPassed() + count);
-        count = 0;
-        for (WebElement element : fail) {
-          unitTests.add(element.findElements(By.tagName("td")).get(1).getText(), element.findElements(By.tagName("td")).get(2).getText());
-          //subTest.add(element.findElements(By.tagName("td")).get(1).getText(), "failed");
-          count += 1;
-        }
-        subTest.add("fail", count);
-        total += count;
-        count = 0;
-        for (WebElement element : timeout) {
-          unitTests.add(element.findElements(By.tagName("td")).get(1).getText(), "timeout");
-          count += 1;
-        }
-        subTest.add("timeout", count);
-        total += count;
-        subTest.add("total", total);
-        subTest.add("tests", unitTests);
-        test.getParent().setTotal(test.getParent().getTotal() + total);
       }
       return subTest;
     } else {
@@ -224,7 +251,6 @@ public class WPTest extends KiteTest {
     return result;
   }
 
-
   @Override
   public Object testScript() throws Exception {
     this.takeAction();
@@ -234,8 +260,8 @@ public class WPTest extends KiteTest {
     result.add("all", this.RUN_ALL);
     duration = System.currentTimeMillis() - duration;
     duration = duration / 1000;
-    System.out.println("total duration - >>>  " + duration / 60 + "minutes and " + duration % 60 + "s");
+    System.out.println(
+        "total duration - >>>  " + duration / 60 + "minutes and " + duration % 60 + "s");
     return result.build().toString();
   }
-
 }

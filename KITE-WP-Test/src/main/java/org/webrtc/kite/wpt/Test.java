@@ -19,6 +19,9 @@ package org.webrtc.kite.wpt;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A Test class contain related informations to get and run WP tests and sub tests on WPT server.
+ */
 public class Test {
   private String testLink;
   private String name;
@@ -74,10 +77,8 @@ public class Test {
   }
 
   public void setName(String name) {
-    if (name.endsWith("html"))
-      name = name.substring(0, name.length() - 5);
-    if (name.contains("historical"))
-      name = this.getParent().getName() + "-" + name;
+    if (name.endsWith("html")) name = name.substring(0, name.length() - 5);
+    if (name.contains("historical")) name = this.getParent().getName() + "-" + name;
     this.name = name;
   }
 

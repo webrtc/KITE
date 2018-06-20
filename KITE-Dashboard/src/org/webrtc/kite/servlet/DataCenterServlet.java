@@ -41,9 +41,7 @@ public class DataCenterServlet extends HttpServlet {
     super();
   }
 
-  /**
-   * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-   */
+  /** @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response) */
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
@@ -52,15 +50,13 @@ public class DataCenterServlet extends HttpServlet {
     try {
       jsonReader = Json.createReader(request.getReader());
       jsonObject = jsonReader.readObject();
-      if (log.isDebugEnabled())
-        log.debug("in->jsonObject: " + jsonObject);
-        System.out.println("in->jsonObject: " + jsonObject);
+      if (log.isDebugEnabled()) log.debug("in->jsonObject: " + jsonObject);
+      System.out.println("in->jsonObject: " + jsonObject);
       DataCenterQueueManager.getInstance().queue.put(jsonObject);
     } catch (JsonException | IllegalStateException | InterruptedException e) {
       log.error("adding to queue", e);
     } finally {
-      if (jsonReader != null)
-        jsonReader.close();
+      if (jsonReader != null) jsonReader.close();
     }
   }
 }

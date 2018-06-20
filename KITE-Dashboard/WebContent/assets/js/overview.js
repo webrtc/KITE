@@ -15,102 +15,96 @@
 //
 
 
-$(document).on("click", "button", function(e) {
-    var id = $(this).attr('id');
-    if($(this).attr('class')=='btn unpick')
-        $(this).attr('class', classes[id]);
-    else
-        $(this).attr('class', 'btn unpick');
-    display[id]=!display[id];
-    var val='';
-    for(i=0; i<4;i++){
-        if(display[i])
-            val+='-1';
-        else
-            val+='-0';
+var resultMap = new Map();
+
+function transformResultList (){
+  jsonData.forEach(result => {
+    var id='';
+    result.browsers.forEach (browser => {
+      id += browser.id;
+    });
+    resultMap.set(id, result.result);
+  });
+}
+
+function displayMatrix() {
+  transformResultList();
+  var id = '';
+  var matrixContainer = $('#matrix-container');
+  var htmlString = '';
+  var firstLine = '';
+  var lines = '';
+  firstLine += '<tr><td>.</td>';
+
+  jsonBrowserList.forEach(browser => {
+    var line = '';
+    line += '<tr><td data-id="' + browser.id + '">';
+    firstLine += '<td data-id="' + browser.id + '">';
+    switch(browser.name) {
+      case 'chrome':
+        line+='<img src="assets/img/chrome.png" height="35" width="35" data-toggle="tooltip" data-placement="top" title=" Version: ' + browser.version + '">';
+        firstLine+='<img src="assets/img/chrome.png" height="35" width="35" data-toggle="tooltip" data-placement="top" title=" Version: ' + browser.version + '">';
+        break;
+      case 'firefox':
+        line+='<img src="assets/img/firefox.png" height="35" width="35" data-toggle="tooltip" data-placement="top" title=" Version: ' + browser.version + '">';
+        firstLine+='<img src="assets/img/firefox.png" height="35" width="35" data-toggle="tooltip" data-placement="top" title=" Version: ' + browser.version + '">';
+        break;
+      case 'safari':
+        line+='<img src="assets/img/safari.png" height="35" width="35" data-toggle="tooltip" data-placement="top" title=" Version: ' + browser.version + '">';
+        firstLine+='<img src="assets/img/safari.png" height="35" width="35" data-toggle="tooltip" data-placement="top" title=" Version: ' + browser.version + '">';
+        break;
+      case 'MicrosoftEdge':
+        line+='<img src="assets/img/edge.png" height="35" width="35" data-toggle="tooltip" data-placement="top" title=" Version: ' + browser.version + '">';
+        firstLine+='<img src="assets/img/edge.png" height="35" width="35" data-toggle="tooltip" data-placement="top" title=" Version: ' + browser.version + '">';
+        break;
     }
-    if (browser=='all'){
-        (function updateChart() {
-            $.ajax({
-                url: 'getjson?testName='+testName+'&size='+tupleSize+'&val='+val+'&location=overview',
-                success: function(result){
-                    $( "#legend" ).empty();
-                    $( "#sequence" ).empty();
-                    $( "#oldLayer" ).empty();
-                    $( "#chart" ).empty();
-                    drawCircle(JSON.parse(result).sunburst);
-                }
-            });
-        })();
-    } else {
-        var data = browser.split('-');
-        (function updateChart() {
-            $.ajax({
-                url: 'getjson?testName='+testName+'&size='+tupleSize+'&val='+val+'&name='+data[0]+'&version='+data[1]+'&platform='+data[2]+'&location=overview',
-                success: function(result){
-                    console.log(result);
-                    $( "#legend" ).empty();
-                    $( "#sequence" ).empty();
-                    $( "#oldLayer" ).empty();
-                    $( "#chart" ).empty();
-                    drawCircle(JSON.parse(result).sunburst);
-                }
-            });
-        })();
-    }
+    line += '<h5 class="small-boy">' + browser.platform + '</h5>';
+    firstLine += '<h5 class="small-boy">' + browser.platform + '</h5>';
+    line += '</td>';
+    firstLine += '</td>';
+    jsonBrowserList.forEach(other_browser => {
+      line += '<td class ="'+browser.platform.charAt(0) + '-' + other_browser.platform.charAt(0) +'">';
+      id = '' + browser.id + other_browser.id;
+      var result = resultMap.get(id);
+      if (typeof result == 'undefined' || result == 'SCHEDULED') {
+        result = 'N/A';
+      }
+      switch (result){
+        case 'SUCCESSFUL':
+          line += '<i class="light fa fa-check result-brick ok" data-toggle="tooltip" data-placement="top" title="' + result + '"></i>';
+          break;
+        case 'FAILED':
+          line += '<i class="light fa fa-times result-brick notok" data-toggle="tooltip" data-placement="top" title="' + result + '"></i>';
+          break;
+        case 'TIME OUT':
+          line += '<i class="light fa fa-times result-brick notok" data-toggle="tooltip" data-placement="top" title="' + result + '"></i>';
+          break;
+        case 'N/A':
+          line += '<i class="light fa fa-ban result-brick na" data-toggle="tooltip" data-placement="top" title="' + result + '"></i>';
+          break;
+        default:
+          line += '<i class="light fa fa-question result-brick error" data-toggle="tooltip" data-placement="top" title="' + result + '"></i>';
+      }
+      line += '</td>';
+    });
+    line += '</tr>';
+    lines += line;
+  });
+  firstLine += '</tr>';
+  htmlString += firstLine + lines;
+  matrixContainer.html(htmlString);
+}
+
+$(document).on("click", ".out-button", function(e) {
+    var link = $(this).attr('data-link');
+    window.open(''+link);
 });
 
-
-$(document).on("click", ".by-browser", function(e) {
-    browser = $(this).attr('id');
-    var val='';
-        for(i=0; i<4;i++){
-            if(display[i])
-                val+='-1';
-            else
-                val+='-0';
-        }
-    if (browser=='all'){
-        (function updateChart() {
-            $.ajax({
-                url: 'getjson?testName='+testName+'&size='+tupleSize+'&val='+val+'&location=overview',
-                success: function(result){
-                    $( "#legend" ).empty();
-                    $( "#sequence" ).empty();
-                    $( "#oldLayer" ).empty();
-                    $( "#chart" ).empty();
-                    $( "#filter-by-browser" ).empty();
-                    $( "#filter-by-browser" ).html('All browsers');
-                    drawCircle(JSON.parse(result).sunburst);
-                }
-            });
-        })();
-    } else{
-        var data = browser.split('-');
-        var filterHtmlString = '';
-        if (data[0] == "firefox")
-            filterHtmlString+="<img src=\"assets/img/firefox.png\" height=\"20\" width=\"20\">";
-        if (data[0] == "chrome")
-            filterHtmlString+="<img src=\"assets/img/chrome.png\" height=\"20\" width=\"20\">";
-        if (data[0] == "MicrosoftEdge")
-            filterHtmlString+="<img src=\"assets/img/edge.png\" height=\"20\" width=\"20\">";
-        if (data[0]== "safari")
-            filterHtmlString+="<img src=\"assets/img/safari.png\" height=\"20\" width=\"20\">";
-        filterHtmlString += data[1]+'-'+data[2];
-        (function updateChart() {
-            $.ajax({
-                url: 'getjson?testName='+testName+'&size='+tupleSize+'&val='+val+'&name='+data[0]+'&version='+data[1]+'&platform='+data[2]+'&location=overview',
-                success: function(result){
-                    console.log(result);
-                    $( "#legend" ).empty();
-                    $( "#sequence" ).empty();
-                    $( "#oldLayer" ).empty();
-                    $( "#chart" ).empty();
-                    $( "#filter-by-browser" ).empty();
-                    $( "#filter-by-browser" ).html(filterHtmlString);
-                    drawCircle(JSON.parse(result).sunburst);
-                }
-            });
-        })();
-    }
+$(document).ready(function(){
+  if (size == 2) {
+    displayMatrix();
+  }
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+  })
 });

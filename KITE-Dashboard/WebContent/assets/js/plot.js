@@ -15,299 +15,287 @@
 //
 
 function showStats (statObj){
-    plotStats (true, statObj.caller)
-    plotStats (false, statObj.callee)
+  plotStats (true, statObj.caller)
+  plotStats (false, statObj.callee)
 };
 
 
 function plotStats (isCaller, data , other ) {
-    var audio;
-    var video;
+  var audio;
+  var video;
 
-    if(isCaller){
-        title = $("#caller-browser");
-        audioByteAvg = $("#caller-audio-bytes");
-        audioPacketAvg = $("#caller-audio-packets");
-        videoByteAvg = $("#caller-video-bytes");
-        videoPacketAvg = $("#caller-video-packets");
-        candidatePair = $("#caller-candidate-pairs");
-        audioDetails = $("#caller-detail-audio");
-        videoDetails = $("#caller-detail-video");
-        sdpOffer = $("#caller-sdp-offer-detail");
-        sdpAnswer = $("#caller-sdp-answer-detail");
+  if(isCaller){
+    title = $("#caller-browser");
+    audioByteAvg = $("#caller-audio-bytes");
+    audioPacketAvg = $("#caller-audio-packets");
+    videoByteAvg = $("#caller-video-bytes");
+    videoPacketAvg = $("#caller-video-packets");
+    candidatePair = $("#caller-candidate-pairs");
+    audioDetails = $("#caller-detail-audio");
+    videoDetails = $("#caller-detail-video");
+    sdpOffer = $("#caller-sdp-offer-detail");
+    sdpAnswer = $("#caller-sdp-answer-detail");
 
-        audioBytes = document.getElementById("caller-audio-bytes-plotting");
-        audioPackets = document.getElementById("caller-audio-packets-plotting");
-        videoBytes = document.getElementById("caller-video-bytes-plotting");
-        videoPackets = document.getElementById("caller-video-packets-plotting");
+    audioBytes = document.getElementById("caller-audio-bytes-plotting");
+    audioPackets = document.getElementById("caller-audio-packets-plotting");
+    videoBytes = document.getElementById("caller-video-bytes-plotting");
+    videoPackets = document.getElementById("caller-video-packets-plotting");
 
-    } else {
-        title = $("#callee-browser");
-        audioByteAvg = $("#callee-audio-bytes");
-        audioPacketAvg = $("#callee-audio-packets");
-        videoByteAvg = $("#callee-video-bytes");
-        videoPacketAvg = $("#callee-video-packets");
-        candidatePair = $("#callee-candidate-pairs");
-        audioDetails = $("#callee-detail-audio");
-        videoDetails = $("#callee-detail-video");
-        sdpOffer = $("#callee-sdp-offer-detail");
-        sdpAnswer = $("#callee-sdp-answer-detail");
+  } else {
+    title = $("#callee-browser");
+    audioByteAvg = $("#callee-audio-bytes");
+    audioPacketAvg = $("#callee-audio-packets");
+    videoByteAvg = $("#callee-video-bytes");
+    videoPacketAvg = $("#callee-video-packets");
+    candidatePair = $("#callee-candidate-pairs");
+    audioDetails = $("#callee-detail-audio");
+    videoDetails = $("#callee-detail-video");
+    sdpOffer = $("#callee-sdp-offer-detail");
+    sdpAnswer = $("#callee-sdp-answer-detail");
 
-        audioBytes = document.getElementById("callee-audio-bytes-plotting");
-        audioPackets = document.getElementById("callee-audio-packets-plotting");
-        videoBytes = document.getElementById("callee-video-bytes-plotting");
-        videoPackets = document.getElementById("callee-video-packets-plotting");
-    }
-
-
-    if (Object.keys(data.audio).length !== 0 && data.audio.constructor === Object){
-        audioByteAvg.html('Bytes (avg S/R: <a style="color:#42f4aa;">'+data.audio.avgBytesSent+'</a>/<a style="color:#ef2b3e;">'+data.audio.avgBytesReceived+'</a> kB/s)');
-        audioPacketAvg.html('Packets (avg S/R: <a style="color:#42f4aa;">'+data.audio.avgPacketsSent+'</a>/<a style="color:#ef2b3e;">'+data.audio.avgPacketsReceived+' </a> /s)');
-        plotByteStat(audioBytes,data.audio, 'audio');
-        plotPacketStat(audioPackets,data.audio), 'audio';
-        var loss = data.audio.PacketsLostOvertime[data.audio.PacketsLostOvertime.length-1];
-        var avgJitter = data.audio.avgJitterOvertime;
-        audioDetails.html('( Packets lost: '+loss +' | Avg jitter: ' + avgJitter.toFixed(5)+')');
-    } else {
-             audioByteAvg.html('No stat was available');
-     }
-    if (Object.keys(data.video).length !== 0 && data.video.constructor === Object){
-        videoByteAvg.html('Bytes (avg S/R: <a style="color:#42f4aa;">'+data.video.avgBytesSent+'</a>/<a style="color:#ef2b3e;">'+data.video.avgBytesReceived+'</a> kB/s)');
-        videoPacketAvg.html('Packets (avg S/R: <a style="color:#42f4aa;">'+data.video.avgPacketsSent+'</a>/<a style="color:#ef2b3e;">'+data.video.avgPacketsReceived+' </a> /s)');
-        plotByteStat(videoBytes,data.video, 'video');
-        plotPacketStat(videoPackets,data.video,'video');
-        var loss = data.video.PacketsLostOvertime[data.video.PacketsLostOvertime.length-1];
-        var avgJitter = data.video.avgJitterOvertime;
-        videoDetails.html('( Packets lost: '+loss +' | Avg jitter: ' + avgJitter.toFixed(5)+')');
-    } else {
-        videoByteAvg.html('No stat was available');
-    }
-
-    if (Object.keys(data.candidates).length !== 0 && data.candidates.constructor === Object){
-        candidatePair.html(getCandidatesHtml(data));
-    }
-
-    if (Object.keys(data.sdp).length !== 0 && data.sdp.constructor === Object){
-        showSDP(sdpOffer, data.sdp.offer, 'offer');
-        showSDP(sdpAnswer, data.sdp.answer, 'answer');
-    }
+    audioBytes = document.getElementById("callee-audio-bytes-plotting");
+    audioPackets = document.getElementById("callee-audio-packets-plotting");
+    videoBytes = document.getElementById("callee-video-bytes-plotting");
+    videoPackets = document.getElementById("callee-video-packets-plotting");
+  }
 
 
-    $('[data-toggle="popover"]').popover({
-        trigger:'hover',
-        placement:'right',
-        html: true
-    });
+  if (Object.keys(data.audio).length !== 0 && data.audio.constructor === Object){
+    audioByteAvg.html('Bytes (avg S/R: <a style="color:#42f4aa;">'+data.audio.avgBytesSent+'</a>/<a style="color:#ef2b3e;">'+data.audio.avgBytesReceived+'</a> kB/s)');
+    audioPacketAvg.html('Packets (avg S/R: <a style="color:#42f4aa;">'+data.audio.avgPacketsSent+'</a>/<a style="color:#ef2b3e;">'+data.audio.avgPacketsReceived+' </a> /s)');
+    plotByteStat(audioBytes,data.audio, 'audio');
+    plotPacketStat(audioPackets,data.audio), 'audio';
+    var loss = data.audio.PacketsLostOvertime[data.audio.PacketsLostOvertime.length-1];
+    var avgJitter = data.audio.avgJitterOvertime;
+    audioDetails.html('( Packets lost: '+loss +' | Avg jitter: ' + avgJitter.toFixed(5)+')');
+  } else {
+     audioByteAvg.html('No stat was available');
+   }
+  if (Object.keys(data.video).length !== 0 && data.video.constructor === Object){
+    videoByteAvg.html('Bytes (avg S/R: <a style="color:#42f4aa;">'+data.video.avgBytesSent+'</a>/<a style="color:#ef2b3e;">'+data.video.avgBytesReceived+'</a> kB/s)');
+    videoPacketAvg.html('Packets (avg S/R: <a style="color:#42f4aa;">'+data.video.avgPacketsSent+'</a>/<a style="color:#ef2b3e;">'+data.video.avgPacketsReceived+' </a> /s)');
+    plotByteStat(videoBytes,data.video, 'video');
+    plotPacketStat(videoPackets,data.video,'video');
+    var loss = data.video.PacketsLostOvertime[data.video.PacketsLostOvertime.length-1];
+    var avgJitter = data.video.avgJitterOvertime;
+    videoDetails.html('( Packets lost: '+loss +' | Avg jitter: ' + avgJitter.toFixed(5)+')');
+  } else {
+    videoByteAvg.html('No stat was available');
+  }
 
+  if (Object.keys(data.candidates).length !== 0 && data.candidates.constructor === Object){
+    candidatePair.html(getCandidatesHtml(data));
+  }
+
+  if (Object.keys(data.sdp).length !== 0 && data.sdp.constructor === Object){
+    showSDP(sdpOffer, data.sdp.offer, 'offer');
+    showSDP(sdpAnswer, data.sdp.answer, 'answer');
+  }
 };
 
 function showSDP(ctx, sdp, type){
-    var html='<pre class="sdp-message">' + sdp + '</pre>' ;
-    ctx.html(html);
+  var html='<pre class="log-message">' + sdp + '</pre>' ;
+  ctx.html(html);
 }
 
 function getCandidatesHtml (data) {
-    candidate_pairs = data.candidates.candidates;
-    candidates_local = data['local-candidate'].candidates;
+  candidate_pairs = data.candidates.candidates;
+  candidates_local = data['local-candidate'].candidates;
 
-    candidates_remote = data['remote-candidate'].candidates;
-    var html = '';
-    candidate_pairs.forEach(function(candidate){
-        if (typeof candidate != 'undefined')
-            html += getCandidateHtml(candidate, candidates_local, candidates_remote);
-    })
-    return html;
+  candidates_remote = data['remote-candidate'].candidates;
+  var html = '';
+  candidate_pairs.forEach(function(candidate){
+    if (typeof candidate != 'undefined'){
+      html += getCandidateHtml(candidate, candidates_local, candidates_remote);
+    }
+  })
+  return html;
 }
 
 function getCandidateHtml (candidate, candidates_local, candidates_remote){
-    var html ='';
-    if (candidate.state === 'succeeded')
-        html +='<tr class="status succeeded-candidate">';
-    else
-        html +='<tr class="status failed-candidate">';
-    html+='<td><a data-toggle="popover" data-content="'+getCandidateInfo(candidates_local[candidate.localCandidateId])+'">' + candidate.localCandidateId + '</a></td>';
-    html+='<td><a data-toggle="popover" data-content="'+getCandidateInfo(candidates_remote[candidate.remoteCandidateId])+'">' + candidate.remoteCandidateId + '</a></td>';
-    html+='<td>' + candidate.state + '</td>';
-    html+='<td>' + candidate.nominated + '</td>';
-    html+='<td>' + candidate.priority + '</td>';
-    html+='<td>' + candidate.bytesSent + '</td>';
-    html+='<td>' + candidate.bytesReceived + '</td>';
-    html += '</tr>';
-    return html;
+  var html ='';
+  if ((candidate.state === 'succeeded') && (candidate.nominated === 'true')){
+    html +='<tr class="status succeeded-candidate">';
+  }
+  else {
+    html +='<tr class="status failed-candidate">';
+  }
+  html+='<td class="pointer" data-toggle="tooltip" data-placement="top" title="'+getCandidateInfo(candidates_local[candidate.localCandidateId])+'">' + candidate.localCandidateId + '</td>';
+  html+='<td class="pointer" data-toggle="tooltip" data-placement="top" title="'+getCandidateInfo(candidates_remote[candidate.remoteCandidateId])+'">' + candidate.remoteCandidateId + '</td>';
+  html+='<td>' + candidate.state + '</td>';
+  html+='<td>' + candidate.nominated + '</td>';
+  html+='<td>' + candidate.priority + '</td>';
+  html+='<td>' + candidate.bytesSent + '</td>';
+  html+='<td>' + candidate.bytesReceived + '</td>';
+  html += '</tr>';
+  return html;
 }
 
 function getCandidateInfo (candidate){
-    var html ='';
-    if (typeof candidate != 'undefined'){
-        html+= 'ip: '+ candidate.ip + ', ';
-        html+= 'port: '+ candidate.port + ', ';
-        html+= 'protocol: '+ candidate.protocol + ', ';
-        html+= 'candidateType: '+ candidate.candidateType + ', ';
-        html+= 'priority: '+ candidate.priority + ', ';
-        html+= 'url: '+ candidate.url;
-    } else {
-        html += 'candidate not found.'
-    }
-    return html;
+  var html ='';
+  if (typeof candidate != 'undefined'){
+    html+= 'ip: '+ candidate.ip + ', ';
+    html+= 'port: '+ candidate.port + ', ';
+    html+= 'protocol: '+ candidate.protocol + ', ';
+    html+= 'candidateType: '+ candidate.candidateType + ', ';
+    html+= 'priority: '+ candidate.priority + ', ';
+    html+= 'url: '+ candidate.url;
+  } else {
+    html += 'candidate not found.'
+  }
+  return html;
 }
 
 function plotByteStat (ctx, data, type ) {
-    var factor = 3;
-    var arrayTmp = data['BytesReceivedOvertime'];
-    var max = Math.max(...arrayTmp);
-    var min = Math.min(...arrayTmp);
-    var margin = (max - min) /2;
-    var labels =  new Array();
-    for (i = 1; i <= arrayTmp.length;i++){
-        labels.push(''+i);
-/*        if (i%5===0)
-            labels.push(''+i+'');
-        else
-            labels.push('.');*/
-    }
+  var factor = 3;
+  var arrayTmp = data['BytesReceivedOvertime'];
+  var max = Math.max(...arrayTmp);
+  var min = Math.min(...arrayTmp);
+  var margin = (max - min) /2;
+  var labels =  new Array();
+  for (i = 1; i <= arrayTmp.length;i++){
+    labels.push(''+i);
+  }
 
-    var config = {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'BytesReceived (kB/s)',
-                    backgroundColor: '#ef2b3e',
-                    borderColor: '#ef2b3e',
-                    fill: false,
-                    data: data['BytesReceivedOvertime'],
-                    pointRadius: 2,
-                    lineTension: 0
-                },
-                {
-                    label: 'BytesSent (kB/s)',
-                    backgroundColor: '#42f4aa',
-                    borderColor: '#42f4aa',
-                    fill: false,
-                    data: data['BytesSentOvertime'],
-                    pointRadius: 2,
-                    lineTension: 0
-                }
-            ]
+  var config = {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'BytesReceived (kB/s)',
+          backgroundColor: '#ef2b3e',
+          borderColor: '#ef2b3e',
+          fill: false,
+          data: data['BytesReceivedOvertime'],
+          pointRadius: 2,
+          lineTension: 0
         },
-        options: {
-            responsive: true,
-            title:{
-                display:true,
-                text: 'Byte transmission overtime.'
-
-            },
-            showLines: true,
-            scales: {
-                xAxes: [{
-                    display: true,
-                    text:'Bytes transmission',
-                    gridLines: {
-                        display : false
-                    }
-                }],
-                yAxes: [{
-                    display: true,
-                    type: 'linear',
-                    ticks: {
-                        suggestedMax: max+margin,
-                        suggestedMin: min-margin,
-                        stepSize: (max+margin)/factor
-                    },
-                    gridLines: {
-                        display : false
-                    }
-                }]
-            }
+        {
+          label: 'BytesSent (kB/s)',
+          backgroundColor: '#42f4aa',
+          borderColor: '#42f4aa',
+          fill: false,
+          data: data['BytesSentOvertime'],
+          pointRadius: 2,
+          lineTension: 0
         }
-    };
-    var myChart = new Chart(ctx,config);
+      ]
+    },
+    options: {
+      responsive: true,
+      title:{
+        display:true,
+        text: 'Byte transmission overtime.'
+
+      },
+      showLines: true,
+      scales: {
+        xAxes: [{
+          display: true,
+          text:'Bytes transmission',
+          gridLines: {
+            display : false
+          }
+        }],
+        yAxes: [{
+          display: true,
+          type: 'linear',
+          ticks: {
+            suggestedMax: max+margin,
+            suggestedMin: min-margin,
+            stepSize: (max+margin)/factor
+          },
+          gridLines: {
+            display : false
+          }
+        }]
+      }
+    }
+  };
+  var myChart = new Chart(ctx,config);
 }
 
 function plotPacketStat (ctx, data, type ) {
-    var factor = 3;
-    var arrayTmp = data['PacketsReceivedOvertime'];
-    var max = Math.max(...arrayTmp);
-    var min = Math.min(...arrayTmp);
-    var margin = (max - min) /2;
-    var labels =  new Array();
-    for (i = 1; i <= arrayTmp.length;i++){
-        labels.push(''+i);
-/*        if (i%5===0)
-            labels.push(''+i+'');
-        else
-            labels.push('.');*/
-    }
+  var factor = 3;
+  var arrayTmp = data['PacketsReceivedOvertime'];
+  var max = Math.max(...arrayTmp);
+  var min = Math.min(...arrayTmp);
+  var margin = (max - min) /2;
+  var labels =  new Array();
+  for (i = 1; i <= arrayTmp.length;i++){
+    labels.push(''+i);
+  }
 
-    var config = {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'PacketsReceived (/s)',
-                    backgroundColor: '#ef2b3e',
-                    borderColor: '#ef2b3e',
-                    fill: false,
-                    data: data['PacketsReceivedOvertime']
-                },
-                {
-                    label: 'PacketsSent (/s)',
-                    backgroundColor: '#42f4aa',
-                    borderColor: '#42f4aa',
-                    fill: false,
-                    data: data['PacketsSentOvertime']
-                }
-            ]
+  var config = {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'PacketsReceived (/s)',
+          backgroundColor: '#ef2b3e',
+          borderColor: '#ef2b3e',
+          fill: false,
+          data: data['PacketsReceivedOvertime']
         },
-        options: {
-            responsive: true,
-            title:{
-                display:false,
-
-            },
-            scales: {
-                xAxes: [{
-                    display: true,
-                    text:'Packets transmission',
-                    gridLines: {
-                        display : false
-                    }
-                }],
-                yAxes: [{
-                    display: true,
-                    type: 'linear',
-                    ticks: {
-                        suggestedMax: max+margin,
-                        suggestedMin: min-margin,
-                        stepSize: max/factor
-                    },
-                    gridLines: {
-                        display : false
-                    }
-                }]
-            }
+        {
+          label: 'PacketsSent (/s)',
+          backgroundColor: '#42f4aa',
+          borderColor: '#42f4aa',
+          fill: false,
+          data: data['PacketsSentOvertime']
         }
-    };
-    var myChart = new Chart(ctx,config);
+      ]
+    },
+    options: {
+      responsive: true,
+      title:{
+        display:false,
+
+      },
+      scales: {
+        xAxes: [{
+          display: true,
+          text:'Packets transmission',
+          gridLines: {
+            display : false
+          }
+          }],
+        yAxes: [{
+          display: true,
+          type: 'linear',
+          ticks: {
+            suggestedMax: max+margin,
+            suggestedMin: min-margin,
+            stepSize: max/factor
+          },
+          gridLines: {
+            display : false
+          }
+        }]
+      }
+    }
+  };
+  var myChart = new Chart(ctx,config);
 }
 
 
 function getStats () {
-    (function requestStats() {
-        $.ajax({
-            url: request,
-            success: function(result){
-                console.log(result);
-                showStats(JSON.parse(result));
-            }
-        });
-    })();
+  (function requestStats() {
+    $.ajax({
+      url: request,
+      success: function(result){
+        console.log(JSON.parse(result));
+      }
+    });
+  })();
 };
 
 
 $(document).ready(function(){
-    getStats ();
-
+  getStats ();
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+  })
 });

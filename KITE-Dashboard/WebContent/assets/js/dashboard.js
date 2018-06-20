@@ -14,23 +14,10 @@
 //	limitations under the License.
 //
 
+var startTimes = [];
+var overallStats = [[], [], []];
+var myLineChart;
 
-$(document).on("click", "i", function(e) {
-    var id = $(this).attr('name');
-    if($(this).attr('class')=='pe-7s-angle-down-circle green'){
-        $("#"+id).css("height","300px");
-        $("#"+id).css("overflow","visible");
-        $(this).attr('class', 'pe-7s-angle-up-circle red');
-
-    }
-    else{
-        if($(this).attr('class')=='pe-7s-angle-up-circle red'){
-            $("#"+id).css("height","60px");
-            $("#"+id).css("overflow","hidden");
-            $(this).attr('class', 'pe-7s-angle-down-circle green');
-        }
-    }
-});
 
 $(document).on("click", "#submit", function(e) {
     var chosenTest = $("#chosen-test").find(":selected").text();
@@ -61,9 +48,17 @@ function getStats (request){
         });
     })();
 }
+
 function displayStats (load){
+    var dates = load.run_dates;
     var callerStatArray = load.caller;
     var calleeStatArray = load.callee;
+    if (callerStatArray.length > 20){
+        callerStatArray = callerStatArray.slice(0,19);
+        calleeStatArray = calleeStatArray.slice(0,19);
+        dates = dates.slice(0,19);
+    }
+
 
     var caller_audio = [];
     var callee_audio = [];
@@ -92,7 +87,12 @@ function displayStats (load){
     var audio_packets_sent_canvas = $('#overtime-video-packets-sent');
     var audio_packets_received_canvas = $('#overtime-video-packets-received');
 
-
+    var options = {  day: 'numeric', month: 'long',year: 'numeric'  };
+    labels = [];
+    dates.forEach(function(date){
+        var tmp = new Date(date);
+        labels.unshift(tmp.toLocaleDateString('en-GB', options));
+    });
     callerStatArray.forEach(function(stat){
         if(!isEmpty(stat)){
             caller_video.unshift(stat.video);
@@ -152,68 +152,103 @@ function displayStats (load){
 
     /*var stat_content = '';
     $("#stat_content").html(stat_content);*/
-    paintCanvas('overtime-video-bytes-sent', caller_video_bytes_sent,callee_video_bytes_sent, "Bytes Sent");
-    paintCanvas('overtime-video-bytes-received', caller_video_bytes_received,callee_video_bytes_received, "Bytes Received");
-    paintCanvas('overtime-video-packets-sent', caller_video_packets_sent,callee_video_packets_sent, "Packets Sent");
-    paintCanvas('overtime-video-packets-received', caller_video_packets_received,callee_video_packets_received, "Packets Received");
-    paintCanvas('overtime-audio-bytes-sent', caller_audio_bytes_sent,callee_audio_bytes_sent, "Bytes Sent");
-    paintCanvas('overtime-audio-bytes-received', caller_audio_bytes_received,callee_audio_bytes_received, "Bytes Received");
-    paintCanvas('overtime-audio-packets-sent', caller_audio_packets_sent,callee_audio_packets_sent, "Packets Sent");
-    paintCanvas('overtime-audio-packets-received', caller_audio_packets_received,callee_audio_packets_received, "Packets Received");
+    if (labels.length>0){
+        if (caller_video_bytes_sent.reduce(add)===0){
+            $('#stat-status').html("No stats are available for the last 30 runs");
+            clearAllGraphs();
+        } else {
+            $('#stat-status').empty();
+            paintCanvas('overtime-video-bytes-sent', caller_video_bytes_sent,callee_video_bytes_sent, "Bytes Sent (kbps)");
+            paintCanvas('overtime-video-bytes-received', caller_video_bytes_received,callee_video_bytes_received, "Bytes Received (kbps)");
+            paintCanvas('overtime-video-packets-sent', caller_video_packets_sent,callee_video_packets_sent, "Packets Sent");
+            paintCanvas('overtime-video-packets-received', caller_video_packets_received,callee_video_packets_received, "Packets Received");
+            paintCanvas('overtime-audio-bytes-sent', caller_audio_bytes_sent,callee_audio_bytes_sent, "Bytes Sent (kbps)");
+            paintCanvas('overtime-audio-bytes-received', caller_audio_bytes_received,callee_audio_bytes_received, "Bytes Received (kbps)");
+            paintCanvas('overtime-audio-packets-sent', caller_audio_packets_sent,callee_audio_packets_sent, "Packets Sent");
+            paintCanvas('overtime-audio-packets-received', caller_audio_packets_received,callee_audio_packets_received, "Packets Received");
+        }
+    } else {
+        $('#stat-status').html("No stats are available for the last 30 runs");
+        clearAllGraphs();
+    }
+}
+
+function add(a, b) {
+    return a + b;
 }
 
 function paintCanvas(canvas,caller_data, callee_data,title){
-    var ctx = document.getElementById(canvas);
-    $('#'+canvas).empty()
-    var labels = [];
-    for (i = caller_data.length; i > 0; i--){
-        labels.push('.');
-    }
-    var config = {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Caller',
-                    backgroundColor: '#ef2b3e',
-                    borderColor: '#ef2b3e',
-                    fill: false,
-                    data: caller_data,
-                    pointRadius: 2,
-                    lineTension: 0
+    if (typeof graphMap.get(canvas) === 'undefined'){
+        var ctx = document.getElementById(canvas);
+        $('#'+canvas).empty()
+    /*    var labels = [];
+        for (i = caller_data.length; i > 0; i--){
+            labels.push('.');
+        }*/
+        var config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Caller',
+                        backgroundColor: '#42f4aa',
+                        borderColor: '#42f4aa',
+                        fill: false,
+                        data: caller_data,
+                        pointRadius: 2,
+                        lineTension: 0
+                    },
+                    {
+                        label: 'Callee',
+                        backgroundColor: '#ef2b3e',
+                        borderColor: '#ef2b3e',
+                        fill: false,
+                        data: callee_data,
+                        pointRadius: 2,
+                        lineTension: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                title:{
+                    display:true,
+                    text: title
                 },
-                {
-                    label: 'Callee',
-                    backgroundColor: '#42f4aa',
-                    borderColor: '#42f4aa',
-                    fill: false,
-                    data: callee_data,
-                    pointRadius: 2,
-                    lineTension: 0
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            title:{
-                display:true,
-                text: title
-            },
-            scales: {
-                xAxes: [{
-                    display: true,
-                }],
-                yAxes: [{
-                    display: true,
-                    type: 'linear',
-                }]
-            },
-            showLines: true
-        }
-    };
-    var myLineChart = new Chart(ctx,config);
+                scales: {
+                    xAxes: [{
+                        display: true,
+                    }],
+                    yAxes: [{
+                        display: true,
+                        type: 'linear',
+                    }]
+                },
+                showLines: true
+            }
+        };
+        var myChart = new Chart(ctx,config);
+        graphMap.set(canvas, myChart)
+    } else {
+        var myChart = graphMap.get(canvas);
+        myChart.data.datasets[0].data = caller_data;
+        myChart.data.datasets[1].data = callee_data;
+        myChart.update();
+        graphMap.set(canvas, myChart);
+    }
 }
+
+function clearAllGraphs(){
+    if(graphMap.size>0){
+        graphMap.forEach(function(graph){
+            graph.data.datasets[0].data = [0];
+            graph.data.datasets[1].data = [0];
+            graph.update();
+        });
+    }
+}
+
 function isEmpty(obj) {
     for(var key in obj) {
         if(obj.hasOwnProperty(key))
@@ -222,61 +257,107 @@ function isEmpty(obj) {
     return true;
 }
 
-$(document).ready(function(){
-    $('[data-toggle="tooltip"]').tooltip();
-    var labels = [];
-    for (i = stats[0].length; i > 0; i--){
-        labels.push('.');
-    }
-    var config = {
-        type: 'line',
-        data: {
-            labels: config_labels,
-            datasets: [
-                {
-                    label: "Success",
-                    backgroundColor: '#42f4aa',
-                    borderColor: '#42f4aa',
-                    fill: false,
-                    data: stats[0],
-                    pointRadius: 2
-                },
-                {
-                    label: "Failed",
-                    backgroundColor: '#ff4b30',
-                    borderColor: '#ff4b30',
-                    fill: false,
-                    data: stats[1],
-                    pointRadius: 2
-                },
-                {
-                    label: "Error",
-                    backgroundColor: '#30b3ff',
-                    borderColor: '#30b3ff',
-                    fill: false,
-                    data: stats[2],
-                    pointRadius: 2
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            title:{
-                display:false,
-                text:'Result throughout configurations'
-            },
-            scales: {
-                xAxes: [{
-                    display: true,
-                }],
-                yAxes: [{
-                    display: true,
-                    type: 'linear',
-                }]
-            },
-            showLines: true
-        }
-    };
 
-var myLineChart = new Chart($("#overtime-result"),config);
+
+$(document).on("click", ".overall", function(e) {
+    selectedTest = $(this).attr('id');
+    $('#selectedTest').html(selectedTest);
+    console.log('Test selected: '+ selectedTest);
+    getAndUpdateOverallStat(selectedTest);
+});
+
+
+function updateOverall (){
+    myChart.data.datasets.forEach((dataset) => {
+        dataset.data = overallStats;
+    });
+    myChart.update();
+}
+
+function getAndUpdateOverallStat( testName ){
+  $('#loadingStatus').html('<i class="fa fa-spinner fa-spin"></i>');
+  overallStats = [[], [], []];
+  startTimes = [];
+  (function getOverallStat() {
+    $.ajax({
+      url: 'getoverall?testName='+testName,
+      success: function(result){
+        $('#loadingStatus').html('');
+        var data = JSON.parse(result);
+        data.forEach(function (stat){
+          startTimes.unshift(stat.startTime);
+          for (i = 0; i <3 ; i++){
+            overallStats[i].unshift(stat.stats[i]);
+          }
+        })
+        for (i = 0; i <3 ; i++){
+          myLineChart.data.datasets[i].data = overallStats[i];
+        }
+        myLineChart.data.labels = startTimes;
+        myLineChart.update();
+        console.log(startTimes);
+      }
+    });
+  })();
+
+}
+
+
+$(document).ready(function(){
+/*  var labels = [];
+  for (i = stats[0].length; i > 0; i--){
+    labels.push('.');
+  }*/
+  var config = {
+    type: 'line',
+    data: {
+      labels: startTimes,
+      datasets: [
+        {
+          label: "Success",
+          backgroundColor: '#42f4aa',
+          borderColor: '#42f4aa',
+          fill: false,
+          data: overallStats[0],
+          pointRadius: 2
+        },
+        {
+          label: "Failed",
+          backgroundColor: '#ff4b30',
+          borderColor: '#ff4b30',
+          fill: false,
+          data: overallStats[1],
+          pointRadius: 2
+        },
+        {
+          label: "Error",
+          backgroundColor: '#30b3ff',
+          borderColor: '#30b3ff',
+          fill: false,
+          data: overallStats[2],
+          pointRadius: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      title:{
+        display:false,
+        text:'Result throughout configurations'
+      },
+      scales: {
+        xAxes: [{
+            display: true,
+        }],
+        yAxes: [{
+          display: true,
+          type: 'linear',
+        }]
+      },
+      showLines: true
+    }
+  };
+myLineChart = new Chart($("#overtime-result"),config);
+getAndUpdateOverallStat(selectedTest);
 });
