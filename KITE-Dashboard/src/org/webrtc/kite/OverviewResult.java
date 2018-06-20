@@ -198,7 +198,7 @@ public class OverviewResult {
         ResultTable resultTable = this.listOfResultTable.get(l);
         result += "{";
         result += "\"result\": \"" + resultTable.getResult().replaceAll("\n", "").replaceAll("\\\\", "") + "\",";
-        result += "\"stats\":" + resultTable.getStats() + ",";
+        result += "\"stats\":"+ resultTable.getStats()+",";
         result += "\"duration\": \"" + resultTable.getDuration() + "\",";
         //result += "\"stats\":"+resultTable.getStats()+",";
         result += "\"browsers\": [";

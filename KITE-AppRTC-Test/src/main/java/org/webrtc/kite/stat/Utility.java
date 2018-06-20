@@ -34,11 +34,11 @@ public class Utility {
    * Obtain a value of a key in the data map if not null
    *
    * @param statObject data Map
-   * @param statName   name of the key
+   * @param statName name of the key
    * @return true if both the provided objects are not null.
    */
-  public static String getStatByName(Map<Object, Object> statObject, String statName) {
-    if (statObject.get(statName) != null)
+  public static String getStatByName(Map<Object, Object> statObject, String statName){
+    if(statObject.get(statName)!=null)
       return statObject.get(statName).toString();
     return "NA";
   }
@@ -51,13 +51,13 @@ public class Utility {
    * @param clientStats array of data sent back from test
    * @return JsonObjectBuilder.
    */
-  public static JsonObjectBuilder buildClientObject(Object clientStats) {
+  public static JsonObjectBuilder buildClientObject(Object clientStats){
     JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
     Map<String, Object> clientStatMap = (Map<String, Object>) clientStats;
 
     List<Object> clientStatArray = (ArrayList) clientStatMap.get("stats");
     JsonArrayBuilder jsonclientStatArray = Json.createArrayBuilder();
-    for (Object stats : clientStatArray) {
+    for (Object stats: clientStatArray) {
       JsonObjectBuilder jsonStatObjectBuilder = buildSingleStatObject(stats);
       jsonclientStatArray.add(jsonStatObjectBuilder);
     }
@@ -66,10 +66,10 @@ public class Utility {
     Map<Object, Object> sdpOffer = (Map<Object, Object>) clientStatMap.get("offer");
     Map<Object, Object> sdpAnswer = (Map<Object, Object>) clientStatMap.get("answer");
     sdpObjectBuilder.add("offer", new SDP(sdpOffer).getJsonObjectBuilder())
-      .add("answer", new SDP(sdpAnswer).getJsonObjectBuilder());
+            .add("answer", new SDP(sdpAnswer).getJsonObjectBuilder());
 
     jsonObjectBuilder.add("sdp", sdpObjectBuilder)
-      .add("stats", jsonclientStatArray);
+            .add("stats", jsonclientStatArray);
 
     return jsonObjectBuilder;
   }
@@ -81,77 +81,72 @@ public class Utility {
    * @param statArray array of data sent back from test
    * @return JsonObjectBuilder.
    */
-  public static JsonObjectBuilder buildSingleStatObject(Object statArray) {
+  public static JsonObjectBuilder buildSingleStatObject(Object statArray){
     JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
     Map<String, List<StatObject>> statObjectMap = new HashMap<>();
-    if (statArray != null) {
-      for (Object map : (ArrayList) statArray) {
-        if (map != null) {
-          Map<Object, Object> statMap = (Map<Object, Object>) map;
-          String type = (String) statMap.get("type");
-          StatObject statObject = null;
-          switch (type) {
-            case "codec": {
-              statObject = new RTCCodecStats(statMap);
-              break;
-            }
-            case "track": {
-              statObject = new RTCMediaStreamTrackStats(statMap);
-              break;
-            }
-            case "stream": {
-              statObject = new RTCMediaStreamStats(statMap);
-              break;
-            }
-            case "inbound-rtp": {
-              statObject = new RTCRTPStreamStats(statMap, true);
-              break;
-            }
-            case "outbound-rtp": {
-              statObject = new RTCRTPStreamStats(statMap, false);
-              break;
-            }
-            case "peer-connection": {
-              statObject = new RTCPeerConnectionStats(statMap);
-              break;
-            }
-            case "transport": {
-              statObject = new RTCTransportStats(statMap);
-              break;
-            }
-            case "candidate-pair": {
-              statObject = new RTCIceCandidatePairStats(statMap);
-              break;
-            }
-            case "remote-candidate": {
-              statObject = new RTCIceCandidateStats(statMap);
-              break;
-            }
-            case "local-candidate": {
-              statObject = new RTCIceCandidateStats(statMap);
-              break;
-            }
-          }
-          if (statObject != null) {
-            if (statObjectMap.get(type) == null) {
-              statObjectMap.put(type, new ArrayList<StatObject>());
-            }
-            statObjectMap.get(type).add(statObject);
-          }
+    for (Object map: (ArrayList) statArray) {
+      Map<Object, Object> statMap = (Map<Object, Object>) map;
+      String type = (String) statMap.get("type");
+      StatObject statObject = null;
+      switch (type){
+        case "codec":{
+          statObject = new RTCCodecStats(statMap);
+          break;
+        }
+        case "track":{
+          statObject = new RTCMediaStreamTrackStats(statMap);
+          break;
+        }
+        case "stream":{
+          statObject = new RTCMediaStreamStats(statMap);
+          break;
+        }
+        case "inbound-rtp":{
+          statObject = new RTCRTPStreamStats(statMap, true);
+          break;
+        }
+        case "outbound-rtp":{
+          statObject = new RTCRTPStreamStats(statMap, false);
+          break;
+        }
+        case "peer-connection":{
+          statObject = new RTCPeerConnectionStats(statMap);
+          break;
+        }
+        case "transport":{
+          statObject = new RTCTransportStats(statMap);
+          break;
+        }
+        case "candidate-pair":{
+          statObject = new RTCIceCandidatePairStats(statMap);
+          break;
+        }
+        case "remote-candidate":{
+          statObject = new RTCIceCandidateStats(statMap);
+          break;
+        }
+        case "local-candidate":{
+          statObject = new RTCIceCandidateStats(statMap);
+          break;
         }
       }
+      if (statObject!=null) {
+        if (statObjectMap.get(type)==null) {
+          statObjectMap.put(type, new ArrayList<StatObject>());
+        }
+        statObjectMap.get(type).add(statObject);
+      }
     }
-    if (!statObjectMap.isEmpty()) {
-      for (String type : statObjectMap.keySet()) {
+    if (!statObjectMap.isEmpty()){
+      for (String type: statObjectMap.keySet()){
         JsonObjectBuilder tmp = Json.createObjectBuilder();
-        for (StatObject stat : statObjectMap.get(type))
-          tmp.add(stat.getId(), stat.getJsonObjectBuilder());
-        jsonObjectBuilder.add(type, tmp);
+        for (StatObject stat: statObjectMap.get(type))
+          tmp.add(stat.getId(),stat.getJsonObjectBuilder());
+        jsonObjectBuilder.add(type,tmp);
       }
     }
     return jsonObjectBuilder;
   }
-
   /**
    * Create a JsonObject to send back to KITE
    *
@@ -162,13 +157,13 @@ public class Utility {
 
     JsonObjectBuilder tmp = Json.createObjectBuilder();
     for (int i = 1; i <= tupleSize; i++) {
-      String name = "client_" + i;
-      if (resultMap.get(name) != null)
+      String name = "client_"+i;
+      if (resultMap.get(name)!=null)
         tmp.add(name, Utility.buildClientObject(resultMap.get(name)));
     }
 
     return Json.createObjectBuilder().add("result", (String) resultMap.get("result"))
-      .add("stats", tmp).build();
+            .add("stats", tmp).build();
   }
 
 }

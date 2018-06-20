@@ -25,29 +25,29 @@ import java.util.Map;
  */
 public class RTCIceCandidateStats extends StatObject {
 
-  private String ip, port, protocol, candidateType, priority, url;
+    private String ip, port, protocol, candidateType, priority, url;
 
-  public RTCIceCandidateStats(Map<Object, Object> statObject) {
-    this.setId(Utility.getStatByName(statObject, "id"));
-    this.ip = Utility.getStatByName(statObject, "ip");
-    this.port = Utility.getStatByName(statObject, "port");
-    this.protocol = Utility.getStatByName(statObject, "protocol");
-    this.candidateType = Utility.getStatByName(statObject, "candidateType");
-    this.priority = Utility.getStatByName(statObject, "priority");
-    this.url = Utility.getStatByName(statObject, "url");
+    public RTCIceCandidateStats(Map<Object, Object> statObject) {
+        this.setId(Utility.getStatByName(statObject, "id"));
+        this.ip = Utility.getStatByName(statObject, "ip");
+        this.port = Utility.getStatByName(statObject, "port");
+        this.protocol = Utility.getStatByName(statObject, "protocol");
+        this.candidateType = Utility.getStatByName(statObject, "candidateType");
+        this.priority = Utility.getStatByName(statObject, "priority");
+        this.url = Utility.getStatByName(statObject, "url");
 
-  }
+    }
 
-  @Override
-  public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("ip", this.ip)
-        .add("port", this.port)
-        .add("protocol", this.protocol)
-        .add("candidateType", this.candidateType)
-        .add("priority", this.priority)
-        .add("url", this.url);
-    return jsonObjectBuilder;
-  }
+    @Override
+    public JsonObjectBuilder getJsonObjectBuilder() {
+        JsonObjectBuilder jsonObjectBuilder =
+                Json.createObjectBuilder()
+                        .add("ip", this.ip)
+                        .add("port", this.port)
+                        .add("protocol", this.protocol)
+                        .add("candidateType", this.candidateType)
+                        .add("priority", this.priority)
+                        .add("url", this.url);
+        return jsonObjectBuilder;
+    }
 }

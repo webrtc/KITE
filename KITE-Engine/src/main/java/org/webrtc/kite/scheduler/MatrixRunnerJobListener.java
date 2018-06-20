@@ -16,7 +16,6 @@
 
 package org.webrtc.kite.scheduler;
 
-import org.apache.log4j.Logger;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
@@ -28,9 +27,8 @@ import org.quartz.listeners.JobListenerSupport;
  */
 public class MatrixRunnerJobListener extends JobListenerSupport {
 
-  private static final Logger logger = Logger.getLogger(MatrixRunnerJobListener.class.getName());
-
-  @Override public String getName() {
+  @Override
+  public String getName() {
     return MatrixRunnerJobListener.class.getName();
   }
 
@@ -42,12 +40,12 @@ public class MatrixRunnerJobListener extends JobListenerSupport {
       try {
         scheduler.clear();
       } catch (SchedulerException se) {
-        logger.error("Exception while clearing the Scheduler", se);
+
       }
       try {
         scheduler.shutdown();
       } catch (SchedulerException se) {
-        logger.error("Exception while shutting down the Scheduler", se);
+
       }
     }
   }

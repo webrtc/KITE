@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,15 +20,13 @@ import eu.bitwalker.useragentutils.OperatingSystem;
 import eu.bitwalker.useragentutils.UserAgent;
 import eu.bitwalker.useragentutils.Version;
 import is.tagomor.woothee.Classifier;
+import org.apache.log4j.Logger;
+import org.webrtc.kite.Utility;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
-
-import org.apache.log4j.Logger;
-import org.webrtc.kite.Utility;
-
 import java.util.Map;
 
 /**
@@ -42,63 +40,38 @@ public class Browser extends KiteConfigObject {
 
   private static final Logger logger = Logger.getLogger(Browser.class.getName());
 
-  // Mandatory
   private String browserName;
   private String version;
   private String platform;
-
-  // Optional
-  private Mobile mobile;
   private String remoteAddress;
-  private boolean headless = false;
-  private boolean technologyPreview = false;
+  private Mobile mobile;
 
-  // Info from web driver
   private String webDriverVersion;
   private String webDriverPlatform;
 
-  // Info from user agent
   private String userAgentVersion;
   private String userAgentPlatform;
-
-  // Private
-  private int maxInstances;
-
 
   /**
    * Constructs a new Browser with the given browser name.
    *
-   * @param browserName name of the browser as accepted in Selenium
+   * @param browserName name of the browser as accepted in Selenium.
    */
   public Browser(String browserName) {
     this.browserName = browserName;
   }
 
   /**
-   * Constructs a new Browser with the given browser name, version and platform.
-   *
-   * @param browserName name of the browser as accepted in Selenium
-   * @param version     the version
-   * @param platform    the platform
-   */
-  public Browser(String browserName, String version, String platform) {
-    this.browserName = browserName;
-    this.version = version;
-    this.platform = platform;
-  }
-
-  /**
    * Constructs a new Browser with the given remote address and JsonObject.
    *
-   * @param remoteAddress a string representation of the Selenium hub url
-   * @param jsonObject    JsonObject
+   * @param remoteAddress a string representation of the Selenium hub url.
+   * @param jsonObject JsonObject
    */
   public Browser(String remoteAddress, JsonObject jsonObject) {
     this.browserName = jsonObject.getString("browserName");
-    this.version = jsonObject.getString("version");
-    this.platform = jsonObject.getString("platform");
-    this.headless = jsonObject.getBoolean("headless", false);
-    this.technologyPreview = jsonObject.getBoolean("technologyPreview", false);
+
+    this.version = (String) Utility.throwNoKeyOrBadValueException(jsonObject, "version", String.class, false);
+    this.platform = (String) Utility.throwNoKeyOrBadValueException(jsonObject, "platform", String.class, false);
     this.remoteAddress = jsonObject.getString("remoteAddress", remoteAddress);
     JsonValue jsonValue = jsonObject.getOrDefault("mobile", null);
     if (jsonValue != null)
@@ -114,225 +87,60 @@ public class Browser extends KiteConfigObject {
     this.browserName = browser.getBrowserName();
     this.version = browser.getVersion();
     this.platform = browser.getPlatform();
-    this.mobile = browser.getMobile();
     this.remoteAddress = browser.getRemoteAddress();
-    this.headless = browser.isHeadless();
-    this.technologyPreview = browser.isTechnologyPreview();
+    this.mobile = browser.getMobile();
   }
 
-  /**
-   * Gets browser name.
-   *
-   * @return the browser name
-   */
   public String getBrowserName() {
     return browserName;
   }
 
-  /**
-   * Sets browser name.
-   *
-   * @param browserName the browser name
-   */
   public void setBrowserName(String browserName) {
     this.browserName = browserName;
   }
 
-  /**
-   * Gets version.
-   *
-   * @return the version
-   */
   public String getVersion() {
     return version;
   }
 
-  /**
-   * Sets version.
-   *
-   * @param version the version
-   */
   public void setVersion(String version) {
     this.version = version;
   }
 
-  /**
-   * Gets platform.
-   *
-   * @return the platform
-   */
   public String getPlatform() {
     return platform;
   }
 
-  /**
-   * Sets platform.
-   *
-   * @param platform the platform
-   */
   public void setPlatform(String platform) {
     this.platform = platform;
   }
 
-  /**
-   * Gets mobile.
-   *
-   * @return the mobile
-   */
-  public Mobile getMobile() {
-    return mobile;
-  }
-
-  /**
-   * Sets mobile.
-   *
-   * @param mobile the mobile
-   */
-  public void setMobile(Mobile mobile) {
-    this.mobile = mobile;
-  }
-
-  /**
-   * Gets remote address.
-   *
-   * @return the remote address
-   */
   public String getRemoteAddress() {
     return remoteAddress;
   }
 
-  /**
-   * Sets remote address.
-   *
-   * @param remoteAddress the remote address
-   */
   public void setRemoteAddress(String remoteAddress) {
     this.remoteAddress = remoteAddress;
   }
 
-  /**
-   * Is headless boolean.
-   *
-   * @return the boolean
-   */
-  public boolean isHeadless() {
-    return headless;
-  }
+  public Mobile getMobile() { return mobile; }
 
-  /**
-   * Sets headless.
-   *
-   * @param technologyPreview the technologyPreview
-   */
-  public void setTechnologyPreview(boolean technologyPreview) {
-    this.technologyPreview = technologyPreview;
-  }
-  /**
-   * Is technologyPreview boolean.
-   *
-   * @return the boolean
-   */
-  public boolean isTechnologyPreview() {
-    return technologyPreview;
-  }
+  public void setMobile(Mobile mobile) { this.mobile = mobile; }
 
-  /**
-   * Sets headless.
-   *
-   * @param headless the headless
-   */
-  public void setHeadless(boolean headless) {
-    this.headless = headless;
-  }
-
-  /**
-   * Gets web driver version.
-   *
-   * @return the web driver version
-   */
   public String getWebDriverVersion() {
     return webDriverVersion;
   }
 
-  /**
-   * Sets web driver version.
-   *
-   * @param webDriverVersion the web driver version
-   */
   public void setWebDriverVersion(String webDriverVersion) {
     this.webDriverVersion = webDriverVersion;
   }
 
-  /**
-   * Gets web driver platform.
-   *
-   * @return the web driver platform
-   */
   public String getWebDriverPlatform() {
     return webDriverPlatform;
   }
 
-  /**
-   * Sets web driver platform.
-   *
-   * @param webDriverPlatform the web driver platform
-   */
   public void setWebDriverPlatform(String webDriverPlatform) {
     this.webDriverPlatform = webDriverPlatform;
-  }
-
-  /**
-   * Gets user agent version.
-   *
-   * @return the user agent version
-   */
-  public String getUserAgentVersion() {
-    return userAgentVersion;
-  }
-
-  /**
-   * Sets user agent version.
-   *
-   * @param userAgentVersion the user agent version
-   */
-  public void setUserAgentVersion(String userAgentVersion) {
-    this.userAgentVersion = userAgentVersion;
-  }
-
-  /**
-   * Gets user agent platform.
-   *
-   * @return the user agent platform
-   */
-  public String getUserAgentPlatform() {
-    return userAgentPlatform;
-  }
-
-  /**
-   * Sets user agent platform.
-   *
-   * @param userAgentPlatform the user agent platform
-   */
-  public void setUserAgentPlatform(String userAgentPlatform) {
-    this.userAgentPlatform = userAgentPlatform;
-  }
-
-  /**
-   * Gets max instances.
-   *
-   * @return the max instances
-   */
-  public int getMaxInstances() {
-    return maxInstances;
-  }
-
-  /**
-   * Sets max instances.
-   *
-   * @param maxInstances the max instances
-   */
-  public void setMaxInstances(int maxInstances) {
-    this.maxInstances = maxInstances;
   }
 
   /**
@@ -397,7 +205,8 @@ public class Browser extends KiteConfigObject {
     }
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     if (this == obj) {
       return true;
     }
@@ -423,7 +232,8 @@ public class Browser extends KiteConfigObject {
     return false;
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     long hashCode = this.browserName.hashCode();
     if (this.version != null)
       hashCode += this.version.hashCode();
@@ -434,7 +244,8 @@ public class Browser extends KiteConfigObject {
     return (int) hashCode;
   }
 
-  @Override public JsonObjectBuilder getJsonObjectBuilder() {
+  @Override
+  public JsonObjectBuilder getJsonObjectBuilder() {
     JsonObjectBuilder jsonObjectBuilder =
         Json.createObjectBuilder().add("browserName", this.getBrowserName());
 
@@ -448,7 +259,8 @@ public class Browser extends KiteConfigObject {
     return jsonObjectBuilder;
   }
 
-  @Override public JsonObjectBuilder getJsonObjectBuilderForResult() {
+  @Override
+  public JsonObjectBuilder getJsonObjectBuilderForResult() {
     JsonObjectBuilder jsonObjectBuilder =
         Json.createObjectBuilder().add("browserName", this.getBrowserName());
 
@@ -483,13 +295,6 @@ public class Browser extends KiteConfigObject {
     return jsonObjectBuilder;
   }
 
-  /**
-   * Gets json object builder for result.
-   *
-   * @param osName    the os name
-   * @param osVersion the os version
-   * @return the json object builder for result
-   */
   public JsonObjectBuilder getJsonObjectBuilderForResult(String osName, String osVersion) {
     JsonObjectBuilder jsonObjectBuilder =
         Json.createObjectBuilder().add("browserName", this.getBrowserName());
@@ -516,21 +321,20 @@ public class Browser extends KiteConfigObject {
     } else if (Utility.isNotNullAndNotEmpty(this.platform)) {
       myPlatform = this.platform;
     }
-
+    
     if (osName != null && osVersion != null) {
       if (!myPlatform.toLowerCase().contains("linux") && !myPlatform.matches("[0-9]")) {
         if (myPlatform.toLowerCase().startsWith("win") && osName.toLowerCase().startsWith("win")
-            || myPlatform.toLowerCase().startsWith("mac") && osName.toLowerCase()
-            .startsWith("mac")) {
+            || myPlatform.toLowerCase().startsWith("mac")
+                && osName.toLowerCase().startsWith("mac")) {
           myPlatform = osName + osVersion;
           if (logger.isDebugEnabled())
-            logger.debug(
-                "Replacing platform info from exception info - replacing: " + myPlatform + " with: "
-                    + osName + osVersion);
+            logger.debug("replacing platform info from exception info - replacing: " + myPlatform
+                + " with: " + osName + osVersion);
         }
       }
     }
-
+    
     if (myPlatform != null)
       jsonObjectBuilder.add("platform", myPlatform);
 

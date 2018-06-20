@@ -26,33 +26,33 @@ import java.util.Map;
  */
 public class RTCDataChannelStats extends StatObject {
 
-  private String label, protocol, datachannelId, state, messagesSent, bytesSent, messagesReceived, bytesReceived;
+    private String label, protocol, datachannelId, state, messagesSent, bytesSent, messagesReceived, bytesReceived;
 
 
-  public RTCDataChannelStats(Map<Object, Object> statObject) {
-    this.setId(Utility.getStatByName(statObject, "id"));
-    this.label = Utility.getStatByName(statObject, "label");
-    this.protocol = Utility.getStatByName(statObject, "protocol");
-    this.datachannelId = Utility.getStatByName(statObject, "datachannelId");
-    this.state = Utility.getStatByName(statObject, "state");
-    this.messagesSent = Utility.getStatByName(statObject, "messagesSent");
-    this.bytesSent = Utility.getStatByName(statObject, "bytesSent");
-    this.messagesReceived = Utility.getStatByName(statObject, "messagesReceived");
-    this.bytesReceived = Utility.getStatByName(statObject, "bytesReceived");
-  }
+    public RTCDataChannelStats(Map<Object, Object> statObject) {
+        this.setId(Utility.getStatByName(statObject, "id"));
+        this.label = Utility.getStatByName(statObject, "label");
+        this.protocol = Utility.getStatByName(statObject, "protocol");
+        this.datachannelId = Utility.getStatByName(statObject, "datachannelId");
+        this.state = Utility.getStatByName(statObject, "state");
+        this.messagesSent = Utility.getStatByName(statObject, "messagesSent");
+        this.bytesSent = Utility.getStatByName(statObject, "bytesSent");
+        this.messagesReceived = Utility.getStatByName(statObject, "messagesReceived");
+        this.bytesReceived = Utility.getStatByName(statObject, "bytesReceived");
+    }
 
-  @Override
-  public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("label", this.label)
-        .add("protocol", this.protocol)
-        .add("datachannelId", this.datachannelId)
-        .add("state", this.state)
-        .add("messagesSent", this.messagesSent)
-        .add("bytesSent", this.bytesSent)
-        .add("messagesReceived", this.messagesReceived)
-        .add("bytesReceived", this.bytesReceived);
-    return jsonObjectBuilder;
-  }
+    @Override
+    public JsonObjectBuilder getJsonObjectBuilder() {
+        JsonObjectBuilder jsonObjectBuilder =
+                Json.createObjectBuilder()
+                        .add("label", this.label)
+                        .add("protocol", this.protocol)
+                        .add("datachannelId", this.datachannelId)
+                        .add("state", this.state)
+                        .add("messagesSent", this.messagesSent)
+                        .add("bytesSent", this.bytesSent)
+                        .add("messagesReceived", this.messagesReceived)
+                        .add("bytesReceived", this.bytesReceived);
+        return jsonObjectBuilder;
+    }
 }

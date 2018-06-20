@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,39 +37,39 @@ import java.util.List;
  */
 @WebServlet("/getresult")
 public class GetResultServlet extends HttpServlet {
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  /**
-   * @see HttpServlet#HttpServlet()
-   */
-  public GetResultServlet() {
-    super();
-  }
-
-  /**
-   * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-   * response)
-   */
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
-    String tableName = request.getParameter("name");
-    String resultString = "";
-    if (tableName == null)
-      throw new KiteNoKeyException("table name");
-    String idStr = request.getParameter("id");
-    if (idStr == null)
-      throw new KiteNoKeyException("id");
-    List<String> idStrList = Arrays.asList(idStr.split("_"));
-    List<Integer> idList = new ArrayList<Integer>();
-    for (String id : idStrList)
-      idList.add(Integer.parseInt(id));
-    try {
-      resultString = new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getResultById(tableName, idList);
-
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw new KiteSQLException(e.getLocalizedMessage());
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public GetResultServlet() {
+        super();
     }
-    response.getWriter().print(resultString);
-  }
+
+    /**
+     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+     *      response)
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String tableName = request.getParameter("name");
+        String resultString = "";
+        if (tableName == null)
+            throw new KiteNoKeyException("table name");
+        String idStr = request.getParameter("id");
+        if (idStr == null)
+            throw new KiteNoKeyException("id");
+        List<String> idStrList = Arrays.asList(idStr.split("_"));
+        List<Integer> idList = new ArrayList<Integer>();
+        for (String id : idStrList)
+            idList.add(Integer.parseInt(id));
+        try {
+            resultString = new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getResultById(tableName, idList);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new KiteSQLException(e.getLocalizedMessage());
+        }
+        response.getWriter().print(resultString);
+    }
 }

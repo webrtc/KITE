@@ -26,37 +26,37 @@ import java.util.Map;
  */
 public class RTCIceCandidatePairStats extends StatObject {
 
-  private String transportId, localCandidateId, remoteCandidateId, state, priority, nominated,
-    bytesSent, bytesReceived, totalRoundTripTime, currentRoundTripTime;
+    private String transportId, localCandidateId, remoteCandidateId, state, priority, nominated,
+            bytesSent, bytesReceived, totalRoundTripTime, currentRoundTripTime;
 
-  public RTCIceCandidatePairStats(Map<Object, Object> statObject) {
-    this.setId(Utility.getStatByName(statObject, "id"));
-    this.transportId = Utility.getStatByName(statObject, "transportId");
-    this.localCandidateId = Utility.getStatByName(statObject, "localCandidateId");
-    this.remoteCandidateId = Utility.getStatByName(statObject, "remoteCandidateId");
-    this.state = Utility.getStatByName(statObject, "state");
-    this.priority = Utility.getStatByName(statObject, "priority");
-    this.nominated = Utility.getStatByName(statObject, "nominated");
-    this.bytesSent = Utility.getStatByName(statObject, "bytesSent");
-    this.bytesReceived = Utility.getStatByName(statObject, "bytesReceived");
-    this.totalRoundTripTime = Utility.getStatByName(statObject, "totalRoundTripTime");
-    this.currentRoundTripTime = Utility.getStatByName(statObject, "currentRoundTripTime");
-  }
+    public RTCIceCandidatePairStats(Map<Object, Object> statObject) {
+        this.setId(Utility.getStatByName(statObject, "id"));
+        this.transportId = Utility.getStatByName(statObject, "transportId");
+        this.localCandidateId = Utility.getStatByName(statObject, "localCandidateId");
+        this.remoteCandidateId = Utility.getStatByName(statObject, "remoteCandidateId");
+        this.state = Utility.getStatByName(statObject, "state");
+        this.priority = Utility.getStatByName(statObject, "priority");
+        this.nominated = Utility.getStatByName(statObject, "nominated");
+        this.bytesSent = Utility.getStatByName(statObject, "bytesSent");
+        this.bytesReceived = Utility.getStatByName(statObject, "bytesReceived");
+        this.totalRoundTripTime = Utility.getStatByName(statObject, "totalRoundTripTime");
+        this.currentRoundTripTime = Utility.getStatByName(statObject, "currentRoundTripTime");
+    }
 
-  @Override
-  public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("transportId", this.transportId)
-        .add("localCandidateId", this.localCandidateId)
-        .add("remoteCandidateId", this.remoteCandidateId)
-        .add("state", this.state)
-        .add("priority", this.priority)
-        .add("nominated", this.nominated)
-        .add("bytesSent", this.bytesSent)
-        .add("currentRoundTripTime", this.currentRoundTripTime)
-        .add("totalRoundTripTime", this.totalRoundTripTime)
-        .add("bytesReceived", this.bytesReceived);
-    return jsonObjectBuilder;
-  }
+    @Override
+    public JsonObjectBuilder getJsonObjectBuilder() {
+        JsonObjectBuilder jsonObjectBuilder =
+                Json.createObjectBuilder()
+                        .add("transportId", this.transportId)
+                        .add("localCandidateId", this.localCandidateId)
+                        .add("remoteCandidateId", this.remoteCandidateId)
+                        .add("state", this.state)
+                        .add("priority", this.priority)
+                        .add("nominated", this.nominated)
+                        .add("bytesSent", this.bytesSent)
+                        .add("currentRoundTripTime", this.currentRoundTripTime)
+                        .add("totalRoundTripTime", this.totalRoundTripTime)
+                        .add("bytesReceived", this.bytesReceived);
+        return jsonObjectBuilder;
+    }
 }

@@ -25,29 +25,29 @@ import java.util.Map;
  */
 public class RTCTransportStats extends StatObject {
 
-  private String bytesSent, bytesReceived, rtcpTransportStatsId, selectedCandidatePairId,
-    localCertificateId, remoteCertificateId;
+    private String bytesSent, bytesReceived, rtcpTransportStatsId, selectedCandidatePairId,
+            localCertificateId, remoteCertificateId;
 
-  public RTCTransportStats(Map<Object, Object> statObject) {
-    this.setId(Utility.getStatByName(statObject, "id"));
-    this.rtcpTransportStatsId = Utility.getStatByName(statObject, "rtcpTransportStatsId");
-    this.selectedCandidatePairId = Utility.getStatByName(statObject, "selectedCandidatePairId");
-    this.localCertificateId = Utility.getStatByName(statObject, "localCertificateId");
-    this.remoteCertificateId = Utility.getStatByName(statObject, "remoteCertificateId");
-    this.bytesSent = Utility.getStatByName(statObject, "bytesSent");
-    this.bytesReceived = Utility.getStatByName(statObject, "bytesReceived");
-  }
+    public RTCTransportStats(Map<Object, Object> statObject) {
+        this.setId(Utility.getStatByName(statObject, "id"));
+        this.rtcpTransportStatsId = Utility.getStatByName(statObject, "rtcpTransportStatsId");
+        this.selectedCandidatePairId = Utility.getStatByName(statObject, "selectedCandidatePairId");
+        this.localCertificateId = Utility.getStatByName(statObject, "localCertificateId");
+        this.remoteCertificateId = Utility.getStatByName(statObject, "remoteCertificateId");
+        this.bytesSent = Utility.getStatByName(statObject, "bytesSent");
+        this.bytesReceived = Utility.getStatByName(statObject, "bytesReceived");
+    }
 
-  @Override
-  public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("rtcpTransportStatsId", this.rtcpTransportStatsId)
-        .add("selectedCandidatePairId", this.selectedCandidatePairId)
-        .add("localCertificateId", this.localCertificateId)
-        .add("remoteCertificateId", this.remoteCertificateId)
-        .add("bytesSent", this.bytesSent)
-        .add("bytesReceived", this.bytesReceived);
-    return jsonObjectBuilder;
-  }
+    @Override
+    public JsonObjectBuilder getJsonObjectBuilder() {
+        JsonObjectBuilder jsonObjectBuilder =
+                Json.createObjectBuilder()
+                        .add("rtcpTransportStatsId", this.rtcpTransportStatsId)
+                        .add("selectedCandidatePairId", this.selectedCandidatePairId)
+                        .add("localCertificateId", this.localCertificateId)
+                        .add("remoteCertificateId", this.remoteCertificateId)
+                        .add("bytesSent", this.bytesSent)
+                        .add("bytesReceived", this.bytesReceived);
+        return jsonObjectBuilder;
+    }
 }

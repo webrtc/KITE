@@ -175,8 +175,6 @@ limitations under the License.
                                                 var failed = $config.getNumberOfFailed();
                                                 var error = $config.getNumberOfError();
                                                 var pending = $config.getNumberOfPending();
-                                                var lastrun = '$dateTool.format('dd-MMM-yyyy',$config.getLatestRun())';
-                                                config_labels.unshift(lastrun);
                                                 stats[0].unshift(success);
                                                 stats[1].unshift(failed);
                                                 stats[2].unshift(error);
@@ -260,65 +258,68 @@ limitations under the License.
                             <div class="card">
                                 <div class="content stat-container">
                                     <h4 class="title">Stats across runs: </h4>
-                                    <div class="row">
-                                        <div class="col-lg-4 col-md-12 col-sm-12">
-                                            <div id="chosen-test" class="styled-select-test">
-                                            <i id="submit" class="pe-7s-search"></i>
-                                                <select>
-                                                    <option>Choose a test</option>
-                                                    #foreach($test in $listOfTest)
-                                                    <option>$test.getTestName()</option>
-                                                    #end
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-4 col-md-12 col-sm-12">
-                                            <div id="chosen-caller" class="styled-select-caller">
-                                                <select>
-                                                    <option>Caller</option>
-                                                    #foreach($browser in $listOfBrowser)
-                                                        #if ($browser.getName()=="MicrosoftEdge")
-                                                            #if ($browser.getVersion().length()<=9)
-                                                            <option>
-                                                                $browser.getName()_$browser.getVersion()_$browser.getPlatform()
-                                                            </option>
-                                                            #end
-                                                        #else)
-                                                            #if ($browser.getVersion().length()<=5)
-                                                            <option>
-                                                                $browser.getName()_$browser.getVersion()_$browser.getPlatform()
-                                                            </option>
+                                    <table class="table">
+                                        <tr>
+                                            <td width:"10%">
+                                                <i id="submit" class="pe-7s-search"></i>
+                                            </td>
+                                            <td width:"30%">
+                                                <div id="chosen-test" class="styled-select-test">
+                                                    <select>
+                                                        <option>Choose a test</option>
+                                                        #foreach($test in $listOfTest)
+                                                        <option>$test.getTestName()</option>
+                                                        #end
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td width:"30%">
+                                                <div id="chosen-caller" class="styled-select-caller">
+                                                    <select>
+                                                        <option>Caller</option>
+                                                        #foreach($browser in $listOfBrowser)
+                                                            #if ($browser.getName()=="MicrosoftEdge")
+                                                                #if ($browser.getVersion().length()<=9)
+                                                                <option>
+                                                                    $browser.getName()_$browser.getVersion()_$browser.getPlatform()
+                                                                </option>
+                                                                #end
+                                                            #else)
+                                                                #if ($browser.getVersion().length()<=5)
+                                                                <option>
+                                                                    $browser.getName()_$browser.getVersion()_$browser.getPlatform()
+                                                                </option>
+                                                                #end
                                                             #end
                                                         #end
-                                                    #end
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-4 col-md-12 col-sm-12">
-                                            <div id="chosen-callee" class="styled-select-callee">
-                                                <select>
-                                                    <option>Callee</option>
-                                                    #foreach($browser in $listOfBrowser)
-                                                        #if ($browser.getName()=="MicrosoftEdge")
-                                                            #if ($browser.getVersion().length()<=9)
-                                                            <option>
-                                                                $browser.getName()_$browser.getVersion()_$browser.getPlatform()
-                                                            </option>
-                                                            #end
-                                                        #else)
-                                                            #if ($browser.getVersion().length()<=5)
-                                                            <option>
-                                                                $browser.getName()_$browser.getVersion()_$browser.getPlatform()
-                                                            </option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td width:"30%">
+                                                <div id="chosen-callee" class="styled-select-callee">
+                                                    <select>
+                                                        <option>Callee</option>
+                                                        #foreach($browser in $listOfBrowser)
+                                                            #if ($browser.getName()=="MicrosoftEdge")
+                                                                #if ($browser.getVersion().length()<=9)
+                                                                <option>
+                                                                    $browser.getName()_$browser.getVersion()_$browser.getPlatform()
+                                                                </option>
+                                                                #end
+                                                            #else)
+                                                                #if ($browser.getVersion().length()<=5)
+                                                                <option>
+                                                                    $browser.getName()_$browser.getVersion()_$browser.getPlatform()
+                                                                </option>
+                                                                #end
                                                             #end
                                                         #end
-                                                    #end
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
                                     <div id="stat-content">
-                                        <h5 class="medium-boy" id="stat-status"></h5>
                                         <ul class="nav nav-tabs">
                                             <li class="active"><a class="medium-boy" data-toggle="tab" href="#video" style="cursor:pointer">Video</a></li>
                                             <li><a class="medium-boy" data-toggle="tab" href="#audio" style="cursor:pointer">Audio</a></li>

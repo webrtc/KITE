@@ -62,15 +62,8 @@ function getStats (request){
     })();
 }
 function displayStats (load){
-    var dates = load.run_dates;
     var callerStatArray = load.caller;
     var calleeStatArray = load.callee;
-    if (callerStatArray.length > 30){
-        callerStatArray = callerStatArray.slice(0,29);
-        calleeStatArray = calleeStatArray.slice(0,29);
-        dates = dates.slice(0,29);
-    }
-
 
     var caller_audio = [];
     var callee_audio = [];
@@ -99,12 +92,7 @@ function displayStats (load){
     var audio_packets_sent_canvas = $('#overtime-video-packets-sent');
     var audio_packets_received_canvas = $('#overtime-video-packets-received');
 
-    var options = {  day: 'numeric', month: 'long',year: 'numeric'  };
-    labels = [];
-    dates.forEach(function(date){
-        var tmp = new Date(date);
-        labels.unshift(tmp.toLocaleDateString('en-GB', options));
-    });
+
     callerStatArray.forEach(function(stat){
         if(!isEmpty(stat)){
             caller_video.unshift(stat.video);
@@ -164,103 +152,68 @@ function displayStats (load){
 
     /*var stat_content = '';
     $("#stat_content").html(stat_content);*/
-    if (labels.length>0){
-        if (caller_video_bytes_sent.reduce(add)===0){
-            $('#stat-status').html("No stats are available for the last 30 runs");
-            clearAllGraphs();
-        } else {
-            $('#stat-status').empty();
-            paintCanvas('overtime-video-bytes-sent', caller_video_bytes_sent,callee_video_bytes_sent, "Bytes Sent (kbps)");
-            paintCanvas('overtime-video-bytes-received', caller_video_bytes_received,callee_video_bytes_received, "Bytes Received (kbps)");
-            paintCanvas('overtime-video-packets-sent', caller_video_packets_sent,callee_video_packets_sent, "Packets Sent");
-            paintCanvas('overtime-video-packets-received', caller_video_packets_received,callee_video_packets_received, "Packets Received");
-            paintCanvas('overtime-audio-bytes-sent', caller_audio_bytes_sent,callee_audio_bytes_sent, "Bytes Sent (kbps)");
-            paintCanvas('overtime-audio-bytes-received', caller_audio_bytes_received,callee_audio_bytes_received, "Bytes Received (kbps)");
-            paintCanvas('overtime-audio-packets-sent', caller_audio_packets_sent,callee_audio_packets_sent, "Packets Sent");
-            paintCanvas('overtime-audio-packets-received', caller_audio_packets_received,callee_audio_packets_received, "Packets Received");
-        }
-    } else {
-        $('#stat-status').html("No stats are available for the last 30 runs");
-        clearAllGraphs();
-    }
-}
-
-function add(a, b) {
-    return a + b;
+    paintCanvas('overtime-video-bytes-sent', caller_video_bytes_sent,callee_video_bytes_sent, "Bytes Sent");
+    paintCanvas('overtime-video-bytes-received', caller_video_bytes_received,callee_video_bytes_received, "Bytes Received");
+    paintCanvas('overtime-video-packets-sent', caller_video_packets_sent,callee_video_packets_sent, "Packets Sent");
+    paintCanvas('overtime-video-packets-received', caller_video_packets_received,callee_video_packets_received, "Packets Received");
+    paintCanvas('overtime-audio-bytes-sent', caller_audio_bytes_sent,callee_audio_bytes_sent, "Bytes Sent");
+    paintCanvas('overtime-audio-bytes-received', caller_audio_bytes_received,callee_audio_bytes_received, "Bytes Received");
+    paintCanvas('overtime-audio-packets-sent', caller_audio_packets_sent,callee_audio_packets_sent, "Packets Sent");
+    paintCanvas('overtime-audio-packets-received', caller_audio_packets_received,callee_audio_packets_received, "Packets Received");
 }
 
 function paintCanvas(canvas,caller_data, callee_data,title){
-    if (typeof graphMap.get(canvas) === 'undefined'){
-        var ctx = document.getElementById(canvas);
-        $('#'+canvas).empty()
-    /*    var labels = [];
-        for (i = caller_data.length; i > 0; i--){
-            labels.push('.');
-        }*/
-        var config = {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Caller',
-                        backgroundColor: '#42f4aa',
-                        borderColor: '#42f4aa',
-                        fill: false,
-                        data: caller_data,
-                        pointRadius: 2,
-                        lineTension: 0
-                    },
-                    {
-                        label: 'Callee',
-                        backgroundColor: '#ef2b3e',
-                        borderColor: '#ef2b3e',
-                        fill: false,
-                        data: callee_data,
-                        pointRadius: 2,
-                        lineTension: 0
-                    }
-                ]
+    var ctx = document.getElementById(canvas);
+    $('#'+canvas).empty()
+    var labels = [];
+    for (i = caller_data.length; i > 0; i--){
+        labels.push('.');
+    }
+    var config = {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Caller',
+                    backgroundColor: '#ef2b3e',
+                    borderColor: '#ef2b3e',
+                    fill: false,
+                    data: caller_data,
+                    pointRadius: 2,
+                    lineTension: 0
+                },
+                {
+                    label: 'Callee',
+                    backgroundColor: '#42f4aa',
+                    borderColor: '#42f4aa',
+                    fill: false,
+                    data: callee_data,
+                    pointRadius: 2,
+                    lineTension: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            title:{
+                display:true,
+                text: title
             },
-            options: {
-                responsive: true,
-                title:{
-                    display:true,
-                    text: title
-                },
-                scales: {
-                    xAxes: [{
-                        display: true,
-                    }],
-                    yAxes: [{
-                        display: true,
-                        type: 'linear',
-                    }]
-                },
-                showLines: true
-            }
-        };
-        var myChart = new Chart(ctx,config);
-        graphMap.set(canvas, myChart)
-    } else {
-        var myChart = graphMap.get(canvas);
-        myChart.data.datasets[0].data = caller_data;
-        myChart.data.datasets[1].data = callee_data;
-        myChart.update();
-        graphMap.set(canvas, myChart);
-    }
+            scales: {
+                xAxes: [{
+                    display: true,
+                }],
+                yAxes: [{
+                    display: true,
+                    type: 'linear',
+                }]
+            },
+            showLines: true
+        }
+    };
+    var myLineChart = new Chart(ctx,config);
 }
-
-function clearAllGraphs(){
-    if(graphMap.size>0){
-        graphMap.forEach(function(graph){
-            graph.data.datasets[0].data = [0];
-            graph.data.datasets[1].data = [0];
-            graph.update();
-        });
-    }
-}
-
 function isEmpty(obj) {
     for(var key in obj) {
         if(obj.hasOwnProperty(key))

@@ -23,7 +23,6 @@ import org.webrtc.kite.dao.DBConnectionManager;
 import org.webrtc.kite.pojo.Browser;
 
 import javax.json.*;
-import javax.json.stream.JsonParsingException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -54,49 +53,8 @@ public class ResultHandler {
   }
 
   /**
-   * Creates a matrix of browser tuples.
-   *
-   * @param tupleSize tuple size
-   * @return a matrix of browser tuples as List<List<Browser>>
-   */
-  public static List<List<Browser>> buildTuples(List<Browser> browserList, int tupleSize) {
-
-    List<List<Browser>> listOfBrowserList = new ArrayList<List<Browser>>();
-
-    double totalTuples = Math.pow(browserList.size(), tupleSize);
-
-
-    for (int i = 0; i < totalTuples; i++)
-      listOfBrowserList.add(new ArrayList<Browser>());
-
-    for (int i = 0; i < tupleSize; i++) {
-      double marge = totalTuples / Math.pow(browserList.size(), i + 1);
-      double rep = Math.pow(browserList.size(), i);
-      for (int x = 0; x < rep; x++)
-        for (int j = 0; j < browserList.size(); j++)
-          for (int k = 0; k < marge; k++) {
-            (listOfBrowserList.get((int) (x * totalTuples / rep + j * marge + k))).add(i,
-                browserList.get(j));
-          }
-    }
-    if (tupleSize > 1) {
-      for (Browser browser : browserList) {
-        if (browser.getPlatform().equalsIgnoreCase("android") || browser.getPlatform().equalsIgnoreCase("ios")) {
-          List<Browser> tmp = new ArrayList<>();
-          for (int i = 0; i < tupleSize; i++) {
-            tmp.add(browser);
-          }
-          listOfBrowserList.remove(tmp);
-        }
-      }
-    }
-    if (log.isDebugEnabled())
-      log.debug("matrix-->" + listOfBrowserList.toString());
-    return listOfBrowserList;
-  }
-
-  /**
    * Returns the connection to the database.
+   *
    */
   private Connection getDatabaseConnection() throws SQLException, ClassNotFoundException {
     return new DBConnectionManager(this.pathToDB).getConnection();
@@ -106,24 +64,24 @@ public class ResultHandler {
    * Inserts new config and test to appropriate table
    * and create result table for new test.
    *
-   * @param connection               a JDBC connection to the database.
-   * @param configName               name of the new configuration.
-   * @param resultTableName          name of the result table for this test.
-   * @param jsonObject               json object containing all of the needed information about the test.
+   * @param connection a JDBC connection to the database.
+   * @param configName name of the new configuration.
+   * @param resultTableName name of the result table for this test.
+   * @param jsonObject json object containing all of the needed information about the test.
    * @param testSuiteBrowserPairList list of participating browser pairs in the test suite.
-   * @param totalTests               number of test cases in this test.
+   * @param totalTests number of test cases in this test.
    */
   private void preliminaryInsert(Connection connection, String configName, String testName, String resultTableName, JsonObject jsonObject, List<List<Browser>> testSuiteBrowserPairList, int totalTests, String description) throws SQLException {
     List<String> queryList = new ArrayList<>();
     long startTime = jsonObject.getJsonNumber("timeStamp").longValue();
     queryList.add("INSERT INTO CONFIG_EXECUTION(CONFIG_NAME, START_TIME) SELECT '" + configName + "'," + startTime
-        + " WHERE NOT EXISTS (SELECT 1 FROM CONFIG_EXECUTION WHERE START_TIME = " + startTime + ");");
+        + " WHERE NOT EXISTS (SELECT 1 FROM CONFIG_EXECUTION WHERE START_TIME = "+startTime+");");
 
     queryList.add("INSERT INTO TESTS(START_TIME,TEST_NAME, IMPL, TUPLE_SIZE, RESULT_TABLE, TOTAL_TESTS, CONFIG_ID, DESCRIPTION) "
         + "VALUES(" + startTime + ",'" + jsonObject.getString("testName") + "','"
         + jsonObject.getString("testImpl") + "'," + jsonObject.getInt("tupleSize") + ",'" + resultTableName
         + "'," + totalTests + "," + "(SELECT CONFIG_ID FROM CONFIG_EXECUTION" + " WHERE START_TIME=" + startTime
-        + "), '" + description + "');");
+        + "), '" +description+ "');");
 
     queryList.add("UPDATE CONFIG_EXECUTION SET TEST_COUNT=" +
         "(SELECT COUNT(*) FROM TESTS WHERE RESULT_TABLE LIKE '%" + startTime + "')" +
@@ -139,7 +97,7 @@ public class ResultHandler {
       overviewTableQuery += " BROWSER_" + (i + 1) + " INTEGER NOT NULL, ";
     }
 
-    resultTableQuery += "PRIMARY KEY(";
+    resultTableQuery+= "PRIMARY KEY(";
     overviewTableQuery += " TEST_NAME TEXT NOT NULL, " +
         "START_TIME INTEGER NOT NULL, " +
         "DURATION INTEGER NOT NULL, " +
@@ -149,7 +107,7 @@ public class ResultHandler {
     for (int i = 0; i < tupleSize; i++) {
       resultTableQuery += " BROWSER_" + (i + 1);
       overviewTableQuery += " BROWSER_" + (i + 1);
-      if (i != tupleSize - 1) {
+      if (i!=tupleSize-1) {
         resultTableQuery += ", ";
         overviewTableQuery += ", ";
       } else {
@@ -161,8 +119,8 @@ public class ResultHandler {
     queryList.add(resultTableQuery);
     queryList.add(overviewTableQuery);
 
-    for (List<Browser> testCaseBrowserList : testSuiteBrowserPairList) {
-      String blankResult = "REPLACE INTO " + resultTableName + " VALUES('SCHEDULED', 0, '{\"stats\":\"NA\"}' ,";
+    for (List<Browser> testCaseBrowserList: testSuiteBrowserPairList){
+      String blankResult = "INSERT INTO "+resultTableName+" VALUES('SCHEDULED', 0, '{\"stats\":\"NA\"}' ,";
       for (int i = 0; i < testCaseBrowserList.size(); i++) {
         int browserID = new BrowserDao(connection).getBrowserId(testCaseBrowserList.get(i));
         blankResult += browserID;
@@ -177,10 +135,9 @@ public class ResultHandler {
     Statement statement = null;
     try {
       statement = connection.createStatement();
-      for (String query : queryList) {
+      for (String query: queryList){
         if (log.isDebugEnabled())
           log.debug("Executing Preliminary Insert:" + query);
-        System.out.println("Executing Preliminary Insert:" + query);
         statement.addBatch(query);
       }
       statement.executeBatch();
@@ -194,14 +151,14 @@ public class ResultHandler {
    * update new result in appropriate place result table
    * Inserts new result in OVERVIEW table if qualified.
    *
-   * @param connection      a JDBC connection to the database.
-   * @param tableName       name of the result table for this test.
-   * @param targetList      list of targeted browsers in the test.
+   * @param connection a JDBC connection to the database.
+   * @param tableName name of the result table for this test.
+   * @param targetList list of targeted browsers in the test.
    * @param destinationList list of actual browsers in the test.
-   * @param testName        name of the test in question.
-   * @param payload         actual result of the test.
-   * @param startTime       start time of the test.
-   * @param timeTaken       duration of the test.
+   * @param testName name of the test in question.
+   * @param payload actual result of the test.
+   * @param startTime start time of the test.
+   * @param timeTaken duration of the test.
    */
   private void postResultInsert(Connection connection, String tableName, List<Browser> targetList, List<Browser> destinationList, String testName, JsonObject payload,
                                 long startTime, long timeTaken) throws SQLException {
@@ -224,46 +181,41 @@ public class ResultHandler {
     /* Create query Strings */
 
 
+
     String resultString = payload.getString("result").replaceAll("\\n", "");
-    JsonObject resultObject = null;
-    try {
-      InputStream stream = new ByteArrayInputStream(resultString.getBytes(StandardCharsets.UTF_8));
-      JsonReader reader = Json.createReader(stream);
-      resultObject = reader.readObject();
-      resultString = Utility.escapeSpecialCharacter(resultObject.getString("result"));
-    } catch (JsonParsingException e) {
-      resultString = "FAILED";
-    }
+    System.out.println(resultString);
+    InputStream stream = new ByteArrayInputStream(resultString.getBytes(StandardCharsets.UTF_8));
+    JsonReader reader = Json.createReader(stream);
+    JsonObject resultObject = reader.readObject();
+    resultString = Utility.escapeSpecialCharacter(resultObject.getString("result"));
     String resultUpdate = "";
-    if (resultObject != null && resultObject.get("stats") != null) {
+    if (resultObject.get("stats")!=null) {
       String statString = resultObject.getJsonObject("stats").toString();
       resultUpdate = "UPDATE " + tableName + " SET RESULT='" + resultString + "', DURATION=" + timeTaken + ", STATS='" + statString + "' WHERE";
-    } else {
-      resultUpdate = "UPDATE " + tableName + " SET RESULT='" + resultString + "', DURATION=" + timeTaken + " WHERE";
     }
+    else
+      resultUpdate = "UPDATE " + tableName + " SET RESULT='" + resultString + "', DURATION=" + timeTaken + " WHERE";
     String browserUpdate = "UPDATE " + tableName + " SET";
-    for (int i = 0; i < tupleSize; i++) {
-      if (targetIdList.get(i) != destinationIdList.get(i)) {
+    for (int i=0; i< tupleSize;i++){
+      if (targetIdList.get(i)!=destinationIdList.get(i)) {
         if (!browserChange) {
           //browserChange = true;
           browserUpdate += " BROWSER_" + (i + 1) + "=" + destinationIdList.get(i);
         } else
           browserUpdate += " ,BROWSER_" + (i + 1) + "=" + destinationIdList.get(i);
       }
-      if (browserChange) {
-        resultUpdate += " BROWSER_" + (i + 1) + "=" + destinationIdList.get(i);
-      } else {
-        resultUpdate += " BROWSER_" + (i + 1) + "=" + targetIdList.get(i);
-      }
-      if (i < tupleSize - 1) {
+      if (browserChange)
+        resultUpdate += " BROWSER_"+(i+1)+"="+destinationIdList.get(i);
+      else
+        resultUpdate += " BROWSER_"+(i+1)+"="+targetIdList.get(i);
+      if (i < tupleSize - 1)
         resultUpdate += " AND";
-      } else {
+      else
         resultUpdate += ";";
-      }
     }
     browserUpdate += " WHERE";
-    for (int i = 0; i < tupleSize; i++) {
-      browserUpdate += " BROWSER_" + (i + 1) + "=" + targetIdList.get(i);
+    for (int i=0;i<tupleSize;i++){
+      browserUpdate +=  " BROWSER_" + (i + 1) + "=" + targetIdList.get(i);
       if (i < tupleSize - 1)
         browserUpdate += " AND";
       else
@@ -273,13 +225,13 @@ public class ResultHandler {
       queryList.add(browserUpdate);
     queryList.add(resultUpdate);
 
-    String overviewQuery = "REPLACE INTO kiteOVERVIEW" + testName.trim().replaceAll("[^a-zA-Z0-9]", "_") + " (";
-    for (int i = 0; i < tupleSize; i++)
-      overviewQuery += "BROWSER_" + (i + 1) + ", ";
-    overviewQuery += "TEST_NAME, START_TIME, DURATION, RESULT) VALUES (";
+    String overviewQuery = "REPLACE INTO kiteOVERVIEW"+testName.trim().replaceAll("[^a-zA-Z0-9]", "_")+" (";
+    for (int i=0;i<tupleSize;i++)
+      overviewQuery +="BROWSER_"+(i+1)+", ";
+    overviewQuery+=	"TEST_NAME, START_TIME, DURATION, RESULT) VALUES (";
     for (int i = 0; i < tupleSize; i++) {
       //overviewQuery += destinationIdList.get(i)+ ", ";
-      overviewQuery += targetIdList.get(i) + ", ";
+      overviewQuery += targetIdList.get(i)+ ", ";
     }
 
     overviewQuery += "'" + testName + "'," + startTime + ", " + timeTaken + ",'" + Utility.escapeSpecialCharacter(resultString) + "');";
@@ -288,10 +240,10 @@ public class ResultHandler {
     Statement statement = null;
     try {
       statement = connection.createStatement();
-      for (String query : queryList) {
+      for (String query: queryList) {
         if (log.isDebugEnabled())
           log.debug("Executing Result Insert:" + query);
-        System.out.println("Executing Result Insert:" + query);
+        //System.out.println("Executing Result Insert:" + query);
         statement.addBatch(query);
       }
       statement.executeBatch();
@@ -300,15 +252,16 @@ public class ResultHandler {
     }
   }
 
+
   /**
    * Updates the status for configuration & test when they're done.
    *
-   * @param connection      a JDBC connection to the database.
-   * @param configName      name of the configuration.
-   * @param testName        name of the test.
+   * @param connection a JDBC connection to the database.
+   * @param configName name of the configuration.
+   * @param testName name of the test.
    * @param resultTableName name of the appropriate result table.
-   * @param timeStamp       start time of the configuration.
-   * @param endTime         end time of the configuration.
+   * @param timeStamp start time of the configuration.
+   * @param endTime end time of the configuration.
    */
   private void updateStatus(Connection connection, String configName, String testName,
                             String resultTableName, long timeStamp, long endTime) throws SQLException {
@@ -335,7 +288,7 @@ public class ResultHandler {
   /**
    * Updates the status for configuration & test when they're done.
    *
-   * @param connection  a JDBC connection to the database.
+   * @param connection a JDBC connection to the database.
    * @param browserList list of browsers to put in the BROWSERS Table if not already exist
    */
   private void putInBrowserTable(Connection connection, List<Browser> browserList)
@@ -363,26 +316,67 @@ public class ResultHandler {
   }
 
   /**
-   * Updates version of different clients in database.
+   * Creates a matrix of browser tuples.
+   *
+   * @param tupleSize tuple size
+   * @return a matrix of browser tuples as List<List<Browser>>
    */
-  private void updateClientVersion(Connection connection, String payload, long timeStamp) throws SQLException {
+  public static List<List<Browser>> buildTuples(List<Browser> browserList, int tupleSize) {
+
+    List<List<Browser>> listOfBrowserList = new ArrayList<List<Browser>>();
+
+    double totalTuples = Math.pow(browserList.size(), tupleSize);
+
+
+    for (int i = 0; i < totalTuples; i++)
+      listOfBrowserList.add(new ArrayList<Browser>());
+
+    for (int i = 0; i < tupleSize; i++) {
+      double marge = totalTuples / Math.pow(browserList.size(), i + 1);
+      double rep = Math.pow(browserList.size(), i);
+      for (int x = 0; x < rep; x++)
+        for (int j = 0; j < browserList.size(); j++)
+          for (int k = 0; k < marge; k++) {
+            (listOfBrowserList.get((int) (x * totalTuples / rep + j * marge + k))).add(i,
+                browserList.get(j));
+          }
+    }
+    for(Browser browser: browserList){
+      if (browser.getPlatform().equalsIgnoreCase("android")||browser.getPlatform().equalsIgnoreCase("ios")) {
+        List<Browser> tmp = new ArrayList<>();
+        for (int i = 0; i< tupleSize; i++){
+          tmp.add(browser);
+        }
+        listOfBrowserList.remove(tmp);
+      }
+    }
+    if (log.isDebugEnabled())
+      log.debug("matrix-->" + listOfBrowserList.toString());
+    return listOfBrowserList;
+  }
+
+  /**
+   * Updates version of different clients in database.
+   *
+   */
+  private void updateClientVersion (Connection connection, String payload, long timeStamp) throws SQLException {
     List<String> queryList = new ArrayList<>();
     String version;
     String client;
     List<String> entryPrime;
     if (log.isDebugEnabled())
       log.debug("Incoming update payload: " + payload.toString());
-    String trimmedPayload = payload.substring(1, payload.length() - 1);
+    String trimmedPayload = payload.substring(1,payload.length()-1);
     List<String> jsonPayload = new ArrayList<>(Arrays.asList(trimmedPayload.split(",")));
 
 
-    for (String entry : jsonPayload) {
+    for (String entry: jsonPayload){
       entryPrime = new ArrayList<>(Arrays.asList(entry.split(":")));
       client = entryPrime.get(0).replaceAll("\\\\\"", "");
       version = entryPrime.get(1).replaceAll("\\\\\"|}\"", "");
 
-      queryList.add("UPDATE CLIENT_VERSION SET LAST_VERSION = (select VERSION WHERE NAME = '" + client + "'), LAST_UPDATE=" + timeStamp + ", VERSION = '" + version + "' WHERE NAME = '" + client
-          + "'");
+      queryList.add("UPDATE CLIENT_VERSION SET LAST_VERSION = (select VERSION WHERE NAME = '"+client+"'), LAST_UPDATE="+timeStamp+", VERSION = '"+version+"' WHERE NAME = '"+client
+          +"'");
     }
     Statement statement = null;
     try {
@@ -408,7 +402,7 @@ public class ResultHandler {
     JsonObject testObject = jsonObject.getJsonObject("test");
     Connection connection = null;
     String testName = testObject.getString("testName");
-    if (!testName.equalsIgnoreCase("SYSTEM_UPDATE Client version update")) {
+    if (!testName.equalsIgnoreCase("SYSTEM_UPDATE Client version update")){
       String configName = testObject.getString("configName");
       long timeStamp = testObject.getJsonNumber("timeStamp").longValue();
       int tupleSize = testObject.getInt("tupleSize");
@@ -452,8 +446,8 @@ public class ResultHandler {
             connection.setAutoCommit(false);
             this.putInBrowserTable(connection, testSuiteBrowserList);
             connection.commit();
-            this.preliminaryInsert(connection, configName, testName, resultTableName, testObject,
-                testSuiteBrowserPairMatrix, totalTests, description);
+            this.preliminaryInsert(connection, configName, testName,resultTableName, testObject,
+                testSuiteBrowserPairMatrix, totalTests, description );
             connection.commit();
             connection.setAutoCommit(true);
           }
@@ -489,7 +483,7 @@ public class ResultHandler {
         String payload = resultObject.getJsonObject("payload").toString();
         //String payload = (String) resultObject.getString("payload");
         long timeStamp = testObject.getJsonNumber("timeStamp").longValue();
-        this.updateClientVersion(connection, payload, timeStamp);
+        this.updateClientVersion(connection,payload,timeStamp);
       } catch (SQLException e) {
         log.error("dumping result", e);
         if (connection != null)

@@ -26,25 +26,25 @@ import java.util.Map;
  */
 public class RTCCertificateStats extends StatObject {
 
-  private String fingerprint, fingerprintAlgorithm, base64Certificate, issuerCertificateId;
+    private String fingerprint, fingerprintAlgorithm, base64Certificate, issuerCertificateId;
 
-  public RTCCertificateStats(Map<Object, Object> statObject) {
-    this.setId(Utility.getStatByName(statObject, "id"));
-    this.fingerprint = Utility.getStatByName(statObject, "fingerprint");
-    this.fingerprintAlgorithm = Utility.getStatByName(statObject, "fingerprintAlgorithm");
-    this.base64Certificate = Utility.getStatByName(statObject, "base64Certificate");
-    this.issuerCertificateId = Utility.getStatByName(statObject, "issuerCertificateId");
+    public RTCCertificateStats(Map<Object, Object> statObject) {
+        this.setId(Utility.getStatByName(statObject, "id"));
+        this.fingerprint = Utility.getStatByName(statObject, "fingerprint");
+        this.fingerprintAlgorithm = Utility.getStatByName(statObject, "fingerprintAlgorithm");
+        this.base64Certificate = Utility.getStatByName(statObject, "base64Certificate");
+        this.issuerCertificateId = Utility.getStatByName(statObject, "issuerCertificateId");
 
-  }
+    }
 
-  @Override
-  public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("fingerprint", this.fingerprint)
-        .add("fingerprintAlgorithm", this.fingerprintAlgorithm)
-        .add("base64Certificate", this.base64Certificate)
-        .add("issuerCertificateId", this.issuerCertificateId);
-    return jsonObjectBuilder;
-  }
+    @Override
+    public JsonObjectBuilder getJsonObjectBuilder() {
+        JsonObjectBuilder jsonObjectBuilder =
+                Json.createObjectBuilder()
+                        .add("fingerprint", this.fingerprint)
+                        .add("fingerprintAlgorithm", this.fingerprintAlgorithm)
+                        .add("base64Certificate", this.base64Certificate)
+                        .add("issuerCertificateId", this.issuerCertificateId);
+        return jsonObjectBuilder;
+    }
 }

@@ -16,68 +16,70 @@
 
 package org.webrtc.kite.scheduler;
 
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import org.apache.log4j.Logger;
+import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.webrtc.kite.MatrixRunner;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.TestConf;
 
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 /**
  * A Quartz job incapsulating Matrix Runner.
  */
-public class MatrixRunnerJob extends KiteJob {
+public class MatrixRunnerJob implements Job {
 
-  private static final Logger logger = Logger.getLogger(MatrixRunnerJob.class.getName());
+  private final static Logger logger = Logger.getLogger(MatrixRunnerJob.class.getName());
 
-  @Override public void execute(JobExecutionContext jobExecutionContext)
-      throws JobExecutionException {
+  @Override
+  public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
-    this.makeUpTheGrid();
     Configurator.getInstance().setTimeStamp();
 
-    for (TestConf testConf : (List<TestConf>) Configurator.getInstance().getConfigHandler()
-        .getTestList()) {
-      try {
-        if (logger.isInfoEnabled()) {
+    try {
+
+      for (TestConf testConf : Configurator.getInstance().getTestList()) {
+
+        if (logger.isInfoEnabled())
           logger.info("Running " + testConf + " ...");
-        }
 
         List<Future<Object>> listOfResults = new MatrixRunner(testConf,
             Configurator.getInstance().buildTuples(testConf.getTupleSize()), testConf.getName())
             .run();
 
+        if (logger.isInfoEnabled())
+          logger.info("\nThe following are results for " + testConf + ":\n");
         if (listOfResults != null) {
-          if (logger.isInfoEnabled()) {
-            String testResults = "The following are results for " + testConf + ":\n";
-            for (Future<Object> future : listOfResults) {
-              try {
-                testResults += "\r\n" + future.get().toString();
-              } catch (Exception e) {
-                logger.error("Exception while test execution", e);
-              }
+          for (Future<Object> future : listOfResults) {
+            try {
+              if (logger.isInfoEnabled())
+                logger.info(future.get().toString());
+            } catch (Exception e) {
+              logger.error("Execution result:", e);
             }
-            testResults += "\r\nEND OF RESULTS\r\n";
-            logger.info(testResults);
           }
         } else {
-          logger.warn("No test case was found.");
+          logger.error("No test case found");
         }
-      } catch (InterruptedException e) {
-        logger.fatal("Error [Interruption]: The execution has been interrupted with the "
-            + "following error: " + e.getLocalizedMessage(), e);
-      } catch (ExecutionException e) {
-        logger.fatal(
-            "Error [Execution]: The execution has been ended with the following error: "
-                + e.getLocalizedMessage(), e);
-      }
-    }
 
-    this.makeDownTheGrid();
+      }
+
+    } catch (InterruptedException e) {
+
+      logger.error(
+          "Error [Interruption]: The execution has been interrupted with the following error: "
+              + e.getLocalizedMessage(), e);
+
+    } catch (ExecutionException e) {
+
+      logger.error("Error [Execution]: The execution has been ended with the following error: "
+          + e.getLocalizedMessage(), e);
+
+    }
 
   }
 

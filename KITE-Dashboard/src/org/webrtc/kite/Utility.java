@@ -84,7 +84,7 @@ public class Utility {
    * @param payload raw payload received from KITE
    * @return String with (all) special characters replaced
    */
-  public static String escapeSpecialCharacter(String payload) {
+  public static String escapeSpecialCharacter(String payload){
     return payload.replaceAll("\\n", "").replaceAll("\\\\", "").replaceAll("\"", "").replaceAll("\'", "");
   }
 

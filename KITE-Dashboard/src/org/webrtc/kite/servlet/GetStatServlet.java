@@ -15,7 +15,6 @@
  */
 
 package org.webrtc.kite.servlet;
-
 import org.webrtc.kite.Utility;
 import org.webrtc.kite.dao.BrowserDao;
 import org.webrtc.kite.dao.ConfigTestDao;
@@ -57,7 +56,7 @@ public class GetStatServlet extends HttpServlet {
 
   /**
    * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-   * response)
+   *      response)
    */
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
@@ -105,40 +104,38 @@ public class GetStatServlet extends HttpServlet {
       }
       statJsonResponse += "}";
       response.getWriter().print(statJsonResponse);
-    } else {
+    }
+    else {
       String testName = request.getParameter("test").trim();
       String caller = request.getParameter("caller").trim();
       String callee = request.getParameter("callee").trim();
-      System.out.println("Requesting: " + testName + " for " + caller + " & " + callee);
+      System.out.println("Requesting: "+ testName + " for " + caller + " & " + callee);
       List<String> statStringList = new ArrayList<>();
       List<Stats> statsList = new ArrayList<>();
-      int callerInt = -1, calleeInt = -1;
+      int callerInt =-1, calleeInt=-1;
       String statJsonResponse = "{";
-      String dateLabels = "\"run_dates\": [";
-      String callerData = "\"caller\": [";
-      String calleeData = "\"callee\": [";
+      String callerData="\"caller\": [";
+      String calleeData="\"callee\": [";
       try {
         callerInt = getBrowserID(caller);
         calleeInt = getBrowserID(callee);
         List<Integer> idList = new ArrayList<>();
         idList.add(callerInt);
         idList.add(calleeInt);
-        if (idList.contains(0) || idList.contains(-1)) {
+        if (idList.contains(0)||idList.contains(-1)){
           // throw some exception I guess
         } else {
           List<String> resultTableList = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getResultTableList(testName);
           for (String resultTable : resultTableList) {
-            List<String> temp = new ArrayList<>(Arrays.asList(resultTable.split("_")));
-            dateLabels += temp.get(temp.size() - 1) + ",";
             String stat = "";
-            stat = new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getStatById(resultTable, idList);
-            if (stat.equalsIgnoreCase("{}") || stat.equalsIgnoreCase("{\"stats\":\"NA\"}") || stat.equalsIgnoreCase(""))
+            stat = new ResultTableDao(Utility.getDBConnection(this.getServletContext())).getStatById(resultTable,idList);
+            if (stat.equalsIgnoreCase("{}")||stat.equalsIgnoreCase("{\"stats\":\"NA\"}")||stat.equalsIgnoreCase(""))
               statStringList.add(null);
             else
               statStringList.add(stat);
           }
-          for (String statStr : statStringList) {
-            if (statStr != null) {
+          for (String statStr:statStringList){
+            if (statStr!=null) {
               JsonReader jsonReader = Json.createReader(new StringReader(statStr));
               JsonObject statArrayJson = jsonReader.readObject();
               jsonReader.close();
@@ -153,7 +150,8 @@ public class GetStatServlet extends HttpServlet {
                 if (browser.isCaller()) {
                   callerData += browser.getJsonData();
                   callerData += ",";
-                } else {
+                }
+                else {
                   calleeData += browser.getJsonData();
                   calleeData += ",";
                 }
@@ -167,32 +165,29 @@ public class GetStatServlet extends HttpServlet {
       } catch (SQLException e) {
         e.printStackTrace();
       }
-      if (callerData.substring(callerData.length() - 1).equalsIgnoreCase(","))
-        callerData = callerData.substring(0, callerData.length() - 1);
-      if (calleeData.substring(calleeData.length() - 1).equalsIgnoreCase(","))
-        calleeData = calleeData.substring(0, calleeData.length() - 1);
-      if (dateLabels.substring(dateLabels.length() - 1).equalsIgnoreCase(","))
-        dateLabels = dateLabels.substring(0, dateLabels.length() - 1);
-      dateLabels += "]";
-      callerData += "]";
-      calleeData += "]";
-      statJsonResponse += dateLabels + "," + callerData + "," + calleeData;
+      if (callerData.substring(callerData.length()-1).equalsIgnoreCase(","))
+        callerData=callerData.substring(0,callerData.length()-1);
+      if (calleeData.substring(calleeData.length()-1).equalsIgnoreCase(","))
+        calleeData=calleeData.substring(0,calleeData.length()-1);
+      callerData+="]";
+      calleeData+="]";
+      statJsonResponse += callerData + ","+calleeData;
       statJsonResponse += "}";
       response.getWriter().print(statJsonResponse);
     }
   }
 
-  private int getBrowserID(String browser) throws SQLException {
+  private int getBrowserID (String browser) throws SQLException {
     int res;
     String name = browser.split("_")[0].trim();
     String version = browser.split("_")[1].trim();
     String platform = browser.split("_")[2].trim();
-    Browser tmp = new Browser(name, version, platform);
+    Browser tmp = new Browser(name,version,platform);
     res = new BrowserDao(Utility.getDBConnection(this.getServletContext())).getBrowserId(tmp);
     return res;
   }
 
-  private String getStatString(String tableName, int browser1, int browser2) {
+  private String getStatString (String tableName, int browser1, int browser2){
     String res = null;
 
     return res;

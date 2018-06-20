@@ -24,20 +24,20 @@ import java.util.Map;
  * RTCPeerConnectionStats, with attributes dataChannelsOpened, dataChannelsClosed
  */
 public class RTCPeerConnectionStats extends StatObject {
-  private String dataChannelsOpened, dataChannelsClosed;
+    private String dataChannelsOpened, dataChannelsClosed;
 
-  public RTCPeerConnectionStats(Map<Object, Object> statObject) {
-    this.setId(Utility.getStatByName(statObject, "id"));
-    this.dataChannelsOpened = Utility.getStatByName(statObject, "dataChannelsOpened");
-    this.dataChannelsClosed = Utility.getStatByName(statObject, "dataChannelsClosed");
-  }
+    public RTCPeerConnectionStats(Map<Object, Object> statObject) {
+        this.setId(Utility.getStatByName(statObject, "id"));
+        this.dataChannelsOpened = Utility.getStatByName(statObject, "dataChannelsOpened");
+        this.dataChannelsClosed = Utility.getStatByName(statObject, "dataChannelsClosed");
+    }
 
-  @Override
-  public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("dataChannelsOpened", this.dataChannelsOpened)
-        .add("dataChannelsClosed", this.dataChannelsClosed);
-    return jsonObjectBuilder;
-  }
+    @Override
+    public JsonObjectBuilder getJsonObjectBuilder() {
+        JsonObjectBuilder jsonObjectBuilder =
+                Json.createObjectBuilder()
+                        .add("dataChannelsOpened", this.dataChannelsOpened)
+                        .add("dataChannelsClosed", this.dataChannelsClosed);
+        return jsonObjectBuilder;
+    }
 }

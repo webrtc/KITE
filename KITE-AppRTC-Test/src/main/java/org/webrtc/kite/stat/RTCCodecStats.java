@@ -25,27 +25,27 @@ import java.util.Map;
  */
 public class RTCCodecStats extends StatObject {
 
-  private String payloadType, codec, clockRate, channels, sdpFmtpLine;
+    private String payloadType, codec, clockRate, channels, sdpFmtpLine;
 
 
-  public RTCCodecStats(Map<Object, Object> statObject) {
-    this.setId(Utility.getStatByName(statObject, "id"));
-    this.payloadType = Utility.getStatByName(statObject, "payloadType");
-    this.clockRate = Utility.getStatByName(statObject, "clockRate");
-    this.channels = Utility.getStatByName(statObject, "channels");
-    this.codec = Utility.getStatByName(statObject, "codec");
-    this.sdpFmtpLine = Utility.getStatByName(statObject, "sdpFmtpLine");
-  }
+    public RTCCodecStats(Map<Object, Object> statObject) {
+        this.setId(Utility.getStatByName(statObject, "id"));
+        this.payloadType = Utility.getStatByName(statObject, "payloadType");
+        this.clockRate = Utility.getStatByName(statObject, "clockRate");
+        this.channels = Utility.getStatByName(statObject, "channels");
+        this.codec = Utility.getStatByName(statObject, "codec");
+        this.sdpFmtpLine = Utility.getStatByName(statObject, "sdpFmtpLine");
+    }
 
-  @Override
-  public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("payloadType", this.payloadType)
-        .add("clockRate", this.clockRate)
-        .add("channels", this.channels)
-        .add("codec", this.codec)
-        .add("sdpFmtpLine", this.sdpFmtpLine);
-    return jsonObjectBuilder;
-  }
+    @Override
+    public JsonObjectBuilder getJsonObjectBuilder() {
+        JsonObjectBuilder jsonObjectBuilder =
+                Json.createObjectBuilder()
+                        .add("payloadType", this.payloadType)
+                        .add("clockRate", this.clockRate)
+                        .add("channels", this.channels)
+                        .add("codec", this.codec)
+                        .add("sdpFmtpLine", this.sdpFmtpLine);
+        return jsonObjectBuilder;
+    }
 }

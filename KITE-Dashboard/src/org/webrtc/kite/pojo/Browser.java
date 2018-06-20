@@ -60,12 +60,13 @@ public class Browser {
       browserVersion = processVersion(jsonObject.getString("version").toLowerCase());
       browserPlatform = jsonObject.getString("version").toLowerCase();
     }
-    if (browserPlatform.contains("android") || browserPlatform.contains("ios") || browserPlatform.contains("fennec")) {
+    if(browserPlatform.contains("android")||browserPlatform.contains("ios")||browserPlatform.contains("fennec")) {
       if (browserPlatform.contains("fennec"))
-        browserPlatform = "android";
+        browserPlatform="android";
       else
         browserPlatform = browserPlatform.split(" ")[0];
-    } else {
+    }
+    else {
       if (browserName.equalsIgnoreCase("MicrosoftEdge"))
         browserPlatform = "Windows 10";
       else
@@ -166,10 +167,10 @@ public class Browser {
    */
   public String processVersion(String version) {
     String browserVersion = version;
-    if (browserVersion.contains("android") || browserVersion.contains("ios") || browserVersion.contains("fennec"))
+    if(browserVersion.contains("android")||browserVersion.contains("ios")||browserVersion.contains("fennec"))
       browserVersion = browserVersion.split(" ")[1];
-    if (!browserVersion.contains("."))
-      browserVersion += ".0";
+      if (!browserVersion.contains("."))
+        browserVersion += ".0";
     return browserVersion;
   }
 

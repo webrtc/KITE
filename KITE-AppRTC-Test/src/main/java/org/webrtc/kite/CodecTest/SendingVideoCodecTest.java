@@ -17,8 +17,10 @@
 package org.webrtc.kite.CodecTest;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.*;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.KiteTest;
 import org.webrtc.kite.stat.Utility;
 
@@ -54,191 +56,185 @@ import java.util.Random;
  */
 public class SendingVideoCodecTest extends KiteTest {
 
-  private final static Logger logger = Logger.getLogger(SendingVideoCodecTest.class.getName());
+    private final static Logger logger = Logger.getLogger(SendingVideoCodecTest.class.getName());
 
-  private final static String APPRTC_URL = "https://appr.tc/r/";
-  private final static int TIMEOUT = 60000;
-  private final static int INTERVAL = 1000;
-  private final static String RESULT_TIMEOUT = "TIME OUT";
-  private final static String RESULT_SUCCESSFUL = "SUCCESSFUL";
-  private final static String RESULT_FAILED = "FAILED";
-  private static String alertMsg;
-  private final String value = "VP8";
-  private final String option = "vsc=" + value;
+    private final static Map<String, String> expectedResultMap = new HashMap<String, String>();
+    private final static String APPRTC_URL = "https://appr.tc/r/";
+    private final static int TIMEOUT = 60000;
+    private final static int INTERVAL = 1000;
 
-  /**
-   * Returns the test's getIceConnectionScript to retrieve appController.call_.pcClient_.pc_.iceConnectionState.
-   * If it doesn't exist then the method returns 'unknown'.
-   *
-   * @return the getIceConnectionScript as string.
-   */
-  private final static String getIceConnectionScript() {
-    return "var retValue;"
-      + "try {retValue = appController.call_.pcClient_.pc_.iceConnectionState;} catch (exception) {} "
-      + "if (retValue) {return retValue;} else {return 'unknown';}";
-  }
+    static {
+        expectedResultMap.put("completed", "completed");
+        expectedResultMap.put("connected", "connected");
+    }
 
-  /**
-   * Returns the test's getSDPOfferScript to retrieve appController.call_.pcClient_.pc_.localDescription.sdp.
-   * If it doesn't exist then the method returns 'unknown'.
-   *
-   * @return the getSDPOfferScript as string.
-   */
-  private final static String getSDPOfferScript() {
-    return "var SDP;"
-      + "try {SDP = appController.call_.pcClient_.pc_.localDescription.sdp;} catch (exception) {} "
-      + "if (SDP) {return SDP;} else {return 'unknown';}";
-  }
+    private final String value = "VP8";
+    private final String option = "vsc=" + value;
 
-  /**
-   * Returns the test's stashStatsScript to stash the stats of the test in a global variable to retrieve later.
-   *
-   * @return the stashStatsScript as string.
-   */
-  private final static String stashStatsScript() {
-    return "const getStatsValues = () =>" +
-      "  appController.call_.pcClient_.pc_.getStats()" +
-      "    .then(data => {" +
-      "      return [...data.values()];" +
-      "    });" +
-      "const stashStats = async () => {" +
-      "  window.KITEStats = await getStatsValues();" +
-      "  return 0;" +
-      "};" +
-      "stashStats();" +
-      "return 0";
-  }
+    /**
+     * Returns the test's getIceConnectionScript to retrieve appController.call_.pcClient_.pc_.iceConnectionState.
+     * If it doesn't exist then the method returns 'unknown'.
+     *
+     * @return the getIceConnectionScript as string.
+     */
+    private final static String getIceConnectionScript() {
+        return "var retValue;"
+                + "try {retValue = appController.call_.pcClient_.pc_.iceConnectionState;} catch (exception) {} "
+                + "if (retValue) {return retValue;} else {return 'unknown';}";
+    }
 
-  /**
-   * Returns the test getResultScript to get the stashed stats.
-   *
-   * @return the getStatsScript as string.
-   */
-  private final static String getStatsScript() {
-    return "return window.KITEStats;";
-  }
+    /**
+     * Returns the test's getSDPOfferScript to retrieve appController.call_.pcClient_.pc_.localDescription.sdp.
+     * If it doesn't exist then the method returns 'unknown'.
+     *
+     * @return the getSDPOfferScript as string.
+     */
+    private final static String getSDPOfferScript() {
+        return "var SDP;"
+                + "try {SDP = appController.call_.pcClient_.pc_.localDescription.sdp;} catch (exception) {} "
+                + "if (SDP) {return SDP;} else {return 'unknown';}";
+    }
 
-  /**
-   * Opens the APPRTC_URL and clicks 'confirm-join-button'.
-   */
-  private void takeAction() throws Exception {
-    Random rand = new Random(System.currentTimeMillis());
-    long channel = Math.abs(rand.nextLong());
-    if (this.getWebDriverList().size() > 1)
-      throw new Exception("This test is limited to 1 browser only");
-    for (WebDriver webDriver : this.getWebDriverList()) {
-      webDriver.get(APPRTC_URL + channel + "?" + option);
-      try {
-        Alert alert = webDriver.switchTo().alert();
-        alertMsg = alert.getText();
-        if (alertMsg != null) {
-          alertMsg = ((RemoteWebDriver) webDriver).getCapabilities().getBrowserName() + " alert: " +alertMsg;
-          logger.warn(alertMsg);
-          alert.accept();
+    /**
+     * Returns the test's stashStatsScript to stash the stats of the test in a global variable to retrieve later.
+     *
+     * @return the stashStatsScript as string.
+     */
+    private final static String stashStatsScript() {
+        return "const getStatsValues = () =>" +
+                "  appController.call_.pcClient_.pc_.getStats()" +
+                "    .then(data => {" +
+                "      return [...data.values()];" +
+                "    });" +
+                "const stashStats = async () => {" +
+                "  window.KITEStats = await getStatsValues();" +
+                "  return 0;" +
+                "};" +
+                "stashStats();" +
+                "return 0";
+    }
+
+    /**
+     * Returns the test getResultScript to get the stashed stats.
+     *
+     * @return the getStatsScript as string.
+     */
+    private final static String getStatsScript() {
+        return "return window.KITEStats;";
+    }
+
+    /**
+     * Opens the APPRTC_URL and clicks 'confirm-join-button'.
+     */
+    private void takeAction() throws Exception {
+        Random rand = new Random(System.currentTimeMillis());
+        long channel = Math.abs(rand.nextLong());
+        if (this.getWebDriverList().size() > 1)
+            throw new Exception("This test is limited to 1 browser only");
+        for (WebDriver webDriver : this.getWebDriverList()) {
+            webDriver.get(APPRTC_URL + channel + "?" + option);
+            try {
+                webDriver.switchTo().alert().accept();
+            } catch (NoAlertPresentException e) {
+                logger.warn(e.getLocalizedMessage());
+            }
+            webDriver.findElement(By.id("confirm-join-button")).click();
         }
-      } catch (NoAlertPresentException e) {
-        alertMsg = null;
-      }
-      webDriver.findElement(By.id("confirm-join-button")).click();
     }
-  }
 
-  /**
-   * Checks whether atleast one the result string matches 'failed'.
-   *
-   * @param result ice connection state for the browser as String
-   * @return true if the result string matches 'failed'.
-   */
-  private boolean checkForFailed(String result) {
-    return result.equalsIgnoreCase("failed");
-  }
-
-  /**
-   * Checks whether the option argument has any effect.
-   *
-   * @param result local SDP as String
-   * @return true if the effect is as expected.
-   */
-  private boolean validateResults(String result) {
-
-    if (result.equalsIgnoreCase("unknown"))
-      return false;
-    else {
-      String[] lines = result.split("\\n");
-      String mLineVideo = null;
-      String payload = null;
-      for (String line : lines) {
-        if (line.contains(value))
-          payload = line.split(":")[1].split(" ")[0];
-        if (line.startsWith("m=video"))
-          mLineVideo = line;
-      }
-      if (payload == null || mLineVideo == null)
-        return false;
-      else {
-        String defaultPayload = mLineVideo.split(" ")[3];
-        if (defaultPayload.equalsIgnoreCase(payload))
-          return true;
-        return false;
-      }
+    /**
+     * Checks whether atleast one the result string matches 'failed'.
+     *
+     * @param result ice connection state for the browser as String
+     * @return true if the result string matches 'failed'.
+     */
+    private boolean checkForFailed(String result) {
+        return result.equalsIgnoreCase("failed");
     }
-  }
 
+    /**
+     * Checks whether the option argument has any effect.
+     *
+     * @param result local SDP as String
+     * @return true if the effect is as expected.
+     */
+    private boolean validateResults(String result) {
 
-  @Override
-  public Object testScript() throws Exception {
-    this.takeAction();
-/*    if (alertMsg != null) {
-      return Json.createObjectBuilder().add("result", alertMsg).build().toString();
-    }*/
-    String result = RESULT_TIMEOUT;
-    Map<String, Object> resultMap = new HashMap<String, Object>();
-    for (int i = 0; i < TIMEOUT; i += INTERVAL) {
-      String ICEConnectionState = "";
-      for (WebDriver webDriver : this.getWebDriverList()) {
-        ICEConnectionState =
-          (String) ((JavascriptExecutor) webDriver).executeScript(getIceConnectionScript());
-        if (logger.isInfoEnabled())
-          logger.info(webDriver + ": " + ICEConnectionState);
-      }
-      if (this.checkForFailed(ICEConnectionState)) {
-        result = RESULT_FAILED;
-        break;
-      } else {
-        if (ICEConnectionState.equalsIgnoreCase("unknown")) {
-          Thread.sleep(INTERVAL);
-        } else {
-          // The connection doesn't need to be connected, new is enough.
-          String SDP;
-          int count = 1;
-          for (WebDriver webDriver : this.getWebDriverList()) {
-            SDP = (String) ((JavascriptExecutor) webDriver).executeScript(getSDPOfferScript());
-            if (validateResults(SDP))
-              result = RESULT_SUCCESSFUL;
-            else
-              result = RESULT_FAILED;
-            ((JavascriptExecutor) webDriver).executeScript(stashStatsScript());
-            Thread.sleep(INTERVAL);
-            Object stats = ((JavascriptExecutor) webDriver).executeScript(getStatsScript());
-            resultMap.put("client_" + count, stats);
-            count += 1;
-          }
-          break;
+        if (result.equalsIgnoreCase("unknown"))
+            return false;
+        else {
+            String[] lines = result.split("\\n");
+            String mLineVideo = null;
+            String payload =null;
+            for (String line : lines) {
+                if (line.contains(value))
+                    payload = line.split(":")[1].split(" ")[0];
+                if (line.startsWith("m=video"))
+                    mLineVideo = line;
+            }
+            if (payload==null || mLineVideo==null)
+                return false;
+            else {
+                String defaultPayload = mLineVideo.split(" ")[3];
+                if (defaultPayload.equalsIgnoreCase(payload))
+                    return true;
+                return false;
+            }
         }
-      }
     }
-    if (result.equalsIgnoreCase("ERROR"))
-      return Json.createObjectBuilder().add("result", "No outbound stream was found by getStats()")
-        .build().toString();    else {
-      resultMap.put("result", result);
-      JsonObjectBuilder tmp = Json.createObjectBuilder();
-      for (int i = 1; i <= this.getWebDriverList().size(); i++) {
-        String name = "client_" + i;
-        if (resultMap.get(name) != null)
-          tmp.add(name, Utility.buildSingleStatObject(resultMap.get(name)));
-      }
-      return Json.createObjectBuilder().add("result", (String) resultMap.get("result"))
-        .add("stats", tmp).build().toString();
+
+
+    @Override
+    public Object testScript() throws Exception {
+        this.takeAction();
+
+        String result = "TIME OUT";
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        for (int i = 0; i < TIMEOUT; i += INTERVAL) {
+            String ICEConnectionState = "";
+            for (WebDriver webDriver : this.getWebDriverList()) {
+                ICEConnectionState =
+                        (String) ((JavascriptExecutor) webDriver).executeScript(getIceConnectionScript());
+                if (logger.isInfoEnabled())
+                    logger.info(webDriver + ": " + ICEConnectionState);
+            }
+            if (this.checkForFailed(ICEConnectionState)) {
+                result = "FAILED";
+                break;
+            } else {
+                if (ICEConnectionState.equalsIgnoreCase("unknown")) {
+                    Thread.sleep(INTERVAL);
+                } else { // The connection doesn't need to be connected, new is enough.
+                    String SDP;
+                    int count = 1;
+                    for (WebDriver webDriver : this.getWebDriverList()) {
+                        SDP = (String) ((JavascriptExecutor) webDriver).executeScript(getSDPOfferScript());
+                        if (validateResults(SDP))
+                            result = "SUCCESSFUL";
+                        else
+                            result = "FAILED";
+                        ((JavascriptExecutor) webDriver).executeScript(stashStatsScript());
+                        Thread.sleep(INTERVAL);
+                        Object stats = ((JavascriptExecutor) webDriver).executeScript(getStatsScript());
+                        resultMap.put("client_" + count, stats);
+                        count += 1;
+                    }
+                    break;
+                }
+            }
+        }
+        if (result.equalsIgnoreCase("ERROR"))
+            return new Exception("No outbound stream was found by getStats()");
+        else {
+            resultMap.put("result", result);
+            JsonObjectBuilder tmp = Json.createObjectBuilder();
+            for (int i = 1; i <= this.getWebDriverList().size(); i++) {
+                String name = "client_"+i;
+                if (resultMap.get(name)!=null)
+                    tmp.add(name, Utility.buildSingleStatObject(resultMap.get(name)));
+            }
+            return Json.createObjectBuilder().add("result", (String) resultMap.get("result"))
+                    .add("stats", tmp).build().toString();
+        }
     }
-  }
 }

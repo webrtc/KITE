@@ -16,13 +16,11 @@
 
 package org.webrtc.kite;
 
-import junit.framework.TestCase;
-import org.openqa.selenium.WebDriver;
-import org.webrtc.kite.BitRateTest.ARBitRateTest;
-import org.webrtc.kite.config.Browser;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.openqa.selenium.WebDriver;
+import org.webrtc.kite.config.Browser;
+import junit.framework.TestCase;
 
 public class IceConnectionTestTest extends TestCase {
 
@@ -34,17 +32,16 @@ public class IceConnectionTestTest extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
 
-    final Browser browser1 = new Browser("firefox");
-    browser1.setRemoteAddress(SELENIUM_SERVER_URL);
+    final Browser firefox = new Browser("firefox");
+    firefox.setRemoteAddress(SELENIUM_SERVER_URL);
+    webDriverList.add(WebDriverFactory.createWebDriver(firefox, TEST_NAME));
 
-    final Browser browser2 = new Browser("chrome");
-    browser2.setRemoteAddress(SELENIUM_SERVER_URL);
-
-    webDriverList.add(WebDriverFactory.createWebDriver(browser1, TEST_NAME));
-    webDriverList.add(WebDriverFactory.createWebDriver(browser2, TEST_NAME));
+    final Browser chrome = new Browser("chrome");
+    chrome.setRemoteAddress(SELENIUM_SERVER_URL);
+    webDriverList.add(WebDriverFactory.createWebDriver(chrome, TEST_NAME));
   }
 
-  public void tearDown() {
+  public void tearDown() throws Exception {
     // Close all the browsers
     for (WebDriver webDriver : this.webDriverList)
       try {

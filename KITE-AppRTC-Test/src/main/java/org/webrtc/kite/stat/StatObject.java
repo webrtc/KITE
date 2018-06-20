@@ -23,34 +23,35 @@ import javax.json.JsonObjectBuilder;
  * Parent class for any WebRTC stat object.
  */
 public abstract class StatObject {
-  private String id;
+    private String id;
 
-  /**
-   * Returns JsonObjectBuilder.
-   *
-   * @return JsonObjectBuilder
-   */
-  public abstract JsonObjectBuilder getJsonObjectBuilder();
+    /**
+     * Returns JsonObjectBuilder.
+     *
+     * @return JsonObjectBuilder
+     */
+    public abstract JsonObjectBuilder getJsonObjectBuilder();
 
-  /**
-   * Returns a JsonObject representation.
-   *
-   * @return JsonObject
-   */
-  public JsonObject getJsonObject() {
-    return this.getJsonObjectBuilder().build();
-  }
+    /**
+     * Returns a JsonObject representation.
+     *
+     * @return JsonObject
+     */
+    public JsonObject getJsonObject() {
+        return this.getJsonObjectBuilder().build();
+    }
 
-  @Override
-  public String toString() {
-    return this.getJsonObject().toString();
-  }
+    @Override
+    public String toString() {
+        return this.getJsonObject().toString();
+    }
 
-  public String getId() {
-    return id;
-  }
 
-  public void setId(String id) {
-    this.id = id;
-  }
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
 }

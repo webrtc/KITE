@@ -26,18 +26,14 @@ import javax.json.JsonObjectBuilder;
  */
 public class Mobile extends KiteConfigObject {
 
-  // Mandatory
   private String deviceName;
   private String platformName;
   private String platformVersion;
 
-  /**
-   * Instantiates a new Mobile.
-   */
   public Mobile() {
 
   }
-
+  
   /**
    * Constructs a new Mobile with the jsonObject.
    *
@@ -49,61 +45,32 @@ public class Mobile extends KiteConfigObject {
     this.platformVersion = jsonObject.getString("platformVersion");
   }
 
-  /**
-   * Gets device name.
-   *
-   * @return the device name
-   */
   public String getDeviceName() {
     return deviceName;
   }
 
-  /**
-   * Sets device name.
-   *
-   * @param deviceName the device name
-   */
   public void setDeviceName(String deviceName) {
     this.deviceName = deviceName;
   }
 
-  /**
-   * Gets platform name.
-   *
-   * @return the platform name
-   */
   public String getPlatformName() {
     return platformName;
   }
 
-  /**
-   * Sets platform name.
-   *
-   * @param platformName the platform name
-   */
   public void setPlatformName(String platformName) {
     this.platformName = platformName;
   }
 
-  /**
-   * Gets platform version.
-   *
-   * @return the platform version
-   */
   public String getPlatformVersion() {
     return platformVersion;
   }
 
-  /**
-   * Sets platform version.
-   *
-   * @param platformVersion the platform version
-   */
   public void setPlatformVersion(String platformVersion) {
     this.platformVersion = platformVersion;
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     if (this == obj) {
       return true;
     }
@@ -120,20 +87,23 @@ public class Mobile extends KiteConfigObject {
       return false;
     }
     return platformVersion.equals(mobile.platformVersion);
+
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return this.deviceName.hashCode() + this.platformName.hashCode() + platformVersion.hashCode();
   }
 
-  @Override public JsonObjectBuilder getJsonObjectBuilder() {
+  @Override
+  public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder().add("deviceName", this.getDeviceName())
         .add("platformName", this.getPlatformName())
         .add("platformVersion", this.getPlatformVersion());
   }
 
-  @Override public JsonObjectBuilder getJsonObjectBuilderForResult() {
+  @Override
+  public JsonObjectBuilder getJsonObjectBuilderForResult() {
     return this.getJsonObjectBuilder();
   }
-
 }

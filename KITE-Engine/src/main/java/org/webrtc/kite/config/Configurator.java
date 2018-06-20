@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,14 +16,11 @@
 
 package org.webrtc.kite.config;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.apache.log4j.Logger;
-import org.quartz.Job;
 import org.webrtc.kite.Utility;
-import org.webrtc.kite.exception.KiteInsufficientValueException;
-import org.webrtc.kite.exception.KiteUnsupportedIntervalException;
-import org.webrtc.kite.exception.KiteUnsupportedRemoteException;
+import org.webrtc.kite.exception.*;
+import org.webrtc.kite.grid.RemoteAddressManager;
+import org.webrtc.kite.grid.RemoteGridFetcher;
 import org.webrtc.kite.scheduler.Interval;
 
 import javax.json.*;
@@ -31,10 +28,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * Representation of the config file as a singleton.
@@ -50,202 +44,203 @@ import java.util.List;
  */
 public class Configurator {
 
-  private static final Logger logger = Logger.getLogger(Configurator.class.getName());
+    private static final Logger logger = Logger.getLogger(Configurator.class.getName());
 
-  /* Singleton boiler plate code */
-  private static Configurator instance = new Configurator();
+    /* Singleton boiler plate code */
+    private static Configurator instance = new Configurator();
 
-  /**
-   * Gets instance.
-   *
-   * @return the instance
-   */
-  public static Configurator getInstance() {
-    return instance;
-  }
+    public static Configurator getInstance() {
+        return instance;
+    }
 
-  private Configurator() {
-  }
-  /* Singleton boiler plate code */
+    private Configurator() {
+    }
+    /* Singleton boiler plate code */
 
-  private long timeStamp = System.currentTimeMillis();
+    private long timeStamp = System.currentTimeMillis();
 
-  private int type;
-  private String name;
-  private int interval;
+    private String name;
+    private int interval;
+    private List<TestConf> testList;
+    private List<Browser> browserList;
 
-  private ConfigHandler configHandler;
+    public long getTimeStamp() { return this.timeStamp; }
 
-  /**
-   * Gets time stamp.
-   *
-   * @return the time stamp
-   */
-  public long getTimeStamp() {
-    return this.timeStamp;
-  }
+    public void setTimeStamp() {
+        this.timeStamp = System.currentTimeMillis();
+    }
 
-  /**
-   * Sets time stamp.
-   */
-  public void setTimeStamp() {
-    this.timeStamp = System.currentTimeMillis();
-  }
+    public String getName() {
+        return this.name;
+    }
 
-  /**
-   * Gets name.
-   *
-   * @return the name
-   */
-  public String getName() {
-    return this.name;
-  }
+    public int getInterval() { return this.interval; }
 
-  /**
-   * Gets interval.
-   *
-   * @return the interval
-   */
-  public int getInterval() {
-    return this.interval;
-  }
+    public List<TestConf> getTestList() {
+        return this.testList;
+    }
 
-  /**
-   * Gets config handler.
-   *
-   * @return the config handler
-   */
-  public ConfigHandler getConfigHandler() {
-    return this.configHandler;
-  }
+    public List<Browser> getBrowserList() { return this.browserList; }
 
-  /**
-   * Gets job class.
-   *
-   * @return the job class
-   */
-  public Class<? extends Job> getJobClass() {
-    return configHandler.getJobClass();
-  }
+    /**
+     * Builds itself based on the content of the config file.
+     *
+     * @param file a File representation of the config file.
+     * @throws FileNotFoundException          if the file is not found on provided path.
+     * @throws JsonException                  if the content of the file is not a valid json.
+     * @throws IllegalStateException          thrown by JsonReader's readObject().
+     * @throws KiteNoKeyException             if any of the mandatory key (name, remotes, tests, browsers) is not found in the config file.
+     * @throws KiteBadValueException          if the value of any key is invalid.
+     * @throws KiteInsufficientValueException if the number of remotes, tests and browsers is less than 1.
+     * @throws KiteUnsupportedRemoteException if an unsupported remote is found in 'remotes'.
+     * @throws KiteUnsupportedIntervalException if an unsupported interval is found in 'interval'.
+     */
+    public void buildConfig(File file) throws FileNotFoundException, JsonException, IllegalStateException, KiteNoKeyException, KiteBadValueException, KiteInsufficientValueException, KiteUnsupportedRemoteException, KiteUnsupportedIntervalException {
 
-  ;
-
-  /**
-   * Builds itself based on the content of the config file.
-   *
-   * @param file a File representation of the config file.
-   * @throws FileNotFoundException            if the file is not found on provided path.
-   * @throws KiteUnsupportedIntervalException if an unsupported interval is found in 'interval'.
-   * @throws KiteInsufficientValueException   if the number of remotes, tests and browsers is less
-   *                                          than 1.
-   * @throws NoSuchMethodException            the no such method exception
-   * @throws IllegalAccessException           the illegal access exception
-   * @throws InstantiationException           the instantiation exception
-   * @throws KiteUnsupportedRemoteException   if an unsupported remote is found in 'remotes'.
-   * @throws InvocationTargetException        the invocation target exception
-   */
-  public void buildConfig(File file) throws FileNotFoundException, KiteUnsupportedIntervalException,
-      KiteInsufficientValueException, NoSuchMethodException, IllegalAccessException,
-      InstantiationException, KiteUnsupportedRemoteException, InvocationTargetException {
-
-    FileReader fileReader = null;
-    JsonReader jsonReader = null;
-    JsonObject jsonObject = null;
-    try {
-      fileReader = new FileReader(file);
-      jsonReader = Json.createReader(fileReader);
-      jsonObject = jsonReader.readObject();
-    } finally {
-      if (fileReader != null)
+        FileReader fileReader = null;
+        JsonReader jsonReader = null;
+        JsonObject jsonObject = null;
         try {
-          fileReader.close();
-        } catch (IOException e) {
-          logger.warn(e.getMessage(), e);
+            fileReader = new FileReader(file);
+            jsonReader = Json.createReader(fileReader);
+            jsonObject = jsonReader.readObject();
+        } finally {
+            if (fileReader != null)
+                try {
+                    fileReader.close();
+                } catch (IOException e) {
+                    logger.warn(e.getMessage(), e);
+                }
+            if (jsonReader != null)
+                jsonReader.close();
         }
-      if (jsonReader != null)
-        jsonReader.close();
+
+        this.name = (String) Utility.throwNoKeyOrBadValueException(jsonObject, "name", String.class, false);
+
+        this.interval = Interval.interval((String) Utility.throwNoKeyOrBadValueException(jsonObject, "interval", String.class, true));
+
+        String callbackURL = jsonObject.getString("callback", null);
+
+        List<JsonObject> jsonObjectList = (List<JsonObject>) Utility.throwNoKeyOrBadValueException(jsonObject, "remotes", JsonArray.class, false);
+        if (jsonObjectList.size() < 1)
+            throw new KiteInsufficientValueException("Remote objects are less than one.");
+
+        RemoteManager remoteManager = new RemoteManager(jsonObjectList);
+
+        jsonObjectList = (List<JsonObject>) Utility.throwNoKeyOrBadValueException(jsonObject, "tests", JsonArray.class, false);
+        if (jsonObjectList.size() < 1)
+            throw new KiteInsufficientValueException("Test objects are less than one.");
+
+        this.testList = new ArrayList<TestConf>();
+        for (JsonObject object : jsonObjectList)
+            this.testList.add(new TestConf(callbackURL, object));
+
+        jsonObjectList = (List<JsonObject>) Utility.throwNoKeyOrBadValueException(jsonObject, "browsers", JsonArray.class, false);
+        int size = jsonObjectList.size();
+        if (size < 1)
+            throw new KiteInsufficientValueException("Browser objects are less than one.");
+        jsonObjectList = new ArrayList<JsonObject>(new LinkedHashSet<JsonObject>(jsonObjectList));
+        if (jsonObjectList.size() != size) {
+            logger.warn("Duplicate browser configurations in the config file have been removed.");
+        }
+
+        logger.info("Finished reading the configuration file.");
+
+        this.adjustRemotes(remoteManager, jsonObjectList);
     }
 
-    this.type = jsonObject.getInt("type", 1);
+    /**
+     * Builds the browser list and sets the remote address in each of the browser object.
+     * <p>
+     * The algorithm is as follows:
+     * 1) If there is only one remote provided then sets that remote for every browser.
+     * 2) If there are more than one remotes then query all remotes against the provided browsers in sequential order to check if a remote can spawn the browser.
+     * 3) If a browser is not supported by a remote then set 'local' as its remote if provided otherwise set the top remote from the remote array.
+     *
+     * @param remoteManager  RemoteManager
+     * @param jsonObjectList an implementation of List<JsonObject>.
+     */
+    private void adjustRemotes(RemoteManager remoteManager, List<JsonObject> jsonObjectList) {
 
-    this.name =
-        (String) Utility.throwNoKeyOrBadValueException(jsonObject, "name", String.class, false);
+        Set<Browser> set = new LinkedHashSet<Browser>();
 
-    this.interval = Interval.interval(
-        (String) Utility.throwNoKeyOrBadValueException(jsonObject, "interval", String.class, true));
+        List<Remote> remoteList = remoteManager.getRemoteList();
+        int remoteListSize = remoteList.size();
 
-    String callbackURL = jsonObject.getString("callback", null);
+        if (remoteListSize == 1) {
+            String remoteAddress = remoteList.get(0).getRemoteAddress();
+            for (JsonObject object : jsonObjectList) {
+                Browser browser = new Browser(null, object);
+                if (browser.getRemoteAddress() == null){
+                    browser.setRemoteAddress(remoteAddress);
+                }
+                set.add(browser);
+            }
+        } else {
+            int index = 0;
+            Remote defaultRemote = remoteList.get(0);
+            if (defaultRemote.isLocal()) index = 1;
 
-    List<JsonObject> testObjectList = (List<JsonObject>) Utility
-        .throwNoKeyOrBadValueException(jsonObject, "tests", JsonArray.class, false);
-    if (testObjectList.size() < 1)
-      throw new KiteInsufficientValueException("Test objects are less than one.");
+            List<RemoteGridFetcher> fetcherList = new ArrayList<>();
+            for (; index < remoteListSize; index++)
+                fetcherList.add(remoteList.get(index).getGridFetcher());
 
-    List<JsonObject> browserObjectList = (List<JsonObject>) Utility
-        .throwNoKeyOrBadValueException(jsonObject, "browsers", JsonArray.class, false);
-    int size = browserObjectList.size();
-    if (size < 1)
-      throw new KiteInsufficientValueException("Browser objects are less than one.");
-    browserObjectList = new ArrayList<JsonObject>(new LinkedHashSet<JsonObject>(browserObjectList));
-    if (browserObjectList.size() != size)
-      logger.warn("Duplicate browser configurations in the config file have been removed.");
+            RemoteAddressManager remoteAddressManager = new RemoteAddressManager(fetcherList);
+            remoteAddressManager.communicateWithRemotes();
 
-    List<JsonObject> remoteObjectList = null;
-    Object object = Utility
-        .throwNoKeyOrBadValueException(jsonObject, "remotes", JsonArray.class, this.type == 2);
-    if (object != null)
-      remoteObjectList = (List<JsonObject>) object;
+            for (JsonObject object : jsonObjectList) {
+                Browser browser = new Browser(null, object);
+                if (browser.getRemoteAddress() == null){
+                String remoteAddress = remoteAddressManager.findAppropriateRemoteAddress(browser);
+                browser.setRemoteAddress(remoteAddress == null ? defaultRemote.getRemoteAddress() : remoteAddress);
+                }
+                set.add(browser);
+            }
+        }
 
-    if ((remoteObjectList == null || remoteObjectList.size() < 1))
-      throw new KiteInsufficientValueException("Either remotes are missing or are less than one.");
-
-    configHandler =
-        new ConfigTypeOneHandler(callbackURL, remoteObjectList, testObjectList, browserObjectList);
-
-    logger.info("Finished reading the configuration file");
-  }
-
-  /**
-   * Creates a matrix of browser tuples.
-   *
-   * @param tupleSize tuple size
-   * @return a matrix of browser tuples as List<List<Browser>>
-   */
-  public List<List<Browser>> buildTuples(int tupleSize) {
-
-    List<List<Browser>> listOfTuples = new ArrayList<List<Browser>>();
-
-    double totalTuples = Math.pow(this.configHandler.getBrowserList().size(), tupleSize);
-
-    logger.info(totalTuples + " test cases to run");
-
-    for (int i = 0; i < totalTuples; i++)
-      listOfTuples.add(new ArrayList<Browser>());
-
-    for (int i = 0; i < tupleSize; i++) {
-      double marge = totalTuples / Math.pow(this.configHandler.getBrowserList().size(), i + 1);
-      double rep = Math.pow(this.configHandler.getBrowserList().size(), i);
-      for (int x = 0; x < rep; x++)
-        for (int j = 0; j < this.configHandler.getBrowserList().size(); j++)
-          for (int k = 0; k < marge; k++)
-            (listOfTuples.get((int) (x * totalTuples / rep + j * marge + k)))
-                .add(i, new Browser(this.configHandler.getBrowserList().get(j)));
+        this.browserList = new ArrayList<Browser>(set);
     }
 
-    Collections.shuffle(listOfTuples);
-    return listOfTuples;
-  }
+    /**
+     * Creates a matrix of browser tuples.
+     *
+     * @param tupleSize tuple size
+     * @return a matrix of browser tuples as List<List<Browser>>
+     */
+    public List<List<Browser>> buildTuples(int tupleSize) {
 
-  /**
-   * Returns a JsonArrayBuilder based on the browser list.
-   *
-   * @return JsonArrayBuilder browser list json array
-   */
-  public JsonArrayBuilder getBrowserListJsonArray() {
-    JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
-    for (Browser browser : this.configHandler.getBrowserList())
-      jsonArrayBuilder.add(browser.getJsonObjectBuilder());
-    return jsonArrayBuilder;
-  }
+        List<List<Browser>> listOfTuples = new ArrayList<List<Browser>>();
+
+        double totalTuples = Math.pow(this.browserList.size(), tupleSize);
+
+        logger.info(totalTuples + " test cases to run.");
+
+        for (int i = 0; i < totalTuples; i++)
+            listOfTuples.add(new ArrayList<Browser>());
+
+        for (int i = 0; i < tupleSize; i++) {
+            double marge = totalTuples / Math.pow(this.browserList.size(), i + 1);
+            double rep = Math.pow(this.browserList.size(), i);
+            for (int x = 0; x < rep; x++)
+                for (int j = 0; j < this.browserList.size(); j++)
+                    for (int k = 0; k < marge; k++)
+                        (listOfTuples.get((int) (x * totalTuples / rep + j * marge + k))).add(i, new Browser(this.browserList.get(j)));
+        }
+
+        Collections.shuffle(listOfTuples);
+        return listOfTuples;
+    }
+
+    /**
+     * Returns a JsonArrayBuilder based on the browser list.
+     *
+     * @return JsonArrayBuilder
+     */
+    public JsonArrayBuilder getBrowserListJsonArray() {
+        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+        for (Browser browser : this.browserList)
+            jsonArrayBuilder.add(browser.getJsonObjectBuilder());
+        return jsonArrayBuilder;
+    }
 
 }

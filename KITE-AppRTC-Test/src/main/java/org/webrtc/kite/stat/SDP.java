@@ -26,19 +26,19 @@ import java.util.Map;
  */
 public class SDP extends StatObject {
 
-  private String type, sdp;
+    private String type, sdp;
 
-  public SDP(Map<Object, Object> statObject) {
-    this.type = Utility.getStatByName(statObject, "type");
-    this.sdp = Utility.getStatByName(statObject, "sdp");
-  }
+    public SDP(Map<Object, Object> statObject) {
+        this.type = Utility.getStatByName(statObject, "type");
+        this.sdp = Utility.getStatByName(statObject, "sdp");
+    }
 
-  @Override
-  public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("type", this.type)
-        .add("sdp", this.sdp);
-    return jsonObjectBuilder;
-  }
+    @Override
+    public JsonObjectBuilder getJsonObjectBuilder() {
+        JsonObjectBuilder jsonObjectBuilder =
+                Json.createObjectBuilder()
+                        .add("type", this.type)
+                        .add("sdp", this.sdp);
+        return jsonObjectBuilder;
+    }
 }

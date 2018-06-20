@@ -26,47 +26,47 @@ import java.util.Map;
  * framesDecoded, framesDropped, framesCorrupted, audioLevel
  */
 public class RTCMediaStreamTrackStats extends StatObject {
-  private String trackIdentifier, remoteSource, ended, detached,
-    frameWidth, frameHeight, framesPerSecond, framesSent, framesReceived,
-    framesDecoded, framesDropped, framesCorrupted, audioLevel;
+    private String trackIdentifier, remoteSource, ended, detached,
+            frameWidth, frameHeight, framesPerSecond, framesSent, framesReceived,
+            framesDecoded, framesDropped, framesCorrupted, audioLevel;
 
-  public RTCMediaStreamTrackStats(Map<Object, Object> statObject) {
-    this.setId(Utility.getStatByName(statObject, "id"));
-    this.trackIdentifier = Utility.getStatByName(statObject, "trackIdentifier");
-    this.remoteSource = Utility.getStatByName(statObject, "remoteSource");
-    this.ended = Utility.getStatByName(statObject, "ended");
-    this.detached = Utility.getStatByName(statObject, "detached");
-    this.frameWidth = Utility.getStatByName(statObject, "frameWidth");
-    this.frameHeight = Utility.getStatByName(statObject, "frameHeight");
-    this.framesPerSecond = Utility.getStatByName(statObject, "framesPerSecond");
-    this.framesSent = Utility.getStatByName(statObject, "framesSent");
-    this.framesReceived = Utility.getStatByName(statObject, "framesReceived");
-    this.framesDecoded = Utility.getStatByName(statObject, "framesDecoded");
-    this.framesDropped = Utility.getStatByName(statObject, "framesDropped");
-    this.framesCorrupted = Utility.getStatByName(statObject, "framesCorrupted");
-    this.audioLevel = Utility.getStatByName(statObject, "audioLevel");
+    public RTCMediaStreamTrackStats(Map<Object, Object> statObject) {
+        this.setId(Utility.getStatByName(statObject, "id"));
+        this.trackIdentifier = Utility.getStatByName(statObject, "trackIdentifier");
+        this.remoteSource = Utility.getStatByName(statObject, "remoteSource");
+        this.ended = Utility.getStatByName(statObject, "ended");
+        this.detached = Utility.getStatByName(statObject, "detached");
+        this.frameWidth = Utility.getStatByName(statObject, "frameWidth");
+        this.frameHeight = Utility.getStatByName(statObject, "frameHeight");
+        this.framesPerSecond = Utility.getStatByName(statObject, "framesPerSecond");
+        this.framesSent = Utility.getStatByName(statObject, "framesSent");
+        this.framesReceived = Utility.getStatByName(statObject, "framesReceived");
+        this.framesDecoded = Utility.getStatByName(statObject, "framesDecoded");
+        this.framesDropped = Utility.getStatByName(statObject, "framesDropped");
+        this.framesCorrupted = Utility.getStatByName(statObject, "framesCorrupted");
+        this.audioLevel = Utility.getStatByName(statObject, "audioLevel");
 
-  }
+    }
 
-  @Override
-  public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("trackIdentifier", this.trackIdentifier)
-        .add("remoteSource", this.remoteSource)
-        .add("ended", this.ended)
-        .add("detached", this.detached)
-        .add("frameWidth", this.frameWidth)
-        .add("frameHeight", this.frameHeight)
-        .add("framesPerSecond", this.framesPerSecond)
-        .add("framesSent", this.framesSent)
-        .add("framesReceived", this.framesReceived)
-        .add("frameHeight", this.frameHeight)
-        .add("framesDecoded", this.framesDecoded)
-        .add("framesDropped", this.framesDropped)
-        .add("framesCorrupted", this.framesCorrupted)
-        .add("audioLevel", this.audioLevel);
+    @Override
+    public JsonObjectBuilder getJsonObjectBuilder() {
+        JsonObjectBuilder jsonObjectBuilder =
+                Json.createObjectBuilder()
+                        .add("trackIdentifier", this.trackIdentifier)
+                        .add("remoteSource", this.remoteSource)
+                        .add("ended", this.ended)
+                        .add("detached", this.detached)
+                        .add("frameWidth", this.frameWidth)
+                        .add("frameHeight", this.frameHeight)
+                        .add("framesPerSecond", this.framesPerSecond)
+                        .add("framesSent", this.framesSent)
+                        .add("framesReceived", this.framesReceived)
+                        .add("frameHeight", this.frameHeight)
+                        .add("framesDecoded", this.framesDecoded)
+                        .add("framesDropped", this.framesDropped)
+                        .add("framesCorrupted", this.framesCorrupted)
+                        .add("audioLevel", this.audioLevel);
 
-    return jsonObjectBuilder;
-  }
+        return jsonObjectBuilder;
+    }
 }

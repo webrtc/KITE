@@ -121,6 +121,12 @@ function updateResult (load,total){
     div.html(htmlString);
 
     window.statMap = statMap;
+/*    $('[data-toggle="popover"]').popover({
+        trigger:'click',
+        placement:'right',
+        html: true,
+        template: '<div class="popover"><div class="arrow"></div><div class="popover-content"></div><div class="popover-footer"><a class="small-boy" style="color:red">&nbsp;&nbsp;[ Close ]</a></div></div>'
+    });*/
 }
 
 

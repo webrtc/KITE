@@ -83,7 +83,7 @@ public class BrowserDao {
    */
   public Browser getBrowserById(int id) throws SQLException {
     String query =
-        "SELECT * FROM BROWSERS WHERE BROWSER_ID=" + id + ";";
+            "SELECT * FROM BROWSERS WHERE BROWSER_ID=" + id + ";";
 
     PreparedStatement ps = null;
     ResultSet rs = null;
@@ -97,7 +97,7 @@ public class BrowserDao {
         String name = rs.getString("NAME");
         String version = rs.getString("VERSION");
         String platform = rs.getString("PLATFORM");
-        browser = new Browser(name, version, platform);
+        browser = new Browser( name, version, platform);
       }
     } finally {
       Utility.closeDBResources(ps, rs);
