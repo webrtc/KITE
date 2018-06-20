@@ -32,5 +32,4 @@ public class KiteInsufficientValueException extends Exception {
   public KiteInsufficientValueException(String message) {
     super(message);
   }
-
 }

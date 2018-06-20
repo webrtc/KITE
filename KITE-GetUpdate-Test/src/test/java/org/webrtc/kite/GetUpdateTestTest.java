@@ -50,6 +50,6 @@ public class GetUpdateTestTest extends TestCase {
   public void testTestScript() throws Exception {
     KiteTest test = new GetUpdateTest();
     test.setWebDriverList(this.webDriverList);
-    System.out.println(test.testScript());
+    //System.out.println(test.testScript());
   }
 }

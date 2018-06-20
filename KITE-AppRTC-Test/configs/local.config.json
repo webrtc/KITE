@@ -11,7 +11,7 @@
     {
       "name": "IceConnectionTest",
       "tupleSize": 2,
-      "description":"This test check the ICEConnection state between two browsers communicating via appr.tc",
+      "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
       "testImpl": "org.webrtc.kite.IceConnectionTest"
     }
   ],
@@ -19,17 +19,20 @@
     {
       "browserName": "chrome",
       "version": "57.0",
-      "platform": "MAC"
+      "platform": "MAC",
+      "flags": []
     },
     {
       "browserName": "firefox",
       "version": "45.0",
-      "platform": "LINUX"
+      "platform": "LINUX",
+      "flags": []
     },
     {
       "browserName": "MicrosoftEdge",
       "version": "14.0",
-      "platform": "WINDOWS"
+      "platform": "WINDOWS",
+      "flags": []
     }
   ]
 }

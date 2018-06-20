@@ -29,26 +29,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * Servlet implementation class DashboardServlet
- */
+/** Servlet implementation class DashboardServlet */
 @WebServlet("/apperror")
 public class AppExceptionHandlerServlet extends HttpServlet {
 
   private static final long serialVersionUID = 5643806873850566969L;
   private static final Log log = LogFactory.getLog(AppExceptionHandlerServlet.class);
 
-  /**
-   * @see HttpServlet#HttpServlet()
-   */
+  /** @see HttpServlet#HttpServlet() */
   public AppExceptionHandlerServlet() {
     super();
     // TODO Auto-generated constructor stub
   }
 
-  /**
-   * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-   */
+  /** @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response) */
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
@@ -64,10 +58,8 @@ public class AppExceptionHandlerServlet extends HttpServlet {
     }
 
     // get UI
-    if (log.isDebugEnabled())
-      log.debug("Displaying: " + targetVM);
+    if (log.isDebugEnabled()) log.debug("Displaying: " + targetVM);
     RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetVM);
     requestDispatcher.forward(request, response);
   }
-
 }

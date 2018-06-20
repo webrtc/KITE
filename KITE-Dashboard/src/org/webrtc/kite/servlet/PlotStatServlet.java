@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.webrtc.kite.Utility;
 import org.webrtc.kite.dao.BrowserDao;
+import org.webrtc.kite.dao.ResultDao;
 import org.webrtc.kite.exception.KiteNoKeyException;
 import org.webrtc.kite.exception.KiteSQLException;
 import org.webrtc.kite.pojo.Browser;
@@ -36,53 +37,38 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Servlet implementation class TestServlet
- */
+/** Servlet implementation class TestServlet */
 @WebServlet("/stat")
 public class PlotStatServlet extends HttpServlet {
   private static final long serialVersionUID = 348927983L;
   private static final Log log = LogFactory.getLog(PublicOverviewServlet.class);
 
-  /**
-   * @see HttpServlet#HttpServlet()
-   */
+  /** @see HttpServlet#HttpServlet() */
   public PlotStatServlet() {
     super();
   }
 
-  /**
-   * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-   * response)
-   */
+  /** @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response) */
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     String testName = request.getParameter("name");
-    if (testName == null)
-      throw new KiteNoKeyException("table name");
+    if (testName == null) throw new KiteNoKeyException("table name");
     String idStr = request.getParameter("id");
-    if (idStr == null)
-      throw new KiteNoKeyException("id");
+    if (idStr == null) throw new KiteNoKeyException("id");
 
     String requestString = "getstat?name=" + testName + "&id=" + idStr + "&overtime=no";
     request.setAttribute("statRequest", requestString);
-    List<String> idStrList = Arrays.asList(idStr.split("_"));
-    List<Browser> browserList = new ArrayList<>();
     try {
-      for (String id : idStrList) {
-        Browser browser = new BrowserDao(Utility.getDBConnection(this.getServletContext()))
-            .getBrowserById(Integer.parseInt(id));
-        browserList.add(browser);
-      }
-      request.setAttribute("browserList", browserList);
+      List<Browser> browsers =
+          new ResultDao(Utility.getDBConnection(this.getServletContext())).getBrowsersById(testName,Integer.parseInt(idStr));
+      request.setAttribute("browserList", browsers);
     } catch (SQLException e) {
       e.printStackTrace();
       throw new KiteSQLException(e.getLocalizedMessage());
     }
 
     // get UI
-    if (log.isDebugEnabled())
-      log.debug("Displaying: stats.vm");
+    if (log.isDebugEnabled()) log.debug("Displaying: stats.vm");
 
     RequestDispatcher requestDispatcher = request.getRequestDispatcher("stats.vm");
     requestDispatcher.forward(request, response);

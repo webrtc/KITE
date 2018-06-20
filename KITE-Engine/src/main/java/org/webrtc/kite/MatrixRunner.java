@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,9 +47,9 @@ public class MatrixRunner {
   /**
    * Constructs a new MatrixRunner with the given TestConf and List<List<Browser>>.
    *
-   * @param testConf TestConf
+   * @param testConf          TestConf
    * @param listOfBrowserList a list of Browser List.
-   * @param testName name of the running test suite.
+   * @param testName          name of the running test suite.
    */
   public MatrixRunner(TestConf testConf, List<List<Browser>> listOfBrowserList, String testName) {
     this.testConf = testConf;
@@ -61,7 +61,7 @@ public class MatrixRunner {
   /**
    * Returns a sublist from the given list of the type of objects specified by the objectClass.
    *
-   * @param futureList List of Future<Object>
+   * @param futureList  List of Future<Object>
    * @param objectClass The class for the desired required object list.
    * @return A sublist from the given list of the type of objects specified by the objectClass.
    */
@@ -83,10 +83,10 @@ public class MatrixRunner {
    * Returns a sublist of the given futureList exclusive of the type of objects specified by the
    * objectClass.
    *
-   * @param futureList List of Future<Object>
+   * @param futureList  List of Future<Object>
    * @param objectClass The class for the undesired required object.
    * @return A sublist of the given futureList exclusive of the type of objects specified by the
-   *         objectClass.
+   * objectClass.
    */
   private List<Future<Object>> getExclusiveSubList(List<Future<Object>> futureList,
       Class<?> objectClass) {
@@ -107,8 +107,8 @@ public class MatrixRunner {
    * This method builds up singleThreadedList and multiThreadedList as follows:
    * <p>
    * 1) Omit all the test cases having 2 identical mobile browsers. 2) Put all the test cases
-   * having only 1 microsoft edge or safari into singleThreadedList. 3) Put all the rest of test
-   * cases into multiThreadedList.
+   * having microsoft edge or safari into singleThreadedList. 3) Put all the rest of test cases into
+   * multiThreadedList.
    */
   private void purgeListOfBrowserList() {
     for (List<Browser> browserList : this.listOfBrowserList) {
@@ -116,7 +116,7 @@ public class MatrixRunner {
       // Omit test cases with two identical mobile clients in them.
       int mobileCount = 0;
       Set<Browser> set = new LinkedHashSet<Browser>();
-      for (Browser browser: browserList) {
+      for (Browser browser : browserList) {
         if (browser.getMobile() != null || browser.getVersion().startsWith("fennec")) {
           set.add(browser);
           mobileCount++;
@@ -130,8 +130,8 @@ public class MatrixRunner {
         continue;
       }
 
-/*      // Add all the test cases having MicrosoftEdge and safari in single thread list.
-      boolean jumpToOuterLoop = false;
+      // Add all the test cases having MicrosoftEdge and safari in single thread list.
+      /*boolean jumpToOuterLoop = false;
       for (Browser browser : browserList) {
         String browserName = browser.getBrowserName();
         if (browserName.equalsIgnoreCase("MicrosoftEdge") || browserName
@@ -147,26 +147,6 @@ public class MatrixRunner {
       this.multiThreadedList.add(browserList);
     }
 
-/*    List<List<Browser>> tmp = new ArrayList<>(this.singleThreadedList);
-
-    int counter =0;
-    for (List<Browser> browserList: tmp){
-      boolean mobile=false;
-      for (Browser browser: browserList){
-        if (browser.getMobile()!=null)
-         mobile = true;
-      }
-      if (!mobile) {
-        if (counter % this.numberOfThread == 1 || counter % this.numberOfThread == 3) {
-          if (counter > this.multiThreadedList.size())
-            break;
-          this.multiThreadedList.add(counter, browserList);
-          this.singleThreadedList.remove(browserList);
-        }
-        counter += 1;
-      }
-    }*/
-
   }
 
   /**
@@ -175,10 +155,10 @@ public class MatrixRunner {
    * The algorithm of the method is as follows: 1) Execute the first test. 2) Execute the multi
    * threaded list. 3) Execute the single threaded list. 4) Execute the last test.
    *
-   * @return List<Future<Object>>
+   * @return List<Future < Object>>
    * @throws InterruptedException if thread pool is interrupted while waiting, in which case
-   *         unfinished tasks are cancelled
-   * @throws ExecutionException if the computation of the first or last thread threw an exception
+   *                              unfinished tasks are cancelled
+   * @throws ExecutionException   if the computation of the first or last thread threw an exception
    */
   public List<Future<Object>> run() throws InterruptedException, ExecutionException {
 
@@ -192,6 +172,7 @@ public class MatrixRunner {
     int index = 0;
     TestManager firstTest = null, lastTest = null;
 
+    // singleThreadedList and multiThreadedList manipulation
     if (this.singleThreadedList.size() > 1) {
       firstTest = new TestManager(this.testConf, this.singleThreadedList.get(0),
           this.testConf.getRemoteTestIdentifier(index++));
@@ -232,6 +213,7 @@ public class MatrixRunner {
       this.multiThreadedList.clear();
     }
 
+    // Set first and last tests
     if (firstTest != null)
       firstTest.setTotalTests(totalTestCases);
     if (lastTest != null)
@@ -253,8 +235,8 @@ public class MatrixRunner {
         do {
           futureList = singleExecutorService.invokeAll(testManagerList);
         } while (futureList.get(0).get() instanceof TestManager); // In case of a needed retry the
-                                                                  // instance of TestManger is
-                                                                  // simply returned.
+        // instance of TestManger is
+        // simply returned.
         testManagerList.clear();
       }
 
@@ -295,8 +277,7 @@ public class MatrixRunner {
         do {
           tempFutureList = singleExecutorService.invokeAll(testManagerList);
         } while (tempFutureList.get(0).get() instanceof TestManager); // In case of a needed retry
-                                                                      // the instance of TestManger
-                                                                      // is simply returned.
+        // the instance of TestManger is simply returned.
         futureList.addAll(tempFutureList);
       }
     } finally {

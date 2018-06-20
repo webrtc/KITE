@@ -6,14 +6,14 @@ The effortless way to test WebRTC compliance, prevent [Karoshi](https://en.wikip
 
 See LICENSE for licensing.
 
-## [1. Single machine setup](https://github.com/webrtc/KITE/wiki/Single-Machine-Test-setup)
+# I. Single Machine Test setup
 
-## [2. Selenium Grid setup](https://github.com/webrtc/KITE/wiki/Setup-selenium-grid)
+## A. Setup Selenium Standalone:
 
-## [3. KITE dashboard](https://github.com/webrtc/KITE/wiki/KITE-dashboard)
+### Install prerequisite software
 
 * Install the browsers you would like to test, available for your machine. Chrome, Edge, Firefox and Safari are supported at this stage. See the wiki for some limitations or hints for each browser.
-* Make sure you have a recent Java JDK installed, at least Java 8 (e.g. from [*Java SE downloads*](http://www.oracle.com/technetwork/java/javase/downloads/index.html))
+* Make sure you have a recent Java JDK installed, at least Java 8 (e.g. from [*Java SE downloads*](http://www.oracle.com/technetwork/java/javase/downloads/index.html)). Sometimes it might be neccessary to set JAVA_HOME and add it to PATH for java to work properly. 
 
 ### Download webdrivers and selenium server standalone
 
@@ -24,7 +24,7 @@ See LICENSE for licensing.
    *   Download the latest [*firefox webdriver*](https://github.com/mozilla/geckodriver/releases),
    *   On Windows, download the latest [*edge webdriver*](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/),
 
-*  Download [*Selenium Server Standalone 3.7.1*](http://selenium-release.storage.googleapis.com/3.7/selenium-server-standalone-3.7.1.jar) in the same folder
+*  Download [*Selenium Server Standalone*](https://www.seleniumhq.org/download/) in the same folder
 
 ### If on MAC, enable safari automation
 
@@ -32,19 +32,19 @@ Enable the 'Allow Remote Automation' option in Safari's Develop menu to control 
 
 ### Start selenium-server-standalone
 
-Run this command , don't stop it until testing session has finished
+Run this command , don't stop it until testing session has finished. Also make sure that you have Firefox and Chrome already installed on your testing machine.
 
 On Linux and Mac run:
 ```
-java -Dwebdriver.chrome.driver=./chromedriver -Dwebdriver.gecko.driver=./geckodriver -jar selenium-server-standalone-3.7.1.jar
+java -Dwebdriver.chrome.driver=./chromedriver -Dwebdriver.gecko.driver=./geckodriver -jar selenium-server-standalone-3.x.x.jar
 ```
 
 On Windows run:
 ```
-java -Dwebdriver.chrome.driver=./chromedriver.exe -Dwebdriver.gecko.driver=./geckodriver.exe -Dwebdriver.edge.driver=./MicrosoftWebDriver.exe -jar selenium-server-standalone-3.7.1.jar
+java -Dwebdriver.chrome.driver=./chromedriver.exe -Dwebdriver.gecko.driver=./geckodriver.exe -Dwebdriver.edge.driver=./MicrosoftWebDriver.exe -jar selenium-server-standalone-3.x.x.jar
 ```
 
-*  ```-Dwebdriver.xxxx.driver``` specifies the path to the webdriver executable matching the browser xxxx (possible values of xxxx are: gecko, chrome, edge, ...).
+*  ```-Dwebdriver.xxxx.driver``` specifies the path to the webdriver executable matching the browser xxxx (possible values of xxxx are: gecko, chrome, edge, safari ...).
 *  Depending on platform and the testing needs, command line can include one, two or the three drivers
 
 ## B. Build and KITE Engine and the basic sample AppRTC Test
@@ -59,9 +59,13 @@ Build uses [*maven*](https://maven.apache.org/) tool. Installable maven packages
 mvn clean install
 ```
 
-* If selenium is not running, build will fail, as KITE-AppRTC-Test includes a Junit test that requires local selenium. You can skip this (not recommended) running maven with -DskipTests 
+* If mvn (maven) is not recognisable by the system, you might need to set MAVEN_HOME and add it to PATH.
+
+* If selenium is not running (step mentioned above), build will fail, as KITE-AppRTC-Test includes a Junit test that requires local selenium. 
+
+You can skip all tests (not recommended) running maven with -DskipTests.
 ```
-mvn clean install -DskipTests
+mvn -DskipTests clean install 
 ```
 
 ## C. Setup the Dashboard
@@ -102,7 +106,7 @@ Read below about the configuration file, check that the desired browsers listed 
 
 ### Understanding a basic configuration file
 
-The example local.config.json file is almost the simplest config file you can get:
+The example local.config.json file is almost the simplest config file you can get (Change the version of browsers to the appropriated one that you have installed on your testing machine):
 
 ```json
 {
@@ -118,25 +122,21 @@ The example local.config.json file is almost the simplest config file you can ge
     {
       "name": "IceConnectionTest",
       "tupleSize": 2,
+      "noOfThreads": 4,
       "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
-      "testImpl": "org.webrtc.kite.IceConnectionTest"
+      "testImpl": "org.webrtc.kite.apprtc.network.IceConnectionTest"
     }
   ],
   "browsers": [
     {
       "browserName": "chrome",
-      "version": "63.0",
+      "version": "65",
       "platform": "MAC"
     },
     {
       "browserName": "firefox",
-      "version": "57.0",
+      "version": "59",
       "platform": "LINUX"
-    },
-    {
-      "browserName": "MicrosoftEdge",
-      "version": "16.16299",
-      "platform": "WINDOWS"
     }
   ]
 }
@@ -163,8 +163,9 @@ It registers IceConnectionTest class as a test (this class is implemented in KIT
     {
       "name": "IceConnectionTest",
       "tupleSize": 2,
+      "noOfThreads": 4,
       "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
-      "testImpl": "org.webrtc.kite.IceConnectionTest"
+      "testImpl": "org.webrtc.kite.apprtc.network.IceConnectionTest"
     }
   ],
 ```
@@ -177,13 +178,18 @@ Sample config files in ```KITE-AppRTC-Test/configs``` contain different examples
   "browsers": [
     {
       "browserName": "chrome",
-      "version": "63.0",
+      "version": "63",
       "platform": "MAC"
     },
     {
       "browserName": "firefox",
-      "version": "57.0",
+      "version": "57",
       "platform": "LINUX"
+    },
+    {
+      "browserName": "safari",
+      "version": "11",
+      "platform": "MAC"
     },
     {
       "browserName": "MicrosoftEdge",
@@ -207,6 +213,11 @@ On Windows run:
 java -cp KITE-Engine/target/kite-jar-with-dependencies.jar;KITE-AppRTC-Test/target/apprtc-test-1.0.jar org.webrtc.kite.Engine ./KITE-AppRTC-Test/configs/local.config.json
 ```
 
+Since the h264 plugin for firefox is only installed after the browser has already been opened, it will be too late to use (results in failed/timeout tests between firefox and safari). You can use the minimal firefox profiles provided in folder 'third_party'. All you need to do is specify the location of the profile folder:
+```
+java -Dkite.firefox.profile=/PATH/TO/firefox-h264-profiles/FOLDER/ -cp KITE-Engine/target/kite-jar-with-dependencies.ja...
+```
+
 Check the dashboard for the results and reports.
 
 If you have followed steps above, that's [*http://localhost:8080/kiteweb*](http://localhost:8080/kiteweb).
@@ -227,4 +238,3 @@ Complete the fields username and accesskey appropriately.
 
 * Don't forget to modify the example browsers, versions and platforms to suit your needs.
 
-## [5. Existing KITE tests](https://github.com/webrtc/KITE/wiki/Existing-KITE-Tests)

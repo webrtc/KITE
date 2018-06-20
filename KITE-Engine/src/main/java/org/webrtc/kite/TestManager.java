@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,11 +17,8 @@
 package org.webrtc.kite;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.webrtc.kite.config.Browser;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.TestConf;
@@ -48,9 +45,9 @@ import java.util.concurrent.Callable;
  */
 public class TestManager implements Callable<Object> {
 
-  private final static boolean ENABLE_CALLBACK = true;
+  private static final Logger logger = Logger.getLogger(TestManager.class.getName());
 
-  private final static Logger logger = Logger.getLogger(TestManager.class.getName());
+  private static final boolean ENABLE_CALLBACK = true;
 
   private TestConf testConf;
   private List<Browser> browserList;
@@ -62,13 +59,17 @@ public class TestManager implements Callable<Object> {
   private boolean isLastTest = false;
 
   private long timeTaken;
+  /**
+   * The Web driver list.
+   */
   protected List<WebDriver> webDriverList;
 
   /**
    * Constructs a new TestManager with the given TestConf and List<Browser>.
    *
-   * @param testConf TestConf
+   * @param testConf    TestConf
    * @param browserList List<Browser>
+   * @param testName    the test name
    */
   public TestManager(TestConf testConf, List<Browser> browserList, String testName) {
     this.testConf = testConf;
@@ -76,10 +77,20 @@ public class TestManager implements Callable<Object> {
     this.testName = testName;
   }
 
+  /**
+   * Sets total tests.
+   *
+   * @param totalTests the total tests
+   */
   public void setTotalTests(int totalTests) {
     this.totalTests = totalTests;
   }
 
+  /**
+   * Sets is last test.
+   *
+   * @param isLastTest the is last test
+   */
   public void setIsLastTest(boolean isLastTest) {
     this.isLastTest = isLastTest;
   }
@@ -97,20 +108,13 @@ public class TestManager implements Callable<Object> {
    * Constructs a list of web drivers against the number of provided browsers.
    *
    * @throws MalformedURLException if no protocol is specified in the remoteAddress of a browser, or
-   *         an unknown protocol is found, or spec is null.
+   *                               an unknown protocol is found, or spec is null.
    */
   private void populateDrivers(String testName) throws MalformedURLException {
     this.webDriverList = new ArrayList<WebDriver>();
-    String tupleName = "";
-    for (Browser browser : this.browserList) {
-      tupleName +=" " + browser.getBrowserName()+"_" +browser.getVersion()+"_" +browser.getPlatform();
-      WebDriver webDriver = WebDriverFactory.createWebDriver(browser, testName);
-      Capabilities capabilities = ((RemoteWebDriver) webDriver).getCapabilities();
-      browser.setWebDriverVersion(capabilities.getVersion());
-      browser.setWebDriverPlatform(capabilities.getPlatform().name());
-      this.webDriverList.add(webDriver);
+    for (Browser browser : this.browserList){
+      this.webDriverList.add(WebDriverUtility.getWebDriverForBrowser(testName, browser));
     }
-    System.out.println("Initiating: " + tupleName);
   }
 
   /**
@@ -119,107 +123,55 @@ public class TestManager implements Callable<Object> {
    */
   private void populateInfoFromNavigator() {
     int tupleSize = this.testConf.getTupleSize();
-    if (tupleSize != this.webDriverList.size())
+    if (tupleSize != this.webDriverList.size()) {
       return;
-    for (int i = 0; i < tupleSize; i++) {
-      try {
-        Browser browser = this.browserList.get(i);
-        if (browser.shouldGetUserAgent()) {
-          WebDriver webDriver = this.webDriverList.get(i);
-          if (!WebDriverFactory.isAlive(webDriver))
-            webDriver.get("http://www.google.com");
-          Object resultObject =
-              ((JavascriptExecutor) webDriver).executeScript(userAgentScript());
-          if (resultObject instanceof String) {
-            String resultOfScript = (String) resultObject;
-            logger.info("Browser platform and userAgent->" + resultOfScript);
-            browser.setUserAgentVersionAndPlatfom(resultOfScript);
-          } else {
-            logger.warn("Bad result object for->" + browser.toString() + "::" + resultObject);
-          }
-        }
-      } catch (Exception e) {
-        logger.error(e);
-      }
     }
-  }
-
-  /**
-   * Returns the JavaScript to get navigator.userAgent.
-   *
-   * @return the JavaScript as string.
-   */
-  private final static String userAgentScript() {
-    return "var nav = '';" + "try { var myNavigator = {};"
-        + "for (var i in navigator) myNavigator[i] = navigator[i];"
-        + "nav = JSON.stringify(myNavigator); } catch (exception) { nav = exception.message; }"
-        + "return nav;";
-  }
-
-  /**
-   * Quits all of the web drivers in the list.
-   */
-  private void closeDrivers() {
-    for (WebDriver webDriver : this.webDriverList)
-      try {
-        // Open about:config in case of fennec (Firefox for Android) and close.
-        if (((RemoteWebDriver) webDriver).getCapabilities().getBrowserName().equalsIgnoreCase("fennec")) {
-          webDriver.get("about:config");
-          webDriver.close();
-        }
-          webDriver.quit();
-      } catch (Exception e) {
-        logger.error("closing driver:", e);
-      }
+    for (int i = 0; i < tupleSize; i++) {
+      WebDriverUtility
+          .populateInfoFromNavigator(this.webDriverList.get(i), this.browserList.get(i));
+    }
   }
 
   /**
    * Develops the final json object to be posted.
    * <p>
    * Sample output:
-   * 
+   * <p>
    * { "test": { "timeStamp": 1492401875950, "configName": "sample.config", "testName":
    * "IceConnectionTest", "tupleSize": 2, "testImpl": "org.webrtc.kite.IceConnectionTest" },
-   * "browsers": [ { "browserName": "chrome", "version": "56.0", "platform": "Linux" }, {
-   * "browserName": "firefox", "version": "48.0", "platform": "Mac OS X 10.9" } ], "result": {
-   * "timeTaken": 9953, "payload": "SUCCESSFUL" }, "meta": { "totalTests": 1, "lastTest": true } }
+   * "target": [ { "browserName": "chrome", "version": "56.0", "platform": "Linux" },
+   * { "browserName": "firefox", "version": "48.0", "platform": "Mac OS X 10.9" } ],
+   * "destination": [ { "browserName": "chrome", "version": "56.0", "platform": "Linux" },
+   * { "browserName": "firefox", "version": "48.0", "platform": "Mac OS X 10.9" } ],
+   * "payload": { "timeTaken": 9953, "result": "SUCCESSFUL" }, "meta": { "totalTests": 1,
+   * "lastTest": true } }
    *
-   * @param object an instance of Exception or any Object with toString() implementation.
-   * @return JsonObject
+   * @param object of type Exception or String
+   * @return
+   * @throws KiteGridException if the test has failed
    */
   private JsonObject developResult(Object object) throws KiteGridException {
-    JsonArrayBuilder targetArrayBuilder = Json.createArrayBuilder();
-    JsonArrayBuilder destinationArrayBuilder = Json.createArrayBuilder();
-
-    for (Browser browser : this.browserList) {
-      targetArrayBuilder.add(browser.getJsonObjectBuilder());
-    }
 
     Object payload = null;
     if (object instanceof Exception) {
       Exception e = (Exception) object;
       String message = e.getLocalizedMessage();
-/*      payload = Json.createObjectBuilder().add("type", e.getClass().getName()).add("message",
-          message == null ? "Message not found in the exception" : message);*/
-      message = "{\"result\":\""+message+"\"}";
-      payload = Json.createObjectBuilder().add("result",
-              message == null ? "Message not found in the exception" : message);
-    }
-    else if (object instanceof String) {
-      //System.out.println(object);
-      payload = Json.createObjectBuilder().add("result",
-          object == null ? "Null result" : (String) object);      
-    }
-    else {
+      message = "{\"result\":\"" + message + "\"}";
+      payload = Json.createObjectBuilder()
+          .add("result", message == null ? "Message not found in the exception" : message);
+    } else if (object instanceof String) {
+      payload = Json.createObjectBuilder()
+          .add("result", object == null ? "Null result" : (String) object);
+    } else {
       throw new IllegalArgumentException("Unexpected class in result " + object.getClass());
     }
-    
+
     String osName = null;
     String osVersion = null;
     if (object instanceof WebDriverException) {
       final Exception e = (WebDriverException) object;
       final String message = e.getLocalizedMessage();
-      if (message!=null) {
+      if (message != null) {
         final String[] lines = message.split("\\n");
         for (final String l : lines) {
           if (l.startsWith("System info:")) {
@@ -233,11 +185,17 @@ public class TestManager implements Callable<Object> {
           }
         }
       } else {
-        throw new KiteGridException("The node has failed to execute the test script, " +
-                "most likely because of the session had ended unexpectedly for unknown error");
+        throw new KiteGridException("The node has failed to execute the test script, "
+            + "most likely because of the session had ended unexpectedly for unknown error");
       }
     }
 
+    JsonArrayBuilder targetArrayBuilder = Json.createArrayBuilder();
+    for (Browser browser : this.browserList) {
+      targetArrayBuilder.add(browser.getJsonObjectBuilder());
+    }
+
+    JsonArrayBuilder destinationArrayBuilder = Json.createArrayBuilder();
     for (Browser browser : this.browserList) {
       final JsonObjectBuilder destinationBrowserB =
           browser.getJsonObjectBuilderForResult(osName, osVersion);
@@ -250,10 +208,11 @@ public class TestManager implements Callable<Object> {
             .add("result", this.getResult(payload));
 
     JsonObjectBuilder meta = this.getMeta(true);
-    if (meta != null)
+    if (meta != null) {
       jsonObjectBuilder.add("meta", meta);
-
+    }
     return jsonObjectBuilder.build();
+
   }
 
   /**
@@ -265,10 +224,11 @@ public class TestManager implements Callable<Object> {
   private JsonObjectBuilder getResult(Object payload) {
     JsonObjectBuilder jsonObjectBuilder =
         Json.createObjectBuilder().add("timeTaken", this.timeTaken);
-    if (payload instanceof JsonObjectBuilder)
+    if (payload instanceof JsonObjectBuilder) {
       jsonObjectBuilder.add("payload", (JsonObjectBuilder) payload);
-    else
+    } else {
       jsonObjectBuilder.add("payload", (String) payload);
+    }
     return jsonObjectBuilder;
   }
 
@@ -284,95 +244,96 @@ public class TestManager implements Callable<Object> {
     JsonObjectBuilder jsonObjectBuilder = null;
 
     if (this.isFirstTest()) {
-      if (jsonObjectBuilder == null)
+      if (jsonObjectBuilder == null) {
         jsonObjectBuilder = Json.createObjectBuilder();
+      }
       jsonObjectBuilder.add("totalTests", this.totalTests);
-      if (withBrowserList)
+      if (withBrowserList) {
         jsonObjectBuilder.add("browsers", Configurator.getInstance().getBrowserListJsonArray())
-                .add("description",this.testConf.getDescription());
+            .add("description", this.testConf.getDescription());
+      }
     }
 
     if (this.isLastTest) {
-      if (jsonObjectBuilder == null)
+      if (jsonObjectBuilder == null) {
         jsonObjectBuilder = Json.createObjectBuilder();
+      }
       jsonObjectBuilder.add("lastTest", this.isLastTest);
     }
 
     return jsonObjectBuilder;
   }
 
-  @Override
-  public Object call() throws Exception {
+  @Override public Object call() throws Exception {
 
+    boolean performTest = true;
+    Object object = null;
+    long startTime = System.currentTimeMillis();
+
+    // Populate WebDrivers
     try {
-
-      boolean performTest = true;
-      Object object = null;
-      long startTime = System.currentTimeMillis();
-
-      try {
-        this.populateDrivers(this.testName);
-      } catch (Exception e) {
-        logger.warn("Exception while populating web drivers", e);
-        this.closeDrivers();
-        if (this.retryCount < this.testConf.getMaxRetryCount()) {
-          this.retryCount++;
-          return this;
-        } else {
-          object = new KiteGridException(e.getLocalizedMessage());
-          performTest = false;
-        }
-      }
-
-      if (performTest)
-        try {
-          KiteTest test = (KiteTest) Class.forName(this.testConf.getTestImpl()).newInstance();
-
-          test.setWebDriverList(this.webDriverList);
-          test.setPayload(this.testConf.getPayload());
-
-          logger.info(this.testConf.getName() + " :: Testing against :: " + this.browserList);
-
-          startTime = System.currentTimeMillis();
-          object = test.testScript();
-          this.timeTaken = System.currentTimeMillis() - startTime;
-        } catch (Exception e) {
-          logger.warn("Exception while running the test", e);
-          this.timeTaken = System.currentTimeMillis() - startTime;
-          object = e;
-        } finally {
-          this.populateInfoFromNavigator();
-          this.closeDrivers();
-        }
-
-      try {
-        JsonObject jsonObject = this.developResult(object);
-        if (ENABLE_CALLBACK) {
-          if (this.testConf.getCallbackURL() == null)
-            logger.warn("No callback specified for " + this.testConf);
-          else {
-            CallbackThread callbackThread =
-                new CallbackThread(this.testConf.getCallbackURL(), jsonObject);
-            // if no "meta", post result in other thread; if "meta", post result in same thread
-            // "meta" is included for the first and last tests, that are executed synchronously
-            if (jsonObject.getString("meta", null) == null)
-              callbackThread.start();
-            else
-              callbackThread.postResult();
-          }
-        }
-
-        return jsonObject;
-      } catch (Exception e) {
-        logger.error("Developing and posting result:", e);
-        return e;
-      }
-
+      this.populateDrivers(this.testName);
     } catch (Exception e) {
-      logger.error("Running test:", e);
-      return e;
-
+      logger.error("Exception while populating web drivers", e);
+      WebDriverUtility.closeDrivers(this.webDriverList);
+      if (this.retryCount < this.testConf.getMaxRetryCount()) {
+        this.retryCount++;
+        return this;
+      } else {
+        object = new KiteGridException(e.getLocalizedMessage());
+        performTest = false;
+      }
     }
+
+    // Perform the test if the driver population was successful
+    if (performTest) {
+      try {
+        KiteTest test = (KiteTest) Class.forName(this.testConf.getTestImpl()).newInstance();
+
+        test.setWebDriverList(this.webDriverList);
+        test.setPayload(this.testConf.getPayload());
+
+        logger.info(this.testConf.getName() + " :: Testing against :: " + this.browserList);
+
+        startTime = System.currentTimeMillis();
+        object = test.testScript();
+        this.timeTaken = System.currentTimeMillis() - startTime;
+      } catch (Exception e) {
+        logger.warn("Exception while running the test", e);
+        this.timeTaken = System.currentTimeMillis() - startTime;
+        object = e;
+      } finally {
+        this.populateInfoFromNavigator();
+        WebDriverUtility.closeDrivers(this.webDriverList);
+      }
+    }
+
+    // Develop result
+    JsonObject jsonObject = null;
+    try {
+      jsonObject = this.developResult(object);
+    } catch (KiteGridException e) {
+      logger.error("Exception while developing result", e);
+      return e;
+    }
+
+    // Callback
+    if (ENABLE_CALLBACK)
+      if (this.testConf.getCallbackURL() == null) {
+        logger.warn("No callback specified for " + this.testConf);
+      } else {
+        CallbackThread callbackThread =
+            new CallbackThread(this.testConf.getCallbackURL(), jsonObject);
+        // if no "meta", post result in other thread; if "meta", post result in same thread
+        // "meta" is included for the first and last tests, that are executed synchronously
+        if (jsonObject.getString("meta", null) == null) {
+          callbackThread.start();
+        } else {
+          callbackThread.postResult();
+        }
+      }
+
+    return jsonObject;
 
   }
 

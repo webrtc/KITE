@@ -16,9 +16,7 @@
 
 package org.webrtc.kite.exception;
 
-/**
- * The KiteNoKeyException is thrown if the specified key is missing.
- */
+/** The KiteNoKeyException is thrown if the specified key is missing. */
 public class KiteNoKeyException extends NullPointerException {
 
   private static final long serialVersionUID = 772908462246522793L;
@@ -37,5 +35,4 @@ public class KiteNoKeyException extends NullPointerException {
   public String getKey() {
     return key;
   }
-
 }

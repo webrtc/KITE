@@ -19,12 +19,12 @@ package org.webrtc.kite.servlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.webrtc.kite.Utility;
-import org.webrtc.kite.dao.ConfigExecutionDao;
-import org.webrtc.kite.dao.ConfigTestDao;
+import org.webrtc.kite.dao.ExecutionDao;
+import org.webrtc.kite.dao.TestDao;
 import org.webrtc.kite.exception.KiteNoKeyException;
 import org.webrtc.kite.exception.KiteSQLException;
-import org.webrtc.kite.pojo.ConfigExecution;
-import org.webrtc.kite.pojo.ConfigTest;
+import org.webrtc.kite.pojo.Execution;
+import org.webrtc.kite.pojo.Test;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -42,35 +42,36 @@ public class ExecutionServlet extends HttpServlet {
   private static final long serialVersionUID = -1650907688090780137L;
   private static final Log log = LogFactory.getLog(ExecutionServlet.class);
 
-  /**
-   * @see HttpServlet#HttpServlet()
-   */
+  /** @see HttpServlet#HttpServlet() */
   public ExecutionServlet() {
     super();
     // TODO Auto-generated constructor stub
   }
 
-  /**
-   * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-   */
+  /** @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response) */
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
     String configName = request.getParameter("name");
-    if (configName == null)
-      throw new KiteNoKeyException("name");
-    if (log.isDebugEnabled())
-      log.debug("in->name: " + configName);
+    if (configName == null) throw new KiteNoKeyException("name");
+    if (log.isDebugEnabled()) log.debug("in->name: " + configName);
 
-    List<ConfigExecution> listOfExecution;
-    List<ConfigTest> listOfDistinctTest;
+    List<Execution> listOfExecution;
+    List<Test> listOfDistinctTest;
     try {
-      listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
+      listOfDistinctTest =
+          new TestDao(Utility.getDBConnection(this.getServletContext())).getDistinctTestList();
       request.setAttribute("listOfTest", listOfDistinctTest);
-      listOfExecution = new ConfigExecutionDao(Utility.getDBConnection(this.getServletContext()))
-          .getConfigExecutionList(configName);
-      if (log.isDebugEnabled())
-        log.debug("out->listOfExecution: " + listOfExecution);
+      listOfExecution =
+          new ExecutionDao(Utility.getDBConnection(this.getServletContext()))
+              .getConfigExecutionList(configName);
+      for (Execution execution : listOfExecution) {
+        List<Test> tmp =
+            new TestDao(Utility.getDBConnection(this.getServletContext()))
+                .getTestListByExecutionId(execution.getConfigId());
+        execution.setTestList(tmp);
+      }
+      if (log.isDebugEnabled()) log.debug("out->listOfExecution: " + listOfExecution);
       request.setAttribute("listOfExecution", listOfExecution);
     } catch (SQLException e) {
       e.printStackTrace();
@@ -78,10 +79,8 @@ public class ExecutionServlet extends HttpServlet {
     }
 
     // get UI
-    if (log.isDebugEnabled())
-      log.debug("Displaying: execution.vm");
+    if (log.isDebugEnabled()) log.debug("Displaying: execution.vm");
     RequestDispatcher requestDispatcher = request.getRequestDispatcher("execution.vm");
     requestDispatcher.forward(request, response);
   }
-
 }

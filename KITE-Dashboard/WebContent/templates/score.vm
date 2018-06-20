@@ -16,115 +16,136 @@ limitations under the License.
 <html lang="en">
 <head>
 
-    <meta charset="utf-8" />
-    <title>Scorecard</title>
+  <meta charset="utf-8" />
+  <title>Scorecard</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/pace.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/themes/black/pace-theme-minimal.css" rel="stylesheet" />
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="assets/css/light-bootstrap-dashboard.css" rel="stylesheet"/>
-    <link href="assets/css/kite-dashboard.css" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/pace.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.0/themes/black/pace-theme-minimal.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+  <!-- Custom fonts for this template-->
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Custom styles for this template-->
+  <link href="assets/css/sb-admin.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
 
-    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
-    <link href="https://rawgithub.com/olimsaidov/pixeden-stroke-7-icon/master/pe-icon-7-stroke/dist/pe-icon-7-stroke.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js" type="text/javascript"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js" type="text/javascript"></script>
+  <script>
+      var scoreJson = $scoreJson;
+      console.log(scoreJson);
+  </script>
+  <script src="assets/js/ready.js"></script>
+  <style>
+    .table td{
+      padding: 20px 5px 10px 5px;
+      text-align: left;
+      border: 1px solid white
+    }
+  </style>
 </head>
-<body>
-    <div class="wrapper">
-        <!-- Start of side nav bar -->
-        <div class="sidebar" data-color="black" data-image="assets/img/sidebarSmall.jpg">
-            <div class="sidebar-wrapper">
-                <div class="logo">
-                    <a href="dashboard" class="simple-text">
-                        KITE
-                    </a>
-                </div>
-                <ul class="nav">
-                    <li>
-                        <div class="row">
-                            <div class="col-sm-1 col-sm-offset-1">
-                                <i class="pe-7s-search"></i>
-                            </div>
-                            <div class="col-sm-9 ">
-                                <form action="search" method="get">
-                                  <div>
-                                    <input name="key" id="key" placeholder="Search">
-                                  </div>
-                                </form>
-                            </div>
-
-                        </div>
-                    </li>
-                    <li>
-                        <a href="dashboard">
-                            <i class="pe-7s-note2"></i>
-                            <p>Dashboard</p>
-                        </a>
-                    </li>
-                    <li class="active">
-                        <a href="score">
-                            <i class="pe-7s-keypad"></i>
-                            <p>Scoreboard</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="versions">
-                            <i class="pe-7s-way"></i>
-                            <p>Version Info</p>
-                        </a>
-                    </li>
-                    <li>
-                        <nav class="overview">
-                            <ul>
-                                <li><a href="#">
-                                        <i class="pe-7s-pin"></i>
-                                        <p>Overview</p>
-                                    </a>
-                                    <ul class="result-wrapping">
-                                        #foreach($test in $listOfTest)
-                                        #if($test.getTupleSize()==2)
-                                          <li><a href="overview?testname=$linkTool.encode($test.getTestName())&1v1=true" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
-                                        #else
-                                          <li><a href="overview?testname=$linkTool.encode($test.getTestName())&1v1=false" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
-                                        #end
-                                        #end
-                                    </ul>
-                                </li>
-                            </ul>
-                        </nav>
-                    </li>
-                </ul>
+<body class="fixed-nav sticky-footer bg-dark" id="page-top">
+<!-- Navigation-->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+    <a class="navbar-brand" href="dashboard">KITE Dashboard</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
+          <a class="nav-link" href="dashboard">
+            <i class="fa fa-fw fa-dashboard"></i>
+            <span class="nav-link-text">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="IsWebRTCReadyYet?">
+          <a class="nav-link" href="score">
+            <i class="fa fa-fw fa-table"></i>
+            <span class="nav-link-text">IsWebRTCReadyYet?</span>
+          </a>
+        </li>
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Versions info">
+          <a class="nav-link" href="versions">
+            <i class="fa fa-fw fa-link"></i>
+            <span class="nav-link-text">Version Info</span>
+          </a>
+        </li>
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Overview">
+          <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseMulti" data-parent="#exampleAccordion">
+            <i class="fa fa-fw fa-sitemap"></i>
+            <span class="nav-link-text">Overview</span>
+          </a>
+          <div class="big-container">
+            <ul class="sidenav-second-level collapse" id="collapseMulti">
+              #foreach($test in $listOfTest)
+                <li><a href="public?testname=$linkTool.encode($test.getTestName())" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
+              #end
+            </ul>
+          </div>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <form class="form-inline my-2 my-lg-0 mr-lg-2" action="search" method="get">
+            <div class="input-group">
+              <input class="form-control" name="key" id="key"  type="text" placeholder="Search for...">
+              <span class="input-group-append">
+                <button class="btn btn-primary" type="button">
+                  <i class="fa fa-search"></i>
+                </button>
+              </span>
             </div>
-        </div>
-        <!-- End of side nav bar -->
-        <!-- Start main data content display -->
-        <div class="main-panel">
-        <!-- Start horizontal nav bar -->
-            <nav class="navbar navbar-default navbar-fixed">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#">
-                            <i class="pe-7s-menu"></i>
-                        </button>
-                        <a class="navbar-brand" href="dashboard">Dashboard</a>
-                    </div>
-                    <div class="collapse navbar-collapse">
-                    </div>
-                </div>
-            </nav>
-        <!-- End of horizontal nav bar -->
-            <div class="col-md-11" style="margin-top:20px;">
-                <div class="card content">
-                    <iframe width="100%" height="1200" src="https://kite-wpt.herokuapp.com/score" frameborder="0" scrolling="yes"></iframe>
-                </div>
-            </div>
-            <!-- End of main data content display -->
-        </div>
+          </form>
+        </li>
+      </ul>
     </div>
+  </nav>
+  <div class="content-wrapper">
+    <div class="container-fluid">
+      <!-- Breadcrumbs-->
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="dashboard">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item active">
+          IsWebRTCReadyYet?
+        </li>
+      </ol>
+      <div class="col-md-12" style="margin-top:20px;">
+        <div class="card content horizontal-scroll">
+          <table class="table table-hover fixed sticky-header">
+            <col width="175px" />
+            <thead id="scoreboardHead">
+            </thead>
+            <tbody id="scoreboardBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- /.container-fluid-->
+    <!-- /.content-wrapper-->
+    <footer class="sticky-footer">
+      <div class="container">
+        <div class="text-center">
+        </div>
+      </div>
+    </footer>
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+      <i class="fa fa-angle-up"></i>
+    </a>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>    <!-- Core plugin JavaScript-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script type="text/javascript" src="assets/js/float-head.js"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="assets/js/sb-admin.min.js"></script>
+  </div>
+
 </body>
-    <!--   Core JS Files   -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
-    <script src="assets/js/light-bootstrap-dashboard.js"></script>
+
 </html>

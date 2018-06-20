@@ -22,7 +22,6 @@ import java.util.List;
 public class TestList {
   public static List<String> WEBRTC_TEST_LIST = new ArrayList<>();
 
-
   static {
     WEBRTC_TEST_LIST.add("webrtc");
     WEBRTC_TEST_LIST.add("mediacapture-streams");

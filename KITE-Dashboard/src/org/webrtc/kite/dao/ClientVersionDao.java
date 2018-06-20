@@ -19,7 +19,7 @@ package org.webrtc.kite.dao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.webrtc.kite.Utility;
-import org.webrtc.kite.pojo.ClientVersion;
+import org.webrtc.kite.pojo.ClientVersionInfo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -30,9 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * A class in charged of getting information on client versions in the database.
- */
+/** A class in charged of getting information on client versions in the database. */
 public class ClientVersionDao {
   private static final Log log = LogFactory.getLog(BrowserDao.class);
 
@@ -47,49 +45,86 @@ public class ClientVersionDao {
     this.connection = connection;
   }
 
-  /**
-   * Returns a list of all client version information.
-   */
-  public List<ClientVersion> getClientVersionList() throws SQLException {
+  /** Returns a list of all client version information. */
+  public List<ClientVersionInfo> getClientVersionList() throws SQLException {
     String query = "SELECT * FROM CLIENT_VERSION;";
-    List<ClientVersion> clientVersionList = new ArrayList<>();
+    List<ClientVersionInfo> clientVersionInfoList = new ArrayList<>();
     PreparedStatement ps = null;
     ResultSet rs = null;
     try {
       ps = this.connection.prepareStatement(query);
-      if (log.isDebugEnabled())
-        log.debug("Executing: " + query);
+      if (log.isDebugEnabled()) log.debug("Executing: " + query);
       rs = ps.executeQuery();
       while (rs.next()) {
         if (log.isDebugEnabled()) {
           final StringBuilder rsLog = new StringBuilder();
           for (int c = 1; c <= rs.getMetaData().getColumnCount(); c++) {
-            rsLog.append(rs.getMetaData().getColumnName(c)).append(":").append(rs.getString(c))
+            rsLog
+                .append(rs.getMetaData().getColumnName(c))
+                .append(":")
+                .append(rs.getString(c))
                 .append("-");
           }
           log.debug(rsLog.toString());
         }
-        // int id = rs.getInt("BROWSER_ID");
         String name = rs.getString("NAME");
         String version = rs.getString("VERSION");
-        if (version == null)
-          version = "-";
+        if (version == null) version = "-";
         String lastVersion = rs.getString("LAST_VERSION");
-        if (lastVersion == null)
-          lastVersion = "-";
+        if (lastVersion == null) lastVersion = "-";
         long lastUpdate = rs.getLong("LAST_UPDATE");
         if (lastUpdate != 0) {
           Date date = new Date(lastUpdate);
-          SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yy");
+          SimpleDateFormat df2 = new SimpleDateFormat("hh:mm aaa - EEE, d MMM yyyy");
           String dateText = df2.format(date);
-          clientVersionList.add(new ClientVersion(name, version, lastVersion, dateText));
+          clientVersionInfoList.add(new ClientVersionInfo(name, version, lastVersion, dateText));
         } else
-          clientVersionList.add(new ClientVersion(name, version, lastVersion, "Never"));
+          clientVersionInfoList.add(new ClientVersionInfo(name, version, lastVersion, "Never"));
       }
 
     } finally {
       Utility.closeDBResources(ps, rs);
     }
-    return clientVersionList;
+    return clientVersionInfoList;
+  }
+
+  /**
+   * Return current version of a specific client.
+   *
+   * @param client in question
+   * @return String version
+   * @throws SQLException
+   */
+  public String getVersionByClient(String client) throws SQLException {
+    String query = "SELECT VERSION FROM CLIENT_VERSION WHERE NAME='" + client + "';";
+    String version = "";
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    try {
+      ps = this.connection.prepareStatement(query);
+      if (log.isDebugEnabled()) log.debug("Executing: " + query);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        if (log.isDebugEnabled()) {
+          final StringBuilder rsLog = new StringBuilder();
+          for (int c = 1; c <= rs.getMetaData().getColumnCount(); c++) {
+            rsLog
+                .append(rs.getMetaData().getColumnName(c))
+                .append(":")
+                .append(rs.getString(c))
+                .append("-");
+          }
+          log.debug(rsLog.toString());
+        }
+        version = rs.getString("VERSION");
+        if (version == null) {
+          version = "-";
+        }
+      }
+
+    } finally {
+      Utility.closeDBResources(ps, rs);
+    }
+    return version;
   }
 }

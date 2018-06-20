@@ -16,9 +16,7 @@
 
 package org.webrtc.kite.exception;
 
-/**
- * The KiteSQLException is thrown to delegate a SQLException as a RuntimeException.
- */
+/** The KiteSQLException is thrown to delegate a SQLException as a RuntimeException. */
 public class KiteSQLException extends RuntimeException {
 
   private static final long serialVersionUID = -875640250911251060L;
@@ -31,5 +29,4 @@ public class KiteSQLException extends RuntimeException {
   public KiteSQLException(String message) {
     super(message);
   }
-
 }

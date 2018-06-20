@@ -38,5 +38,4 @@ public class KiteUnsupportedRemoteException extends Exception {
   public String getRemoteName() {
     return remoteName;
   }
-
 }

@@ -20,12 +20,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.webrtc.kite.Utility;
 import org.webrtc.kite.dao.BrowserDao;
-import org.webrtc.kite.dao.ConfigExecutionDao;
-import org.webrtc.kite.dao.ConfigTestDao;
+import org.webrtc.kite.dao.ExecutionDao;
+import org.webrtc.kite.dao.TestDao;
 import org.webrtc.kite.exception.KiteSQLException;
 import org.webrtc.kite.pojo.Browser;
-import org.webrtc.kite.pojo.ConfigTest;
 import org.webrtc.kite.pojo.ConfigurationOverall;
+import org.webrtc.kite.pojo.Test;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -39,53 +39,49 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-/**
- * Servlet implementation class DashboardServlet
- */
+/** Servlet implementation class DashboardServlet */
 @WebServlet("/dashboard")
 public class DashboardServlet extends HttpServlet {
 
   private static final long serialVersionUID = -5016256996275105856L;
   private static final Log log = LogFactory.getLog(DashboardServlet.class);
 
-  /**
-   * @see HttpServlet#HttpServlet()
-   */
+  /** @see HttpServlet#HttpServlet() */
   public DashboardServlet() {
     super();
   }
 
-  /**
-   * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-   */
+  /** @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response) */
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
     List<ConfigurationOverall> listOfConfig;
     List<Browser> listOfBrowser;
-    List<ConfigTest> listOfDistinctTest;
+    List<Test> listOfDistinctTest;
+    List<Test> listOfTest;
     try {
-      listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
+      listOfDistinctTest =
+          new TestDao(Utility.getDBConnection(this.getServletContext())).getDistinctTestList();
       request.setAttribute("listOfTest", listOfDistinctTest);
-      listOfConfig = new ConfigExecutionDao(Utility.getDBConnection(this.getServletContext()))
-          .getDistinctConfigExecutionList();
-      listOfBrowser = new BrowserDao(Utility.getDBConnection(this.getServletContext()))
-          .getBrowserList();
+      listOfTest = new TestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
+      request.setAttribute("listOfExecutedTest", listOfTest);
+      listOfConfig =
+          new ExecutionDao(Utility.getDBConnection(this.getServletContext()))
+              .getDistinctConfigExecutionList();
+      listOfBrowser =
+          new BrowserDao(Utility.getDBConnection(this.getServletContext())).getBrowserList();
       listOfBrowser = new ArrayList<Browser>(new LinkedHashSet<Browser>(listOfBrowser));
-      if (log.isDebugEnabled())
-        log.debug("out->listOfConfigName: " + listOfConfig);
       request.setAttribute("listOfConfig", listOfConfig);
       request.setAttribute("listOfBrowser", listOfBrowser);
+      request.setAttribute("defaultTest", "IceConnectionTest");
     } catch (SQLException e) {
       e.printStackTrace();
       throw new KiteSQLException(e.getLocalizedMessage());
     }
 
     // get UI
-    if (log.isDebugEnabled())
-      log.debug("Displaying: dashboard.vm");
+    if (log.isDebugEnabled()) log.debug("Displaying: dashboard.vm");
     RequestDispatcher requestDispatcher = request.getRequestDispatcher("dashboard.vm");
     requestDispatcher.forward(request, response);
   }
-
 }

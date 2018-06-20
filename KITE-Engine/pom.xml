@@ -1,24 +1,26 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.webrtc.kite</groupId>
-  <artifactId>kite</artifactId>
-  <version>1.0</version>
+  <parent>
+    <groupId>org.webrtc.kite</groupId>
+    <artifactId>kite-base</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-    
+  <artifactId>kite-engine</artifactId>
+  <name>kite-engine</name>
+
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.6.1</version>
+        <version>${kite.mvn.compiler.version}</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>${kite.java.version}</source>
+          <target>${kite.java.version}</target>
         </configuration>
       </plugin>
       <plugin>
@@ -54,50 +56,50 @@
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
-      <version>3.7.1</version>
+      <version>${kite.selenium.version}</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>javax.json</artifactId>
-      <version>1.0.4</version>
+      <version>${kite.json.version}</version>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
+      <version>${kite.log4j.version}</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
     <dependency>
       <groupId>org.xerial</groupId>
       <artifactId>sqlite-jdbc</artifactId>
-      <version>3.16.1</version>
+      <version>${kite.sqlite.jdbc.version}</version>
     </dependency>
     <dependency>
       <groupId>eu.bitwalker</groupId>
       <artifactId>UserAgentUtils</artifactId>
-      <version>1.20</version>
+      <version>1.21</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/is.tagomor.woothee/woothee-java -->
     <dependency>
       <groupId>is.tagomor.woothee</groupId>
       <artifactId>woothee-java</artifactId>
-      <version>1.5.1</version>
+      <version>1.7.0</version>
     </dependency>
     <dependency>
       <groupId>org.webrtc.kite</groupId>
       <artifactId>kite-if</artifactId>
-      <version>1.0</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>${kite.junit.version}</version>
       <scope>test</scope>
     </dependency>
-  <dependency>
+    <dependency>
       <groupId>org.quartz-scheduler</groupId>
       <artifactId>quartz</artifactId>
-      <version>2.2.1</version>
+      <version>2.3.0</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12 -->
     <dependency>

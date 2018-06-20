@@ -18,20 +18,12 @@ package org.webrtc.kite.pojo;
 
 import java.util.List;
 
-/**
- * ConfigExecution object containing the overall information of an executed configuration.
- */
+/** Execution object containing the overall information of an executed configuration. */
 public class ConfigurationOverall {
 
   private String configName;
   private List<Integer> idList;
-  private List<Long> startTimeList;
   private int numberOfRuns;
-  private int numberOfTested;
-  private int numberOfSuccess;
-  private int numberOfFailed;
-  private int numberOfError;
-  private int numberOfPending;
   private long oldestRun;
   private long latestRun;
 
@@ -40,45 +32,13 @@ public class ConfigurationOverall {
    *
    * @param configName name of the configuration.
    */
-  public ConfigurationOverall(String configName, long oldestRun, long latestRun) {
+  public ConfigurationOverall(String configName) {
     this.configName = configName;
     this.numberOfRuns = 0;
-    this.numberOfTested = 0;
-    this.numberOfSuccess = 0;
-    this.numberOfFailed = 0;
-    this.numberOfError = 0;
-    this.numberOfPending = 0;
-    this.oldestRun = oldestRun;
-    this.latestRun = latestRun;
-
   }
 
   public void setIdList(List<Integer> idList) {
     this.idList = idList;
-  }
-
-  public int getNumberOfError() {
-    return numberOfError;
-  }
-
-  public void setNumberOfError(int numberOfError) {
-    this.numberOfError = numberOfError;
-  }
-
-  public int getNumberOfFailed() {
-    return numberOfFailed;
-  }
-
-  public void setNumberOfFailed(int numberOfFailed) {
-    this.numberOfFailed = numberOfFailed;
-  }
-
-  public int getNumberOfPending() {
-    return numberOfPending;
-  }
-
-  public void setNumberOfPending(int numberOfPending) {
-    this.numberOfPending = numberOfPending;
   }
 
   public int getNumberOfRuns() {
@@ -87,22 +47,6 @@ public class ConfigurationOverall {
 
   public void setNumberOfRuns(int numberOfRuns) {
     this.numberOfRuns = numberOfRuns;
-  }
-
-  public int getNumberOfSuccess() {
-    return numberOfSuccess;
-  }
-
-  public void setNumberOfSuccess(int numberOfSuccess) {
-    this.numberOfSuccess = numberOfSuccess;
-  }
-
-  public int getNumberOfTested() {
-    return numberOfTested;
-  }
-
-  public void setNumberOfTested(int numberOfTested) {
-    this.numberOfTested = numberOfTested;
   }
 
   public long getLatestRun() {
@@ -133,15 +77,4 @@ public class ConfigurationOverall {
     return idList.get(0);
   }
 
-  public int getId(long startTime) {
-    return idList.get(startTimeList.indexOf(startTime));
-  }
-
-  public List<Long> getStartTimeList() {
-    return startTimeList;
-  }
-
-  public void setStartTimeList(List<Long> startTimeList) {
-    this.startTimeList = startTimeList;
-  }
 }

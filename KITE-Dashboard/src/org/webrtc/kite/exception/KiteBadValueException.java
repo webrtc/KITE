@@ -16,9 +16,7 @@
 
 package org.webrtc.kite.exception;
 
-/**
- * The KiteBadValueException is thrown if the value of the specified key is invalid.
- */
+/** The KiteBadValueException is thrown if the value of the specified key is invalid. */
 public class KiteBadValueException extends ClassCastException {
 
   private static final long serialVersionUID = 7060558542316118129L;
@@ -37,5 +35,4 @@ public class KiteBadValueException extends ClassCastException {
   public String getKey() {
     return key;
   }
-
 }

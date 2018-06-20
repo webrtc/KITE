@@ -23,11 +23,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * A class in charged of the connection to the database.
- */
+/** A class in charged of the connection to the database. */
 public class DBConnectionManager {
-
 
   private static final Log log = LogFactory.getLog(DBConnectionManager.class);
   private String dbURL;
@@ -44,9 +41,7 @@ public class DBConnectionManager {
     this.connection = DriverManager.getConnection("jdbc:sqlite:" + dbURL);
   }
 
-  /**
-   * Returns the created connection to the database.
-   */
+  /** Returns the created connection to the database. */
   public Connection getConnection() {
     try {
       if (this.connection.isClosed()) {
@@ -58,6 +53,4 @@ public class DBConnectionManager {
     }
     return this.connection;
   }
-
 }
-

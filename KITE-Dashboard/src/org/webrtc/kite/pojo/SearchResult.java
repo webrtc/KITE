@@ -18,69 +18,52 @@ package org.webrtc.kite.pojo;
 
 import java.util.List;
 
-/**
- * A class representing the result of a user's search.
- */
+/** A class representing the result of a user's search. */
 public class SearchResult {
 
-  private List<ConfigExecution> listOfConfigResult;
-  private List<ConfigTest> listOfConfigTestResult;
-  private List<ResultTable> listOfResult;
+  private List<Execution> listOfConfigResult;
+  private List<Test> listOfTestResult;
+  private List<Result> listOfResult;
   private String searchKey;
 
-  public SearchResult() {
-  }
+  public SearchResult() {}
 
-  /**
-   * Returns key word for the search.
-   */
+  /** Returns key word for the search. */
   public String getSearchKey() {
     return searchKey;
   }
 
-  /**
-   * Sets key word for the search.
-   */
+  /** Sets key word for the search. */
   public void setSearchKey(String searchKey) {
     this.searchKey = searchKey;
   }
 
-  /**
-   * Returns the list of found configurations.
-   */
-  public List<ConfigExecution> getListOfConfigResult() {
+  /** Returns the list of found configurations. */
+  public List<Execution> getListOfConfigResult() {
     return listOfConfigResult;
   }
 
-  /**
-   * Sets the list of found configurations.
-   */
-  public void setListOfConfigResult(List<ConfigExecution> listOfConfigResult) {
+  /** Sets the list of found configurations. */
+  public void setListOfConfigResult(List<Execution> listOfConfigResult) {
     this.listOfConfigResult = listOfConfigResult;
   }
 
-  /**
-   * Returns the list of found tests.
-   */
-  public List<ConfigTest> getListOfConfigTestResult() {
-    return listOfConfigTestResult;
+  /** Returns the list of found tests. */
+  public List<Test> getListOfTestResult() {
+    return listOfTestResult;
   }
 
-  /**
-   * Sets the list of found tests.
-   */
-  public void setListOfConfigTestResult(List<ConfigTest> listOfConfigTestResult) {
-    this.listOfConfigTestResult = listOfConfigTestResult;
+  /** Sets the list of found tests. */
+  public void setListOfTestResult(List<Test> listOfTestResult) {
+    this.listOfTestResult = listOfTestResult;
   }
 
-  /**
-   * Returns the list of found results.
-   */
-  public List<ResultTable> getListOfResult() {
+  /** Returns the list of found results. */
+  public List<Result> getListOfResult() {
     return listOfResult;
   }
 
-  public void setListOfResult(List<ResultTable> listOfResult) {
+  public void setListOfResult(List<Result> listOfResult) {
     this.listOfResult = listOfResult;
   }
 }

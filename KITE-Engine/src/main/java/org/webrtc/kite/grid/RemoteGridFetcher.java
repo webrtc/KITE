@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,17 @@ import org.apache.log4j.Logger;
 import org.webrtc.kite.Utility;
 import org.webrtc.kite.config.Browser;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
+import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,25 +44,32 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
 
   private static final Logger logger = Logger.getLogger(RemoteGridFetcher.class.getName());
 
-  private static final List<String> OS_X_CODENAME = Arrays.asList("SNOW_LEOPARD", "LION",
-      "MOUNTAIN_LION", "MAVERICKS", "YOSEMITE", "EL_CAPITAN", "SIERRA");
+  private static final List<String> OS_X_CODENAME = Arrays
+      .asList("SNOW_LEOPARD", "LION", "MOUNTAIN_LION", "MAVERICKS", "YOSEMITE", "EL_CAPITAN",
+          "SIERRA");
 
   private String pathToDB;
   private String tableName;
   private String remoteAddress;
 
+  /**
+   * The Rest api url.
+   */
   protected String restApiUrl;
+  /**
+   * The Browser list.
+   */
   protected List<Browser> browserList = new ArrayList<Browser>();
 
   /**
    * Constructs a new RemoteGridFetcher with the given pathToDB, tableName, remoteAddress and
    * restApiUrl.
    *
-   * @param pathToDB path to db
-   * @param tableName name of the table
+   * @param pathToDB      path to db
+   * @param tableName     name of the table
    * @param remoteAddress string representation of the Selenium hub url.
-   * @param restApiUrl string representation of the rest API url for fetching the supported
-   *        browsers.
+   * @param restApiUrl    string representation of the rest API url for fetching the supported
+   *                      browsers.
    */
   public RemoteGridFetcher(String pathToDB, String tableName, String remoteAddress,
       String restApiUrl) {
@@ -63,6 +80,11 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
     this.restApiUrl = restApiUrl;
   }
 
+  /**
+   * Gets remote address.
+   *
+   * @return the remote address
+   */
   public String getRemoteAddress() {
     return remoteAddress;
   }
@@ -84,9 +106,10 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
    * @throws SQLException if a database access error occurs.
    */
   private void createTableIfNotExists(Connection c) throws SQLException {
-    String sql = "CREATE TABLE IF NOT EXISTS " + this.tableName
-        + "(BROWSER       TEXT    NOT NULL, " + " VERSION       TEXT, " + " PLATFORM      TEXT, "
-        + " PLATFORM_TYPE TEXT, " + " LAST_UPDATE   INTEGER);";
+    String sql =
+        "CREATE TABLE IF NOT EXISTS " + this.tableName + "(BROWSER       TEXT    NOT NULL, "
+            + " VERSION       TEXT, " + " PLATFORM      TEXT, " + " PLATFORM_TYPE TEXT, "
+            + " LAST_UPDATE   INTEGER);";
 
     Statement s = null;
     try {
@@ -131,8 +154,8 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
       ps = c.prepareStatement(sql);
       for (Browser browser : browserList) {
         String platformType = browser.getPlatform();
-        if (platformType.contains("XP") || platformType.contains("VISTA")
-            || platformType.contains("WIN"))
+        if (platformType.contains("XP") || platformType.contains("VISTA") || platformType
+            .contains("WIN"))
           platformType = "WINDOWS";
         if (RemoteGridFetcher.OS_X_CODENAME.contains(platformType))
           platformType = "MAC";
@@ -287,8 +310,67 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
     return result;
   }
 
-  @Override
-  public Object call() throws Exception {
+  /**
+   * Gets available config list.
+   *
+   * @param username  the username
+   * @param accesskey the accesskey
+   * @return the available config list
+   * @throws IOException the io exception
+   */
+  protected List<JsonObject> getAvailableConfigList(String username, String accesskey)
+      throws IOException {
+    URL myurl = new URL(this.restApiUrl);
+
+    JsonReader reader = null;
+    List<JsonObject> availableConfigList = null;
+
+    HttpURLConnection con = null;
+    InputStream is = null;
+    InputStreamReader isr = null;
+    BufferedReader br = null;
+    try {
+      if (username != null && accesskey != null)
+        Authenticator.setDefault(new Authenticator() {
+          @Override protected PasswordAuthentication getPasswordAuthentication() {
+            return new PasswordAuthentication(username, accesskey.toCharArray());
+          }
+        });
+      con = (HttpURLConnection) myurl.openConnection();
+      is = con.getInputStream();
+      isr = new InputStreamReader(is);
+      br = new BufferedReader(isr);
+      reader = Json.createReader(br);
+      availableConfigList = reader.readArray().getValuesAs(JsonObject.class);
+    } finally {
+      if (reader != null)
+        reader.close();
+      if (br != null)
+        try {
+          br.close();
+        } catch (IOException ioe) {
+          logger.warn("Exception while closing BufferedReader", ioe);
+        }
+      if (isr != null)
+        try {
+          isr.close();
+        } catch (IOException ioe) {
+          logger.warn("Exception while closing InputStreamReader", ioe);
+        }
+      if (is != null)
+        try {
+          is.close();
+        } catch (IOException ioe) {
+          logger.warn("Exception while closing InputStream", ioe);
+        }
+      if (con != null)
+        con.disconnect();
+    }
+
+    return availableConfigList;
+  }
+
+  @Override public Object call() throws Exception {
     if (!this.isUpdatedInLast24h()) {
       this.fetchConfig();
       this.createAndFillTable();
