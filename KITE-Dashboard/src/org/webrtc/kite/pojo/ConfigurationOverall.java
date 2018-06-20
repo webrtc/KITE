@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,84 +53,80 @@ public class ConfigurationOverall {
 
   }
 
-  public void setConfigName(String configName) {
-    this.configName = configName;
-  }
-
-  public void setLatestRun(long latestRun) {
-    this.latestRun = latestRun;
-  }
-
-  public void setNumberOfError(int numberOfError) {
-    this.numberOfError = numberOfError;
-  }
-
-  public void setNumberOfFailed(int numberOfFailed) {
-    this.numberOfFailed = numberOfFailed;
-  }
-
-  public void setNumberOfPending(int numberOfPending) {
-    this.numberOfPending = numberOfPending;
-  }
-
-  public void setNumberOfRuns(int numberOfRuns) {
-    this.numberOfRuns = numberOfRuns;
-  }
-
-  public void setNumberOfSuccess(int numberOfSuccess) {
-    this.numberOfSuccess = numberOfSuccess;
-  }
-
-  public void setNumberOfTested(int numberOfTested) {
-    this.numberOfTested = numberOfTested;
-  }
-
-  public void setOldestRun(long oldestRun) {
-    this.oldestRun = oldestRun;
-  }
-
   public void setIdList(List<Integer> idList) {
     this.idList = idList;
-  }
-
-  public void setStartTimeList(List<Long> startTimeList) {
-    this.startTimeList = startTimeList;
   }
 
   public int getNumberOfError() {
     return numberOfError;
   }
 
+  public void setNumberOfError(int numberOfError) {
+    this.numberOfError = numberOfError;
+  }
+
   public int getNumberOfFailed() {
     return numberOfFailed;
+  }
+
+  public void setNumberOfFailed(int numberOfFailed) {
+    this.numberOfFailed = numberOfFailed;
   }
 
   public int getNumberOfPending() {
     return numberOfPending;
   }
 
+  public void setNumberOfPending(int numberOfPending) {
+    this.numberOfPending = numberOfPending;
+  }
+
   public int getNumberOfRuns() {
     return numberOfRuns;
+  }
+
+  public void setNumberOfRuns(int numberOfRuns) {
+    this.numberOfRuns = numberOfRuns;
   }
 
   public int getNumberOfSuccess() {
     return numberOfSuccess;
   }
 
+  public void setNumberOfSuccess(int numberOfSuccess) {
+    this.numberOfSuccess = numberOfSuccess;
+  }
+
   public int getNumberOfTested() {
     return numberOfTested;
+  }
+
+  public void setNumberOfTested(int numberOfTested) {
+    this.numberOfTested = numberOfTested;
   }
 
   public long getLatestRun() {
     return latestRun;
   }
 
+  public void setLatestRun(long latestRun) {
+    this.latestRun = latestRun;
+  }
+
   public long getOldestRun() {
     return oldestRun;
   }
 
+  public void setOldestRun(long oldestRun) {
+    this.oldestRun = oldestRun;
+  }
+
   public String getConfigName() {
     return configName;
+  }
+
+  public void setConfigName(String configName) {
+    this.configName = configName;
   }
 
   public int getLatestId() {
@@ -143,5 +139,9 @@ public class ConfigurationOverall {
 
   public List<Long> getStartTimeList() {
     return startTimeList;
+  }
+
+  public void setStartTimeList(List<Long> startTimeList) {
+    this.startTimeList = startTimeList;
   }
 }

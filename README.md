@@ -6,11 +6,11 @@ The effortless way to test WebRTC compliance, prevent [Karoshi](https://en.wikip
 
 See LICENSE for licensing.
 
-# I. Single Machine Test setup
+## [1. Single machine setup](https://github.com/webrtc/KITE/wiki/Single-Machine-Test-setup)
 
-## A. Setup Selenium Standalone:
+## [2. Selenium Grid setup](https://github.com/webrtc/KITE/wiki/Setup-selenium-grid)
 
-### Install prerequisite software
+## [3. KITE dashboard](https://github.com/webrtc/KITE/wiki/KITE-dashboard)
 
 * Install the browsers you would like to test, available for your machine. Chrome, Edge, Firefox and Safari are supported at this stage. See the wiki for some limitations or hints for each browser.
 * Make sure you have a recent Java JDK installed, at least Java 8 (e.g. from [*Java SE downloads*](http://www.oracle.com/technetwork/java/javase/downloads/index.html))
@@ -227,3 +227,4 @@ Complete the fields username and accesskey appropriately.
 
 * Don't forget to modify the example browsers, versions and platforms to suit your needs.
 
+## [5. Existing KITE tests](https://github.com/webrtc/KITE/wiki/Existing-KITE-Tests)

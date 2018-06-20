@@ -231,7 +231,7 @@ $(document).ready(function(){
     var config = {
         type: 'line',
         data: {
-            labels: labels,
+            labels: config_labels,
             datasets: [
                 {
                     label: "Success",

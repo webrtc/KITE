@@ -34,62 +34,62 @@ import java.util.List;
  * A class in charged of getting information on client versions in the database.
  */
 public class ClientVersionDao {
-    private static final Log log = LogFactory.getLog(BrowserDao.class);
+  private static final Log log = LogFactory.getLog(BrowserDao.class);
 
-    private Connection connection;
+  private Connection connection;
 
-    /**
-     * Constructs a new ClientVersionDao object associated with a connection to the database.
-     *
-     * @param connection a JDBC connection to the database.
-     */
-    public ClientVersionDao(Connection connection) {
-        this.connection = connection;
-    }
+  /**
+   * Constructs a new ClientVersionDao object associated with a connection to the database.
+   *
+   * @param connection a JDBC connection to the database.
+   */
+  public ClientVersionDao(Connection connection) {
+    this.connection = connection;
+  }
 
-    /**
-     * Returns a list of all client version information.
-     */
-    public List<ClientVersion> getClientVersionList() throws SQLException {
-        String query = "SELECT * FROM CLIENT_VERSION;";
-        List<ClientVersion> clientVersionList  = new ArrayList<>();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = this.connection.prepareStatement(query);
-            if (log.isDebugEnabled())
-                log.debug("Executing: " + query);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                if (log.isDebugEnabled()) {
-                    final StringBuilder rsLog = new StringBuilder();
-                    for (int c = 1; c <= rs.getMetaData().getColumnCount(); c++) {
-                        rsLog.append(rs.getMetaData().getColumnName(c)).append(":").append(rs.getString(c))
-                                .append("-");
-                    }
-                    log.debug(rsLog.toString());
-                }
-                // int id = rs.getInt("BROWSER_ID");
-                String name = rs.getString("NAME");
-                String version = rs.getString("VERSION");
-                if (version==null)
-                    version = "-";
-                String lastVersion = rs.getString("LAST_VERSION");
-                if (lastVersion==null)
-                    lastVersion = "-";
-                long lastUpdate = rs.getLong("LAST_UPDATE");
-                if (lastUpdate!=0){
-                    Date date=new Date(lastUpdate);
-                    SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yy");
-                    String dateText = df2.format(date);
-                    clientVersionList.add(new ClientVersion(name, version, lastVersion,dateText));
-                } else
-                    clientVersionList.add(new ClientVersion(name, version, lastVersion,"Never"));
-            }
-
-        } finally {
-            Utility.closeDBResources(ps, rs);
+  /**
+   * Returns a list of all client version information.
+   */
+  public List<ClientVersion> getClientVersionList() throws SQLException {
+    String query = "SELECT * FROM CLIENT_VERSION;";
+    List<ClientVersion> clientVersionList = new ArrayList<>();
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    try {
+      ps = this.connection.prepareStatement(query);
+      if (log.isDebugEnabled())
+        log.debug("Executing: " + query);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        if (log.isDebugEnabled()) {
+          final StringBuilder rsLog = new StringBuilder();
+          for (int c = 1; c <= rs.getMetaData().getColumnCount(); c++) {
+            rsLog.append(rs.getMetaData().getColumnName(c)).append(":").append(rs.getString(c))
+                .append("-");
+          }
+          log.debug(rsLog.toString());
         }
-        return clientVersionList;
+        // int id = rs.getInt("BROWSER_ID");
+        String name = rs.getString("NAME");
+        String version = rs.getString("VERSION");
+        if (version == null)
+          version = "-";
+        String lastVersion = rs.getString("LAST_VERSION");
+        if (lastVersion == null)
+          lastVersion = "-";
+        long lastUpdate = rs.getLong("LAST_UPDATE");
+        if (lastUpdate != 0) {
+          Date date = new Date(lastUpdate);
+          SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yy");
+          String dateText = df2.format(date);
+          clientVersionList.add(new ClientVersion(name, version, lastVersion, dateText));
+        } else
+          clientVersionList.add(new ClientVersion(name, version, lastVersion, "Never"));
+      }
+
+    } finally {
+      Utility.closeDBResources(ps, rs);
     }
+    return clientVersionList;
+  }
 }

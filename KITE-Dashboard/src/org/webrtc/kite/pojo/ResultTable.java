@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,7 +34,7 @@ public class ResultTable {
   /**
    * Constructs a new ResultTable object from given information.
    *
-   * @param result a string representing actual result of the test case.
+   * @param result   a string representing actual result of the test case.
    * @param duration duration of the test case.
    */
   public ResultTable(String result, long duration, boolean stats) {
@@ -47,8 +47,8 @@ public class ResultTable {
   /**
    * Returns true if the browserList contains a specific browser
    */
-  public boolean hasBrowser(Browser aBrowser){
-    for (Browser browser: browserList){
+  public boolean hasBrowser(Browser aBrowser) {
+    for (Browser browser : browserList) {
       if (browser.equals(aBrowser))
         return true;
     }
@@ -105,17 +105,17 @@ public class ResultTable {
   }
 
   /**
-   * Sets test case's start time.
-   */
-  public void setStartTime(long startTime) {
-    this.startTime = startTime;
-  }
-
-  /**
    * Returns test case's start time.
    */
   public long getStartTime() {
     return startTime;
+  }
+
+  /**
+   * Sets test case's start time.
+   */
+  public void setStartTime(long startTime) {
+    this.startTime = startTime;
   }
 
   public boolean getStats() {

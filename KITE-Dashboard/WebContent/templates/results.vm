@@ -111,9 +111,13 @@ limitations under the License.
                                         <i class="pe-7s-pin"></i>
                                         <p>Overview</p>
                                     </a>
-                                    <ul>
+                                    <ul class="result-wrapping">
                                         #foreach($test in $listOfTest)
-                                        <li><a href="overview?testname=$linkTool.encode($test.getTestName())&size=$linkTool.encode($test.getTupleSize())" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
+                                        #if($test.getTupleSize()==2)
+                                          <li><a href="overview?testname=$linkTool.encode($test.getTestName())&1v1=true" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
+                                        #else
+                                          <li><a href="overview?testname=$linkTool.encode($test.getTestName())&1v1=false" style="font-size: 12px;" >$test.getTestName()<div class="circle"></div></a></li>
+                                        #end
                                         #end
                                     </ul>
                                 </li>
@@ -210,7 +214,7 @@ limitations under the License.
                                     <div id="chart"></div>
                                 </div>
                                 <div class="col-md-3 col-sm-3">
-                                    <div id="legend" class="result-wrapping"></div>
+                                    <div id="legend" class=""></div>
                                 </div>
                             </div>
                         </div>

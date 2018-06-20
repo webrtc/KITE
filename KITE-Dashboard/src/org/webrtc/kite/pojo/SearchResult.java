@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,28 +28,7 @@ public class SearchResult {
   private List<ResultTable> listOfResult;
   private String searchKey;
 
-  public SearchResult() {}
-
-  /**
-   * Sets the list of found configurations.
-   */
-  public void setListOfConfigResult(List<ConfigExecution> listOfConfigResult) {
-    this.listOfConfigResult = listOfConfigResult;
-  }
-
-  /**
-   * Sets the list of found tests.
-   */
-  public void setListOfConfigTestResult(List<ConfigTest> listOfConfigTestResult) {
-    this.listOfConfigTestResult = listOfConfigTestResult;
-  }
-
-
-  /**
-   * Sets key word for the search.
-   */
-  public void setSearchKey(String searchKey) {
-    this.searchKey = searchKey;
+  public SearchResult() {
   }
 
   /**
@@ -60,10 +39,24 @@ public class SearchResult {
   }
 
   /**
+   * Sets key word for the search.
+   */
+  public void setSearchKey(String searchKey) {
+    this.searchKey = searchKey;
+  }
+
+  /**
    * Returns the list of found configurations.
    */
   public List<ConfigExecution> getListOfConfigResult() {
     return listOfConfigResult;
+  }
+
+  /**
+   * Sets the list of found configurations.
+   */
+  public void setListOfConfigResult(List<ConfigExecution> listOfConfigResult) {
+    this.listOfConfigResult = listOfConfigResult;
   }
 
   /**
@@ -73,8 +66,11 @@ public class SearchResult {
     return listOfConfigTestResult;
   }
 
-  public void setListOfResult(List<ResultTable> listOfResult) {
-    this.listOfResult = listOfResult;
+  /**
+   * Sets the list of found tests.
+   */
+  public void setListOfConfigTestResult(List<ConfigTest> listOfConfigTestResult) {
+    this.listOfConfigTestResult = listOfConfigTestResult;
   }
 
   /**
@@ -82,5 +78,9 @@ public class SearchResult {
    */
   public List<ResultTable> getListOfResult() {
     return listOfResult;
+  }
+
+  public void setListOfResult(List<ResultTable> listOfResult) {
+    this.listOfResult = listOfResult;
   }
 }

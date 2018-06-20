@@ -1,0 +1,9 @@
+{
+  "debug": false,
+  "httpPort": 8081,
+  "httpsPort": 8443,
+  "staticDir": "public",
+  "serverAddress": "192.168.1.11",
+  "keyPath": "config/server.key",
+  "certPath": "config/server.cert"
+}

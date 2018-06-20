@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -55,9 +55,6 @@ public class ExecutionServlet extends HttpServlet {
    */
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    // TODO Auto-generated method stub
-    // response.getWriter().append("Served at:
-    // ").append(request.getContextPath());
 
     String configName = request.getParameter("name");
     if (configName == null)
@@ -71,12 +68,11 @@ public class ExecutionServlet extends HttpServlet {
       listOfDistinctTest = new ConfigTestDao(Utility.getDBConnection(this.getServletContext())).getTestList();
       request.setAttribute("listOfTest", listOfDistinctTest);
       listOfExecution = new ConfigExecutionDao(Utility.getDBConnection(this.getServletContext()))
-              .getConfigExecutionList(configName);
+          .getConfigExecutionList(configName);
       if (log.isDebugEnabled())
         log.debug("out->listOfExecution: " + listOfExecution);
       request.setAttribute("listOfExecution", listOfExecution);
     } catch (SQLException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
       throw new KiteSQLException(e.getLocalizedMessage());
     }

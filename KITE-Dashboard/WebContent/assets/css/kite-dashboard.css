@@ -30,6 +30,11 @@ limitations under the License.
         margin:5px;
     }
 
+    .dropdown-button {
+      display: inline-flex;
+      align-items: center;
+    }
+
     .filter{
         border-left: 5px dashed white;
     }

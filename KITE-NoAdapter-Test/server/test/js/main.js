@@ -17,7 +17,9 @@
 
 'use strict';
 
-var tracing = false;
+
+
+var tracing = true;
 
 function trace(arg) {
   if (tracing) {

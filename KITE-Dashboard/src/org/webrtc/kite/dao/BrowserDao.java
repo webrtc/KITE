@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,8 +54,8 @@ public class BrowserDao {
    */
   public int getBrowserId(Browser browser) throws SQLException {
     String query =
-            "SELECT BROWSER_ID FROM BROWSERS WHERE NAME='" + browser.getName() + "' AND VERSION='"
-                    + browser.getVersion() + "' AND PLATFORM='" + browser.getPlatform() + "';";
+        "SELECT BROWSER_ID FROM BROWSERS WHERE NAME='" + browser.getName() + "' AND VERSION='"
+            + browser.getVersion() + "' AND PLATFORM='" + browser.getPlatform() + "';";
 
     int res = 0;
     PreparedStatement ps = null;
@@ -112,7 +112,7 @@ public class BrowserDao {
    * Returns a list of all registered browsers
    */
   public List<Browser> getBrowserList() throws SQLException {
-    String query = "SELECT * FROM BROWSERS ORDER BY NAME DESC, VERSION ASC, PLATFORM DESC;";
+    String query = "SELECT * FROM BROWSERS ORDER BY NAME DESC, VERSION DESC, PLATFORM DESC;";
 
     List<Browser> listOfBrowsers = new ArrayList<>();
     PreparedStatement ps = null;
@@ -127,7 +127,7 @@ public class BrowserDao {
           final StringBuilder rsLog = new StringBuilder();
           for (int c = 1; c <= rs.getMetaData().getColumnCount(); c++) {
             rsLog.append(rs.getMetaData().getColumnName(c)).append(":").append(rs.getString(c))
-                    .append("-");
+                .append("-");
           }
           log.debug(rsLog.toString());
         }
@@ -135,7 +135,7 @@ public class BrowserDao {
         String name = rs.getString("NAME");
         String version = rs.getString("VERSION");
         String platform = rs.getString("PLATFORM");
-        if (!Mapping.IrrelevantList.contains(version)&&!Mapping.IrrelevantList.contains(platform))
+        if (!Mapping.IrrelevantList.contains(version) && !Mapping.IrrelevantList.contains(platform))
           listOfBrowsers.add(new Browser(name, version, platform));
       }
 
@@ -144,11 +144,12 @@ public class BrowserDao {
     }
     return listOfBrowsers;
   }
+
   /**
    * Returns a list of browser by platform.
    */
   public List<Browser> getBrowserListByPlatform(String platform) throws SQLException {
-    String query = "SELECT NAME,VERSION FROM BROWSERS WHERE PLATFORM='"+platform+"' OR UPPER(PLATFORM)='"+platform.toUpperCase()+"' ORDER BY NAME DESC, VERSION ASC;";
+    String query = "SELECT NAME,VERSION FROM BROWSERS WHERE PLATFORM='" + platform + "' OR UPPER(PLATFORM)='" + platform.toUpperCase() + "' ORDER BY NAME DESC, VERSION ASC;";
 
     List<Browser> listOfBrowsers = new ArrayList<>();
     PreparedStatement ps = null;
@@ -163,7 +164,7 @@ public class BrowserDao {
           final StringBuilder rsLog = new StringBuilder();
           for (int c = 1; c <= rs.getMetaData().getColumnCount(); c++) {
             rsLog.append(rs.getMetaData().getColumnName(c)).append(":").append(rs.getString(c))
-                    .append("-");
+                .append("-");
           }
           log.debug(rsLog.toString());
         }
@@ -184,26 +185,24 @@ public class BrowserDao {
    * Returns a list of all browsers that should be in overview
    * For Edge and Safari, this will only determine the nightly, since they don't really have a pattern between stable and
    * nightly.
-   *
    */
   public List<Browser> getOverviewBrowserList() throws SQLException {
     List<Browser> listOfOverviewBrowser = new ArrayList<>(); // The ones with the relevant version //
-    for (String platform: Mapping.OsList){
+    for (String platform : Mapping.OsList) {
       List<Browser> listOfBrowsers = this.getBrowserListByPlatform(platform);
       // Presumably that the list had already been sorted by browser name //
       String name = null;
       String nightly = "0";
       String stable = "0";
-      for (Browser browser: listOfBrowsers) {
+      for (Browser browser : listOfBrowsers) {
 
         if (!browser.getName().equalsIgnoreCase(name)) {
-          if (name==null) { // First browser on the list //
+          if (name == null) { // First browser on the list //
             name = browser.getName();
-          }
-          else { // Change to next browser on the list, register current one with nightly and stable version found.
+          } else { // Change to next browser on the list, register current one with nightly and stable version found.
             if (!name.equalsIgnoreCase("safari"))
-              listOfOverviewBrowser.add(new Browser(name, nightly,platform));
-            if (name.equalsIgnoreCase("chrome")||name.equalsIgnoreCase("firefox")) {
+              listOfOverviewBrowser.add(new Browser(name, nightly, platform));
+            if (name.equalsIgnoreCase("chrome") || name.equalsIgnoreCase("firefox")) {
               listOfOverviewBrowser.add(new Browser(name, stable, platform));
             }
             name = browser.getName();
@@ -212,24 +211,24 @@ public class BrowserDao {
           }
         }
 
-        String version = browser.getVersion().split("\\.")[0]+".0";
+        String version = browser.getVersion().split("\\.")[0] + ".0";
         if (version.compareTo(nightly) > 0) { // Get the highest version as nightly (canary) //
           nightly = version;
-          stable = String.valueOf((Integer.parseInt(nightly.split("\\.")[0]) - 2))+".0"; // Stable is normally 2 version down //
+          stable = String.valueOf((Integer.parseInt(nightly.split("\\.")[0]) - 2)) + ".0"; // Stable is normally 2 version down //
         }
 
-        if (listOfBrowsers.indexOf(browser)==listOfBrowsers.size()-1){
+        if (listOfBrowsers.indexOf(browser) == listOfBrowsers.size() - 1) {
           if (!name.equalsIgnoreCase("safari"))
-            listOfOverviewBrowser.add(new Browser(name, nightly,platform));
-          if (name.equalsIgnoreCase("chrome")||name.equalsIgnoreCase("firefox"))
+            listOfOverviewBrowser.add(new Browser(name, nightly, platform));
+          if (name.equalsIgnoreCase("chrome") || name.equalsIgnoreCase("firefox"))
             listOfOverviewBrowser.add(new Browser(name, stable, platform));
         }
       }
     }
-    listOfOverviewBrowser.add(new Browser("MicrosoftEdge",Mapping.NightlyEdge,Mapping.OsList.get(0)));
-    listOfOverviewBrowser.add(new Browser("MicrosoftEdge",Mapping.StableEdge,Mapping.OsList.get(0)));
-    listOfOverviewBrowser.add(new Browser("safari",Mapping.StableSafari,Mapping.OsList.get(1)));
-    listOfOverviewBrowser.add(new Browser("safari",Mapping.NightlySafari,Mapping.OsList.get(1)));
+    listOfOverviewBrowser.add(new Browser("MicrosoftEdge", Mapping.NightlyEdge, Mapping.OsList.get(0)));
+    listOfOverviewBrowser.add(new Browser("MicrosoftEdge", Mapping.StableEdge, Mapping.OsList.get(0)));
+    listOfOverviewBrowser.add(new Browser("safari", Mapping.StableSafari, Mapping.OsList.get(1)));
+    listOfOverviewBrowser.add(new Browser("safari", Mapping.NightlySafari, Mapping.OsList.get(1)));
     return listOfOverviewBrowser;
   }
 

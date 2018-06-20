@@ -1,12 +1,12 @@
 /*
  * Copyright 2017 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,8 +36,8 @@ public class Browser {
   /**
    * Constructs a new Browser from given information as name, version and platform.
    *
-   * @param name name of browser.
-   * @param version version of browser.
+   * @param name     name of browser.
+   * @param version  version of browser.
    * @param platform platform on which the browser runs.
    */
   public Browser(String name, String version, String platform) {
@@ -99,21 +99,7 @@ public class Browser {
   }
 
   /**
-   * Returns true or false on whether a browser is relevant in term of version to be in the overview.
-   * The list of interesting browsers and their versions can be found in the class mapping.
-   *
-   */
-  public boolean shouldBeInOverView() {
-    for (String version : Mapping.VersionList)
-      if (this.version.startsWith(version))
-        if (Mapping.OsList.contains(this.platform))
-          return true;
-    return false;
-  }
-
-  /**
    * Returns true or false on whether a browser is equal to another one.
-   *
    */
   public boolean isEqualTo(Browser browser) {
     if (!this.name.equals(browser.getName()))
@@ -128,7 +114,6 @@ public class Browser {
 
   /**
    * Preprocesses browser platform.
-   *
    */
   public String processPlatform(String platform) {
     String browserPlatform;
@@ -142,7 +127,7 @@ public class Browser {
         break;
       }
       case "windows": {
-              /*if (jsonObject.getString("platform").equalsIgnoreCase("Windows"))*/
+        /*if (jsonObject.getString("platform").equalsIgnoreCase("Windows"))*/
         browserPlatform = "Windows 10";
             /*else {
               switch (bPlatform.get(1)) {
@@ -176,9 +161,9 @@ public class Browser {
     }
     return browserPlatform.toUpperCase();
   }
+
   /**
    * Preprocesses browser version.
-   *
    */
   public String processVersion(String version) {
     String browserVersion = version;
@@ -191,27 +176,26 @@ public class Browser {
 
   /**
    * Returns Json string of the browser
-   *
    */
   public String toSunburstJson() {
-    String res="";
-    switch (this.name){
+    String res = "";
+    switch (this.name) {
       case "safari":
-        res+="Sa";
+        res += "Sa";
         break;
       case "chrome":
-        res+="Cr";
+        res += "Cr";
         break;
       case "firefox":
-        res+="FF";
+        res += "FF";
         break;
       case "MicrosoftEdge":
-        res+="E";
+        res += "E";
         break;
     }
-    res+=this.version;
-    res+=this.platform.replaceAll(" ","");
-    return "\"name\":\""+res+"\",\"children\":[{";
+    res += this.version;
+    res += this.platform.replaceAll(" ", "");
+    return "\"name\":\"" + res + "\",\"children\":[{";
   }
 
   /**
@@ -263,11 +247,11 @@ public class Browser {
     return (int) hashCode;
   }
 
-  public void setId(int id) {
-    this.id = id;
-  }
-
   public int getId() {
     return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
   }
 }

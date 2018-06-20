@@ -141,50 +141,6 @@ function displayMatrix(load, container){
         });
     }
     container.html(resultHtml);
-
-   /* var statDiv = $("#stats");
-    var statHTML = '<td>'+'</td>'+'<td class="medium-boy run-time">'+ stats.ok +'</td>'+
-            '<td class="medium-boy run-time">'+ stats.failed +'</td>'+'<td class="medium-boy run-time">'+ stats.error +'</td>';
-    statDiv.html(statHTML);*/
-
-    /*var ctx = $("#durationChart");
-    var durations = data.durations;
-    var labels = [];
-    for (i = 0; i < durations.length;i++){
-        labels.push(i);
-        i+=5;
-    }
-    var config = {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Duration (s)",
-                backgroundColor: '#42f4aa',
-                borderColor: '#42f4aa',
-                fill: false,
-                data: durations,
-            }]
-        },
-        options: {
-            responsive: true,
-            title:{
-                display:false,
-                text:'Duration of displayed test cases'
-            },
-            scales: {
-                xAxes: [{
-                    display: true,
-                }],
-                yAxes: [{
-                    display: true,
-                    type: 'linear',
-                }]
-            }
-        }
-    };
-
-    var myLineChart = new Chart($("#durationChart"),config);*/
 }
 
 
@@ -218,14 +174,6 @@ function getClientHTML(json, caller){
     }
     html+='</h4>';
     html+='<h4 class="status">'+json.platform+'</h4>';
-    /*if(json.platform.includes('Windows')){
-        html+='<img src=\"assets/img/windows.png\" height=\"25\" width=\"25\">';
-    } else {
-        if(json.platform.includes('Linux'))
-            html+='<img src=\"assets/img/ubuntu.png\" height=\"25\" width=\"25\">';
-        else
-            html+='<img src=\"assets/img/mac.png\" height=\"25\" width=\"25\">';
-    }*/
     return html;
 }
 
@@ -246,6 +194,12 @@ function getResultHTML(result){
     }
     return html;
 }
+
+$(document).on("click", ".out-button", function(e) {
+    var link = $(this).attr('data-link');
+    console.log(link);
+    window.open(''+link);
+});
 
 $(document).ready(function(){
     $('[data-toggle="popover"]').popover({
