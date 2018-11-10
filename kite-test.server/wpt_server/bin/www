@@ -5,7 +5,7 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('kite-test.sever:server');
+var debug = require('debug')('kite-test.server:server');
 var io = require('socket.io');
 var https = require('https');
 //var http = require('http');
