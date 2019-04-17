@@ -68,6 +68,13 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
     cd \GitHub\KITE
     c
     ```
+    If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`c`__ to compile the test module
+     only or __`c all`__ to recompile the entire project:
+    ```
+    cd \GitHub\KITE\KITE-AppRTC-Test
+    c all
+    ```
+     
     &nbsp;    
 
 ## C. Install the local grid
@@ -203,7 +210,7 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
 To run the AppRTC iceconnection test:
 ```
 cd %KITE_HOME%\KITE-Example-Test
-r example.local.json
+r example.config.json
 ```
 
 #### Run KITE-AppRTC-Test
