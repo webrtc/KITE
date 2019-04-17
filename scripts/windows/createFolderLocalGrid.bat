@@ -68,7 +68,7 @@ ECHO @echo off >> hub/startHub.bat
 ECHO setlocal >> hub/startHub.bat
 ECHO   title Hub >> hub/startHub.bat
 if ["%USE_CAPABILITY_MATCHER%"] == ["TRUE"] (
-  ECHO   java -cp "../../KITE-Grid-Utils/target/*;../*;." org.openqa.grid.selenium.GridLauncherV3 -role hub --debug -host %IP% -capabilityMatcher io.cosmosoftware.kite.grid.KiteCapabilityMatcher >> hub/startHub.bat
+  ECHO   java -cp "*;../*;." org.openqa.grid.selenium.GridLauncherV3 -role hub --debug -host %IP% -capabilityMatcher io.cosmosoftware.kite.grid.KiteCapabilityMatcher >> hub/startHub.bat
 ) ELSE (
   ECHO   java -jar ../selenium.jar -role hub --debug -host %IP% >> hub/startHub.bat
 

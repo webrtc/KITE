@@ -29,3 +29,7 @@ set SELENIUM_VERSION=3.141.59
 rem Browser versions
 set CHROME_VERSION=73
 set FIREFOX_VERSION=66
+
+rem Capability Matcher
+set KITE_EXTRAS_VERSION=0.1.4
+set GRID_VERSION=0.0.1

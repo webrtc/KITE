@@ -66,10 +66,15 @@ echo   java -Dwebdriver.safari.driver=/Applications/Safari.app/Contents/MacOS/sa
 
 rm hub/startHub.sh || true
 echo echo -n -e '"\033]0;HUB\007"' >> hub/startHub.sh
-echo   java -jar $path/localGrid/selenium.jar -role hub --debug -host $IP >> hub/startHub.sh
-
+if [[ "$USE_CAPABILITY_MATCHER" = "TRUE" ]]
+then
+  echo java -cp  $path/localGrid/*:$path/localGrid/hub/* org.openqa.grid.selenium.GridLauncherV3 -role hub --debug -host $IP -capabilityMatcher io.cosmosoftware.kite.grid.KiteCapabilityMatcher >> hub/startHub.sh
+else
+  echo   java -jar $path/localGrid/selenium.jar -role hub --debug -host $IP >> hub/startHub.sh
+fi
 
 chmod +x startGrid.sh
+chmod +x stopGrid.sh
 
 cd hub
 chmod +x startHub.sh
