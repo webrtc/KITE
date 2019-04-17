@@ -1,5 +1,5 @@
 {
-  "name": "IceConnectionTest ",
+  "name": "IceConnectionTest Suite",
   "callable": true,
   "remotes": [
     {
@@ -9,7 +9,7 @@
   ],
   "tests": [
     {
-      "name": "IceConnectionTest",
+      "name": "IceConnectionTest %ts",
       "tupleSize": 2,
       "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
       "testImpl": "org.webrtc.kite.apprtc.tests.IceConnectionTest",

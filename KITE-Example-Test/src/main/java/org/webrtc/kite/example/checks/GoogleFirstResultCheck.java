@@ -11,7 +11,7 @@ import static io.cosmosoftware.kite.util.ReportUtils.saveScreenshotPNG;
 
 public class GoogleFirstResultCheck extends TestCheck {
   final GoogleResultPage searchPage = new GoogleResultPage(this.webDriver);
-  final String EXPECTED_RESULT = "CoSMo Software: RTC Experts";
+  final String EXPECTED_RESULT = "CoSMo Software | WebRTC Technology & Implementation";
   
   public GoogleFirstResultCheck(WebDriver webDriver) {
     super(webDriver);
@@ -25,7 +25,7 @@ public class GoogleFirstResultCheck extends TestCheck {
   @Override
   protected void step() throws KiteTestException {
     searchPage.openFirstResult();
-    String found = webDriver.getTitle().trim();
+    String found = searchPage.getTitle().trim();
     if (!found.equalsIgnoreCase(EXPECTED_RESULT)){
       throw new KiteTestException("The title of the first Google result was not correct: \n" +
         "Expected: " + EXPECTED_RESULT + " but found " + found, Status.FAILED);

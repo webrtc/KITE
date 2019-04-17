@@ -7,7 +7,6 @@ import org.openqa.selenium.WebDriver;
 public class GoogleSearchStep extends TestStep {
   
   final String TARGET = "CoSMo Software Consulting";
-  final String GOOGLE_PAGE = "https://google.com";
   final GoogleSearchPage searchPage = new GoogleSearchPage(this.webDriver);
   
   public GoogleSearchStep(WebDriver webDriver) {
@@ -17,12 +16,12 @@ public class GoogleSearchStep extends TestStep {
   
   @Override
   public String stepDescription() {
-    return "Open " + GOOGLE_PAGE + " and look for " + TARGET;
+    return "Open " + searchPage.getURL() + " and look for " + TARGET;
   }
   
   @Override
   protected void step() {
-    this.webDriver.get(GOOGLE_PAGE);
+    searchPage.open();
     searchPage.searchFor(TARGET);
   }
 }

@@ -55,7 +55,7 @@ public class MatrixRunner {
   public MatrixRunner(TestConf testConf, List<List<EndPoint>> listOfTuples, String testName) {
     this.testConf = testConf;
     this.testSuite = new Container(testConf.getName().contains("%ts") ?
-      testConf.getName().replaceAll("%ts", "") + " Suite (" + timestamp() + ")" : testConf.getName());
+      testConf.getName().replaceAll("%ts", "") + " (" + timestamp() + ")" : testConf.getName());
     this.testName = testName;
     this.tupleList.addAll(listOfTuples);
     List<List<EndPoint>> customBrowserMatrix = Configurator.getInstance().getCustomBrowserMatrix();
