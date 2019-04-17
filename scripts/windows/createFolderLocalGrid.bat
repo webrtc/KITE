@@ -39,7 +39,9 @@ ECHO cd .. >> startGrid.bat
 
 rem create script for chrome Node
 
-IF EXIST chrome/startNode.bat del /F chrome/startNode.bat
+cd chrome
+IF EXIST startNode.bat del /F startNode.bat
+cd ..
 ECHO @echo off >> chrome/startNode.bat
 ECHO setlocal >> chrome/startNode.bat
 ECHO   title CHROME NODE  >> chrome/startNode.bat
@@ -48,7 +50,9 @@ ECHO   endlocal  >> chrome/startNode.bat
 ECHO pause >> chrome/startNode.bat
 
 rem create script for Firefox Node
-IF EXIST firefox/startNode.bat del /F firefox/startNode.bat
+cd firefox
+IF EXIST startNode.bat del /F startNode.bat
+cd ..
 ECHO @echo off >> firefox/startNode.bat
 ECHO setlocal >> firefox/startNode.bat
 ECHO   title FIREFOX NODE >> firefox/startNode.bat
@@ -57,7 +61,9 @@ ECHO   endlocal  >> firefox/startNode.bat
 ECHO pause >> firefox/startNode.bat
 
 rem create script for Hub
-IF EXIST hub/startHub.bat del /F hub/startHub.bat
+cd hub
+IF EXIST startHub.bat del /F startHub.bat
+cd ..
 ECHO @echo off >> hub/startHub.bat
 ECHO setlocal >> hub/startHub.bat
 ECHO   title HUB >> hub/startHub.bat

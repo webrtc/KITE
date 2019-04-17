@@ -18,8 +18,7 @@ move geckodriver.exe ../../../localGrid/firefox
 cd ..
 
 rem delete the zip filed
-
+del /f installDrivers.ps1
 del /f geckodriver.zip
 del /f chromedriver.zip
 rmdir /s /Q unziped
-del /f installDrivers.ps1
