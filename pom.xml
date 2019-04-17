@@ -1,38 +1,114 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.webrtc.kite</groupId>
   <artifactId>kite-base</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>2.0.2</version>
   <name>kite-base</name>
   <packaging>pom</packaging>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <kite.java.version>1.8</kite.java.version>
-    <kite.version>1.0-SNAPSHOT</kite.version>
-    <kite.selenium.version>3.11.0</kite.selenium.version>
-    <kite.junit.version>4.12</kite.junit.version>
-    <kite.json.version>1.0.4</kite.json.version>
+    <kite.version>2.0.3</kite.version>
+    <kite.extras.version>0.1.2</kite.extras.version>
+    <kite.framework.version>0.1.1</kite.framework.version>
     <kite.log4j.version>1.2.17</kite.log4j.version>
-    <kite.sqlite.jdbc.version>3.21.0.1</kite.sqlite.jdbc.version>
-    <!-- maven plugin versions, shouldn't need be changed very often -->
+    <!-- Core dependencies -->
     <kite.mvn.compiler.version>3.6.1</kite.mvn.compiler.version>
+    <kite.java.version>1.8</kite.java.version>
+    <kite.guava.version>25.1-jre</kite.guava.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- maven plugin versions, shouldn't need be changed very often -->
+    <kite.test.mvn.compiler.version>3.6.1</kite.test.mvn.compiler.version>
+
+    <!--Compilation dependencies-->
+    <kite.proguard-mvn.version>2.0.14</kite.proguard-mvn.version>
+    <kite.proguard-base.version>6.0.3</kite.proguard-base.version>
+    <kite.maven-shade.version>3.2.1</kite.maven-shade.version>
+
+    <!-- Report related dependencies -->
+    <kite.json.version>1.1.2</kite.json.version>
+    <kite.org.json.version>20180130</kite.org.json.version>
+    <kite.allure-java-common.version>2.10.0</kite.allure-java-common.version>
+    <kite.allure2-model-pojo.version>1.0.0</kite.allure2-model-pojo.version>
+    <kite.jackson-annotations.version>2.9.8</kite.jackson-annotations.version>
+
+    <!-- Utility dependencies -->
+    <kite.sqlite.jdbc.version>3.23.1</kite.sqlite.jdbc.version>
+    <kite.common-io.version>2.6</kite.common-io.version>
+    <kite.jcraft.version>0.1.54</kite.jcraft.version>
+    <kite.tess4j.version>4.0.2</kite.tess4j.version>
+    <kite.quartz.version>2.3.0</kite.quartz.version>
+    <kite.jaxb.version>2.2.11</kite.jaxb.version>
+    <kite.dataformat-xml.version>2.8.5</kite.dataformat-xml.version>
+    <kite.activation.version>1.1.1</kite.activation.version>
+    <kite.user-agent.version>1.21</kite.user-agent.version>
+    <kite.woothee.version>1.8.0</kite.woothee.version>
+    <kite.browscap-java.version>1.2.7</kite.browscap-java.version>
+
+    <!--Web app dependencies-->
+    <kite.servlet.version>4.0.1</kite.servlet.version>
+    <kite.velocity.version>1.7</kite.velocity.version>
+    <kite.velocity-tool.version>2.0</kite.velocity-tool.version>
+    <kite.websocket-api.version>1.1</kite.websocket-api.version>
+    <kite.commons-logging.version>1.1.1</kite.commons-logging.version>
+
+    <!-- Automation framework dependencies -->
+    <kite.selenium.version>3.141.59</kite.selenium.version>
+    <kite.appium.version>6.1.0</kite.appium.version>
+
+    <!-- Test framework dependencies -->
+    <kite.junit.version>4.12</kite.junit.version>
+    <kite.junit-jupiter-api.version>5.0.0</kite.junit-jupiter-api.version>
+
+
+    <!-- Node and NPM  -->
+    <kite.node.version>v8.11.3</kite.node.version>
+    <kite.npm.version>6.9.0</kite.npm.version>
+
   </properties>
 
-  <modules>
-    <module>KITE-Engine-IF</module>
-    <module>KITE-Engine</module>
-    <module>KITE-Base-Test</module>
-    <module>KITE-AppRTC-Test</module>
-    <module>KITE-GetUpdate-Test</module>
-    <module>KITE-Jitsi-Test</module>
-    <module>KITE-NoAdapter-Test</module>
-    <module>KITE-WP-Test</module>
-    <module>KITE-Dashboard</module>
-  </modules>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>1.6</version>
+        <configuration>
+          <installDirectory>./</installDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <nodeVersion>${kite.node.version}</nodeVersion>
+              <npmVersion>${kite.npm.version}</npmVersion>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+
+  <modules>
+    <module>KITE-Engine</module>
+    <module>KITE-Framework</module>
+    <module>KITE-Example-Test</module>
+    <module>KITE-AppRTC-Test</module>
+    <module>KITE-WPT-Test</module>
+  </modules>
 </project>

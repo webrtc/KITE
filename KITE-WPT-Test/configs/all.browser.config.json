@@ -1,0 +1,88 @@
+{
+  "name": "Web Platform Test 1",
+  "reportFolder" : "/home/nam/workSpace/BackEnd/KITEs/KITE.example/",
+  "callable": true,
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://192.168.1.33:4444/wd/hub"
+    }
+  ],
+  "callback": null,
+  "tests": [
+    {
+      "name": "Web Platform Test",
+      "tupleSize": 1,
+      "noOfThreads": 5,
+      "testImpl": "org.webrtc.kite.wpt.WPTTest",
+      "payload": {
+        "report": true,
+        "revision": "ada93cd97824c94f5166e13452be401d8941d819",
+        "securedURL": "https://w3c-test.org/",
+        "nonSecuredURL": "http://w3c-test.org/",
+        "tests": [
+          "webrtc",
+          "mediacapture-streams"
+        ]
+      }
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "chrome",
+      "platform": "LINUX",
+      "version": "73"
+    },
+    {
+      "browserName": "chrome",
+      "platform": "MAC",
+      "version": "73"
+    },
+    {
+      "browserName": "chrome",
+      "platform": "WINDOWS",
+      "version": "73"
+    },
+    {
+      "browserName": "firefox",
+      "platform": "LINUX",
+      "version": "65"
+    },
+    {
+      "browserName": "firefox",
+      "platform": "MAC",
+      "version": "66"
+    },
+    {
+      "browserName": "firefox",
+      "platform": "WINDOWS",
+      "version": "66"
+    },
+    {
+      "browserName": "safari",
+      "platform": "MAC",
+      "version": "12.0"
+    },
+    {
+      "browserName": "safari",
+      "platform": "MAC",
+      "version": "12.2",
+      "technologyPreview": true
+    },
+    {
+      "browserName": "edge",
+      "platform": "WINDOWS",
+      "version": "44.17763"
+    },
+    {
+      "browserName": "chrome",
+      "version": "ANDROID 72",
+      "platform": "ANDROID",
+      "mobile": {
+        "deviceName": "AndroidPhone",
+        "platformName": "Android",
+        "platformVersion": "8"
+      }
+    }
+  ]
+}

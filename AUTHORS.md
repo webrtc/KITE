@@ -3,3 +3,4 @@
 * Hoang Vu (Nam) (hoang dot vu at cosmosoftware dot io)
 * Jose M Recio (jose dot recio at cosmosoftware dot io)
 * Dr Alex (Alex dot Gouaillard at cosmosoftware dot io)
+* Emmanuel Andre (emmanuel dot andre at cosmosoftware dot io)

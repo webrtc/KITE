@@ -40,7 +40,7 @@ public abstract class ConfigHandler {
   /**
    * The Browser list.
    */
-  protected List<Browser> browserList;
+  protected List<EndPoint> endPointList;
 
   /**
    * Gets test list.
@@ -56,8 +56,8 @@ public abstract class ConfigHandler {
    *
    * @return the browser list
    */
-  public List<? extends Browser> getBrowserList() {
-    return this.browserList;
+  public List<? extends EndPoint> getEndPointList() {
+    return this.endPointList;
   }
 
   /**
@@ -72,82 +72,68 @@ public abstract class ConfigHandler {
    *
    * @param remoteManager  RemoteManager
    * @param jsonObjectList an implementation of List<JsonObject>.
-   * @param browserClass   the browser class
+   * @param objectClass   the browser class
    * @throws NoSuchMethodException     the no such method exception
    * @throws IllegalAccessException    the illegal access exception
    * @throws InvocationTargetException the invocation target exception
    * @throws InstantiationException    the instantiation exception
    */
   protected void adjustRemotes(RemoteManager remoteManager, List<JsonObject> jsonObjectList,
-      Class browserClass)
+      Class objectClass)
       throws NoSuchMethodException, IllegalAccessException, InvocationTargetException,
       InstantiationException {
-
-    Set<Browser> set = new LinkedHashSet<Browser>();
-
+  
+    Set<EndPoint> set = new LinkedHashSet<>();
+  
     List<Remote> remoteList = remoteManager.getRemoteList();
     int remoteListSize = remoteList.size();
-
+  
     if (remoteListSize == 1) {
       String remoteAddress = remoteList.get(0).getRemoteAddress();
       for (JsonObject object : jsonObjectList) {
         Constructor constructor =
-            browserClass.getConstructor(new Class[] {String.class, JsonObject.class});
-        Browser browser = (Browser) constructor.newInstance(null, object);
-        if (browser.getRemoteAddress() == null) {
-          browser.setRemoteAddress(remoteAddress);
+          objectClass.getConstructor(new Class[]{String.class, JsonObject.class});
+        EndPoint endPoint = (EndPoint) constructor.newInstance(null, object);
+        if (endPoint.getRemoteAddress() == null) {
+          endPoint.setRemoteAddress(remoteAddress);
         }
-        set.add(browser);
+        set.add(endPoint);
       }
     } else {
       int index = 0;
       Remote defaultRemote = remoteList.get(0);
       if (defaultRemote.isLocal())
         index = 1;
-
+    
       List<RemoteGridFetcher> fetcherList = new ArrayList<>();
       for (; index < remoteListSize; index++)
         fetcherList.add(remoteList.get(index).getGridFetcher());
-
+    
       RemoteAddressManager remoteAddressManager = new RemoteAddressManager(fetcherList);
       remoteAddressManager.communicateWithRemotes();
-
+    
       for (JsonObject object : jsonObjectList) {
         Constructor constructor =
-            browserClass.getConstructor(new Class[] {String.class, JsonObject.class});
-        Browser browser = (Browser) constructor.newInstance(null, object);
-        if (browser.getRemoteAddress() == null) {
-          String remoteAddress = remoteAddressManager.findAppropriateRemoteAddress(browser);
-          browser.setRemoteAddress(
-              remoteAddress == null ? defaultRemote.getRemoteAddress() : remoteAddress);
+          objectClass.getConstructor(new Class[]{String.class, JsonObject.class});
+        EndPoint endPoint = (EndPoint) constructor.newInstance(null, object);
+        if (endPoint.getRemoteAddress() == null) {
+          String remoteAddress = remoteAddressManager.findAppropriateRemoteAddress(endPoint);
+          endPoint.setRemoteAddress(
+            remoteAddress == null ? defaultRemote.getRemoteAddress() : remoteAddress);
         }
-        set.add(browser);
+        set.add(endPoint);
       }
     }
-
-    this.browserList = new ArrayList<Browser>(set);
+    if (this.endPointList != null) {
+      set.addAll(this.endPointList);
+    }
+    this.endPointList = new ArrayList<>(set);
   }
-
-  /**
-   * Sets max instances.
-   *
-   * @param maxInstances the max instances
-   */
-  protected void setMaxInstances(int maxInstances) {
-    for (Browser browser : this.browserList)
-      browser.setMaxInstances(maxInstances);
-  }
-
+  
   /**
    * Gets job class.
    *
    * @return the job class
    */
   abstract public Class<? extends Job> getJobClass();
-
-  /**
-   * Determine max instances.
-   */
-  public void determineMaxInstances() { }
-
 }

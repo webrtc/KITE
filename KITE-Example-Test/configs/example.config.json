@@ -1,0 +1,35 @@
+{
+  "name": "Kite test example (with Allure reporting)",
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://localhost:4444/wd/hub"
+    }
+  ],
+  "tests": [
+    {
+      "name": "KiteExampleTest",
+      "tupleSize": 1,
+      "description": "This example test opens google and searches for Cosmo Software Consulting and verify the first result",
+      "testImpl": "org.webrtc.kite.example.KiteExampleTest",
+      "payload" : {
+        "test1": "ONE",
+        "test2": "TWO"
+      }
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "chrome",
+      "version": "73",
+      "platform": "WINDOWS",
+      "flags": []
+    },
+    {
+      "browserName": "firefox",
+      "version": "66",
+      "platform": "WINDOWS",
+      "flags": []
+    }
+  ]
+}

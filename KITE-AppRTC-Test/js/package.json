@@ -1,0 +1,19 @@
+{
+  "name": "apprtc",
+  "version": "0.0.3",
+  "description": "KITE AppRTC-Test Javascript",
+  "main": "",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "license": "ISC",
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "kite-common": "0.0.3",
+    "selenium-webdriver": "^4.0.0-alpha.1"
+  }
+}

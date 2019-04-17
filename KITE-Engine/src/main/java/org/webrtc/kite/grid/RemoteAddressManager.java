@@ -16,6 +16,10 @@
 
 package org.webrtc.kite.grid;
 
+import org.apache.log4j.Logger;
+import org.webrtc.kite.config.Browser;
+import org.webrtc.kite.config.EndPoint;
+
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,9 +27,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import org.apache.log4j.Logger;
-import org.webrtc.kite.config.Browser;
 
 /**
  * Container of all the RemoteGridFetchers to communicate with the REST APIs and find the
@@ -81,29 +82,33 @@ public class RemoteAddressManager {
       }
     }
   }
-
+  
   /**
-   * Finds the appropriate remote address for the given Browser object in sequential manner.
+   * Finds the appropriate remote address for the given EndPoint object in sequential manner.
    *
-   * @param browser Browser
+   * @param endPoint EndPoint
    * @return string representation of the Selenium hub url or null if none of the external grids
    * supports the given browser.
    */
-  public String findAppropriateRemoteAddress(Browser browser) {
-    for (RemoteGridFetcher fetcher : this.fetcherList)
-      try {
-        if (fetcher.search(browser)) {
-          if (fetcher instanceof BrowserStackGridFetcher && browser.getPlatform() != null) {
-            if (RemoteAddressManager.BROWSER_STACK_PLATFORMS.get(browser.getPlatform()) != null)
+  public String findAppropriateRemoteAddress(EndPoint endPoint) {
+    if (endPoint instanceof Browser) {
+      Browser browser = (Browser) endPoint;
+      // only for browser
+      for (RemoteGridFetcher fetcher : this.fetcherList)
+        try {
+          if (fetcher.search(browser)) {
+            if (fetcher instanceof BrowserStackGridFetcher && browser.getPlatform() != null) {
+              if (RemoteAddressManager.BROWSER_STACK_PLATFORMS.get(browser.getPlatform()) != null)
+                return fetcher.getRemoteAddress();
+            } else {
               return fetcher.getRemoteAddress();
-          } else {
-            return fetcher.getRemoteAddress();
+            }
           }
-        }
-      } catch (SQLException e) {
-        logger.warn("SQLException while searching for: " + fetcher.getClass().getName(),
+        } catch (SQLException e) {
+          logger.warn("SQLException while searching for: " + fetcher.getClass().getName(),
             e);
-      }
+        }
+    }
     return null;
   }
 
