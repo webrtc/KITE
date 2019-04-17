@@ -10,8 +10,8 @@ mkdir chrome
 mkdir firefox
 mkdir hub
 
-IF [%LOCALHOST%] == ["TRUE"] (
-  set IP="localhost"
+IF "%LOCALHOST%" == "TRUE" (
+  set IP=localhost
 ) ELSE (
   for /f "delims=[] tokens=2" %%a in ('ping -4 -n 1 %ComputerName% ^| findstr [') do set IP=%%a
 )
@@ -61,7 +61,7 @@ IF EXIST hub/startHub.bat del /F hub/startHub.bat
 ECHO @echo off >> hub/startHub.bat
 ECHO setlocal >> hub/startHub.bat
 ECHO   title HUB >> hub/startHub.bat
-if [%USE_CAPABILITY_MATCHER%] == ["TRUE"] (
+if ["%USE_CAPABILITY_MATCHER%"] == ["TRUE"] (
   ECHO   java -cp "../../KITE-Grid-Utils/target/*;../*;." org.openqa.grid.selenium.GridLauncherV3 -role hub --debug -host %IP% -capabilityMatcher io.cosmosoftware.kite.grid.KiteCapabilityMatcher >> hub/startHub.bat
 ) ELSE (
   ECHO   java -jar ../selenium.jar -role hub --debug -host %IP% >> hub/startHub.bat

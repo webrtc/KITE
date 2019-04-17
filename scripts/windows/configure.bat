@@ -10,13 +10,13 @@ rem
 rem Please check the selenium version from: https://selenium-release.storage.googleapis.com/
 
 rem Set to TRUE to install Chrome and Firefox, or FALSE to skip this step if the correct versions are already installed.
-set INSTALL_BROWSERS=FALSE
+set INSTALL_BROWSERS=TRUE
 
 rem Set to TRUE/FALSE to enable/disable the CAPABILITY MATCHER
 set USE_CAPABILITY_MATCHER=FALSE
 
 rem Set to TRUE to use localhost or FALSE to use the host's IP address
-set LOCALHOST=FALSE
+set LOCALHOST=TRUE
 
 rem ChromeDriver and GeckoDriver versions
 set GECKO_VERSION=v0.24.0
