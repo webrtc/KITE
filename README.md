@@ -58,8 +58,9 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
     ```
     cd \GitHub\KITE
     chmod +x configure
-    configure
+    sudo ./configure
     ```
+    Logout and login again for the environment variables to take effect.
 
 3. Compile 
 
@@ -207,7 +208,7 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
 #### Run KITE-Example-Test
 
 
-To run the AppRTC iceconnection test:
+To run the example test:
 ```
 cd %KITE_HOME%\KITE-Example-Test
 r example.config.json

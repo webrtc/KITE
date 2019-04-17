@@ -14,14 +14,14 @@
 export INSTALL_BROWSERS=FALSE
 
 # Set to TRUE/FALSE to enable/disable the CAPABILITY MATCHER
-export USE_CAPABILITY_MATCHER=TRUE
+export USE_CAPABILITY_MATCHER=FALSE
 
 # Set to TRUE if this is a full desktop environment, FALSE if it's without any display
 export DESKTOP_ENVIRONMENT=TRUE
 
 
 # Set to TRUE to use localhost or FALSE to use the host's IP address
-export LOCALHOST=FALSE
+export LOCALHOST=TRUE
 
 # ChromeDriver and GeckoDriver versions
 export GECKO_VERSION=v0.24.0

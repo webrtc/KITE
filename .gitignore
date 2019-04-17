@@ -8,5 +8,6 @@ node
 *reports/
 localgrid
 package-lock.json
-
-
+.classpath
+.settings
+.project
