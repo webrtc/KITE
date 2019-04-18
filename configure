@@ -26,7 +26,7 @@ do
 	then
 		rm ~/bin/${f}
 	fi
-	ln -f -n scripts/linux/path/${f} ~/bin/${f}
+	ln -f -s ${KITE_HOME}/scripts/linux/path/${f} ~/bin/${f}
 done
 
 chmod +x $KITE_HOME/third_party/allure-2.10.0/bin/allure
@@ -34,6 +34,6 @@ if [ -f ~/bin/allure ]
 then
 	rm ~/bin/allure
 fi
-ln -f -n $KITE_HOME/third_party/allure-2.10.0/bin/allure ~/bin/allure
+ln -f -s $KITE_HOME/third_party/allure-2.10.0/bin/allure ~/bin/allure
 
 gnome-session-quit
