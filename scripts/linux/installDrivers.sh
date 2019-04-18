@@ -1,6 +1,6 @@
 #!/bin/bash
 set +v
-. ./gridConfig
+. ./gridConfig.sh
 
 
 wget https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip

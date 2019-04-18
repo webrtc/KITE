@@ -1,6 +1,6 @@
 #!/bin/bash
 set +v
-. ./gridConfig
+. ./gridConfig.sh
 cd ..
 cd ..
 mkdir -p localGrid
