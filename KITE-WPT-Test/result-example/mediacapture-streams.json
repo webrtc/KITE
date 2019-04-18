@@ -1,0 +1,2232 @@
+{
+  "run_info": {
+    "product": "chrome",
+    "bits": 64,
+    "has_sandbox": true,
+    "linux_distro": "Ubuntu",
+    "verify": false,
+    "os_version": "18.04",
+    "browser_version": "70.0.3538.77",
+    "version": "Ubuntu 18.04",
+    "wasm": false,
+    "debug": false,
+    "os": "linux",
+    "processor": "x86_64",
+    "revision": "1893e9316c5187dcb93a0ecdb5c0ae07572543a9"
+  },
+  "time_start": 1547548772962,
+  "time_end": 1547548809691,
+  "results": [
+    {
+      "test": "/mediacapture-streams/MediaDevices-SecureContext.html",
+      "status": "OK",
+      "message": null,
+      "duration": 359,
+      "subtests": [
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "Uncaught Error: assert_false: MediaDevices is not exposed expected false got true",
+          "name": "MediaDevices and SecureContext"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStreamTrack-init.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 318,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "getUserMedia({video:true}) creates a stream with a properly initialized video track"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/GUM-empty-option-param.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 1230,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that getUserMedia is rejected with a TypeError when used with an empty options parameter"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaDevices-enumerateDevices.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 1233,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "mediaDevices.enumerateDevices() is present and working"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "InputDeviceInfo is supported"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/GUM-trivial-constraint.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 319,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that setting a trivial mandatory constraint in getUserMedia works"
+        }
+      ]
+    },
+    {
+      "status": "ERROR",
+      "expected": "OK",
+      "test": "/mediacapture-streams/MediaStream-removetrack.https.html",
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that a removal from a MediaStream works as expected"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: audio element ended because no more audio tracks expected true but got false",
+          "name": "Test that removal from a MediaStream fires ended on media elements (video first)"
+        },
+        {
+          "status": "NOTRUN",
+          "expected": "PASS",
+          "message": null,
+          "name": "Test that removal from a MediaStream fires ended on media elements (audio first)"
+        }
+      ],
+      "duration": 1386,
+      "message": "Test named 'Test that removal from a MediaStream fires ended on media elements (video first)' specified 2 'cleanup' functions, and 1 returned a non-thenable value."
+    },
+    {
+      "test": "/mediacapture-streams/MediaStream-video-only.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 1331,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that a MediaStream with at least one video track is returned"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStream-audio-only.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 216,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that a MediaStream with exactly one audio track is returned"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaDevices-getUserMedia.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 1379,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "mediaDevices.getUserMedia() is present on navigator"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "groupId is correctly supported by getUserMedia() for video devices"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "groupId is correctly supported by getUserMedia() for audio devices"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected (string) \"none\" but got (undefined) undefined",
+          "name": "getUserMedia() supports setting none as resizeMode."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected (string) \"crop-and-scale\" but got (undefined) undefined",
+          "name": "getUserMedia() supports setting crop-and-scale as resizeMode."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_unreached: getUserMedia() should fail with invalid resizeMode Reached unreachable code",
+          "name": "getUserMedia() fails with exact invalid resizeMode."
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/GUM-api.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 1530,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "mediaDevices.getUserMedia() is present on navigator"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/GUM-non-applicable-constraint.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 218,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Test that setting video-only valid constraints inside of \"audio\" is simply ignored"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Test that setting video-only invalid constraints inside of \"audio\" is simply ignored"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Test that setting audio-only valid constraints inside of \"video\" is simply ignored"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Test that setting audio-only invalid constraints inside of \"video\" is simply ignored"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStream-finished-add.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 218,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that adding a track to an inactive MediaStream is allowed"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStream-clone.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 216,
+      "subtests": [
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "promise_test: Unhandled rejection with value: object \"TypeError: Cannot read property 'readyState' of undefined\"",
+          "name": "Tests that cloning MediaStream objects works as expected"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that cloning MediaStreamTrack objects works as expected"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStream-default-feature-policy.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 1882,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Default \"microphone\" feature policy [\"self\"] allows the top-level document."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Default \"microphone\" feature policy [\"self\"] allows same-origin iframes."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Default \"microphone\" feature policy [\"self\"] disallows cross-origin iframes."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Feature policy \"microphone\" can be enabled in cross-origin iframes using \"allow\" attribute."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Default \"camera\" feature policy [\"self\"] allows the top-level document."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Default \"camera\" feature policy [\"self\"] allows same-origin iframes."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Default \"camera\" feature policy [\"self\"] disallows cross-origin iframes."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Feature policy \"camera\" can be enabled in cross-origin iframes using \"allow\" attribute."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Default \"camera; microphone\" feature policy [\"self\"] allows the top-level document."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Default \"camera; microphone\" feature policy [\"self\"] allows same-origin iframes."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Default \"camera; microphone\" feature policy [\"self\"] disallows cross-origin iframes."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Feature policy \"camera; microphone\" can be enabled in cross-origin iframes using \"allow\" attribute."
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/historical.html",
+      "status": "OK",
+      "message": null,
+      "duration": 346,
+      "subtests": [
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_false: expected false got true",
+          "name": "webkitMediaStream interface should not exist"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_false: expected false got true",
+          "name": "navigator.webkitGetUserMedia should not exist"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "navigator.mozGetUserMedia should not exist"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_throws: function \"() => URL.createObjectURL(mediaStream)\" did not throw",
+          "name": "Passing MediaStream to URL.createObjectURL() should throw"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaDevices-getSupportedConstraints.html",
+      "status": "OK",
+      "message": null,
+      "duration": 378,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "navigator.mediaDevices.getSupportedConstraints exists"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "width is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "height is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "aspectRatio is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "frameRate is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "facingMode is supported"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got undefined",
+          "name": "resizeMode is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "volume is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "sampleRate is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "sampleSize is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "echoCancellation is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "autoGainControl is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "noiseSuppression is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "latency is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "channelCount is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "deviceId is supported"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "groupId is supported"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/GUM-optional-constraint.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 368,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that setting an optional constraint in getUserMedia is handled as optional"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStreamTrack-MediaElement-disabled-audio-is-silence.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 518,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that a disabled audio track in a MediaStream is rendered as silence"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStream-gettrackid.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 215,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that MediaStream.getTrackById works as expected"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStreamTrack-id.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 1634,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that distinct mediastream tracks have distinct ids "
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/GUM-invalid-facing-mode.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 216,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that setting an invalid facingMode constraint in getUserMedia fails"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStream-MediaElement-srcObject.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 1281,
+      "subtests": [
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: playback rate is always 1 expected 1 but got 0.4",
+          "name": "Tests that a MediaStream can be assigned to a video element with srcObject"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStreamTrack-getCapabilities.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 1647,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio MediaStreamTrack getCapabilities() test for volume"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio MediaStreamTrack getCapabilities() test for sampleRate"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio MediaStreamTrack getCapabilities() test for sampleSize"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio MediaStreamTrack getCapabilities() test for echoCancellation"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio MediaStreamTrack getCapabilities() test for autoGainControl"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio MediaStreamTrack getCapabilities() test for noiseSuppression"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio MediaStreamTrack getCapabilities() test for latency"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio MediaStreamTrack getCapabilities() test for channelCount"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio MediaStreamTrack getCapabilities() test for deviceId"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio MediaStreamTrack getCapabilities() test for groupId"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video MediaStreamTrack getCapabilities() test for width"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video MediaStreamTrack getCapabilities() test for height"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video MediaStreamTrack getCapabilities() test for aspectRatio"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video MediaStreamTrack getCapabilities() test for frameRate"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video MediaStreamTrack getCapabilities() test for facingMode"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video MediaStreamTrack getCapabilities() test for resizeMode"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video MediaStreamTrack getCapabilities() test for deviceId"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video MediaStreamTrack getCapabilities() test for groupId"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio InputDeviceInfo getCapabilities() test for volume"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio InputDeviceInfo getCapabilities() test for sampleRate"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio InputDeviceInfo getCapabilities() test for sampleSize"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio InputDeviceInfo getCapabilities() test for echoCancellation"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio InputDeviceInfo getCapabilities() test for autoGainControl"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio InputDeviceInfo getCapabilities() test for noiseSuppression"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio InputDeviceInfo getCapabilities() test for latency"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio InputDeviceInfo getCapabilities() test for channelCount"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio InputDeviceInfo getCapabilities() test for deviceId"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup audio InputDeviceInfo getCapabilities() test for groupId"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video InputDeviceInfo getCapabilities() test for width"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video InputDeviceInfo getCapabilities() test for height"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video InputDeviceInfo getCapabilities() test for aspectRatio"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video InputDeviceInfo getCapabilities() test for frameRate"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video InputDeviceInfo getCapabilities() test for facingMode"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video InputDeviceInfo getCapabilities() test for resizeMode"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video InputDeviceInfo getCapabilities() test for deviceId"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Setup video InputDeviceInfo getCapabilities() test for groupId"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Audio track getCapabilities() volume property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected \"object\" but got \"undefined\"",
+          "name": "Audio track getCapabilities() volume properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Audio track getCapabilities() sampleRate property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected \"object\" but got \"undefined\"",
+          "name": "Audio track getCapabilities() sampleRate properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Audio track getCapabilities() sampleSize property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected \"object\" but got \"undefined\"",
+          "name": "Audio track getCapabilities() sampleSize properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio track getCapabilities() echoCancellation property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio track getCapabilities() echoCancellation properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio track getCapabilities() autoGainControl property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio track getCapabilities() autoGainControl properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio track getCapabilities() noiseSuppression property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio track getCapabilities() noiseSuppression properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Audio track getCapabilities() latency property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected \"object\" but got \"undefined\"",
+          "name": "Audio track getCapabilities() latency properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Audio track getCapabilities() channelCount property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected \"object\" but got \"undefined\"",
+          "name": "Audio track getCapabilities() channelCount properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio track getCapabilities() deviceId property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio track getCapabilities() deviceId properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio track getCapabilities() groupId property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio track getCapabilities() groupId properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() width property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() width properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() height property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() height properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() aspectRatio property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() aspectRatio properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() frameRate property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() frameRate properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() facingMode property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() facingMode properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Video track getCapabilities() resizeMode property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "Cannot read property 'forEach' of undefined",
+          "name": "Video track getCapabilities() resizeMode properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "Cannot read property 'indexOf' of undefined",
+          "name": "Video track getCapabilities() resizeMode properly supported. Value: none"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "Cannot read property 'indexOf' of undefined",
+          "name": "Video track getCapabilities() resizeMode properly supported. Value: crop-and-scale"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() deviceId property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() deviceId properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() groupId property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video track getCapabilities() groupId properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Audio device getCapabilities() volume property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected \"object\" but got \"undefined\"",
+          "name": "Audio device getCapabilities() volume properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Audio device getCapabilities() sampleRate property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected \"object\" but got \"undefined\"",
+          "name": "Audio device getCapabilities() sampleRate properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Audio device getCapabilities() sampleSize property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected \"object\" but got \"undefined\"",
+          "name": "Audio device getCapabilities() sampleSize properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio device getCapabilities() echoCancellation property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio device getCapabilities() echoCancellation properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio device getCapabilities() autoGainControl property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio device getCapabilities() autoGainControl properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio device getCapabilities() noiseSuppression property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio device getCapabilities() noiseSuppression properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Audio device getCapabilities() latency property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected \"object\" but got \"undefined\"",
+          "name": "Audio device getCapabilities() latency properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Audio device getCapabilities() channelCount property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: expected \"object\" but got \"undefined\"",
+          "name": "Audio device getCapabilities() channelCount properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio device getCapabilities() deviceId property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio device getCapabilities() deviceId properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio device getCapabilities() groupId property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Audio device getCapabilities() groupId properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() width property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() width properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() height property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() height properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() aspectRatio property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() aspectRatio properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() frameRate property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() frameRate properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() facingMode property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() facingMode properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: expected true got false",
+          "name": "Video device getCapabilities() resizeMode property present."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "Cannot read property 'forEach' of undefined",
+          "name": "Video device getCapabilities() resizeMode properly supported."
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "Cannot read property 'indexOf' of undefined",
+          "name": "Video device getCapabilities() resizeMode properly supported. Value: none"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "Cannot read property 'indexOf' of undefined",
+          "name": "Video device getCapabilities() resizeMode properly supported. Value: crop-and-scale"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() deviceId property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() deviceId properly supported."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() groupId property present."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Video device getCapabilities() groupId properly supported."
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStream-idl.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 266,
+      "subtests": [
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: an ended track gets added via the MediaStream constructor expected object \"[object MediaStreamTrack]\" but got null",
+          "name": "Tests that a MediaStream constructor follows the algorithm set in the spec"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStreamTrackEvent-constructor.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 269,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "The eventInitDict argument is required"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "The eventInitDict's track member is required."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "The MediaStreamTrackEvent instance's track attribute is set."
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStreamTrack-applyConstraints.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 319,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "applyConstraints rejects invalid groupID"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "applyConstraints accepts invalid ideal groupID, does not change setting"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "applyConstraints rejects attempt to switch device using groupId"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_unreached: applyConstraints() must fail with invalid resizeMode Reached unreachable code",
+          "name": "applyConstraints rejects invalid resizeMode"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "applyConstraints accepts invalid ideal resizeMode, does not change setting"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStreamTrack-MediaElement-disabled-video-is-black.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 268,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that a disabled video track in a MediaStream is rendered as blackness"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/GUM-unknownkey-option-param.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 368,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that getUserMedia is rejected with a TypeError when used with an unknown constraint"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/GUM-impossible-constraint.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 268,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that setting an impossible constraint in getUserMedia fails"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/idlharness.https.window.html",
+      "status": "OK",
+      "message": null,
+      "duration": 2254,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "mediacapture-streams interfaces."
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Partial interface Navigator: original interface defined"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Partial interface Navigator[2]: original interface defined"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Partial interface MediaDevices: original interface defined"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: existence and properties of interface object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface object length"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface object name"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: existence and properties of interface prototype object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: existence and properties of interface prototype object's \"constructor\" property"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: existence and properties of interface prototype object's @@unscopables property"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get id' expected \"get id\" but got \"\"",
+          "name": "MediaStream interface: attribute id"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: operation getAudioTracks()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: operation getVideoTracks()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: operation getTracks()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: operation getTrackById(DOMString)"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: operation addTrack(MediaStreamTrack)"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: operation removeTrack(MediaStreamTrack)"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: operation clone()"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get active' expected \"get active\" but got \"\"",
+          "name": "MediaStream interface: attribute active"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get onaddtrack' expected \"get onaddtrack\" but got \"\"",
+          "name": "MediaStream interface: attribute onaddtrack"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get onremovetrack' expected \"get onremovetrack\" but got \"\"",
+          "name": "MediaStream interface: attribute onremovetrack"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream must be primary interface of [object MediaStream]"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Stringification of [object MediaStream]"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: [object MediaStream] must inherit property \"id\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: [object MediaStream] must inherit property \"getAudioTracks()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: [object MediaStream] must inherit property \"getVideoTracks()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: [object MediaStream] must inherit property \"getTracks()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: [object MediaStream] must inherit property \"getTrackById(DOMString)\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: calling getTrackById(DOMString) on [object MediaStream] with too few arguments must throw TypeError"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: [object MediaStream] must inherit property \"addTrack(MediaStreamTrack)\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: calling addTrack(MediaStreamTrack) on [object MediaStream] with too few arguments must throw TypeError"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: [object MediaStream] must inherit property \"removeTrack(MediaStreamTrack)\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: calling removeTrack(MediaStreamTrack) on [object MediaStream] with too few arguments must throw TypeError"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: [object MediaStream] must inherit property \"clone()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: [object MediaStream] must inherit property \"active\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: [object MediaStream] must inherit property \"onaddtrack\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: [object MediaStream] must inherit property \"onremovetrack\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream must be primary interface of new MediaStream()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Stringification of new MediaStream()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: new MediaStream() must inherit property \"id\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: new MediaStream() must inherit property \"getAudioTracks()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: new MediaStream() must inherit property \"getVideoTracks()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: new MediaStream() must inherit property \"getTracks()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: new MediaStream() must inherit property \"getTrackById(DOMString)\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: calling getTrackById(DOMString) on new MediaStream() with too few arguments must throw TypeError"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: new MediaStream() must inherit property \"addTrack(MediaStreamTrack)\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: calling addTrack(MediaStreamTrack) on new MediaStream() with too few arguments must throw TypeError"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: new MediaStream() must inherit property \"removeTrack(MediaStreamTrack)\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: calling removeTrack(MediaStreamTrack) on new MediaStream() with too few arguments must throw TypeError"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: new MediaStream() must inherit property \"clone()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: new MediaStream() must inherit property \"active\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: new MediaStream() must inherit property \"onaddtrack\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStream interface: new MediaStream() must inherit property \"onremovetrack\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: existence and properties of interface object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface object length"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface object name"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: existence and properties of interface prototype object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: existence and properties of interface prototype object's \"constructor\" property"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: existence and properties of interface prototype object's @@unscopables property"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get kind' expected \"get kind\" but got \"\"",
+          "name": "MediaStreamTrack interface: attribute kind"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get id' expected \"get id\" but got \"\"",
+          "name": "MediaStreamTrack interface: attribute id"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get label' expected \"get label\" but got \"\"",
+          "name": "MediaStreamTrack interface: attribute label"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get enabled' expected \"get enabled\" but got \"\"",
+          "name": "MediaStreamTrack interface: attribute enabled"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get muted' expected \"get muted\" but got \"\"",
+          "name": "MediaStreamTrack interface: attribute muted"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get onmute' expected \"get onmute\" but got \"\"",
+          "name": "MediaStreamTrack interface: attribute onmute"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get onunmute' expected \"get onunmute\" but got \"\"",
+          "name": "MediaStreamTrack interface: attribute onunmute"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get readyState' expected \"get readyState\" but got \"\"",
+          "name": "MediaStreamTrack interface: attribute readyState"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get onended' expected \"get onended\" but got \"\"",
+          "name": "MediaStreamTrack interface: attribute onended"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: operation clone()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: operation stop()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: operation getCapabilities()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: operation getConstraints()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: operation getSettings()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: operation applyConstraints(MediaTrackConstraints)"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_true: The prototype object must have a property \"onoverconstrained\" expected true got false",
+          "name": "MediaStreamTrack interface: attribute onoverconstrained"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack must be primary interface of [object MediaStreamTrack]"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Stringification of [object MediaStreamTrack]"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"kind\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"id\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"label\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"enabled\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"muted\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"onmute\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"onunmute\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"readyState\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"onended\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"clone()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"stop()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"getCapabilities()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"getConstraints()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"getSettings()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"applyConstraints(MediaTrackConstraints)\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrack interface: calling applyConstraints(MediaTrackConstraints) on [object MediaStreamTrack] with too few arguments must throw TypeError"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_inherits: property \"onoverconstrained\" not found in prototype chain",
+          "name": "MediaStreamTrack interface: [object MediaStreamTrack] must inherit property \"onoverconstrained\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrackEvent interface: existence and properties of interface object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrackEvent interface object length"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrackEvent interface object name"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrackEvent interface: existence and properties of interface prototype object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrackEvent interface: existence and properties of interface prototype object's \"constructor\" property"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrackEvent interface: existence and properties of interface prototype object's @@unscopables property"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get track' expected \"get track\" but got \"\"",
+          "name": "MediaStreamTrackEvent interface: attribute track"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrackEvent must be primary interface of [object MediaStreamTrackEvent]"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Stringification of [object MediaStreamTrackEvent]"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaStreamTrackEvent interface: [object MediaStreamTrackEvent] must inherit property \"track\" with the proper type"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_own_property: self does not have own property \"OverconstrainedErrorEvent\" expected property \"OverconstrainedErrorEvent\" missing",
+          "name": "OverconstrainedErrorEvent interface: existence and properties of interface object"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_own_property: self does not have own property \"OverconstrainedErrorEvent\" expected property \"OverconstrainedErrorEvent\" missing",
+          "name": "OverconstrainedErrorEvent interface object length"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_own_property: self does not have own property \"OverconstrainedErrorEvent\" expected property \"OverconstrainedErrorEvent\" missing",
+          "name": "OverconstrainedErrorEvent interface object name"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_own_property: self does not have own property \"OverconstrainedErrorEvent\" expected property \"OverconstrainedErrorEvent\" missing",
+          "name": "OverconstrainedErrorEvent interface: existence and properties of interface prototype object"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_own_property: self does not have own property \"OverconstrainedErrorEvent\" expected property \"OverconstrainedErrorEvent\" missing",
+          "name": "OverconstrainedErrorEvent interface: existence and properties of interface prototype object's \"constructor\" property"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_own_property: self does not have own property \"OverconstrainedErrorEvent\" expected property \"OverconstrainedErrorEvent\" missing",
+          "name": "OverconstrainedErrorEvent interface: existence and properties of interface prototype object's @@unscopables property"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_own_property: self does not have own property \"OverconstrainedErrorEvent\" expected property \"OverconstrainedErrorEvent\" missing",
+          "name": "OverconstrainedErrorEvent interface: attribute error"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: Unexpected exception when evaluating object expected null but got object \"ReferenceError: OverconstrainedErrorEvent is not defined\"",
+          "name": "OverconstrainedErrorEvent must be primary interface of new OverconstrainedErrorEvent(\"type\", {})"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: Unexpected exception when evaluating object expected null but got object \"ReferenceError: OverconstrainedErrorEvent is not defined\"",
+          "name": "Stringification of new OverconstrainedErrorEvent(\"type\", {})"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: Unexpected exception when evaluating object expected null but got object \"ReferenceError: OverconstrainedErrorEvent is not defined\"",
+          "name": "OverconstrainedErrorEvent interface: new OverconstrainedErrorEvent(\"type\", {}) must inherit property \"error\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: existence and properties of interface object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface object length"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface object name"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: existence and properties of interface prototype object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: existence and properties of interface prototype object's \"constructor\" property"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: existence and properties of interface prototype object's @@unscopables property"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get ondevicechange' expected \"get ondevicechange\" but got \"\"",
+          "name": "MediaDevices interface: attribute ondevicechange"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: operation enumerateDevices()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: operation getSupportedConstraints()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: operation getUserMedia(MediaStreamConstraints)"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices must be primary interface of navigator.mediaDevices"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Stringification of navigator.mediaDevices"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: navigator.mediaDevices must inherit property \"ondevicechange\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: navigator.mediaDevices must inherit property \"enumerateDevices()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: navigator.mediaDevices must inherit property \"getSupportedConstraints()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: navigator.mediaDevices must inherit property \"getUserMedia(MediaStreamConstraints)\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDevices interface: calling getUserMedia(MediaStreamConstraints) on navigator.mediaDevices with too few arguments must throw TypeError"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface: existence and properties of interface object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface object length"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface object name"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface: existence and properties of interface prototype object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface: existence and properties of interface prototype object's \"constructor\" property"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface: existence and properties of interface prototype object's @@unscopables property"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get deviceId' expected \"get deviceId\" but got \"\"",
+          "name": "MediaDeviceInfo interface: attribute deviceId"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get kind' expected \"get kind\" but got \"\"",
+          "name": "MediaDeviceInfo interface: attribute kind"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get label' expected \"get label\" but got \"\"",
+          "name": "MediaDeviceInfo interface: attribute label"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get groupId' expected \"get groupId\" but got \"\"",
+          "name": "MediaDeviceInfo interface: attribute groupId"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface: operation toJSON()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "InputDeviceInfo interface: existence and properties of interface object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "InputDeviceInfo interface object length"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "InputDeviceInfo interface object name"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "InputDeviceInfo interface: existence and properties of interface prototype object"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "InputDeviceInfo interface: existence and properties of interface prototype object's \"constructor\" property"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "InputDeviceInfo interface: existence and properties of interface prototype object's @@unscopables property"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "InputDeviceInfo interface: operation getCapabilities()"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "InputDeviceInfo must be primary interface of [object InputDeviceInfo]"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Stringification of [object InputDeviceInfo]"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "InputDeviceInfo interface: [object InputDeviceInfo] must inherit property \"getCapabilities()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface: [object InputDeviceInfo] must inherit property \"deviceId\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface: [object InputDeviceInfo] must inherit property \"kind\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface: [object InputDeviceInfo] must inherit property \"label\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface: [object InputDeviceInfo] must inherit property \"groupId\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "MediaDeviceInfo interface: [object InputDeviceInfo] must inherit property \"toJSON()\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Test default toJSON operation of InputDeviceInfo"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: getter must have the name 'get mediaDevices' expected \"get mediaDevices\" but got \"\"",
+          "name": "Navigator interface: attribute mediaDevices"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Navigator interface: operation getUserMedia(MediaStreamConstraints, NavigatorUserMediaSuccessCallback, NavigatorUserMediaErrorCallback)"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Navigator interface: navigator must inherit property \"mediaDevices\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Navigator interface: navigator must inherit property \"getUserMedia(MediaStreamConstraints, NavigatorUserMediaSuccessCallback, NavigatorUserMediaErrorCallback)\" with the proper type"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Navigator interface: calling getUserMedia(MediaStreamConstraints, NavigatorUserMediaSuccessCallback, NavigatorUserMediaErrorCallback) on navigator with too few arguments must throw TypeError"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStream-add-audio-track.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 1381,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "Tests that adding a track to a MediaStream works as expected"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/MediaStreamTrack-getSettings.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 1630,
+      "subtests": [
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "A device can be opened twice and have the same device ID"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "A device can be opened twice with different resolutions"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "groupId is correctly reported by getSettings() for all devices"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "deviceId is reported by getSettings() for getUserMedia() audio tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "groupId is reported by getSettings() for getUserMedia() audio tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "volume is reported by getSettings() for getUserMedia() audio tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "sampleRate is reported by getSettings() for getUserMedia() audio tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "sampleSize is reported by getSettings() for getUserMedia() audio tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "echoCancellation is reported by getSettings() for getUserMedia() audio tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "autoGainControl is reported by getSettings() for getUserMedia() audio tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "noiseSuppression is reported by getSettings() for getUserMedia() audio tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "latency is reported by getSettings() for getUserMedia() audio tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "channelCount is reported by getSettings() for getUserMedia() audio tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "deviceId is reported by getSettings() for getUserMedia() video tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "groupId is reported by getSettings() for getUserMedia() video tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "width is reported by getSettings() for getUserMedia() video tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "height is reported by getSettings() for getUserMedia() video tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "aspectRatio is reported by getSettings() for getUserMedia() video tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "frameRate is reported by getSettings() for getUserMedia() video tracks"
+        },
+        {
+          "status": "PASS",
+          "message": null,
+          "name": "facingMode is reported by getSettings() for getUserMedia() video tracks"
+        },
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_equals: resizeMode should exist and it should be a string. expected \"string\" but got \"undefined\"",
+          "name": "resizeMode is reported by getSettings() for getUserMedia() video tracks"
+        }
+      ]
+    },
+    {
+      "test": "/mediacapture-streams/GUM-deny.https.html",
+      "status": "OK",
+      "message": null,
+      "duration": 268,
+      "subtests": [
+        {
+          "status": "FAIL",
+          "expected": "PASS",
+          "message": "assert_unreached: The success callback should not be triggered since access is to be denied Reached unreachable code",
+          "name": "Tests that the error callback is triggered when permission is denied"
+        }
+      ]
+    }
+  ]
+}

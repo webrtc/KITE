@@ -1,0 +1,10 @@
+This is the Meetecho extension utility for screensharing support in the Janus WebRTC gateway
+
+Janus (http://janus.conf.meetecho.com) is an open source, general purpose WebRTC gateway developed by Meetecho.
+
+Among its several features, it also allows users to share their screen or one of their applications with several attendees.
+
+For security reasons, screen/application sharing with WebRTC needs an extension to be installed: this extension provides such a security mechanism for usage with the Janus gateway.
+
+Test it with the online demo (http://janus.conf.meetecho.com/screensharingtest.html) or with any installation of Janus you made yourself.
+

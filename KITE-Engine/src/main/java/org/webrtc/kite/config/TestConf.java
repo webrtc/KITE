@@ -43,28 +43,33 @@ public class TestConf extends Test {
   // Optional
   private int noOfThreads;
   private int maxRetryCount;
-
+  private String commandName;
+  
   /**
    * Constructs a new TestConf with the given callback url and JsonObject.
    *
+   * @param permute the permute
    * @param callbackURL a string representation of callback url.
    * @param jsonObject  JsonObject
    * @throws KiteInsufficientValueException the kite insufficient value exception
    */
-  public TestConf(String callbackURL, JsonObject jsonObject) throws KiteInsufficientValueException {
-    super(callbackURL, jsonObject);
-
+  public TestConf(boolean permute, String callbackURL, JsonObject jsonObject)
+    throws KiteInsufficientValueException {
+    super(permute, callbackURL, jsonObject);
+    
     this.tupleSize = jsonObject.getInt("tupleSize");
-
+    
     this.noOfThreads = jsonObject.getInt("noOfThreads", 1);
-    if (this.noOfThreads < 1)
+    if (this.noOfThreads < 1) {
       throw new KiteInsufficientValueException(
-          "noOfThreads for " + this.name + " is less than one.");
-
+        "noOfThreads for " + this.name + " is less than one.");
+    }
+    
     this.maxRetryCount = jsonObject.getInt("maxRetryCount", 1);
-    if (this.maxRetryCount < 0)
+    if (this.maxRetryCount < 0) {
       throw new KiteInsufficientValueException(
-          "maxRetryCount for " + this.name + " is a negative value.");
+        "maxRetryCount for " + this.name + " is a negative value.");
+    }
   }
 
   /**
@@ -93,16 +98,7 @@ public class TestConf extends Test {
   public int getNoOfThreads() {
     return noOfThreads;
   }
-
-  /**
-   * Sets no of threads.
-   *
-   * @param noOfThreads the no of threads
-   */
-  public void setNoOfThreads(int noOfThreads) {
-    this.noOfThreads = noOfThreads;
-  }
-
+  
   /**
    * Gets max retry count.
    *
@@ -112,34 +108,11 @@ public class TestConf extends Test {
     return maxRetryCount;
   }
 
-  /**
-   * Sets max retry count.
-   *
-   * @param maxRetryCount the max retry count
-   */
-  public void setMaxRetryCount(int maxRetryCount) {
-    this.maxRetryCount = maxRetryCount;
+  public void setCommandName(String commandName) {
+    this.commandName = commandName;
   }
-
-  /**
-   * Returns an identifier for the TestConf in the following format:
-   * name + "_" + last four digits of the Configurator's timestamp + "_" + index.
-   *
-   * @param index Index of the testcase in the array
-   * @return Remote test identifier
-   */
-  public String getRemoteTestIdentifier(int index) {
-    String identifier = "" + Configurator.getInstance().getTimeStamp();
-    identifier = identifier.substring(identifier.length() - 4);
-    return name + "_" + identifier + "_" + index;
-  }
-
+  
   @Override public JsonObjectBuilder getJsonObjectBuilder() {
     return super.getJsonObjectBuilder().add("tupleSize", this.tupleSize);
   }
-
-  @Override public JsonObjectBuilder getJsonObjectBuilderForResult() {
-    return super.getJsonObjectBuilderForResult().add("tupleSize", this.tupleSize);
-  }
-
 }

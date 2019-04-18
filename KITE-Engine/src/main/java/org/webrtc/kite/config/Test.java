@@ -25,42 +25,43 @@ import javax.json.JsonValue;
  * The type Test.
  */
 public class Test extends KiteConfigObject {
-
+  
+  private final String DEFAULT_DESC = "No description was provided fot this test.";
+  
   // Mandatory
-  /**
-   * The Name.
-   */
-  protected String name;
-  /**
-   * The Test.
-   */
-  protected String testImpl;
-
+  protected final String name;
+  protected final String testImpl;
+  
   // Optional
   private String description;
   private JsonValue payload;
   private String callbackURL;
-
+  private boolean permute;
+  
   /**
    * Constructs a new TestConf with the given callback url and JsonObject.
    *
    * @param callbackURL a string representation of callback url.
    * @param jsonObject  JsonObject
    */
-  public Test(String callbackURL, JsonObject jsonObject) {
+  public Test(boolean permute, String callbackURL, JsonObject jsonObject) {
     this.name = jsonObject.getString("name");
     this.testImpl = jsonObject.getString("testImpl");
-
+    
     this.description =
-        jsonObject.getString("description", "No description was provided fot this test.");
+      jsonObject.getString("description", DEFAULT_DESC);
     this.payload = jsonObject.getOrDefault("payload", null);
-
+    
     // Override the global value with the local value
     this.callbackURL = jsonObject.getString("callback", null);
-    if (this.callbackURL == null)
+    
+    if (this.callbackURL == null) {
       this.callbackURL = callbackURL;
+    }
+    
+    this.permute = jsonObject.getBoolean("permute", permute);
   }
-
+  
   /**
    * Gets name.
    *
@@ -69,15 +70,7 @@ public class Test extends KiteConfigObject {
   public String getName() {
     return name;
   }
-
-  /**
-   * Sets name.
-   *
-   * @param name the name
-   */
-  public void setName(String name) {
-    this.name = name;
-  }
+  
 
   /**
    * Gets test.
@@ -87,16 +80,8 @@ public class Test extends KiteConfigObject {
   public String getTestImpl() {
     return testImpl;
   }
-
-  /**
-   * Sets test.
-   *
-   * @param testImpl the test
-   */
-  public void setTestImpl(String testImpl) {
-    this.testImpl = testImpl;
-  }
-
+  
+  
   /**
    * Gets description.
    *
@@ -105,7 +90,7 @@ public class Test extends KiteConfigObject {
   public String getDescription() {
     return description;
   }
-
+  
   /**
    * Sets description.
    *
@@ -114,7 +99,7 @@ public class Test extends KiteConfigObject {
   public void setDescription(String description) {
     this.description = description;
   }
-
+  
   /**
    * Gets payload.
    *
@@ -123,7 +108,7 @@ public class Test extends KiteConfigObject {
   public JsonValue getPayload() {
     return payload;
   }
-
+  
   /**
    * Sets payload.
    *
@@ -132,7 +117,7 @@ public class Test extends KiteConfigObject {
   public void setPayload(JsonValue payload) {
     this.payload = payload;
   }
-
+  
   /**
    * Gets callback url.
    *
@@ -141,7 +126,7 @@ public class Test extends KiteConfigObject {
   public String getCallbackURL() {
     return callbackURL;
   }
-
+  
   /**
    * Sets callback url.
    *
@@ -150,15 +135,26 @@ public class Test extends KiteConfigObject {
   public void setCallbackURL(String callbackURL) {
     this.callbackURL = callbackURL;
   }
-
+  
+  /**
+   * Is permute boolean.
+   *
+   * @return the boolean
+   */
+  public boolean isPermute() {
+    return permute;
+  }
+  
+  /**
+   * Sets permute.
+   *
+   * @param permute the permute
+   */
+  public void setPermute(boolean permute) {
+    this.permute = permute;
+  }
+  
   @Override public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder().add("name", this.name).add("testImpl", this.testImpl);
   }
-
-  @Override public JsonObjectBuilder getJsonObjectBuilderForResult() {
-    return Json.createObjectBuilder().add("timeStamp", Configurator.getInstance().getTimeStamp())
-        .add("configName", Configurator.getInstance().getName()).add("testName", this.name)
-        .add("testImpl", this.testImpl);
-  }
-
 }

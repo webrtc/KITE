@@ -17,7 +17,7 @@
 package org.webrtc.kite.grid;
 
 import org.apache.log4j.Logger;
-import org.webrtc.kite.Utility;
+import org.webrtc.kite.Utils;
 import org.webrtc.kite.config.Browser;
 
 import javax.json.Json;
@@ -116,7 +116,7 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
       s = c.createStatement();
       s.executeUpdate(sql);
     } finally {
-      Utility.closeDBResources(s, null);
+      Utils.closeDBResources(s, null);
     }
   }
 
@@ -134,7 +134,7 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
       s = c.createStatement();
       s.executeUpdate(sql);
     } finally {
-      Utility.closeDBResources(s, null);
+      Utils.closeDBResources(s, null);
     }
   }
 
@@ -167,7 +167,7 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
         ps.executeUpdate();
       }
     } finally {
-      Utility.closeDBResources(ps, null);
+      Utils.closeDBResources(ps, null);
     }
   }
 
@@ -192,7 +192,7 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
       else
         return false;
     } finally {
-      Utility.closeDBResources(s, rs);
+      Utils.closeDBResources(s, rs);
     }
   }
 
@@ -220,7 +220,7 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
       } else
         return false;
     } finally {
-      Utility.closeDBResources(s, rs);
+      Utils.closeDBResources(s, rs);
       if (c != null)
         c.close();
     }
@@ -302,7 +302,7 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
       if (rs.next())
         result = true;
     } finally {
-      Utility.closeDBResources(s, rs);
+      Utils.closeDBResources(s, rs);
       if (c != null)
         c.close();
     }

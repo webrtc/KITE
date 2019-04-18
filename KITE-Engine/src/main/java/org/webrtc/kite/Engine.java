@@ -25,7 +25,6 @@ import org.webrtc.kite.exception.*;
 import org.webrtc.kite.scheduler.MatrixRunnerJobListener;
 
 import javax.json.JsonException;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,12 +38,15 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 public class Engine {
 
-  private static final String IDENTITY_GROUP = "KITE";
-
   static {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HHmmss");
     System.setProperty("current.date", dateFormat.format(new Date()));
+//    DOMConfigurator.configure("log4j.xml");
   }
+
+  private static final String IDENTITY_GROUP = "KITE";
+  public static Scheduler scheduler = null;
+
 
   //Logger must be called after setting the system property "current.data"
   private static final Logger logger = Logger.getLogger(Engine.class.getName());
@@ -61,14 +63,14 @@ public class Engine {
       return;
     }
 
-    Scheduler scheduler = null;
     try {
-      Configurator.getInstance().buildConfig(new File(args[0]));
+      Configurator.getInstance().setConfigFilePath(args[0]);
+      Configurator.getInstance().buildConfig();
       int interval = Configurator.getInstance().getInterval();
 
       // Grab the Scheduler instance from the Factory
       scheduler = StdSchedulerFactory.getDefaultScheduler();
-      // and start it off
+      // and setStartTimestamp it off
       scheduler.start();
 
       Class jobClass = Configurator.getInstance().getJobClass();
@@ -115,7 +117,7 @@ public class Engine {
       logger.fatal(
           "Error [Unrecognized remote]: '" + e.getRemoteName() + "' is unrecognized to KITE.", e);
     } catch (Exception e) {
-      logger.fatal("FATAL Error: KITE has failed to start execution", e);
+      logger.fatal("FATAL Error: KITE has failed to setStartTimestamp execution", e);
       try {
         if (scheduler != null && (scheduler.isStarted() || !scheduler.isShutdown())) {
           try {

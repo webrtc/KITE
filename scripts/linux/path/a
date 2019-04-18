@@ -1,0 +1,9 @@
+ALLURE_BAT=$KITE_HOME/third_party/allure-2.10.0/bin/allure
+if [ -f "$ALLURE_BAT" ] 
+then
+  echo $ALLURE_BAT
+  gnome-terminal -e 'allure serve kite-allure-reports'
+else
+  echo "File not found: $ALLURE_BAT"
+  echo "Please edit this file and set ALLURE_BAT to the correct path. You may need to check your KITE_HOME variable."
+fi 

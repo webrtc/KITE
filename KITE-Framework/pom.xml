@@ -1,0 +1,49 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.webrtc.kite</groupId>
+    <artifactId>kite-base</artifactId>
+    <version>2.0.2</version>
+  </parent>
+
+  <artifactId>kite-framework</artifactId>
+  <name>kite-framework</name>
+  <version>${kite.framework.version}</version>
+
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${kite.mvn.compiler.version}</version>
+        <configuration>
+          <source>${kite.java.version}</source>
+          <target>${kite.java.version}</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>com.github.CoSMoSoftware.KITE-Extras</groupId>
+      <artifactId>kite-extras</artifactId>
+      <version>${kite.extras.version}</version>
+    </dependency>
+    <!-- Uncomment this and comment out the above dependency to use your local maven repo for KITE-Extras
+    <dependency>
+      <groupId>io.cosmosoftware.kite</groupId>
+      <artifactId>kite-extras</artifactId>
+      <version>${kite.extras.version}</version>
+    </dependency>
+    -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${kite.junit.version}</version>
+    </dependency>
+  </dependencies>
+</project>

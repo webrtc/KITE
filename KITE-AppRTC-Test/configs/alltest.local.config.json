@@ -1,0 +1,166 @@
+{
+  "name": "IceConnectionTest ",
+  "callback": null,
+  "callable": true,
+  "reportFolder" : "",
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://localhost:4444/wd/hub"
+    }
+  ],
+  "tests": [
+    {
+      "name": "IceConnectionTest",
+      "tupleSize": 2,
+      "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
+      "testImpl": "org.webrtc.kite.apprtc.tests.IceConnectionTest",
+      "payload" : {
+        "url": "https://appr.tc",
+        "statsCollectionDuration": 10000,
+        "statsCollectionInterval": 1000,
+        "getStats": true,
+        "bitrate": 8000,
+        "printToCSV": false,
+        "printToJson": false,
+        "selectedStats": []
+      }
+    },
+    {
+      "name": "NoVideoTest",
+      "tupleSize": 2,
+      "description": "This test check the ICEConnection state between two browsers communicating via appr.tc without video",
+      "testImpl": "org.webrtc.kite.apprtc.tests.NoVideoTest",
+      "payload" : {
+        "url": "https://appr.tc",
+        "statsCollectionDuration": 10000,
+        "statsCollectionInterval": 1000,
+        "getStats": true,
+        "bitrate": 8000,
+        "printToCSV": false,
+        "printToJson": false,
+        "selectedStats": []
+      }
+    },
+    {
+      "name": "NoAudioTest",
+      "tupleSize": 2,
+      "description": "This test check the ICEConnection state between two browsers communicating via appr.tc without audio",
+      "testImpl": "org.webrtc.kite.apprtc.tests.NoAudioTest",
+      "payload" : {
+        "url": "https://appr.tc",
+        "statsCollectionDuration": 10000,
+        "statsCollectionInterval": 1000,
+        "getStats": true,
+        "bitrate": 8000,
+        "printToCSV": false,
+        "printToJson": false,
+        "selectedStats": []
+      }
+    },
+    {
+      "name": "HDTest",
+      "tupleSize": 2,
+      "description": "This test check the ICEConnection state between two browsers communicating via appr.tc with HD resolution",
+      "testImpl": "org.webrtc.kite.apprtc.tests.HDTest",
+      "payload" : {
+        "url": "https://appr.tc",
+        "statsCollectionDuration": 10000,
+        "statsCollectionInterval": 1000,
+        "getStats": true,
+        "bitrate": 8000,
+        "printToCSV": false,
+        "printToJson": false,
+        "selectedStats": []
+      }
+    },
+    {
+      "name": "AudioSendingBitrateTest",
+      "tupleSize": 2,
+      "description": "This test check the bitrate of a certain setting set by user",
+      "testImpl": "org.webrtc.kite.apprtc.tests.AudioSendingBitrateTest",
+      "payload" : {
+        "url": "https://appr.tc",
+        "statsCollectionDuration": 10000,
+        "statsCollectionInterval": 1000,
+        "getStats": true,
+        "bitrate": 8000,
+        "printToCSV": false,
+        "printToJson": false,
+        "selectedStats": []
+      }
+    },
+    {
+      "name": "VideoReceivingBitrateTest",
+      "tupleSize": 2,
+      "description": "This test check the bitrate of a certain setting set by user",
+      "testImpl": "org.webrtc.kite.apprtc.tests.VideoReceivingBitrateTest",
+      "payload" : {
+        "url": "https://appr.tc",
+        "statsCollectionDuration": 10000,
+        "statsCollectionInterval": 1000,
+        "getStats": true,
+        "bitrate": 8000,
+        "printToCSV": false,
+        "printToJson": false,
+        "selectedStats": []
+      }
+    },
+    {
+      "name": "AudioReceivingBitrateTest",
+      "tupleSize": 2,
+      "description": "This test check the bitrate of a certain setting set by user",
+      "testImpl": "org.webrtc.kite.apprtc.tests.AudioReceivingBitrateTest",
+      "payload" : {
+        "url": "https://appr.tc",
+        "statsCollectionDuration": 10000,
+        "statsCollectionInterval": 1000,
+        "getStats": true,
+        "bitrate": 8000,
+        "printToCSV": false,
+        "printToJson": false,
+        "selectedStats": []
+      }
+    },
+    {
+      "name": "VideoReceivingBitrateTest",
+      "tupleSize": 2,
+      "description": "This test check the bitrate of a certain setting set by user",
+      "testImpl": "org.webrtc.kite.apprtc.tests.VideoReceivingBitrateTest",
+      "payload" : {
+        "url": "https://appr.tc",
+        "statsCollectionDuration": 10000,
+        "statsCollectionInterval": 1000,
+        "getStats": true,
+        "bitrate": 8000,
+        "printToCSV": false,
+        "printToJson": false,
+        "selectedStats": []
+      }
+    },
+    {
+      "name": "LoopbackTest",
+      "tupleSize": 1,
+      "description": "This test check the ICEConnection state of one browser on appr.tc in loopback mode",
+      "testImpl": "org.webrtc.kite.apprtc.tests.LoopbackTest",
+      "payload" : {
+        "url": "https://appr.tc",
+        "statsCollectionDuration": 10000,
+        "statsCollectionInterval": 1000,
+        "getStats": true,
+        "bitrate": 8000,
+        "printToCSV": false,
+        "printToJson": false,
+        "selectedStats": []
+      }
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "chrome",
+      "version": "72",
+      "platform": "LINUX",
+      "flags": []
+    }
+  ]
+}

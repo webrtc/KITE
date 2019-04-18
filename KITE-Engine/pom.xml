@@ -6,11 +6,13 @@
   <parent>
     <groupId>org.webrtc.kite</groupId>
     <artifactId>kite-base</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0.2</version>
   </parent>
 
   <artifactId>kite-engine</artifactId>
   <name>kite-engine</name>
+  <version>${kite.version}</version>
+
 
   <build>
     <plugins>
@@ -24,88 +26,100 @@
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.1.0</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>${kite.maven-shade.version}</version>
+
         <configuration>
-          <finalName>kite</finalName>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+          <finalName>kite-jar-with-dependencies</finalName>
+          <transformers>
+            <!-- add Main-Class to manifest file -->
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
               <mainClass>org.webrtc.kite.Engine</mainClass>
-            </manifest>
-          </archive>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
+            </transformer>
+          </transformers>
         </configuration>
         <executions>
           <execution>
             <phase>package</phase>
             <goals>
-              <goal>single</goal>
+              <goal>shade</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>1.6</version>
+        <configuration>
+          <installDirectory>../</installDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <nodeVersion>${kite.node.version}</nodeVersion>
+              <npmVersion>${kite.npm.version}</npmVersion>
+            </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
-
   <dependencies>
+    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
     <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-java</artifactId>
-      <version>${kite.selenium.version}</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${kite.jackson-annotations.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>log4j-over-slf4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.glassfish</groupId>
-      <artifactId>javax.json</artifactId>
-      <version>${kite.json.version}</version>
+      <groupId>com.github.CoSMoSoftware.KITE-Extras</groupId>
+      <artifactId>kite-extras</artifactId>
+      <version>${kite.extras.version}</version>
     </dependency>
+    <!-- Uncomment this and comment out the above dependency to use your local maven repo for KITE-Extras
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>${kite.log4j.version}</version>
+      <groupId>io.cosmosoftware.kite</groupId>
+      <artifactId>kite-extras</artifactId>
+      <version>${kite.extras.version}</version>
+    </dependency>
+    -->
+    <dependency>
+      <groupId>org.webrtc.kite</groupId>
+      <artifactId>kite-framework</artifactId>
+      <version>${kite.framework.version}</version>
+    </dependency>
+<!-- https://mvnrepository.com/artifact/org.quartz-scheduler/quartz -->
+    <dependency>
+      <groupId>org.quartz-scheduler</groupId>
+      <artifactId>quartz</artifactId>
+      <version>${kite.quartz.version}</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
     <dependency>
       <groupId>org.xerial</groupId>
       <artifactId>sqlite-jdbc</artifactId>
       <version>${kite.sqlite.jdbc.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>eu.bitwalker</groupId>
-      <artifactId>UserAgentUtils</artifactId>
-      <version>1.21</version>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/is.tagomor.woothee/woothee-java -->
-    <dependency>
-      <groupId>is.tagomor.woothee</groupId>
-      <artifactId>woothee-java</artifactId>
-      <version>1.7.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.webrtc.kite</groupId>
-      <artifactId>kite-if</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${kite.junit.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.quartz-scheduler</groupId>
-      <artifactId>quartz</artifactId>
-      <version>2.3.0</version>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12 -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.25</version>
     </dependency>
   </dependencies>
 

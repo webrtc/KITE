@@ -1,0 +1,39 @@
+# This script will set the USER enviroment variable KITE_HOME to the current folder
+# and add '%KITE_HOME%\scripts\path' to the USER PATH.
+# It will close the current and open a new one with the command c, r and a ready to use
+# to respectively compile, run and launch allure reports from the KITE Tests
+
+KITE_HOME=`pwd`
+
+if [ -n "$(grep "KITE_HOME" ~/.profile)" ]
+then
+	echo "Updating KITE_HOME"
+	sed -i '/KITE_HOME/d' ~/.profile
+fi
+
+echo export KITE_HOME="$KITE_HOME" >> ~/.profile
+
+chmod +x scripts/linux/path/*
+
+if [ ! -d ~/bin ]
+then
+	mkdir ~/bin
+fi
+
+for f in a c r
+do
+	if [ -f ~/bin/${f} ]
+	then
+		rm ~/bin/${f}
+	fi
+	ln -f -n scripts/linux/path/${f} ~/bin/${f}
+done
+
+chmod +x $KITE_HOME/third_party/allure-2.10.0/bin/allure
+if [ -f ~/bin/allure ]
+then
+	rm ~/bin/allure
+fi
+ln -f -n $KITE_HOME/third_party/allure-2.10.0/bin/allure ~/bin/allure
+
+gnome-session-quit
