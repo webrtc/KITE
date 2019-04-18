@@ -22,13 +22,13 @@
     {
       "browserName": "chrome",
       "version": "73",
-      "platform": "MAC",
+      "platform": "WINDOWS",
       "flags": []
     },
     {
       "browserName": "firefox",
       "version": "66",
-      "platform": "MAC",
+      "platform": "WINDOWS",
       "flags": []
     }
   ]
