@@ -2,7 +2,7 @@
 
 rem check firefox version - Install if it is not the latest
 
-call configure.bat
+call gridConfig.bat
 wmic datafile where name="C:\\Program Files\\Mozilla Firefox\\firefox.exe" get Version /value > firefox.txt
 find /c "Version=%FIREFOX_VERSION%" firefox.txt
 if %errorlevel% equ 1 goto notfound

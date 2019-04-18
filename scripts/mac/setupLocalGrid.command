@@ -1,7 +1,6 @@
-#! /bin/bash
 BASEDIR=$(dirname "$0")
 cd $BASEDIR
-source config.sh
+source gridConfig
 osascript -e "tell application \"Terminal\" to do script \"$BASEDIR/createFolderLocalGrid.sh;exit\" "
 sleep 1
 

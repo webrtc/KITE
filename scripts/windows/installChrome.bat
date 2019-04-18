@@ -1,5 +1,5 @@
 @echo off
-call configure.bat
+call gridConfig.bat
 rem check chrome version - Install if it is not the latest
 wmic datafile where name="C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe" get Version /value > chrome.txt
 find /c "Version=%CHROME_VERSION%" chrome.txt

@@ -9,7 +9,7 @@ curl https://selenium-release.storage.googleapis.com/$SELENIUM_VERSION_SHORT/sel
 if [[ "$USE_CAPABILITY_MATCHER" = "TRUE" ]]
 then
   brew install wget
-  wget https://github.com/CoSMoSoftware/KITE-Extras/releases/download/$KITE_EXTRAS_VERSION/grid-utils-$GRID_VERSION.jar 
+  wget https://github.com/CoSMoSoftware/KITE-Extras/releases/download/$KITE_EXTRAS_VERSION/grid-utils-$GRID_VERSION.jar
 fi
 
 mv grid-utils-$GRID_VERSION.jar grid.jar
@@ -17,4 +17,4 @@ mv grid.jar ../../localGrid/hub
 
 
 mv selenium.jar ../../localGrid
-exit
+kill -9 $PPID

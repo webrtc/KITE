@@ -60,9 +60,9 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
     ```
     cd \GitHub\KITE
     chmod +x configure
-    sudo ./configure
+    ./configure
     ```
-    Logout and login again for the environment variables to take effect.
+    If on Linux, logout and login again for the environment variables to take effect.
 
 3. Compile 
 
@@ -210,9 +210,22 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
 #### Run KITE-Example-Test
 
 
-To run the example test:
+To run the example test,  
+__On Windows:__  
+on Windows:
 ```
 cd %KITE_HOME%\KITE-Example-Test
+r example.config.json
+```
+__On Linux and Mac:__  
+```
+cd $KITE_HOME/KITE-Example-Test
+r example.config.json
+```
+
+on Linux and Mac:
+```
+cd $KITE_HOME/KITE-Example-Test
 r example.config.json
 ```
 
@@ -240,11 +253,17 @@ On Linux/Mac:
 ### Open the dashboard
 
 After running the test, you can open the Allure dashboard with the command `a`.
+
+on Windows:
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
 a
 ```
-
+on Linux and Mac:
+```
+cd $KITE_HOME/KITE-AppRTC-Test
+a
+```
 
 Congratulation! You should see the results of your first KITE test.
 

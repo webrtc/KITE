@@ -51,12 +51,12 @@ echo pkill -f hub >> stopGrid.sh
 
 rm chrome/startNode.sh || true
 echo echo -n -e '"\033]0;NODE CHROME\007"' >> chrome/startNode.sh
-echo   java -Dwebdriver.chrome.driver=./chromedriver -jar $path/localGrid/selenium.jar -role node -maxSession 5 -port 6001 -host $IP -hub http://$IP:4444/grid/register -browser browserName=chrome,version=$CHROME_VERSION,platform=MAC,maxInstances=5 --debug >> chrome/startNode.sh
+echo   java -Dwebdriver.chrome.driver=$path/localGrid/chrome/chromedriver -jar $path/localGrid/selenium.jar -role node -maxSession 5 -port 6001 -host $IP -hub http://$IP:4444/grid/register -browser browserName=chrome,version=$CHROME_VERSION,platform=MAC,maxInstances=5 --debug >> chrome/startNode.sh
 
 
 rm firefox/startNode.sh || true
 echo echo -n -e '"\033]0;NODE FIREFOX\007"' >> firefox/startNode.sh
-echo   java -Dwebdriver.gecko.driver=./geckodriver -jar $path/localGrid/selenium.jar -role node -maxSession 10 -port 6002 -host $IP -hub http://$IP:4444/grid/register  -browser browserName=firefox,version=$FIREFOX_VERSION,platform=MAC,maxInstances=10 --debug  >> firefox/startNode.sh
+echo   java -Dwebdriver.gecko.driver=$path/localGrid/firefox/geckodriver -jar $path/localGrid/selenium.jar -role node -maxSession 10 -port 6002 -host $IP -hub http://$IP:4444/grid/register  -browser browserName=firefox,version=$FIREFOX_VERSION,platform=MAC,maxInstances=10 --debug  >> firefox/startNode.sh
 
 
 rm safari/startNode.sh || true
@@ -66,15 +66,10 @@ echo   java -Dwebdriver.safari.driver=/Applications/Safari.app/Contents/MacOS/sa
 
 rm hub/startHub.sh || true
 echo echo -n -e '"\033]0;HUB\007"' >> hub/startHub.sh
-if [[ "$USE_CAPABILITY_MATCHER" = "TRUE" ]]
-then
-  echo java -cp  $path/localGrid/*:$path/localGrid/hub/* org.openqa.grid.selenium.GridLauncherV3 -role hub --debug -host $IP -capabilityMatcher io.cosmosoftware.kite.grid.KiteCapabilityMatcher >> hub/startHub.sh
-else
-  echo   java -jar $path/localGrid/selenium.jar -role hub --debug -host $IP >> hub/startHub.sh
-fi
+echo   java -jar $path/localGrid/selenium.jar -role hub --debug -host $IP >> hub/startHub.sh
+
 
 chmod +x startGrid.sh
-chmod +x stopGrid.sh
 
 cd hub
 chmod +x startHub.sh
@@ -90,5 +85,4 @@ cd firefox
 chmod +x startNode.sh
 cd ..
 
-exit
-
+kill -9 $PPID

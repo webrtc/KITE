@@ -13,7 +13,7 @@ if [[ $chrome == *$CHROME_VERSION* ]]; then
   echo Chrome version $CHROME_VERSION is already installed
 else
   echo Chrome version $CHROME_VERSION was not found, installing it
-  Brew cask install google-chrome 
+  Brew cask install google-chrome
 fi
 
-exit
+kill -9 $PPID

@@ -1,5 +1,5 @@
 @echo off
-call configure.bat
+call gridConfig.bat
 
 rem create the folders 
 cd ..

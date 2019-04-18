@@ -16,4 +16,4 @@ else
   brew cask install firefox
 fi
 
-exit
+kill -9 $PPID

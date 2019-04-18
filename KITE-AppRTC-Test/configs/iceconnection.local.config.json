@@ -31,7 +31,7 @@
     {
       "browserName": "chrome",
       "version": "73",
-      "platform": "windows",
+      "platform": "MAC",
       "flags": []
     }
   ]
