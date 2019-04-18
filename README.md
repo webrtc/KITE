@@ -35,7 +35,7 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
 
 ## B. Install KITE 2.0
 
-1. Clone this repo, for example under `\GitHub\`:  
+1. Clone this repo into a folder __without any space__, for example under `\GitHub\`:  
     ```
     cd \
     mkdir GitHub
@@ -43,6 +43,8 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
     git clone https://github.com/webrtc/KITE.git
     cd KITE
     ```
+
+	
 
 2. Configure __KITE__  
 

@@ -5,22 +5,35 @@
 
 KITE_HOME=`pwd`
 
-if [ -n "$(grep "KITE_HOME" /etc/environment)" ]
+if [ -n "$(grep "KITE_HOME" ~/.profile)" ]
 then
 	echo "Updating KITE_HOME"
-	sed -i '/KITE_HOME/d' /etc/environment
+	sed -i '/KITE_HOME/d' ~/.profile
 fi
 
-echo KITE_HOME="$KITE_HOME" >> /etc/environment
-
+echo export KITE_HOME="$KITE_HOME" >> ~/.profile
 
 chmod +x scripts/linux/path/*
-ln -f -n scripts/linux/path/a /usr/bin/a
-ln -f -n scripts/linux/path/c /usr/bin/c
-ln -f -n scripts/linux/path/r /usr/bin/r
+
+if [ ! -d ~/bin ]
+then
+	mkdir ~/bin
+fi
+
+for f in a c r
+do
+	if [ -f ~/bin/${f} ]
+	then
+		rm ~/bin/${f}
+	fi
+	ln -f -n scripts/linux/path/${f} ~/bin/${f}
+done
 
 chmod +x $KITE_HOME/third_party/allure-2.10.0/bin/allure
-ln -f -n $KITE_HOME/third_party/allure-2.10.0/bin/allure /usr/bin/allure
+if [ -f ~/bin/allure ]
+then
+	rm ~/bin/allure
+fi
+ln -f -n $KITE_HOME/third_party/allure-2.10.0/bin/allure ~/bin/allure
 
 gnome-session-quit
-

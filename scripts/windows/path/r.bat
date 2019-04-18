@@ -18,10 +18,10 @@ if [%1] == [] (
   goto :end
 )
 
-echo %1 | FINDSTR /C:"configs\" >nul & if errorlevel 1 (
-  set CONFIG=%1
-) else (
+echo %1 | FINDSTR /C:"configs\\" >nul & if errorlevel 1 (
   set CONFIG=configs/%1
+) else (
+  set CONFIG=%1
 )
 
 

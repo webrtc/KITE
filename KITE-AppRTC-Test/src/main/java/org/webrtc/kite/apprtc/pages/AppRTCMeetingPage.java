@@ -15,6 +15,7 @@
  */
 package org.webrtc.kite.apprtc.pages;
 
+import io.cosmosoftware.kite.exception.KiteInteractionException;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.pages.BasePage;
 import org.openqa.selenium.WebDriver;
@@ -32,52 +33,53 @@ import java.util.List;
 import java.util.Map;
 
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
+import static io.cosmosoftware.kite.entities.Timeouts.TEN_SECOND_INTERVAL_IN_SECONDS;
 import static io.cosmosoftware.kite.util.TestUtils.*;
 
 public class AppRTCMeetingPage extends BasePage {
-  
+
   @FindBy(id="mini-video")
   WebElement miniVideo;
-  
+
   @FindBy(id="local-video")
   WebElement localVideo;
-  
+
   @FindBy(id="remote-video")
   WebElement remoteVideo;
-  
+
   @FindBy(id="hangup")
   WebElement hangUpButton;
-  
+
   @FindBy(id="fullscreen")
   WebElement fullScreenButton;
-  
+
   @FindBy(id="mute-audio")
   WebElement muteAudioButton;
-  
+
   @FindBy(id="mute-video")
   WebElement muteVideoButton;
 
-  
+
   public AppRTCMeetingPage(WebDriver webDriver) {
     super(webDriver);
   }
-  
+
   public void muteAudio() throws KiteTestException {
     click(muteAudioButton);
   }
-  
+
   public void muteVideo() throws KiteTestException {
     click(muteVideoButton);
   }
-  
+
   public void hangup() throws KiteTestException {
     click(hangUpButton);
   }
-  
+
   public void goFullScreen() throws KiteTestException {
     click(fullScreenButton);
   }
-  
+
   public String getICEConnectionState() {
     return (String) executeJsScript(webDriver, getIceConnectionStateScript());
   }
@@ -86,12 +88,13 @@ public class AppRTCMeetingPage extends BasePage {
     return (Long) executeJsScript(webDriver, getRemoteVideoPixelSumScript());
   }
 
-  public String remoteVideoCheck() {
+  public String remoteVideoCheck() throws KiteTestException {
+    waitUntilVisibilityOf(remoteVideo, TEN_SECOND_INTERVAL_IN_SECONDS);
     return videoCheck(webDriver, 1);
   }
 
 
-  
+
   /**
    * Returns the test's GetResolutionScript to stash the result and stats of the test in a global variable to retrieve later.
    *
@@ -107,7 +110,7 @@ public class AppRTCMeetingPage extends BasePage {
     JsonReader reader = Json.createReader(stream);
     return reader.readObject();
   }
-  
+
   /**
    * Return the bitrate of a media track
    * @param mediaType type of media (video/audio)
@@ -119,7 +122,7 @@ public class AppRTCMeetingPage extends BasePage {
     waitAround(ONE_SECOND_INTERVAL);
     return (Long) executeJsScript(webDriver, getStashedBitrateScript());
   }
-  
+
   /**
    * stat JsonObjectBuilder to add to callback result.
    * @param webDriver used to execute command.
@@ -144,8 +147,8 @@ public class AppRTCMeetingPage extends BasePage {
     }
     return buildClientRTCStatObject(statMap, selectedStats);
   }
-  
-  
+
+
   /**
    * Stashes stats into a global variable and collects them 1s after
    * @return String.
@@ -157,14 +160,14 @@ public class AppRTCMeetingPage extends BasePage {
         "    .then(data => {" +
         "      window.KITEStats = [...data.values()];" +
         "    });" ;
-    
+
     String getStashedStatsScript = "return window.KITEStats;";
-  
+
     executeJsScript(webDriver, stashStatsScript);
     waitAround(ONE_SECOND_INTERVAL);
     return executeJsScript(webDriver, getStashedStatsScript);
   }
-  
+
   /**
    * Returns the test JavaScript to retrieve appController.call_.pcClient_.pc_.iceConnectionState.
    * If it doesn't exist then the method returns 'unknown'.
@@ -176,7 +179,7 @@ public class AppRTCMeetingPage extends BasePage {
       + "try {retValue = appController.call_.pcClient_.pc_.iceConnectionState;} catch (exception) {} "
       + "if (retValue) {return retValue;} else {return 'unknown';}";
   }
-  
+
   /**
    * Returns the test's canvasCheck to check if the video is blank, and if it changes overtime.
    *
@@ -191,8 +194,8 @@ public class AppRTCMeetingPage extends BasePage {
       + "if (sum===255*(Math.pow(remoteVideo.videoHeight-1,(remoteVideo.videoWidth-1)*(remoteVideo.videoWidth-1))))"
       + "   return 0;" + "return sum;";
   }
-  
-  
+
+
   /**
    * Returns the test's getSDPMessageScript to retrieve the sdp message for either the offer or answer.
    * If it doesn't exist then the method returns 'unknown'.
@@ -209,11 +212,11 @@ public class AppRTCMeetingPage extends BasePage {
         return "var SDP;"
           + "try {SDP = appController.call_.pcClient_.pc_.localDescription;} catch (exception) {} "
           + "if (SDP) {return SDP;} else {return 'unknown';}";
-        
+
     }
     return null;
   }
-  
+
   private String stashBitrateScript(String mediaType, String direction) {
     return "appController.call_.pcClient_.pc_.getStats().then(data => {" +
       "   [...data.values()].forEach(function(e){" +
@@ -226,12 +229,12 @@ public class AppRTCMeetingPage extends BasePage {
       "});" +
       "return 0;";
   }
-  
-  
+
+
   private String getStashedBitrateScript() {
     return "return window.bitrate";
   }
-  
+
   private String stashResolutionScript(boolean remote) {
     return "window.resolution = {width: -1, height: -1};" +
       "appController.call_.pcClient_.pc_.getStats().then(data => {" +
@@ -245,12 +248,12 @@ public class AppRTCMeetingPage extends BasePage {
       "   });" +
       "});";
   }
-  
+
   private String getStashedResolutionScript() {
     return "return JSON.stringify(window.resolution);";
   }
-  
-  
+
+
   /**
    * Create a JsonObjectBuilder Object to eventually build a Json object
    * from data obtained via tests.
@@ -262,29 +265,29 @@ public class AppRTCMeetingPage extends BasePage {
     try {
       JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
       Map<String, Object> clientStatMap = clientStats;
-      
+
       List<Object> clientStatArray = (ArrayList) clientStatMap.get("stats");
       JsonArrayBuilder jsonclientStatArray = Json.createArrayBuilder();
       for (Object stats : clientStatArray) {
         JsonObjectBuilder jsonRTCStatObjectBuilder = buildSingleRTCStatObject(stats, selectedStats);
         jsonclientStatArray.add(jsonRTCStatObjectBuilder);
       }
-      
+
       JsonObjectBuilder sdpObjectBuilder = Json.createObjectBuilder();
       Map<Object, Object> sdpOffer = (Map<Object, Object>) clientStatMap.get("offer");
       Map<Object, Object> sdpAnswer = (Map<Object, Object>) clientStatMap.get("answer");
       sdpObjectBuilder.add("offer", new SDP(sdpOffer).getJsonObjectBuilder())
         .add("answer", new SDP(sdpAnswer).getJsonObjectBuilder());
-      
+
       jsonObjectBuilder.add("sdp", sdpObjectBuilder)
         .add("statsArray", jsonclientStatArray);
-      
+
       return jsonObjectBuilder;
     } catch (ClassCastException e) {
       return Json.createObjectBuilder();
     }
   }
-  
+
   /**
    * Create a JsonObjectBuilder Object to eventually build a Json object
    * from data obtained via tests.
@@ -295,9 +298,9 @@ public class AppRTCMeetingPage extends BasePage {
   public static JsonObjectBuilder buildSingleRTCStatObject(Object statArray) {
     return buildSingleRTCStatObject(statArray, null);
   }
-  
-  
-  
+
+
+
   /**
    * Create a JsonObjectBuilder Object to eventually build a Json object
    * from data obtained via tests.
@@ -391,5 +394,5 @@ public class AppRTCMeetingPage extends BasePage {
     }
     return jsonObjectBuilder;
   }
-  
+
 }

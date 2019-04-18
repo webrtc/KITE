@@ -59,6 +59,6 @@ public class GetStatsStep extends TestStep {
   protected void step() {
     JsonObject stats = appRTCMeetingPage.getStatOvertime(
       webDriver, statsCollectionDuration, statsCollectionInterval, selectedStats).build();
-    Reporter.getInstance().textAttachment(this.report, "Peer connection's stats", stats.toString(), "json");
+    Reporter.getInstance().jsonAttachment(this.report, "Peer connection's stats", stats);
   }
 }
