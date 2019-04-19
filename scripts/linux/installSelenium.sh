@@ -1,6 +1,6 @@
 #!/bin/bash
 set +v
-. ./gridConfig
+. ./gridConfig.sh
 
 echo "Downloading selenium version $SELENIUM_VERSION"
 
