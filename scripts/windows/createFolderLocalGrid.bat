@@ -29,13 +29,13 @@ ECHO taskkill /FI "WINDOWTITLE eq Hub*" /F >> stopGrid.bat
 rem create script for Grid
 IF EXIST startGrid.bat del /F startGrid.bat
 ECHO @echo off >> startGrid.bat
-ECHO cd hub >> startGrid.bat
+ECHO cd %KITE_HOME%\localGrid\hub >> startGrid.bat
 ECHO start startHub.bat >> startGrid.bat
-ECHO cd ..\chrome >> startGrid.bat
+ECHO cd %KITE_HOME%\localGrid\chrome >> startGrid.bat
 ECHO start startNode.bat >> startGrid.bat
-ECHO cd ..\firefox >> startGrid.bat
+ECHO cd %KITE_HOME%\localGrid\firefox >> startGrid.bat
 ECHO start startNode.bat >> startGrid.bat
-ECHO cd .. >> startGrid.bat
+ECHO exit >> startGrid.bat
 
 
 rem create script for Chrome Node

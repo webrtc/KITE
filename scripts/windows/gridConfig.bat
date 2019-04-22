@@ -10,17 +10,17 @@ rem
 rem Please check the selenium version from: https://selenium-release.storage.googleapis.com/
 
 rem Set to TRUE to install Chrome and Firefox, or FALSE to skip this step if the correct versions are already installed.
-set INSTALL_BROWSERS=TRUE
+set INSTALL_BROWSERS=FALSE
 
 rem Set to TRUE/FALSE to enable/disable the CAPABILITY MATCHER
-set USE_CAPABILITY_MATCHER=FALSE
+set USE_CAPABILITY_MATCHER=TRUE
 
 rem Set to TRUE to use localhost or FALSE to use the host's IP address
-set LOCALHOST=TRUE
+set LOCALHOST=FALSE
 
 rem Capability Matcher
 set KITE_EXTRAS_VERSION=0.1.4
-set GRID_VERSION=0.0.1
+set GRID_UTILS_VERSION=0.1.1
 
 rem Selenium version
 set SELENIUM_VERSION_SHORT=3.141
