@@ -4,7 +4,7 @@
   "remotes": [
     {
       "type": "local",
-      "remoteAddress": "http://localhost:4444/wd/hub"
+      "remoteAddress": "http://3.83.163.77:4444/wd/hub"
     }
   ],
   "tests": [
@@ -29,9 +29,10 @@
   ],
   "browsers": [
     {
-      "browserName": "chrome",
-      "version": "73",
-      "platform": "WINDOWS",
+      "browserName": "firefox",
+      "version": "66",
+      "platform": "LINUX",
+      "headless": true,
       "flags": []
     }
   ]

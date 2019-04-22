@@ -50,19 +50,25 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
 
     This will set KITE_HOME environment variable and add utility scripts to your path.  
 
-    2.1 On Windows, open a Command Prompt window and:
+    2.1 On Windows, open a Command Prompt window and enter the followng commands:
     ```
     cd \GitHub\KITE
     configure.bat
     ```
 
-    2.2 On linux or mac, open a Command Prompt window and:
+    2.2 On Linux, open a terminal and enter the followng commands:
     ```
     cd \GitHub\KITE
-    chmod +x configure
-    ./configure
+    chmod +x configure.sh
+    ./configure.sh
+    ```     
+    
+    2.3 On Mac, open a terminal and enter the followng commands:
     ```
-    If on Linux, logout and login again for the environment variables to take effect.
+    cd \GitHub\KITE
+    ./configure.command
+    ```
+    
 
 3. Compile 
 
@@ -223,11 +229,6 @@ cd $KITE_HOME/KITE-Example-Test
 r example.config.json
 ```
 
-on Linux and Mac:
-```
-cd $KITE_HOME/KITE-Example-Test
-r example.config.json
-```
 
 #### Run KITE-AppRTC-Test
 
@@ -237,7 +238,7 @@ You will need to change __`version`__ and __`platform`__ according to what is in
 To run the AppRTC iceconnection test:
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
-r iceconnection.local.json
+r iceconnection.local.config.json
 ```
 
 Alternatively, you can launch the test with the full command.

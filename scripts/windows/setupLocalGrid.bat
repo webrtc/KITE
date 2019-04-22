@@ -12,4 +12,5 @@ echo:
 pause>nul|set/p ="   Please wait until all the installations are completed, then press any key to launch the grid..."
 cd ../../localGrid
 startGrid.bat
+cd %KITE_HOME%
 

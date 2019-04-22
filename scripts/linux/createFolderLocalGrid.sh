@@ -22,13 +22,13 @@ rm startGrid.sh || true
 if [[ "$DESKTOP_ENVIRONMENT" = "TRUE" ]]
 then
   echo cd hub >> startGrid.sh
-  echo gnome-terminal -e ./startHub.sh >> startGrid.sh
+  echo x-terminal-emulator -e ./startHub.sh >> startGrid.sh
   echo cd .. >> startGrid.sh
   echo cd chrome >> startGrid.sh
-  echo gnome-terminal -e ./startNode.sh >> startGrid.sh
+  echo x-terminal-emulator -e ./startNode.sh >> startGrid.sh
   echo cd .. >> startGrid.sh
   echo cd firefox >> startGrid.sh
-  echo gnome-terminal -e ./startNode.sh >> startGrid.sh
+  echo x-terminal-emulator -e ./startNode.sh >> startGrid.sh
   echo cd .. >> startGrid.sh
 else
   echo cd hub >> startGrid.sh

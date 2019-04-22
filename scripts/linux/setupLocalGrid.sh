@@ -9,7 +9,7 @@ function startGrid() {
   cd ../../localGrid
   if [ "$DESKTOP_ENVIRONMENT" = "TRUE" ]
   then
-    gnome-terminal -e ./startGrid.sh &
+    x-terminal-emulator -e ./startGrid.sh &
   else
     ./startGrid.sh &
   fi

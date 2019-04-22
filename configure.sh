@@ -25,5 +25,5 @@ fi
 sed -i 's,/'"$KITE_HOME"'.*$,'"$NEW_PATH"',g' ~/.bashrc
 echo export PATH="$NEW_PATH" >> ~/.bashrc
 
-gnome-terminal -e 'sh -c "exec bash; cd $KITE_HOME"'
+x-terminal-emulator -e 'sh -c "exec bash; cd $KITE_HOME"'
 

@@ -42,17 +42,17 @@ __NOTE:__ _This script only works on Windows 10. On Windows 7, several steps nee
 Now that you know what the latest stable versions of Chrome and Firefox are, please open a command prompt/terminal and enter the following commands.:
 ### Windows 10
 ```
-cd %KITE_HOME%\script\windows
+cd %KITE_HOME%\scripts\windows
 notepad gridConfig.bat
 ```  
 ### Ubuntu
 ```
-cd $KITE_HOME/script/linux
+cd $KITE_HOME/scripts/linux
 nano gridConfig.sh
 ```  
 ### Mac
 ```
-cd $KITE_HOME/script/mac
+cd $KITE_HOME/scripts/mac
 open -a TextEdit gridConfig.sh
 ```  
 
@@ -89,20 +89,20 @@ Open a command prompt and enter the following commands:
 
 ### Windows 10
 ```
-cd %KITE_HOME%\script\windows
+cd %KITE_HOME%\scripts\windows
 setupLocalGrid.bat
 ```  
 
 ### Ubuntu
 ```
-cd $KITE_HOME/script/linux
+cd $KITE_HOME/scripts/linux
 chmod +x *.sh
 ./setupLocalGrid.sh
 ```  
 
 ### Mac
 ```
-cd $KITE_HOME/script/mac
+cd $KITE_HOME/scripts/mac
 chmod +x *.sh
 chmod +x *.command
 ./setupLocalGrid.command
