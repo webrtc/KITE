@@ -27,7 +27,6 @@ public class RemoteVideoDisplayCheck extends TestCheck {
   public RemoteVideoDisplayCheck(WebDriver webDriver) {
     super(webDriver);
   }
-  protected AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver);
   
   @Override
   public String stepDescription() {
@@ -36,6 +35,7 @@ public class RemoteVideoDisplayCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
+    final AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
     logger.info("Looking for video object");
 
     String videoCheck = appRTCMeetingPage.remoteVideoCheck();

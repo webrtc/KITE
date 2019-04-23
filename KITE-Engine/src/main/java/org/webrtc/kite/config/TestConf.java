@@ -72,6 +72,18 @@ public class TestConf extends Test {
     }
   }
 
+  public String getTestClassName() {
+    if (isJavascript()) {
+      return this.testImpl.substring(0, this.testImpl.indexOf("."));
+    } else {
+      return this.testImpl.substring(this.testImpl.lastIndexOf(".") + 1);
+    }
+  }
+  
+  public boolean isJavascript() {
+    return testImpl.endsWith("js");
+  }
+  
   /**
    * Gets tuple size.
    *

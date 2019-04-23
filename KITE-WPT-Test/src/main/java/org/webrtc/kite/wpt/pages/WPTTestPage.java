@@ -3,6 +3,7 @@ package org.webrtc.kite.wpt.pages;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.pages.BasePage;
 import io.cosmosoftware.kite.report.Status;
+import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -37,8 +38,8 @@ public class WPTTestPage extends BasePage {
   private long start;
   private int retry = 0;
   
-  public WPTTestPage(WebDriver webDriver, String pageUrl) {
-    super(webDriver);
+  public WPTTestPage(WebDriver webDriver, Logger logger, String pageUrl) {
+    super(webDriver, logger);
     setImplicitWait(webDriver, EXTENDED_TIMEOUT);
     this.pageUrl = pageUrl;
     this.resultReport = new Result(pageUrl);

@@ -29,7 +29,6 @@ public class RemoteVideoHDCheck extends TestCheck {
   public RemoteVideoHDCheck(WebDriver webDriver) {
     super(webDriver);
   }
-  private AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver);
   
   @Override
   public String stepDescription() {
@@ -38,6 +37,7 @@ public class RemoteVideoHDCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
+    final AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
     JsonObject resolution = appRTCMeetingPage.getResolution("remote");
     int width = resolution.getInt("width");
     int height = resolution.getInt("height");

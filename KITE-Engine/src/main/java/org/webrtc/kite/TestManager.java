@@ -17,12 +17,12 @@
 package org.webrtc.kite;
 
 import io.cosmosoftware.kite.report.Container;
-import org.webrtc.kite.tests.KiteBaseTest;
-import org.webrtc.kite.tests.KiteJsTest;
 import org.apache.log4j.Logger;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.EndPoint;
 import org.webrtc.kite.config.TestConf;
+import org.webrtc.kite.tests.KiteBaseTest;
+import org.webrtc.kite.tests.KiteJsTest;
 
 import javax.json.JsonObject;
 import java.util.List;
@@ -47,28 +47,30 @@ public class TestManager implements Callable<Object> {
   private final List<EndPoint> endPointList;
   private final int retry;
   private Container testSuite;
+  private final Logger testLogger;
   /**
    * Constructs a new TestManager with the given TestConf and List<EndPoint>.
    *
    * @param testConf             TestConf
    * @param endPointList List<EndPoint>
    */
-  public TestManager(TestConf testConf, List<EndPoint> endPointList, int id) {
+  public TestManager(TestConf testConf, List<EndPoint> endPointList, int id, Logger testLogger) {
     this.testConf = testConf;
     this.endPointList = endPointList;
     this.retry = id;
+    this.testLogger = testLogger;
   }
   
   @Override
   public Object call() throws Exception {
     String testImpl = this.testConf.getTestImpl();
     KiteBaseTest test;
-    if (testImpl.endsWith("js")) {
+    if (this.testConf.isJavascript()) {
       test = new KiteJsTest(testImpl);
     } else {
       test = (KiteBaseTest) Class.forName(this.testConf.getTestImpl()).getConstructor().newInstance();
     }
-    
+    test.setLogger(testLogger);
     testSuite.addChild(test.getReport().getUuid());
     test.setDescription(testConf.getDescription());
     test.setParentSuite(Configurator.getInstance().getName());

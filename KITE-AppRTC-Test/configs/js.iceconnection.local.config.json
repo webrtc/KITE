@@ -12,11 +12,11 @@
       "name": "IceConnectionTest",
       "tupleSize": 2,
       "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
-      "testImpl": "ice-connection-test.js",
+      "testImpl": "IceConnectionTest.js",
       "payload" : {
         "url": "https://appr.tc",
         "testTimeout": 60,
-        "statsCollectionDuration": 10,
+        "statsCollectionDuration": 3,
         "statsCollectionInterval": 1,
         "getStats": true,
         "selectedStats": [

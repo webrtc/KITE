@@ -28,7 +28,6 @@ public class PeerConnectionCheck extends TestCheck {
   public PeerConnectionCheck(WebDriver webDriver) {
     super(webDriver);
   }
-  private AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver);
   
   @Override
   public String stepDescription() {
@@ -37,6 +36,7 @@ public class PeerConnectionCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
+    final AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
     for (int elapsedTime = 0; elapsedTime < this.checkTimeout; elapsedTime += this.checkInterval) {
       String state = appRTCMeetingPage.getICEConnectionState();
       if (state.equalsIgnoreCase("failed")) {

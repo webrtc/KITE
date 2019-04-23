@@ -1,16 +1,15 @@
 package org.webrtc.kite.example.checks;
 
-import org.webrtc.kite.example.pages.GoogleResultPage;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.Reporter;
 import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestCheck;
 import org.openqa.selenium.WebDriver;
+import org.webrtc.kite.example.pages.GoogleResultPage;
 
 import static io.cosmosoftware.kite.util.ReportUtils.saveScreenshotPNG;
 
 public class GoogleFirstResultCheck extends TestCheck {
-  final GoogleResultPage searchPage = new GoogleResultPage(this.webDriver);
   final String EXPECTED_RESULT = "CoSMo Software | WebRTC Technology & Implementation";
   
   public GoogleFirstResultCheck(WebDriver webDriver) {
@@ -24,6 +23,7 @@ public class GoogleFirstResultCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
+    final GoogleResultPage searchPage = new GoogleResultPage(this.webDriver, logger);
     searchPage.openFirstResult();
     String found = searchPage.getTitle().trim();
     if (!found.equalsIgnoreCase(EXPECTED_RESULT)){

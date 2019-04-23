@@ -2,7 +2,6 @@ package org.webrtc.kite.wpt;
 
 import org.webrtc.kite.tests.KiteBaseTest;
 import org.webrtc.kite.tests.TestRunner;
-import org.apache.log4j.Logger;
 import org.webrtc.kite.wpt.steps.RetrieveTestStep;
 import org.webrtc.kite.wpt.steps.RunAllTestStep;
 
@@ -18,10 +17,7 @@ import java.util.List;
  */
 public class WPTTest extends KiteBaseTest {
   
-  /**
-   * The Logger.
-   */
-  private final Logger logger = Logger.getLogger(this.getClass().getName());
+
   private String securedURL;
   private String nonSecuredURL;
   private String revision;

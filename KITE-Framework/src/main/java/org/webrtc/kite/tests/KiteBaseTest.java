@@ -11,10 +11,7 @@ import io.cosmosoftware.kite.steps.TestStep;
 import io.cosmosoftware.kite.util.ReportUtils;
 import io.cosmosoftware.kite.util.TestUtils;
 import io.cosmosoftware.kite.util.WebDriverUtils;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.webrtc.kite.WebDriverFactory;
@@ -30,8 +27,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -44,7 +43,7 @@ import static org.webrtc.kite.Utils.populateInfoFromNavigator;
 
 public abstract class KiteBaseTest {
   protected String name = this.getClass().getSimpleName();
-  protected final Logger logger = Logger.getLogger(new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(new Date()));
+  protected Logger logger = null;
   protected final List<TestRunner> testRunners = new ArrayList<>();
   protected String parentSuite = "";
   protected String suite = "";
@@ -89,7 +88,7 @@ public abstract class KiteBaseTest {
   public JsonObject execute() {
     try {
       init();
-      logger.info("Test initiation finished..");
+      logger.info("Test initialisation completed...");
       if (multiThread) {
         testInParallel();
       } else {
@@ -108,7 +107,6 @@ public abstract class KiteBaseTest {
 
   public void init() throws KiteTestException, IOException {
     this.report.setStartTimestamp();
-    initFileAppender();
     AllureStepReport initStep = new AllureStepReport("Creating webdrivers and preparing threads..");
     try {
       initStep.setStartTimestamp();
@@ -174,6 +172,7 @@ public abstract class KiteBaseTest {
    * @throws Exception if an Exception occurs during method execution.
    */
   private void testInParallel() throws Exception {
+    logger.info("Starting the execution of the test runners in parallel");
     expectedTestDuration = Math.max(expectedTestDuration, this.testRunners.size() * 2);
     logger.info("testRunners.size() = " + testRunners.size());
     ExecutorService executorService = Executors.newFixedThreadPool(testRunners.size());
@@ -191,6 +190,7 @@ public abstract class KiteBaseTest {
    * If not, overwrite this function with appropriate order.
    */
   protected void testSequentially(){
+    logger.info("Starting the execution of the test runners sequentially");
     for (int i = 0; i < testRunners.get(0).getSteps().size(); i++) {
       for (TestRunner runner : testRunners) {
         TestStep step = runner.getSteps().get(i);
@@ -210,8 +210,6 @@ public abstract class KiteBaseTest {
     } catch (UnknownHostException e) {
       this.report.addLabel("host", "N/A");
     }
-    
-    logger.info("Finished filling out initial report");
   }
 
   /**
@@ -281,6 +279,10 @@ public abstract class KiteBaseTest {
     this.payload = (JsonObject)payload;
   }
 
+  public void setLogger(Logger logger) {
+    this.logger = logger;
+  }
+  
   public void setEndPointList(List<EndPoint> endPointList) {
     this.endPointList = endPointList;
     this.report.setName(generateTestCaseName());
@@ -450,12 +452,6 @@ public abstract class KiteBaseTest {
    * @param runner the TestRunner
    */
   protected abstract void populateTestSteps(TestRunner runner);
-
-  protected void initFileAppender() throws IOException {
-    FileAppender fileAppender = new FileAppender( new PatternLayout("%d %-5p - %m%n"), "logs/" + name + "/test_" + logger.getName() + ".log", false);
-    fileAppender.setThreshold(Level.INFO);
-    logger.addAppender(fileAppender);
-  }
 
   public void setName(String name) { this.name = name; }
 

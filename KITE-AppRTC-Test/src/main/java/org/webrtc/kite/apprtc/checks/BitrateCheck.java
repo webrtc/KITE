@@ -37,7 +37,6 @@ public class BitrateCheck extends TestCheck {
   public BitrateCheck(WebDriver webDriver) {
     super(webDriver);
   }
-  private AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver);
   
   @Override
   public String stepDescription() {
@@ -53,6 +52,7 @@ public class BitrateCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
+    final AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
     String stat = direction.equalsIgnoreCase("sending") ? "inbound-rtp" : "outbound-rtp";
     JsonArray selectedStat =
       Json.createArrayBuilder()
