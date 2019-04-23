@@ -19,7 +19,7 @@ rem Set to TRUE to use localhost or FALSE to use the host's IP address
 set LOCALHOST=TRUE
 
 rem Capability Matcher
-set KITE_EXTRAS_VERSION=0.1.4
+set KITE_EXTRAS_VERSION=0.1.5
 set GRID_UTILS_VERSION=0.0.1
 
 rem Selenium version

@@ -25,5 +25,27 @@ fi
 sed -i 's,/'"$KITE_HOME"'.*$,'"$NEW_PATH"',g' ~/.bashrc
 echo export PATH="$NEW_PATH" >> ~/.bashrc
 
-x-terminal-emulator -e 'sh -c "exec bash; cd $KITE_HOME"'
+function skipchoice(){
+read -p "Do you want to  install the local grid now? (y/n) " yn
+case $yn in
+    [Yy]* )
+           installGrid
+           ;;
+    [Nn]* )
+          startNewPrompt
+          ;;
+    * ) echo "Please answer yes or no."
+		skipchoice;;
+esac
+}
 
+
+startNewPrompt(){
+x-terminal-emulator -e 'sh -c "exec bash; cd $KITE_HOME"'
+}
+
+installGrid(){
+cd $KITE_HOME/scripts/linux
+./interactiveInstallation.sh
+}
+skipchoice

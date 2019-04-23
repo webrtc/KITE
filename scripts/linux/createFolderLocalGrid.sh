@@ -21,25 +21,20 @@ fi
 rm startGrid.sh || true
 if [[ "$DESKTOP_ENVIRONMENT" = "TRUE" ]]
 then
-  echo cd hub >> startGrid.sh
+  echo cd $KITE_HOME/localGrid/hub >> startGrid.sh
   echo x-terminal-emulator -e ./startHub.sh >> startGrid.sh
-  echo cd .. >> startGrid.sh
-  echo cd chrome >> startGrid.sh
+  echo cd $KITE_HOME/localGrid/chrome >> startGrid.sh
   echo x-terminal-emulator -e ./startNode.sh >> startGrid.sh
-  echo cd .. >> startGrid.sh
-  echo cd firefox >> startGrid.sh
+
+  echo cd $KITE_HOME/localGrid/firefox >> startGrid.sh
   echo x-terminal-emulator -e ./startNode.sh >> startGrid.sh
-  echo cd .. >> startGrid.sh
 else
-  echo cd hub >> startGrid.sh
+  echo cd $KITE_HOME/localGrid/hub >> startGrid.sh
   echo "./startHub.sh &" >> startGrid.sh
-  echo cd .. >> startGrid.sh
-  echo cd chrome >> startGrid.sh
+  echo cd $KITE_HOME/localGrid/chrome >> startGrid.sh
   echo "./startNode.sh &" >> startGrid.sh
-  echo cd .. >> startGrid.sh
-  echo cd firefox >> startGrid.sh
+  echo cd $KITE_HOME/localGrid/firefox >> startGrid.sh
   echo "./startNode.sh &" >> startGrid.sh
-  echo cd .. >> startGrid.sh
 fi
 
 

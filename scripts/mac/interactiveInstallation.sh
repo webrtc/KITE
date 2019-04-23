@@ -1,219 +1,304 @@
 #!/bin/bash
 set +v
-echo Welcome to the installation tutorial of KITE-2.0
-echo Here are the default configuration
+
+echo -e '\n'Welcome to the interactive setup of the local grid. '\n''\n'Here are the defaults settings:
 . ./gridConfig.sh
 
+
+echo -e '\n'Whether or not to install the Browsers '\n' 
 echo INSTALL_BROWSERS=$INSTALL_BROWSERS
-echo USE_CAPABILITY_MATCHER=$USE_CAPABILITY_MATCHER
-echo LOCALHOST=$LOCALHOST
-echo GECKO_VERSION=$GECKO_VERSION
-echo CHROMEDRIVER_VERSION=$CHROMEDRIVER_VERSION
-echo SELENIUM_VERSION_SHORT=$SELENIUM_VERSION_SHORT
-echo SELENIUM_VERSION=$SELENIUM_VERSION
+echo -e '\n'Browser versions
 echo CHROME_VERSION=$CHROME_VERSION
 echo FIREFOX_VERSION=$FIREFOX_VERSION
+echo -e '\n'Whether to use 'localhost' or the computer's IP as the grid's hub address 
+echo LOCALHOST=$LOCALHOST
+echo -e '\n'GeckoDriver and ChromeDriver versions
+echo GECKO_VERSION=$GECKO_VERSION
+echo CHROMEDRIVER_VERSION=$CHROMEDRIVER_VERSION
+echo -e '\n'Selenium Standalone Server version
+echo SELENIUM_VERSION_SHORT=$SELENIUM_VERSION_SHORT
+echo SELENIUM_VERSION=$SELENIUM_VERSION
+echo -e '\n'Whether to use CAPABILITY MATCHER and the KITE Extras and Grid Utils versions
+echo USE_CAPABILITY_MATCHER=$USE_CAPABILITY_MATCHER
 echo KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION
-echo GRID_VERSION=$GRID_VERSION
-
-
+echo -e GRID_UTILS_VERSION=$GRID_UTILS_VERSION '\n'
+function quit() {
+	cd $KITE_HOME
+}
 
 function run() {
-	./setupLocalGrid.command
+	cd $KITE_HOME/scripts/linux
+	./setupLocalGrid.sh
+	quit
 }
+
 
 function remind() {
 	rm  gridConfig.sh-e
-	echo Here are the new configuration: 
+
+	echo -e '\n'Here are the new configuration: 
 	. ./gridConfig.sh
 
+
+	echo -e '\n'Whether or not to install the Browsers '\n' 
 	echo INSTALL_BROWSERS=$INSTALL_BROWSERS
-	echo USE_CAPABILITY_MATCHER=$USE_CAPABILITY_MATCHER
-	echo LOCALHOST=$LOCALHOST
-	echo GECKO_VERSION=$GECKO_VERSION
-	echo CHROMEDRIVER_VERSION=$CHROMEDRIVER_VERSION
-	echo SELENIUM_VERSION_SHORT=$SELENIUM_VERSION_SHORT
-	echo SELENIUM_VERSION=$SELENIUM_VERSION
+	echo -e '\n'Browser versions
 	echo CHROME_VERSION=$CHROME_VERSION
 	echo FIREFOX_VERSION=$FIREFOX_VERSION
+	echo -e '\n'Whether to use 'localhost' or the computer's IP as the grid's hub address 
+	echo LOCALHOST=$LOCALHOST
+	echo -e '\n'GeckoDriver and ChromeDriver versions
+	echo GECKO_VERSION=$GECKO_VERSION
+	echo CHROMEDRIVER_VERSION=$CHROMEDRIVER_VERSION
+	echo -e '\n'Selenium Standalone Server version
+	echo SELENIUM_VERSION_SHORT=$SELENIUM_VERSION_SHORT
+	echo SELENIUM_VERSION=$SELENIUM_VERSION
+	echo -e '\n'Whether to use CAPABILITY MATCHER and the KITE Extras and Grid Utils versions
+	echo USE_CAPABILITY_MATCHER=$USE_CAPABILITY_MATCHER
 	echo KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION
-	echo GRID_VERSION=$GRID_VERSION
-	run
-}
-
-function configGrid() {
-
-	echo Please check the corresponding KITE-Extras version from:
-	echo https://github.com/CoSMoSoftware/KITE-Extras/releases
-	echo currently the config file has the following version:
-	echo KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION
-	echo GRID_VERSION=$GRID_VERSION
-	read -p "Are those versions correct? (y/n)" yn
-	case $yn in
-		[Nn]* )
-			   echo Please enter the current version of KITE Extras
-			   read InputKiteExtrasVersion
-			   sed -i'' -e s/KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION/KITE_EXTRAS_VERSION=$InputKiteExtrasVersion/ ./gridConfig.sh
-			   echo Please enter the current version of grid-utils
-			   read inputGridVersion
-			   sed -i'' -e s/GRID_VERSION=$GRID_VERSION/GRID_VERSION=$inputGridVersion/ ./gridConfig.sh
-			   remind
-			   ;;
-		[Yy]* )
-			   remind
-			  ;;
-		* ) echo "Please answer yes or no.";;
-	esac
+	echo -e GRID_UTILS_VERSION=$GRID_UTILS_VERSION '\n'
+	read -p "Do you want to start the Grid (y/n)?  " yn
+case $yn in
+    [Yy]* )
+           run
+           ;;
+    [Nn]* )
+          quit
+          ;;
+    * ) echo "Please answer yes or no."
+		remind
+		;;
+esac
 }
 
 function configSelenium() {
-	echo Please check the corresponding selenium version from:
+	echo -e '\n'Please check the corresponding selenium version from:
 	echo https://selenium-release.storage.googleapis.com/
 	echo currently the config file has the following version:
 	echo SELENIUM_VERSION_SHORT=$SELENIUM_VERSION_SHORT
 	echo SELENIUM_VERSION=$SELENIUM_VERSION
-	read -p "Are those versions correct? (y/n)" yn
-	case $yn in
+	read -p "Are those versions correct? (y/n/q)" ynq
+	case $ynq in
 		[Nn]* )
-			   echo Please enter the current version of Selenium - short version
+			   echo Please enter the current version of Selenium \(short version\)
 			   read InputSeleniumshort
-			   sed -i'' -e s/SELENIUM_VERSION_SHORT=$SELENIUM_VERSION_SHORT/SELENIUM_VERSION_SHORT=$InputSeleniumshort/ ./gridConfig.sh
-			   echo Please enter the current version of Selenium - complete version
+			   sed -i'' -e s/SELENIUM_VERSION_SHORT=$SELENIUM_VERSION_SHORT/SELENIUM_VERSION_SHORT=$InputSeleniumshort/ ./gridConfig.sh			   
+			   echo Please enter the current version of Selenium \(complete version\)
 			   read InputSelenium
 			   sed -i'' -e s/SELENIUM_VERSION=$SELENIUM_VERSION/SELENIUM_VERSION=$InputSelenium/ ./gridConfig.sh
-			   configGrid
+			   remind
 			   ;;
 		[Yy]* )
-			   configGrid
+			   remind
 			  ;;
-		* ) echo "Please answer yes or no.";;
+    [Qq]* )
+           quit
+		;;
+    * ) echo "Please answer yes, no or quit."
+	configSelenium;;
 	esac
 }
 
-function configGeckodriver() {
+function configFirefoxDriver() {
 
-	echo Please check the corresponding geckodriver version from:
+	echo -e '\n'Please check the corresponding geckodriver version from:
 	echo https://github.com/mozilla/geckodriver/releases
 	echo currently the config file has the following version:
 	echo GECKO_VERSION=$GECKO_VERSION
-	read -p "Is this version correct? (y/n)" yn
-	case $yn in
+	read -p "Is this version correct? (y/n/q)" ynq
+	case $ynq in
 		[Nn]* )
 			   echo Please enter the current version of geckodriver
 			   read InputGeckodriver
-			   sed -i'' -e  s/GECKO_VERSION=$GECKO_VERSION/GECKO_VERSION=$InputGeckodriver/ ./gridConfig.sh
+			   sed -i'' -e s/GECKO_VERSION=$GECKO_VERSION/GECKO_VERSION=$InputGeckodriver/ ./gridConfig.sh
 			   configSelenium
 			   ;;
 		[Yy]* )
 			   configSelenium
 			  ;;
-		* ) echo "Please answer yes or no.";;
+    [Qq]* )
+           quit
+		;;
+    * ) echo "Please answer yes, no or quit."
+	configFirefoxDriver;;
 	esac
 }
 
 function configChromeDriver() {
 
-	echo Please check the corresponding chromedriver version from:
+	echo -e '\n'Please check the corresponding chromedriver version from:
 	echo http://chromedriver.chromium.org/downloads
 	echo currently the config file has the following version:
 	echo CHROMEDRIVER_VERSION=$CHROMEDRIVER_VERSION
-	read -p "Is this version correct? (y/n)" yn
-	case $yn in
+	read -p "Is this version correct? (y/n/q)" ynq
+	case $ynq in
 		[Nn]* )
 			   echo Please enter the current version of chrome Driver
 			   read InputChromeDriver
-			   sed -i'' -e  s/CHROMEDRIVER_VERSION=$CHROMEDRIVER_VERSION/CHROMEDRIVER_VERSION=$InputChromeDriver/ ./gridConfig.sh
-			   configGeckodriver
+			   sed -i'' -e s/CHROMEDRIVER_VERSION=$CHROMEDRIVER_VERSION/CHROMEDRIVER_VERSION=$InputChromeDriver/ ./gridConfig.sh
+			   configFirefoxDriver
 			   ;;
 		[Yy]* )
-			   configGeckodriver
+			   configFirefoxDriver
 			  ;;
-		* ) echo "Please answer yes or no.";;
+    [Qq]* )
+           quit
+		;;
+    * ) echo "Please answer yes, no or quit."
+	configChromeDriver;;
 	esac
 }
 
 function configFirefox() {
-	echo Please check that the versions of Firefox match the one in the config file.
+	echo -e '\n'Please check that the versions of Firefox match the one in the config file.
 	echo currently the config file has the following version:
 	echo FIREFOX_VERSION=$FIREFOX_VERSION
-	read -p "Is this version correct? (y/n)" yn
-	case $yn in
+	read -p "Is this version correct? (y/n/q)" ynq
+	case $ynq in
 		[Nn]* )
 			   echo Please enter the current version of Firefox
 			   read InputFirefoxVersion
-			   sed -i'' -e  s/FIREFOX_VERSION=$FIREFOX_VERSION/FIREFOX_VERSION=$InputFirefoxVersion/ ./gridConfig.sh
+			   sed -i'' -e s/FIREFOX_VERSION=$FIREFOX_VERSION/FIREFOX_VERSION=$InputFirefoxVersion/ ./gridConfig.sh
 			   configChromeDriver
 			   ;;
 		[Yy]* )
 			   configChromeDriver
 			  ;;
-		* ) echo "Please answer yes or no.";;
+    [Qq]* )
+           quit
+		;;
+    * ) echo "Please answer yes, no or quit."
+	configFirefox;;
 	esac
 }
 
 function configChrome() {
-	echo Please check that the versions of Chrome match the one in the config file.
+	echo -e '\n'Please check that the versions of Chrome match the one in the config file.
 	echo currently the config file has the following version:
 	echo CHROME_VERSION=$CHROME_VERSION
-	read -p "Is this version correct? (y/n)" yn
-	case $yn in
+	read -p "Is this version correct? (y/n/q)" ynq
+	case $ynq in
 		[Nn]* )
 			   echo Please enter the current version of chrome
 			   read InputChromeVersion
-			   sed -i'' -e  s/CHROME_VERSION=$CHROME_VERSION/CHROME_VERSION=$InputChromeVersion/ ./gridConfig.sh
+			   sed -i'' -e s/CHROME_VERSION=$CHROME_VERSION/CHROME_VERSION=$InputChromeVersion/ ./gridConfig.sh
 			   configFirefox
 			   ;;
 		[Yy]* )
 			   configFirefox
 			  ;;
-		* ) echo "Please answer yes or no.";;
+    [Qq]* )
+           quit
+		;;
+    * ) echo "Please answer yes, no or quit."
+				configChrome
+				;;
 	esac
 }
 
+
+
+
+
+function localhost() {
+	echo -e 
+	read -p "Would you like to use 'localhost' as the hub address (instead of the IP)?  (y/n/q)" ynq
+	case $ynq in
+		[Yy]* )
+				echo You chose to use 'localhost' as the hub address instead of the IP
+
+			   sed -i'' -e s/LOCALHOST=$LOCALHOST/LOCALHOST=TRUE/ ./gridConfig.sh
+			   configChrome
+			   ;;
+		[Nn]* )
+				echo You chose to use the IP as the hub address instead of 'localhost' 
+
+			   sed -i'' -e s/LOCALHOST=$LOCALHOST/LOCALHOST=FALSE/ ./gridConfig.sh
+			   configChrome
+			  ;;
+    [Qq]* )
+           quit
+		;;
+    * ) echo "Please answer yes, no or quit."
+	localhost;;
+	esac
+}
+
+
+
+function configGrid() {
+
+	echo -e '\n'Please check the corresponding KITE-Extras version from:
+	echo https://github.com/CoSMoSoftware/KITE-Extras/releases
+	echo currently the config file has the following versions:
+	echo KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION
+	echo GRID_UTILS_VERSION=$GRID_UTILS_VERSION
+	read -p "Are those versions correct? (y/n/q)" ynq
+	case $ynq in
+		[Nn]* )
+			   echo Please enter the current version of KITE Extras
+			   read InputKiteExtrasVersion
+			   sed -i'' -e s/KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION/KITE_EXTRAS_VERSION=$InputKiteExtrasVersion/ ./gridConfig.sh			   
+			   echo Please enter the current version of grid-utils
+			   read inputGridVersion
+			   sed -i'' -e s/GRID_UTILS_VERSION=$GRID_UTILS_VERSION/GRID_UTILS_VERSION=$inputGridVersion/ ./gridConfig.sh
+			   localhost
+			   ;;
+		[Yy]* )
+			   localhost
+			  ;;
+    [Qq]* )
+           quit
+		;;
+    * ) echo "Please answer yes, no or quit."
+	configGrid;;
+	
+	esac
+}
 
 
 function capabilityMatcher() {
-	read -p "Would you like to use the capability Matcher? (y/n)" yn
-	case $yn in
+		echo -e 
+		read -p "Would you like to use the capability Matcher? (y/n/q)" ynq
+	case $ynq in
 		[Yy]* )
+			echo You chose to use capability matcher
 			   sed -i'' -e s/USE_CAPABILITY_MATCHER=$USE_CAPABILITY_MATCHER/USE_CAPABILITY_MATCHER=TRUE/ ./gridConfig.sh
-			   configChrome
+			   configGrid
 			   ;;
 		[Nn]* )
+					echo You chose to not use capability matcher
 			   sed -i'' -e s/USE_CAPABILITY_MATCHER=$USE_CAPABILITY_MATCHER/USE_CAPABILITY_MATCHER=FALSE/ ./gridConfig.sh
-			   configChrome
+			   localhost
 			  ;;
-		* ) echo "Please answer yes or no.";;
+    [Qq]* )
+           quit
+		;;
+    * ) echo "Please answer yes, no or quit."
+	capabilityMatcher;;
 	esac
 }
 
-function localhost() {
-	read -p "Would you like to run the localGrid on localhost ? (y/n)" yn
-	case $yn in
-		[Yy]* )
-			   sed -i'' -e s/LOCALHOST=$LOCALHOST/LOCALHOST=TRUE/ ./gridConfig.sh
-			   capabilityMatcher
-			   ;;
-		[Nn]* )
-			   sed -i'' -e s/LOCALHOST=$LOCALHOST/LOCALHOST=FALSE/ ./gridConfig.sh
-			   capabilityMatcher
-			  ;;
-		* ) echo "Please answer yes or no.";;
-	esac
-}
 
 function choiceInstallBrowser() {
-	read -p "Would you like to install the browsers? (y/n)" yn
-	case $yn in
+		echo -e 
+	read -p "Would you like to install the browsers? (y/n/q)" ynq
+	case $ynq in
 		[Yy]* )
+			echo You chose to install the Browsers
 			   sed -i'' -e s/INSTALL_BROWSERS=$INSTALL_BROWSERS/INSTALL_BROWSERS=TRUE/ ./gridConfig.sh
-			   localhost
+			   capabilityMatcher
 			   ;;
 		[Nn]* )
+				echo You chose to skip the browser installation
 			   sed -i'' -e s/INSTALL_BROWSERS=$INSTALL_BROWSERS/INSTALL_BROWSERS=FALSE/ ./gridConfig.sh
-			   localhost
+			   capabilityMatcher
 			  ;;
-		* ) echo "Please answer yes or no.";;
+    [Qq]* )
+           quit
+		;;
+    * ) echo "Please answer yes, no or quit."
+	choiceInstallBrowser;;
 	esac
 }
 
@@ -226,25 +311,22 @@ function modify() {
 
 
 
-
-read -p "Would you like to run the script with those configuration? (y/n)" yn
-case $yn in
+function skipchoice() {
+		echo -e 
+read -p "Would you like to run the script with those configuration? (y/n/q)" ynq
+case $ynq in
     [Yy]* )
            run
 		;;
     [Nn]* )
-	modify
+		   modify
 	;;
-    * ) echo "Please answer yes or no.";;
+    [Qq]* )
+           quit
+		;;
+    * ) echo "Please answer yes, no or quit."
+		skipchoice;;
 esac
+}
 
-
-
-
-
-
-
-
-
-
-
+skipchoice

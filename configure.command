@@ -34,8 +34,31 @@ fi
 
 echo export allure="$KITE_HOME/third_party/allure-2.10.0/bin/allure" >> ~/.bash_profile
 
+function skipchoice(){
+read -p "Do you want to  install the local grid now? (y/n) " yn
+case $yn in
+    [Yy]* )
+           installGrid
+           ;;
+    [Nn]* )
+          startNewPrompt
+          ;;
+    * ) echo "Please answer yes or no."
+		skipchoice;;
+esac
+}
 
+
+startNewPrompt(){
 osascript -e 'tell application "Terminal" to do script "cd $KITE_HOME"'
-
 kill -9 $PPID 
+
+}
+
+installGrid(){
+cd $KITE_HOME/scripts/linux
+./interactiveInstallation.sh
+}
+
+skipchoice
 

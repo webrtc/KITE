@@ -37,4 +37,4 @@ export CHROME_VERSION=73
 
 #Capability Matcher
 export KITE_EXTRAS_VERSION=0.1.4
-export GRID_VERSION=0.0.1
+export GRID_UTILS_VERSION=0.0.1
