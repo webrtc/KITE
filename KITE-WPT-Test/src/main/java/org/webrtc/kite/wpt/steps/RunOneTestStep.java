@@ -19,7 +19,7 @@ public class RunOneTestStep extends TestStep {
   public RunOneTestStep(WebDriver webDriver, String url) {
     super(webDriver);
     this.url = url;
-    wptTestPage = new WPTTestPage(webDriver, url);
+    wptTestPage = new WPTTestPage(webDriver, logger, url);
   }
   
   @Override

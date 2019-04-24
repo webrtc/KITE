@@ -18,18 +18,25 @@ package org.webrtc.kite;
 
 import io.cosmosoftware.kite.report.Container;
 import io.cosmosoftware.kite.report.Reporter;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.EndPoint;
 import org.webrtc.kite.config.TestConf;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
 
 /**
@@ -103,7 +110,7 @@ public class MatrixRunner {
           listOfFutureObjects.add(future);
         }
       } catch (InterruptedException | ExecutionException e) {
-        logger.error(e);
+        logger.error(getStackTrace(e));
       }
     }
     return listOfFutureObjects;
@@ -134,11 +141,11 @@ public class MatrixRunner {
       Executors.newFixedThreadPool(this.testConf.getNoOfThreads());
     
     logger.info("Executing " + this.testConf + " for " + totalTestCases + " browser tuples");
-    
     try {
+      final Logger testLogger = createTestLogger(this.testConf.getTestClassName());
       for (int index = 0; index < this.tupleList.size(); index ++) {
         List<EndPoint> configObjectList = this.tupleList.get(index);
-        TestManager manager = new TestManager(this.testConf, configObjectList, testConf.getMaxRetryCount() );
+        TestManager manager = new TestManager(this.testConf, configObjectList, testConf.getMaxRetryCount(), testLogger);
         manager.setTestSuite(testSuite);
         testManagerList.add(manager);
       }
@@ -151,7 +158,9 @@ public class MatrixRunner {
       }
       
       testManagerList.clear();
-      
+
+    } catch (Exception e) {
+      logger.error(getStackTrace(e));
     } finally {
       testSuite.setStopTimestamp();
       Reporter.getInstance().generateReportFiles();
@@ -159,5 +168,17 @@ public class MatrixRunner {
     }
     return futureList;
   }
+
+
+
+
+  protected Logger createTestLogger(String testClassName) throws IOException {
+    Logger testLogger = Logger.getLogger(new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(new Date()));
+    FileAppender fileAppender = new FileAppender( new PatternLayout("%d %-5p - %m%n"), "logs/" + testClassName + "/test_" + testLogger.getName() + ".log", false);
+    fileAppender.setThreshold(Level.INFO);
+    testLogger.addAppender(fileAppender);
+    return testLogger;
+  }
+  
   
 }

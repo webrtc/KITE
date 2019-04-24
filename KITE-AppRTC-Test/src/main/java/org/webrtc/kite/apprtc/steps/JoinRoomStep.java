@@ -24,7 +24,6 @@ public class JoinRoomStep extends TestStep {
 
   protected String roomId;
   private String debugOption;
-  private AppRTCJoinPage appRTCJoinPage = new AppRTCJoinPage(webDriver);
 
   public void setRoomId(String roomId) {
     this.roomId = roomId;
@@ -45,6 +44,7 @@ public class JoinRoomStep extends TestStep {
 
   @Override
   protected void step() throws KiteTestException {
+    final AppRTCJoinPage appRTCJoinPage = new AppRTCJoinPage(webDriver, logger);
     appRTCJoinPage.joinRoom(roomId + (debugOption != null ? debugOption : ""));
   }
 }

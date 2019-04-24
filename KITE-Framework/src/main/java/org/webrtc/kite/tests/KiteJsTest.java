@@ -4,7 +4,6 @@
 
 package org.webrtc.kite.tests;
 
-import org.apache.log4j.Logger;
 import org.webrtc.kite.config.EndPoint;
 
 import java.util.UUID;
@@ -18,7 +17,6 @@ import static io.cosmosoftware.kite.util.TestUtils.printJsonTofile;
  */
 public class KiteJsTest extends KiteBaseTest {
   
-  private static final Logger logger = Logger.getLogger(KiteJsTest.class.getName());
   // todo : get JS_PATH from config file
   private final String JS_PATH = "js/";
   private final String jsTestImpl;

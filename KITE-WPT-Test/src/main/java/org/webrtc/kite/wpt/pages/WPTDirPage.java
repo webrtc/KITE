@@ -1,6 +1,7 @@
 package org.webrtc.kite.wpt.pages;
 
 import io.cosmosoftware.kite.pages.BasePage;
+import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -21,8 +22,8 @@ public class WPTDirPage extends BasePage {
   
   private final String pageUrl;
   
-  public WPTDirPage(WebDriver webDriver, String pageUrl) {
-    super(webDriver);
+  public WPTDirPage(WebDriver webDriver, Logger logger, String pageUrl) {
+    super(webDriver, logger);
     this.pageUrl = pageUrl;
   }
   

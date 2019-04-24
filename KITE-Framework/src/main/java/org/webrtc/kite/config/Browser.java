@@ -30,6 +30,7 @@ import javax.json.JsonValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Representation of a browser object in the config file.
@@ -389,37 +390,21 @@ public class Browser extends EndPoint {
       return false;
     }
   }
-  
-  
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
-    
-    Browser temp = (Browser) obj;
-    if (this.browserName.equalsIgnoreCase(temp.getBrowserName())) {
-      if (Utils.areBothNull(this.version, temp.getVersion())) {
-        if (this.isEqualToPlatform(temp.getPlatform())) {
-          return this.isEqualToMobile(temp.getMobile()) && this.typeRole.equals(temp.typeRole);
-        }
-      } else if (Utils.areBothNotNull(this.version, temp.getVersion())) {
-        if (this.version.equalsIgnoreCase(temp.getVersion())) {
-          if (this.isEqualToPlatform(temp.getPlatform())) {
-            return this.isEqualToMobile(temp.getMobile()) && this.typeRole.equals(temp.typeRole);
-          }
-        }
-      }
-    }
-    
-    return false;
+
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Browser browser = (Browser) o;
+    return browserName.equals(browser.browserName) &&
+            version.equals(browser.version) && platformName.equals(browser.platformName) && Objects.equals(gateway, browser.gateway) &&
+            Objects.equals(mobile, browser.mobile);
   }
-  
+
   @Override
   public int hashCode() {
-    long hashCode = this.browserName.hashCode();
+    int hashCode = this.browserName.hashCode();
     if (this.version != null) {
       hashCode += this.version.hashCode();
     }
@@ -429,8 +414,11 @@ public class Browser extends EndPoint {
     if (this.mobile != null) {
       hashCode += this.mobile.hashCode();
     }
+    if (this.gateway != null) {
+      hashCode += this.gateway.hashCode();
+    }
     hashCode += this.typeRole.hashCode();
-    return (int) hashCode;
+    return hashCode;
   }
   
   @Override

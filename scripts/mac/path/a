@@ -1,0 +1,11 @@
+ALLURE_BAT=$KITE_HOME/third_party/allure-2.10.0/bin/allure
+if [ -f "$ALLURE_BAT" ] 
+echo $KITE_HOME
+echo echo -n -e '"\033]0;ALLURE\007"' > "$KITE_HOME/scripts/mac/path/a.sh"
+echo cd `pwd` >> "$KITE_HOME/scripts/mac/path/a.sh"
+echo allure serve kite-allure-reports >> "$KITE_HOME/scripts/mac/path/a.sh"
+echo rm -f $KITE_HOME/scripts/mac/path/a.sh >> "$KITE_HOME/scripts/mac/path/a.sh"
+chmod +x $KITE_HOME/scripts/mac/path/a.sh
+then 
+	osascript -e 'tell application "Terminal" to do script "$KITE_HOME/scripts/mac/path/a.sh" '
+fi

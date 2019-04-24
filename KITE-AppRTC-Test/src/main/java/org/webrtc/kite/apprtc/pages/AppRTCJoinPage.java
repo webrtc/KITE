@@ -17,6 +17,7 @@ package org.webrtc.kite.apprtc.pages;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.pages.BasePage;
+import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -28,8 +29,8 @@ public class AppRTCJoinPage extends BasePage {
   @FindBy(id="confirm-join-button")
   WebElement joinButton;
   
-  public AppRTCJoinPage(WebDriver webDriver) {
-    super(webDriver);
+  public AppRTCJoinPage(WebDriver webDriver, Logger logger) {
+    super(webDriver, logger);
   }
   
   public void joinRoom(String roomId) throws KiteTestException {

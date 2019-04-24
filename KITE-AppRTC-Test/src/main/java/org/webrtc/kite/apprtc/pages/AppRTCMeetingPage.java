@@ -15,9 +15,9 @@
  */
 package org.webrtc.kite.apprtc.pages;
 
-import io.cosmosoftware.kite.exception.KiteInteractionException;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.pages.BasePage;
+import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -60,8 +60,8 @@ public class AppRTCMeetingPage extends BasePage {
   WebElement muteVideoButton;
 
 
-  public AppRTCMeetingPage(WebDriver webDriver) {
-    super(webDriver);
+  public AppRTCMeetingPage(WebDriver webDriver, Logger logger) {
+    super(webDriver, logger);
   }
 
   public void muteAudio() throws KiteTestException {

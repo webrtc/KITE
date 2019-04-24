@@ -1,6 +1,6 @@
 #!/bin/bash
 set +v
-. ./config.sh
+. ./gridConfig.sh
 google-chrome-stable -version >chrome.txt
 chromeFile="chrome.txt"
 chrome=$(cat "$chromeFile")

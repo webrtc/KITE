@@ -15,10 +15,10 @@
  */
 package org.webrtc.kite.apprtc.tests;
 
-import org.webrtc.kite.tests.TestRunner;
 import org.webrtc.kite.apprtc.checks.PeerConnectionCheck;
-import org.webrtc.kite.apprtc.steps.JoinRoomStep;
 import org.webrtc.kite.apprtc.steps.GetStatsStep;
+import org.webrtc.kite.apprtc.steps.JoinRoomStep;
+import org.webrtc.kite.tests.TestRunner;
 
 import java.util.Random;
 

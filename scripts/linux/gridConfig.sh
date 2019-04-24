@@ -11,7 +11,7 @@
 
 
 # Set to TRUE to install Chrome and Firefox, or FALSE to skip this step if the correct versions are already installed.
-export INSTALL_BROWSERS=FALSE
+export INSTALL_BROWSERS=TRUE
 
 # Set to TRUE/FALSE to enable/disable the CAPABILITY MATCHER
 export USE_CAPABILITY_MATCHER=FALSE
@@ -37,4 +37,4 @@ export CHROME_VERSION=73
 
 #Capability Matcher
 export KITE_EXTRAS_VERSION=0.1.4
-export GRID_VERSION=0.0.1
+export GRID_UTILS_VERSION=0.0.1

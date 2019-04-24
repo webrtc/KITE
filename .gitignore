@@ -11,3 +11,4 @@ package-lock.json
 .classpath
 .settings
 .project
+.DS_Store

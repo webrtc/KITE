@@ -1,2 +1,2 @@
-exports.peerConnectionCheck = require("./peer-connection-check");
-exports.remoteVideoDisplayCheck = require('./remote-video-display-check');
+exports.PeerConnectionCheck = require("./PeerConnectionCheck");
+exports.RemoteVideoDisplayCheck = require('./RemoteVideoDisplayCheck');

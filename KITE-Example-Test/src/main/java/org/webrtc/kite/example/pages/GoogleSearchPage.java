@@ -1,6 +1,7 @@
 package org.webrtc.kite.example.pages;
 
 import io.cosmosoftware.kite.pages.BasePage;
+import org.apache.log4j.Logger;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -8,15 +9,15 @@ import org.openqa.selenium.support.FindBy;
 
 public class GoogleSearchPage extends BasePage {
   
-  final String GOOGLE_PAGE = "https://google.com";
+  private final static String GOOGLE_PAGE = "https://google.com";
   
   @FindBy(className="gLFyf")
   WebElement searchBar;
   
   
   
-  public GoogleSearchPage(WebDriver webDriver) {
-    super(webDriver);
+  public GoogleSearchPage(WebDriver webDriver, Logger logger) {
+    super(webDriver, logger);
   }
   
   public void open() {
@@ -28,7 +29,7 @@ public class GoogleSearchPage extends BasePage {
     searchBar.sendKeys(Keys.ENTER);
   }
   
-  public String getURL() {
+  public static String getURL() {
     return GOOGLE_PAGE;
   }
 }

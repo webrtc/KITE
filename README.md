@@ -50,19 +50,54 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
 
     This will set KITE_HOME environment variable and add utility scripts to your path.  
 
-    2.1 On Windows, open a Command Prompt window and:
+    2.1 On Windows, open a Command Prompt window and enter the followng commands:
     ```
     cd \GitHub\KITE
     configure.bat
     ```
 
-    2.2 On linux or mac, open a Command Prompt window and:
+    2.2 On Linux, open a terminal and enter the followng commands:
     ```
     cd \GitHub\KITE
-    chmod +x configure
-    sudo ./configure
+    chmod +x configure.sh
+    ./configure.sh
+    ```     
+    
+    2.3 On Mac, open a terminal and enter the followng commands:
     ```
-    Logout and login again for the environment variables to take effect.
+    cd \GitHub\KITE
+    ./configure.command
+    ```
+    
+    During this step, you will be prompt to setup the local grid. This is an interactive setup. 
+    It is important to configure the Firefox and Chrome versions according to the versions installed on your computer.  
+    If Chrome and/or Firefox are not installed, this script will automatically download and install the latest stable releases. 
+          
+    To check the browser versions:  
+    __1. Chrome__  
+    Open Chrome and enter <a href="chrome://settings/help" target="_blank">chrome://settings/help</a> into the address bar.
+       
+    __2. Firefox__  
+    Open Firefox, top right menu, then select Help, then About Firefox. You can also find out the latest version
+     at [www.mozilla.org/en-US/firefox/releases/](https://www.mozilla.org/en-US/firefox/releases/).
+    
+    Different browser versions require a different ChromeDriver (to control Chrome) and a different GeckoDriver (to control Firefox).
+    You will need to find out what are the corresponding driver versions. Please visit the following two pages:
+    * http://chromedriver.chromium.org/downloads
+    * https://github.com/mozilla/geckodriver/releases 
+    
+    
+    By default, the local grid setup script is configured for __Chrome__ version __73__ and __Firefox__ version __66__. 
+    If these are the versions installed on your computer, you can safely use the default settings.
+    Otherwise, you will need to edit the following settings when prompt to do so:  
+    ```
+    CHROME_VERSION=__73__
+    FIREFOX_VERSION=__66__
+    CHROMEDRIVER_VERSION=__73.0.3683.68__
+    GECKO_VERSION=__v0.24.0__ 
+    ```
+    __Note:__ Please input only the major (i.e. 73 or 66) for the browser versions, but the full version with the minor (i.e. 73.0.3683.68 or v0.24.0) for the driver versions.   
+   More details are available in the [local grid setup guide](scripts/README.md).
 
 3. Compile 
 
@@ -82,7 +117,8 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
 
 ## C. Install the local grid
 
-To setup the local grid, refer to the [local grid setup guide](scripts/README.md).
+If you have chosen to skip the grid installation during configure, you can still do it
+by following [local grid setup guide](scripts/README.md).
   
 &nbsp;    
 &nbsp;      
@@ -210,11 +246,19 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
 #### Run KITE-Example-Test
 
 
-To run the example test:
+To run the example test,  
+__On Windows:__  
+on Windows:
 ```
 cd %KITE_HOME%\KITE-Example-Test
 r example.config.json
 ```
+__On Linux and Mac:__  
+```
+cd $KITE_HOME/KITE-Example-Test
+r example.config.json
+```
+
 
 #### Run KITE-AppRTC-Test
 
@@ -224,7 +268,7 @@ You will need to change __`version`__ and __`platform`__ according to what is in
 To run the AppRTC iceconnection test:
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
-r iceconnection.local.json
+r iceconnection.local.config.json
 ```
 
 Alternatively, you can launch the test with the full command.
@@ -240,11 +284,17 @@ On Linux/Mac:
 ### Open the dashboard
 
 After running the test, you can open the Allure dashboard with the command `a`.
+
+on Windows:
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
 a
 ```
-
+on Linux and Mac:
+```
+cd $KITE_HOME/KITE-AppRTC-Test
+a
+```
 
 Congratulation! You should see the results of your first KITE test.
 

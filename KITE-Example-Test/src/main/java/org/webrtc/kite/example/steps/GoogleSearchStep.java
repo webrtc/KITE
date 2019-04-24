@@ -1,13 +1,13 @@
 package org.webrtc.kite.example.steps;
 
-import org.webrtc.kite.example.pages.GoogleSearchPage;
 import io.cosmosoftware.kite.steps.TestStep;
 import org.openqa.selenium.WebDriver;
+import org.webrtc.kite.example.pages.GoogleSearchPage;
 
 public class GoogleSearchStep extends TestStep {
   
   final String TARGET = "CoSMo Software Consulting";
-  final GoogleSearchPage searchPage = new GoogleSearchPage(this.webDriver);
+  
   
   public GoogleSearchStep(WebDriver webDriver) {
     super(webDriver);
@@ -16,11 +16,12 @@ public class GoogleSearchStep extends TestStep {
   
   @Override
   public String stepDescription() {
-    return "Open " + searchPage.getURL() + " and look for " + TARGET;
+    return "Open " + GoogleSearchPage.getURL() + " and look for " + TARGET;
   }
   
   @Override
   protected void step() {
+    final GoogleSearchPage searchPage = new GoogleSearchPage(this.webDriver, logger);
     searchPage.open();
     searchPage.searchFor(TARGET);
   }

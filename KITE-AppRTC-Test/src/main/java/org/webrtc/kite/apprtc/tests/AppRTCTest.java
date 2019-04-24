@@ -18,9 +18,7 @@ package org.webrtc.kite.apprtc.tests;
 import org.webrtc.kite.tests.KiteBaseTest;
 
 import javax.json.JsonArray;
-import javax.json.JsonObject;
 import java.util.Random;
-import java.util.UUID;
 
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.entities.Timeouts.TEN_SECOND_INTERVAL;

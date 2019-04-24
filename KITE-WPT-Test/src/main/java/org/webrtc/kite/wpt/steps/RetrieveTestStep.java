@@ -22,7 +22,7 @@ public class RetrieveTestStep extends TestStep {
     super(webDriver);
     this.url = verifyPathFormat(url);
     this.sercureURL = verifyPathFormat(sercureURL);
-    this.wptDirPage = new WPTDirPage(webDriver, url);
+    this.wptDirPage = new WPTDirPage(webDriver, logger, url);
     this.testUrlList = testUrlList;
   }
   

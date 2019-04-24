@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "fs": "^0.0.1-security",
-    "kite-common": "0.0.3",
+    "kite-common": "0.0.4",
     "selenium-webdriver": "^4.0.0-alpha.1"
   }
 }

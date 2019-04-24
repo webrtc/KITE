@@ -1,15 +1,15 @@
 #!/bin/bash
 set +v
-. ./config.sh
-
+. ./gridConfig.sh
+cd $KITE_HOME/scripts/linux
 
 
 
 function startGrid() {
-  cd ../../localGrid
+  cd $KITE_HOME/localGrid
   if [ "$DESKTOP_ENVIRONMENT" = "TRUE" ]
   then
-    gnome-terminal -e ./startGrid.sh &
+    x-terminal-emulator -e ./startGrid.sh &
   else
     ./startGrid.sh &
   fi
