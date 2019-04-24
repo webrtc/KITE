@@ -15,6 +15,7 @@ fi
 echo export KITE_HOME="$KITE_HOME" >> ~/.bashrc
 
 chmod +x scripts/linux/path/*
+chmod +x scripts/linux/*.sh
 chmod +x $KITE_HOME/third_party/allure-2.10.0/bin/allure
 
 if [ -n "$(grep "\$KITE_HOME" ~/.bashrc)" ]
