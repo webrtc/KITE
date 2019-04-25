@@ -1,6 +1,6 @@
 #! /bin/bash
 cd $KITE_HOME/scripts/mac
-source config.sh
+source gridConfig.sh
 
 cd $KITE_HOME
 

@@ -11,7 +11,7 @@
 
 
 # Set to TRUE to install Chrome and Firefox, or FALSE to skip this step if the correct versions are already installed.
-INSTALL_BROWSERS=TRUE
+INSTALL_BROWSERS=FALSE
 
 # Set to TRUE/FALSE to enable/disable the CAPABILITY MATCHER
 USE_CAPABILITY_MATCHER=FALSE

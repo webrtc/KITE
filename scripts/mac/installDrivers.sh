@@ -1,7 +1,7 @@
 #! /bin/bash
 BASEDIR=$(dirname "$0")
 cd $BASEDIR
-source config.sh
+source gridConfig.sh
 
 
 curl https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_mac64.zip  -o chromezip

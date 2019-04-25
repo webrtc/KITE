@@ -43,7 +43,7 @@ import static org.webrtc.kite.Utils.populateInfoFromNavigator;
 
 public abstract class KiteBaseTest {
   protected String name = this.getClass().getSimpleName();
-  protected Logger logger = null;
+  protected Logger logger = Logger.getLogger(this.getClass().getName());
   protected final List<TestRunner> testRunners = new ArrayList<>();
   protected String parentSuite = "";
   protected String suite = "";

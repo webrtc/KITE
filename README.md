@@ -91,10 +91,10 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
     If these are the versions installed on your computer, you can safely use the default settings.
     Otherwise, you will need to edit the following settings when prompt to do so:  
     ```
-    CHROME_VERSION=__73__
-    FIREFOX_VERSION=__66__
-    CHROMEDRIVER_VERSION=__73.0.3683.68__
-    GECKO_VERSION=__v0.24.0__ 
+    CHROME_VERSION=73
+    FIREFOX_VERSION=66
+    CHROMEDRIVER_VERSION=73.0.3683.68
+    GECKO_VERSION=v0.24.0
     ```
     __Note:__ Please input only the major (i.e. 73 or 66) for the browser versions, but the full version with the minor (i.e. 73.0.3683.68 or v0.24.0) for the driver versions.   
    More details are available in the [local grid setup guide](scripts/README.md).

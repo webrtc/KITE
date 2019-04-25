@@ -23,6 +23,7 @@ import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
 
 public class RemoteVideoDisplayCheck extends TestCheck {
+  protected AppRTCMeetingPage appRTCMeetingPage = null;
 
   public RemoteVideoDisplayCheck(WebDriver webDriver) {
     super(webDriver);
@@ -35,7 +36,9 @@ public class RemoteVideoDisplayCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
-    final AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
+    if (appRTCMeetingPage == null) {
+      appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
+    }
     logger.info("Looking for video object");
 
     String videoCheck = appRTCMeetingPage.remoteVideoCheck();

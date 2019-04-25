@@ -27,8 +27,8 @@ function quit() {
 }
 
 function run() {
-	cd $KITE_HOME/scripts/linux
-	./setupLocalGrid.sh
+	cd $KITE_HOME/scripts/mac
+	./setupLocalGrid.command
 	quit
 }
 

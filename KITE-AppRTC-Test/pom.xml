@@ -13,7 +13,7 @@
 
   <artifactId>apprtc-test</artifactId>
   <name>apprtc-test</name>
-  <version>2.0.1</version>
+  <version>${kite.apprtc.version}</version>
 
   <build>
     <plugins>
@@ -35,6 +35,17 @@
           <installDirectory>../</installDirectory>
         </configuration>
         <executions>
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <nodeVersion>${kite.node.version}</nodeVersion>
+              <npmVersion>${kite.npm.version}</npmVersion>
+            </configuration>
+          </execution>
           <execution>
             <id>npm install</id>
             <goals>

@@ -56,7 +56,7 @@ kill -9 $PPID
 }
 
 installGrid(){
-cd $KITE_HOME/scripts/linux
+cd $KITE_HOME/scripts/mac
 ./interactiveInstallation.sh
 }
 

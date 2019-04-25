@@ -43,7 +43,7 @@ public class AppRTCTestTest extends TestCase {
 
     final Browser browser = new Browser(
             "chrome",
-            "72",
+            "73",
       getSystemPlatform());
     browser.setRemoteAddress(SELENIUM_SERVER_URL);
     

@@ -25,7 +25,8 @@ import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
 import javax.json.JsonObject;
 
 public class RemoteVideoHDCheck extends TestCheck {
-
+  protected AppRTCMeetingPage appRTCMeetingPage = null;
+  
   public RemoteVideoHDCheck(WebDriver webDriver) {
     super(webDriver);
   }
@@ -37,7 +38,9 @@ public class RemoteVideoHDCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
-    final AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
+    if (appRTCMeetingPage == null) {
+      appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
+    }
     JsonObject resolution = appRTCMeetingPage.getResolution("remote");
     int width = resolution.getInt("width");
     int height = resolution.getInt("height");
