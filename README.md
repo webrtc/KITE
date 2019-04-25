@@ -16,7 +16,15 @@ You will need Git, JDK 8 and Maven. Here's where you can find them:
 * [JDK 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  
 * [Maven](https://maven.apache.org/download.cgi?Preferred=ftp://mirror.reverse.net/pub/apache/)  
 
-To verify your setup, in a command prompt or shell window, type
+Maven requires you to add JAVA_HOME to your environment variables and MAVEN/bin to your PATH.  
+
+If this is your first time installing Maven or JDK, you might want to check out these guides:
+* On Windows: https://www.mkyong.com/maven/how-to-install-maven-in-windows/
+* On Mac: https://www.mkyong.com/maven/install-maven-on-mac-osx/
+* On Ubuntu: https://www.mkyong.com/maven/how-to-install-maven-in-ubuntu/
+
+
+To verify your setup, in a new command prompt or shell terminal, type
 ``` 
 mvn -version
 ```
