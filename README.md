@@ -66,14 +66,14 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
 
     2.2 On Linux, open a terminal and enter the followng commands:
     ```
-    cd \GitHub\KITE
+    cd /GitHub/KITE
     chmod +x configure.sh
     ./configure.sh
     ```     
     
     2.3 On Mac, open a terminal and enter the followng commands:
     ```
-    cd \GitHub\KITE
+    cd /GitHub/KITE
     ./configure.command
     ```
     
@@ -109,18 +109,34 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
 
 3. Compile 
 
-    Just type `c` (which will execute `mvn clean install -DskipTests`)
+    
+__On Windows:__  
+    Just type `c` (which will execute `mvn clean install -DskipTests`).
     ```
-    cd \GitHub\KITE
+    cd %KITE_HOME%
     c
     ```
     If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`c`__ to compile the test module
      only or __`c all`__ to recompile the entire project:
     ```
-    cd \GitHub\KITE\KITE-AppRTC-Test
+    cd %KITE_HOME%\KITE-AppRTC-Test
     c all
+    ```  
+    
+__On Linux and Mac:__  
+    Just type `./c` (which will execute `mvn clean install -DskipTests`).
     ```
+    cd $KITE_HOME/
+    ./c
+    ```
+    If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`./c`__ to compile the test module
+     only or __`./c all`__ to recompile the entire project:  
      
+    ```
+    cd $KITE_HOME/KITE-AppRTC-Test
+    ./c all
+    ```
+            
     &nbsp;    
 
 ## C. Install the local grid
@@ -255,8 +271,7 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
 
 
 To run the example test,  
-__On Windows:__  
-on Windows:
+__On Windows:__ 
 ```
 cd %KITE_HOME%\KITE-Example-Test
 r example.config.json
@@ -264,7 +279,7 @@ r example.config.json
 __On Linux and Mac:__  
 ```
 cd $KITE_HOME/KITE-Example-Test
-r example.config.json
+./r example.config.json
 ```
 
 
@@ -273,10 +288,17 @@ r example.config.json
 Edit the file `./KITE-AppRTC-Test/configs/iceconnection.local.config.json` with your favorite text editor.  
 You will need to change __`version`__ and __`platform`__ according to what is installed on your local grid.
 
-To run the AppRTC iceconnection test:
+To run the AppRTC iceconnection test,
+
+__On Windows:__  
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
 r iceconnection.local.config.json
+```
+__On Linux and Mac:__  
+```
+cd $KITE_HOME/KITE-AppRTC-Test
+./r iceconnection.local.config.json
 ```
 
 Alternatively, you can launch the test with the full command.
@@ -301,7 +323,7 @@ a
 on Linux and Mac:
 ```
 cd $KITE_HOME/KITE-AppRTC-Test
-a
+./a
 ```
 
 Congratulation! You should see the results of your first KITE test.
