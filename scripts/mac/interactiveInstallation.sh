@@ -1,6 +1,6 @@
 #!/bin/bash
 set +v
-
+cd $KITE_HOME/scripts/mac
 echo -e '\n'Welcome to the interactive setup of the local grid. '\n''\n'Here are the defaults settings:
 . ./gridConfig.sh
 

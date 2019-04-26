@@ -74,6 +74,7 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
     2.3 On Mac, open a terminal and enter the followng commands:
     ```
     cd /GitHub/KITE
+    chmod +x configure.command
     ./configure.command
     ```
     
@@ -95,16 +96,16 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
     * https://github.com/mozilla/geckodriver/releases 
     
     
-    By default, the local grid setup script is configured for __Chrome__ version __73__ and __Firefox__ version __66__. 
+    By default, the local grid setup script is configured for __Chrome__ version __74__ and __Firefox__ version __66__. 
     If these are the versions installed on your computer, you can safely use the default settings.
     Otherwise, you will need to edit the following settings when prompt to do so:  
     ```
-    CHROME_VERSION=73
+    CHROME_VERSION=74
     FIREFOX_VERSION=66
-    CHROMEDRIVER_VERSION=73.0.3683.68
+    CHROMEDRIVER_VERSION=74.0.3729.6
     GECKO_VERSION=v0.24.0
     ```
-    __Note:__ Please input only the major (i.e. 73 or 66) for the browser versions, but the full version with the minor (i.e. 73.0.3683.68 or v0.24.0) for the driver versions.   
+    __Note:__ Please input only the major (i.e. 74 or 66) for the browser versions, but the full version with the minor (i.e. 74.0.3729.6 or v0.24.0) for the driver versions.   
    More details are available in the [local grid setup guide](scripts/README.md).
 
 3. Compile 
@@ -155,16 +156,16 @@ by following [local grid setup guide](scripts/README.md).
 __Note:__ You will need to have your [local grid](scripts/README.md) running before you can execute any test.  
 You can check if your local grid is running and the browser versions installed by 
 opening the [Grid Console](http://localhost:4444/grid/console).
-In the following example, we are assuming __Chrome__ version __73__ and __Firefox__ version __66__.
+In the following example, we are assuming __Chrome__ version __74__ and __Firefox__ version __66__.
 
 
 ### Edit the test config file
 
 Edit the file `./KITE-Example-Test/configs/example.config.json` with your favorite text editor.  
 You will need to change __`version`__ and __`platform`__ according to what is installed on your local grid.
-For example, if your local grid is windows and the latest stable version of __Chrome__ is __73__, you should set: 
+For example, if your local grid is windows and the latest stable version of __Chrome__ is __74__, you should set: 
 ```json
-      "version": "73",
+      "version": "74",
       "platform": "WINDOWS",
 ```
 
@@ -204,7 +205,7 @@ The example example.config.json file is almost the simplest config file you can 
   "browsers": [
     {
       "browserName": "chrome",
-      "version": "73",
+      "version": "74",
       "platform": "WINDOWS",
       "flags": []
     },
@@ -253,13 +254,13 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
   "browsers": [
     {
       "browserName": "chrome",
-      "version": "72",
+      "version": "74",
       "platform": "LINUX",
       "flags": []
     },
     {
       "browserName": "firefox",
-      "version": "65",
+      "version": "66",
       "platform": "MAC",
       "flags": []
     }

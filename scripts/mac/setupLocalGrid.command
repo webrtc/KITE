@@ -25,13 +25,11 @@ read -p "Please ensure you enabled the Allow Remote Automation option in Safari'
 read -p "Do you want to start the Grid (y/n)?  " yn
 case $yn in
     [Yy]* )
-    	 cd $KITE_HOME
-  	 cd localGrid
-   	 ./startGrid.sh
-         ;;
+	$KITE_HOME/localGrid/startGrid.sh
+kill -9 $PPID ;;
     [Nn]* )
-         echo " "
-         ;;
+kill -9 $PPID 
+;;
     * ) echo "Please answer yes or no.";;
 esac
 

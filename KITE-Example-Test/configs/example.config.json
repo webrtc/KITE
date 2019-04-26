@@ -21,7 +21,7 @@
   "browsers": [
     {
       "browserName": "chrome",
-      "version": "73",
+      "version": "74",
       "platform": "WINDOWS",
       "flags": []
     },
