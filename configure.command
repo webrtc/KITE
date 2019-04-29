@@ -26,9 +26,8 @@ fi
 chmod +x scripts/mac/path/*
 chmod +x $KITE_HOME/third_party/allure-2.10.0/bin/allure
 
-echo export a="$KITE_HOME/scripts/mac/path/a" >> ~/.bash_profile
-echo export c="$KITE_HOME/scripts/mac/path/c" >> ~/.bash_profile
-echo export r="$KITE_HOME/scripts/mac/path/r" >> ~/.bash_profile
+echo export PATH="$KITE_HOME/scripts/mac/path:${PATH}" >> ~/.bash_profile
+source ~/.bash_profile
 
 if [ -n "$(grep "export allure" ~/.bash_profile)" ]
 then
