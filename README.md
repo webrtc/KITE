@@ -2,6 +2,24 @@
 
 The effortless way to test WebRTC compliance, prevent [Karoshi](https://en.wikipedia.org/wiki/Kar%C5%8Dshi) with __KITE!__
 
+Write automated interoperability test scripts in Java or Javascript and run them on any platforms. KITE supports:  
+ * all web browser: Chrome, Firefox, Safari, Edge, Opera... on all OS (Linux, Windows, Mac, iOS and Android)
+ * Mobile Native Apps on Android, iOS
+ * Desktop Native Apps on Windows and MacOS
+ * Electron Apps 
+
+
+__KITE__ can be setup on Windows, Mac or Linux.  The installation process only takes 10 to 15 minutes.  
+
+Additional free WebRTC sample tests are available https://github.com/CoSMoSoftware/KITE-Sample-Tests  
+
+For advanced features such as:
+ * load testing
+ * network instrumentation
+ * sample tests on native apps
+
+Please contact [contact@cosmosoftware.io](mailto:contact@cosmosoftware.io)
+
 
 #### _This is not an official Google product_
 
