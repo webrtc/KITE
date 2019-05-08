@@ -8,20 +8,22 @@ const elements = {
 
 module.exports = {
 
+  // Kite common ?
+  /*
   open: async function(driver, url, timeout) {
     await driver.get(url);
     await TestUtils.waitForPage(driver, timeout);
-  },
+  },*/
 
-  enterRoomId: async function(driver, roomId) {
-    let roomInput = await driver.findElement(elements.roomInput);
+  enterRoomId: async function(stepInfo) {
+    let roomInput = await stepInfo.driver.findElement(elements.roomInput);
     await roomInput.clear();
-    await roomInput.sendKeys(roomId);
+    await roomInput.sendKeys(stepInfo.roomId);
   },
 
-  joinRoom: async function(driver, timeout) {
-    let joinButton = await driver.findElement(elements.joinButton);
+  joinRoom: async function(stepInfo) {
+    let joinButton = await stepInfo.driver.findElement(elements.joinButton);
     joinButton.click();
-    await TestUtils.waitForPage(driver, timeout);
+    await TestUtils.waitForPage(stepInfo.driver, stepInfo.timeout);
   },
 }

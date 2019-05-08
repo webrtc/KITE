@@ -1,44 +1,43 @@
-// const KiteBaseTest = require('./classes/KiteBaseTest');
 const {TestUtils, WebDriverFactory, KiteBaseTest, Status} = require('kite-common');
 const globalVariables = TestUtils.getGlobalVariables(process);
 
 // Steps & checks
-const OpenAppUrlStep = require('./steps/OpenAppUrlStep');
-const ConnectToAppRoomStep = require('./steps/ConnectToAppRoomStep');
-const PeerConnectionCheck = require('./checks/PeerConnectionCheck');
-const RemoteVideoDisplayCheck = require('./checks/RemoteVideoDisplayCheck');
-const GetStatsStep = require('./steps/GetStatsStep');
+const {OpenAppUrlStep, ConnectToAppRoomStep, GetStatsStep} = require('./steps');
+const {PeerConnectionCheck, RemoteVideoDisplayCheck} = require('./checks');
 
+// KiteBaseTest config
 const capabilities = require(globalVariables.capabilitiesPath);
 const payload = require(globalVariables.payloadPath);
-const reportPath  = globalVariables.reportPath;
+
+
 
 class IceConnectionTest extends KiteBaseTest {
-  constructor(name, payload, reportPath) {
-    super(name, payload, reportPath);
+  constructor(name, globalVariables, capabilities, payload) {
+    super(name, globalVariables, capabilities, payload);
   }
 
   async testScript() {
     try {
-      var driver = await WebDriverFactory.getDriver(capabilities, capabilities.remoteAddress);
-      let openAppUrlStep = new OpenAppUrlStep(driver, this.url, this.timeout);
-      await openAppUrlStep.execute(this.report, this.reporter);
-      let connectToAppRoomStep = new ConnectToAppRoomStep(driver, this.timeout);
-      await connectToAppRoomStep.execute(this.report, this.reporter);
-      let peerConnectionCheck = new PeerConnectionCheck(driver, this.timeout);
-      await peerConnectionCheck.execute(this.report, this.reporter);
-      let remoteVideoDisplayCheck = new RemoteVideoDisplayCheck(driver);
-      await remoteVideoDisplayCheck.execute(this.report, this.reporter);
-      let getStatsStep = new GetStatsStep(driver,this.statsCollectionDuration, this.statsCollectionInterval);
-      await getStatsStep.execute(this.report, this.reporter);
+      this.driver = await WebDriverFactory.getDriver(this.capabilities, this.capabilities.remoteAddress);
+      let openAppUrlStep = new OpenAppUrlStep(this);
+      await openAppUrlStep.execute(this);
+      let connectToAppRoomStep = new ConnectToAppRoomStep(this);
+      await connectToAppRoomStep.execute(this);
+      let peerConnectionCheck = new PeerConnectionCheck(this);
+      await peerConnectionCheck.execute(this);
+      let remoteVideoDisplayCheck = new RemoteVideoDisplayCheck(this);
+      await remoteVideoDisplayCheck.execute(this);
+      let getStatsStep = new GetStatsStep(this);
+      await getStatsStep.execute(this);
 
-      // End of Test report
+      // End of Test reportWebDriverUtils
       this.report.setStopTimestamp();
     } catch (error) {
       console.log(error);
     } finally {
-      driver.quit();
+      await this.driver.quit();
     }
+
     this.reporter.generateReportFiles();
     let value = this.report.getJsonBuilder();
     TestUtils.writeToFile(this.reportPath + '/result.json', JSON.stringify(value));
@@ -47,5 +46,5 @@ class IceConnectionTest extends KiteBaseTest {
 
 module.exports = IceConnectionTest;
 
-var test = new IceConnectionTest('IceConnection Test', payload, reportPath);
+var test = new IceConnectionTest('IceConnection Test', globalVariables, capabilities, payload);
 test.testScript();

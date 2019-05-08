@@ -1,5 +1,4 @@
-const {TestStep} = require('kite-common');
-const {apprtcJoinPage} = require('../pages');
+const {TestUtils, TestStep} = require('kite-common');
 
 
 /**
@@ -8,11 +7,11 @@ const {apprtcJoinPage} = require('../pages');
  * Description:
  */
 class OpenAppUrlStep extends TestStep {
-  constructor(driver, url, timeout) {
+  constructor(KiteBaseTest) {
     super();
-    this.driver = driver
-    this.url = url;
-    this.timeout = timeout;
+    this.driver = KiteBaseTest.driver;
+    this.url = KiteBaseTest.url;
+    this.timeout = KiteBaseTest.timeout;
   }
 
   stepDescription() {
@@ -20,7 +19,7 @@ class OpenAppUrlStep extends TestStep {
   }
 
   async step() {
-    await apprtcJoinPage.open(this.driver, this.url, this.timeout);
+    await TestUtils.open(this);
   }
 }
 

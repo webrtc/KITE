@@ -41,6 +41,8 @@ import org.webrtc.kite.config.Mobile;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -229,6 +231,13 @@ public class WebDriverFactory {
     if (browser.useFakeMedia()) {
       chromeOptions.addArguments("use-fake-ui-for-media-stream");
       chromeOptions.addArguments("use-fake-device-for-media-stream");
+    } else {
+      // Create an Hashmap to edit user profil
+      Map<String, Object> prefs = new HashMap<String, Object>();
+      // Allow access to camera & micro
+      prefs.put("profile.default_content_setting_values.media_stream_camera", 1);
+      prefs.put("profile.default_content_setting_values.media_stream_mic", 1);
+      chromeOptions.setExperimentalOption("prefs", prefs);
     }
     chromeOptions.addArguments("auto-select-desktop-capture-source=Entire screen");
     if (!"electron".equals(browser.getVersion())) {

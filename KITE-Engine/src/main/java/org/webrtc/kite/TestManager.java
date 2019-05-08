@@ -73,6 +73,7 @@ public class TestManager implements Callable<Object> {
     test.setLogger(testLogger);
     testSuite.addChild(test.getReport().getUuid());
     test.setDescription(testConf.getDescription());
+    test.setInstrumentation(Configurator.getInstance().getInstrumentation());
     test.setParentSuite(Configurator.getInstance().getName());
     test.setSuite(testSuite.getName());
     test.setPayload(this.testConf.getPayload());

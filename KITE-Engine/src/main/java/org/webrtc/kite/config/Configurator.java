@@ -16,6 +16,7 @@
 
 package org.webrtc.kite.config;
 
+import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.instrumentation.Instrumentation;
 import io.cosmosoftware.kite.report.Reporter;
 import io.cosmosoftware.kite.usrmgmt.AccountCollection;
@@ -42,8 +43,7 @@ import java.util.List;
 
 import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
 import static io.cosmosoftware.kite.util.TestUtils.downloadFile;
-import static org.webrtc.kite.Utils.readJsonFile;
-import static org.webrtc.kite.Utils.throwNoKeyOrBadValueException;
+import static org.webrtc.kite.Utils.*;
 
 /**
  * Representation of the config file as a singleton.
@@ -83,7 +83,7 @@ public class Configurator {
   private String name;
   private int interval;
   private String commandName;
-  private Instrumentation instrumentation;
+  private Instrumentation instrumentation = null;
   private String configFilePath;
 
   private List<JsonObject> remoteObjectList = null;
@@ -327,10 +327,14 @@ public class Configurator {
 
     String instrumentUrl = jsonObject.getString("instrumentUrl", null);
     if (instrumentUrl != null) {
-      String instrumentFile = System.getProperty("java.io.tmpdir") + "instrumentation.json";
-      downloadFile(instrumentUrl, instrumentFile);
-      JsonObject instrumentObject = readJsonFile(instrumentFile);
-      this.instrumentation = new Instrumentation(instrumentObject);
+      try {
+        String instrumentFile = System.getProperty("java.io.tmpdir") + "instrumentation.json";
+        downloadFile(instrumentUrl, instrumentFile);
+        JsonObject instrumentObject = readJsonFile(instrumentFile);
+        this.instrumentation = new Instrumentation(instrumentObject);
+      } catch (KiteTestException e) {
+        logger.error(getStackTrace(e));
+      } 
     }
     skipSame = jsonObject.getBoolean("skipSame", skipSame);
     logger.info("Finished reading the configuration file");

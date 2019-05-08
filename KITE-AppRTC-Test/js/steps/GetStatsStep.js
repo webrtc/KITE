@@ -6,21 +6,25 @@ const {TestUtils, TestStep} = require('kite-common');
  * Description:
  */
 class GetStatsStep extends TestStep {
-  constructor(driver, statsCollectionDuration, statsCollectionInterval) {
+  constructor(kiteBaseTest) {
     super();
-    this.driver = driver;
-    this.statsCollectionDuration = statsCollectionDuration;
-    this.statsCollectionInterval = statsCollectionInterval;
+    this.driver = kiteBaseTest.driver;
+    this.statsCollectionTime = kiteBaseTest.statsCollectionTime;
+    this.statsCollectionInterval = kiteBaseTest.statsCollectionInterval;
     this.pc = "appController.call_.pcClient_.pc_";
+    this.selectedStats = kiteBaseTest.selectedStats;
+
+    // Test reporter if you want to add attachment(s)
+    this.testReporter = kiteBaseTest.reporter;
   }
 
   stepDescription() {
     return "Get the peer connection's stats";
   }
 
-  async step(allureTestReport, reporter) {
-    let getStats = await TestUtils.getStats(this.driver, this.pc, this.statsCollectionDuration, this.statsCollectionInterval);
-    reporter.textAttachment(this.report, 'Peer connection\'s stats', JSON.stringify(getStats), "json");
+  async step() {
+    let getStats = await TestUtils.getStats(this);
+    this.testReporter.textAttachment(this.report, 'Peer connection\'s stats', JSON.stringify(getStats), "json");
   }
 }
 

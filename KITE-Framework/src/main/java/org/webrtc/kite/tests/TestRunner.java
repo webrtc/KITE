@@ -1,6 +1,8 @@
 package org.webrtc.kite.tests;
 
+import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.AllureTestReport;
+import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestStep;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
@@ -55,8 +57,21 @@ public class TestRunner implements Callable<Object> {
   public List<TestStep> getSteps() {
     return steps;
   }
-  
+
+  public TestStep getLastStep() {
+    return this.steps.get(this.steps.size() - 1);
+  }
+
   public WebDriver getWebDriver() {
     return webDriver;
+  }
+
+  public boolean completed(String stepName) throws  KiteTestException{
+    for (TestStep step : steps) {
+      if (step.getName().equalsIgnoreCase(stepName)) {
+        return step.stepCompleted();
+      }
+    }
+    throw new KiteTestException("Could not find the step with name: " + stepName, Status.FAILED);
   }
 }
