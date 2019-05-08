@@ -11,7 +11,7 @@ Write automated interoperability test scripts in Java or Javascript and run them
 
 __KITE__ can be setup on Windows, Mac or Linux.  The installation process only takes 10 to 15 minutes.  
 
-Additional free WebRTC sample tests are available https://github.com/CoSMoSoftware/KITE-Sample-Tests  
+Additional free WebRTC sample tests are available at https://github.com/CoSMoSoftware/KITE-Sample-Tests  
 
 For advanced features such as:
  * load testing
