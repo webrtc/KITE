@@ -1,7 +1,7 @@
 #! /bin/bash
 BASEDIR=$(dirname "$0")
 cd $BASEDIR
-source config.sh
+source gridConfig.sh
 
 /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --version >chrome.txt
 chromeFile="chrome.txt"

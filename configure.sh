@@ -46,6 +46,7 @@ x-terminal-emulator -e 'sh -c "exec bash; cd $KITE_HOME"'
 }
 
 installGrid(){
+x-terminal-emulator -e 'sh -c "exec bash; cd $KITE_HOME"'
 cd $KITE_HOME/scripts/linux
 ./interactiveInstallation.sh
 }

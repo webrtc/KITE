@@ -14,10 +14,11 @@ const roomId = (today.getDate()) * (today.getHours()+100) * (today.getMinutes()+
  * Description:
  */
 class ConnectToAppRoomStep extends TestStep {
-  constructor(driver, timeout) {
+  constructor(kiteBaseTest) {
     super();
-    this.driver = driver;
-    this.timeout = timeout;
+    this.driver = kiteBaseTest.driver;
+    this.timeout = kiteBaseTest.timeout;
+    this.roomId = roomId;
   }
 
   stepDescription() {
@@ -25,9 +26,9 @@ class ConnectToAppRoomStep extends TestStep {
   }
 
   async step() {
-    await apprtcJoinPage.enterRoomId(this.driver, roomId);
+    await apprtcJoinPage.enterRoomId(this);
     // Join the room and wait until the page is ready
-    await apprtcJoinPage.joinRoom(this.driver, this.timeout);
+    await apprtcJoinPage.joinRoom(this);
   }
 }
 

@@ -2,6 +2,24 @@
 
 The effortless way to test WebRTC compliance, prevent [Karoshi](https://en.wikipedia.org/wiki/Kar%C5%8Dshi) with __KITE!__
 
+Write automated interoperability test scripts in Java or Javascript and run them on any platforms. KITE supports:  
+ * all web browser: Chrome, Firefox, Safari, Edge, Opera... on all OS (Linux, Windows, Mac, iOS and Android)
+ * Mobile Native Apps on Android, iOS
+ * Desktop Native Apps on Windows and MacOS
+ * Electron Apps 
+
+
+__KITE__ can be setup on Windows, Mac or Linux.  The installation process only takes 10 to 15 minutes.  
+
+Additional free WebRTC sample tests are available at https://github.com/CoSMoSoftware/KITE-Sample-Tests  
+
+For advanced features such as:
+ * load testing
+ * network instrumentation
+ * sample tests on native apps
+
+Please contact [contact@cosmosoftware.io](mailto:contact@cosmosoftware.io)
+
 
 #### _This is not an official Google product_
 
@@ -16,7 +34,15 @@ You will need Git, JDK 8 and Maven. Here's where you can find them:
 * [JDK 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  
 * [Maven](https://maven.apache.org/download.cgi?Preferred=ftp://mirror.reverse.net/pub/apache/)  
 
-To verify your setup, in a command prompt or shell window, type
+Maven requires you to add JAVA_HOME to your environment variables and MAVEN/bin to your PATH.  
+
+If this is your first time installing Maven or JDK, you might want to check out these guides:
+* On Windows: https://www.mkyong.com/maven/how-to-install-maven-in-windows/
+* On Mac: https://www.mkyong.com/maven/install-maven-on-mac-osx/
+* On Ubuntu: https://www.mkyong.com/maven/how-to-install-maven-in-ubuntu/
+
+
+To verify your setup, in a new command prompt or shell terminal, type
 ``` 
 mvn -version
 ```
@@ -37,7 +63,6 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
 
 1. Clone this repo into a folder __without any space__, for example under `\GitHub\`:  
     ```
-    cd \
     mkdir GitHub
     cd GitHub
     git clone https://github.com/webrtc/KITE.git
@@ -50,22 +75,20 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
 
     This will set KITE_HOME environment variable and add utility scripts to your path.  
 
-    2.1 On Windows, open a Command Prompt window and enter the followng commands:
+    2.1 On Windows, open a Command Prompt window and enter the following commands:
     ```
-    cd \GitHub\KITE
     configure.bat
     ```
 
-    2.2 On Linux, open a terminal and enter the followng commands:
+    2.2 On Linux, open a terminal and enter the following commands:
     ```
-    cd \GitHub\KITE
     chmod +x configure.sh
     ./configure.sh
     ```     
     
-    2.3 On Mac, open a terminal and enter the followng commands:
+    2.3 On Mac, open a terminal and enter the following commands:
     ```
-    cd \GitHub\KITE
+    chmod +x configure.command  
     ./configure.command
     ```
     
@@ -84,36 +107,70 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
     Different browser versions require a different ChromeDriver (to control Chrome) and a different GeckoDriver (to control Firefox).
     You will need to find out what are the corresponding driver versions. Please visit the following two pages:
     * http://chromedriver.chromium.org/downloads
-    * https://github.com/mozilla/geckodriver/releases 
-    
-    
-    By default, the local grid setup script is configured for __Chrome__ version __73__ and __Firefox__ version __66__. 
+    * https://github.com/mozilla/geckodriver/releases  
+ 
+    By default, the local grid setup script is configured for __Chrome__ version __74__ and __Firefox__ version __66__. 
     If these are the versions installed on your computer, you can safely use the default settings.
     Otherwise, you will need to edit the following settings when prompt to do so:  
+    
     ```
-    CHROME_VERSION=__73__
-    FIREFOX_VERSION=__66__
-    CHROMEDRIVER_VERSION=__73.0.3683.68__
-    GECKO_VERSION=__v0.24.0__ 
+    CHROME_VERSION=74
+    FIREFOX_VERSION=66
+    CHROMEDRIVER_VERSION=74.0.3729.6
+    GECKO_VERSION=v0.24.0
     ```
-    __Note:__ Please input only the major (i.e. 73 or 66) for the browser versions, but the full version with the minor (i.e. 73.0.3683.68 or v0.24.0) for the driver versions.   
+    
+    __Note:__ Please input only the major (i.e. 74 or 66) for the browser versions, but the full version with the minor (i.e. 74.0.3729.6 or v0.24.0) for the driver versions.   
    More details are available in the [local grid setup guide](scripts/README.md).
 
 3. Compile 
 
-    Just type `c` (which will execute `mvn clean install -DskipTests`)
+    
+__On Windows:__  
+    Just type `c` (which will execute `mvn clean install -DskipTests`). 
+    
     ```
-    cd \GitHub\KITE
+    cd %KITE_HOME%
     c
     ```
-    If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`c`__ to compile the test module
-     only or __`c all`__ to recompile the entire project:
+
+If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`c`__ to compile the test module
+only or __`c all`__ to recompile the entire project:
+
     ```
-    cd \GitHub\KITE\KITE-AppRTC-Test
+    cd %KITE_HOME%\KITE-AppRTC-Test  
+    c all
+    ```  
+    
+__On Linux:__  
+Just type `./c` (which will execute `mvn clean install -DskipTests`). 
+
+    ```
+    cd $KITE_HOME
+    ./c
+    ```
+If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`./c`__ to compile the test module
+only or __`./c all`__ to recompile the entire project:  
+
+    ```
+    cd $KITE_HOME/KITE-AppRTC-Test 
+    ./c all
+    ```
+    
+__On Mac:__  
+Just type `c` (which will execute `mvn clean install -DskipTests`).
+    ```
+    cd $KITE_HOME
+    c
+    ```
+If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`c`__ to compile the test module
+ only or __`c all`__ to recompile the entire project:  
+
+    ```
+    cd $KITE_HOME/KITE-AppRTC-Test
     c all
     ```
-     
-    &nbsp;    
+
 
 ## C. Install the local grid
 
@@ -131,16 +188,16 @@ by following [local grid setup guide](scripts/README.md).
 __Note:__ You will need to have your [local grid](scripts/README.md) running before you can execute any test.  
 You can check if your local grid is running and the browser versions installed by 
 opening the [Grid Console](http://localhost:4444/grid/console).
-In the following example, we are assuming __Chrome__ version __73__ and __Firefox__ version __66__.
+In the following example, we are assuming __Chrome__ version __74__ and __Firefox__ version __66__.
 
 
 ### Edit the test config file
 
 Edit the file `./KITE-Example-Test/configs/example.config.json` with your favorite text editor.  
 You will need to change __`version`__ and __`platform`__ according to what is installed on your local grid.
-For example, if your local grid is windows and the latest stable version of __Chrome__ is __73__, you should set: 
+For example, if your local grid is windows and the latest stable version of __Chrome__ is __74__, you should set: 
 ```json
-      "version": "73",
+      "version": "74",
       "platform": "WINDOWS",
 ```
 
@@ -180,7 +237,7 @@ The example example.config.json file is almost the simplest config file you can 
   "browsers": [
     {
       "browserName": "chrome",
-      "version": "73",
+      "version": "74",
       "platform": "WINDOWS",
       "flags": []
     },
@@ -229,13 +286,13 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
   "browsers": [
     {
       "browserName": "chrome",
-      "version": "72",
+      "version": "74",
       "platform": "LINUX",
       "flags": []
     },
     {
       "browserName": "firefox",
-      "version": "65",
+      "version": "66",
       "platform": "MAC",
       "flags": []
     }
@@ -247,16 +304,21 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
 
 
 To run the example test,  
-__On Windows:__  
-on Windows:
+
+__On Windows:__ 
 ```
 cd %KITE_HOME%\KITE-Example-Test
-r example.config.json
+r configs\example.config.json
 ```
-__On Linux and Mac:__  
+__On Linux:__  
 ```
 cd $KITE_HOME/KITE-Example-Test
-r example.config.json
+./r configs/example.config.json
+```
+__On Mac:__  
+```
+cd $KITE_HOME/KITE-Example-Test
+r configs/example.config.json
 ```
 
 
@@ -265,32 +327,50 @@ r example.config.json
 Edit the file `./KITE-AppRTC-Test/configs/iceconnection.local.config.json` with your favorite text editor.  
 You will need to change __`version`__ and __`platform`__ according to what is installed on your local grid.
 
-To run the AppRTC iceconnection test:
+To run the AppRTC iceconnection test,
+
+__On Windows:__  
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
-r iceconnection.local.config.json
+r configs\iceconnection.local.config.json
+```
+__On Linux:__  
+```
+cd $KITE_HOME/KITE-AppRTC-Test
+./r configs/iceconnection.local.config.json
+```
+__On Mac:__  
+```
+cd $KITE_HOME/KITE-AppRTC-Test
+r configs/iceconnection.local.config.json
 ```
 
-Alternatively, you can launch the test with the full command.
-On Windows:  
+Alternatively, you can launch the test with the full command.  
+
+__On Windows:__    
 ```
--Dkite.firefox.profile="%KITE_HOME%"/third_party/ -cp "%KITE_HOME%/KITE-Engine/target/kite-jar-with-dependencies.jar;target/*" org.webrtc.kite.Engine configs/iceconnection.local.json
+java -Dkite.firefox.profile="%KITE_HOME%"/third_party/ -cp "%KITE_HOME%/KITE-Engine/target/kite-jar-with-dependencies.jar;target/*" org.webrtc.kite.Engine configs/iceconnection.local.config.json
 ```
-On Linux/Mac:  
+__On Linux/Mac:__  
 ```
--Dkite.firefox.profile="$KITE_HOME"/third_party/ -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:target/*" org.webrtc.kite.Engine configs/iceconnection.local.json
+java -Dkite.firefox.profile="$KITE_HOME"/third_party/ -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:target/*" org.webrtc.kite.Engine configs/iceconnection.local.config.json
 ```
 
 ### Open the dashboard
 
 After running the test, you can open the Allure dashboard with the command `a`.
 
-on Windows:
+__On Windows:__  
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
 a
 ```
-on Linux and Mac:
+__On Linux:__  
+```
+cd $KITE_HOME/KITE-AppRTC-Test
+./a
+```
+__On Mac:__  
 ```
 cd $KITE_HOME/KITE-AppRTC-Test
 a
@@ -305,7 +385,7 @@ Congratulation! You should see the results of your first KITE test.
 
 Alternatively, the full command to launch the Allure dashboard is:  
 ```
-allure serve PATH_TO/kite-allure-reports
+allure serve kite-allure-reports
 ```
 
 

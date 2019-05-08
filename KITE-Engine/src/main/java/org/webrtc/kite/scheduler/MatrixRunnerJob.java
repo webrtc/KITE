@@ -16,7 +16,6 @@
 
 package org.webrtc.kite.scheduler;
 
-import io.cosmosoftware.kite.instrumentation.Instrumentation;
 import org.apache.log4j.Logger;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -38,69 +37,43 @@ public class MatrixRunnerJob extends KiteJob {
       throws JobExecutionException {
 
     Configurator.getInstance().setTimeStamp();
-
-    int iterations = 0, index = 0;
-    Instrumentation instrumentation = Configurator.getInstance().getInstrumentation();
-    if (instrumentation != null) {
-      iterations = instrumentation.getScenarios().size();
-    }
-
-    do {
-      String commandName = null;
-      if (instrumentation != null) {
-        try {
-          commandName = instrumentation.runCommand(index);
-        } catch (Exception e) {
-          logger.warn("Exception while running commands", e);
+    for (TestConf testConf : (List<TestConf>) Configurator.getInstance().getConfigHandler()
+        .getTestList()) {
+      try {
+        if (logger.isInfoEnabled()) {
+          logger.info("Running " + testConf + " ...");
         }
-      }
-      for (TestConf testConf : (List<TestConf>) Configurator.getInstance().getConfigHandler()
-          .getTestList()) {
-        testConf.setCommandName(commandName);
-        try {
+
+        List<Future<Object>> listOfResults =
+            new MatrixRunner(
+                    testConf,
+                    Configurator.getInstance()
+                        .buildTuples(testConf.getTupleSize(), testConf.isPermute()),
+                    testConf.getName())
+                .run();
+
+        if (listOfResults != null) {
           if (logger.isInfoEnabled()) {
-            logger.info("Running " + testConf + " ...");
-          }
-
-          List<Future<Object>> listOfResults =
-              new MatrixRunner(
-                      testConf,
-                      Configurator.getInstance()
-                          .buildTuples(testConf.getTupleSize(), testConf.isPermute()),
-                      testConf.getName())
-                  .run();
-
-          if (listOfResults != null) {
-            if (logger.isInfoEnabled()) {
-              String testResults = "The following are results for " + testConf + ":\n";
-              for (Future<Object> future : listOfResults) {
-                try {
-                  testResults += "\r\n" + future.get().toString();
-                } catch (Exception e) {
-                  logger.error("Exception while test execution", e);
-                }
+            String testResults = "The following are results for " + testConf + ":\n";
+            for (Future<Object> future : listOfResults) {
+              try {
+                testResults += "\r\n" + future.get().toString();
+              } catch (Exception e) {
+                logger.error("Exception while test execution", e);
               }
-              testResults += "\r\nEND OF RESULTS\r\n";
-              logger.info("MatrixRunnuerJob Completed");
-              logger.debug(testResults);
             }
-          } else {
-            logger.warn("No test case was found.");
+            testResults += "\r\nEND OF RESULTS\r\n";
+            logger.info("MatrixRunnuerJob Completed");
+            logger.debug(testResults);
           }
-        } catch (InterruptedException e) {
-          logger.fatal("Error [Interruption]: The execution has been interrupted with the "
-              + "following error: " + e.getLocalizedMessage(), e);
+        } else {
+          logger.warn("No test case was found.");
         }
+      } catch (InterruptedException e) {
+        logger.fatal("Error [Interruption]: The execution has been interrupted with the "
+            + "following error: " + e.getLocalizedMessage(), e);
       }
-
-      if (instrumentation != null) {
-        try {
-          instrumentation.runCleanCommand(index++);
-        } catch (Exception e) {
-          logger.warn("Exception while running clean commands", e);
-        }
-      }
-    } while (--iterations > 0);
+    }
 
 
   }

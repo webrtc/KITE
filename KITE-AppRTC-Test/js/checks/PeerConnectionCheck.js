@@ -1,4 +1,4 @@
-const {TestUtils, TestStep, Status} = require('kite-common');
+const {TestUtils, TestStep, Status, KiteTestError} = require('kite-common');
 const {apprtcMeetingPage} = require('../pages');
 
 
@@ -8,32 +8,31 @@ const {apprtcMeetingPage} = require('../pages');
  * Description:
  */
 class PeerConnectionCheck extends TestStep {
-  constructor(driver, timeout) {
+  constructor(kiteBaseTest) {
     super();
-    this.driver = driver;
-    this.timeout = timeout;
+    this.driver = kiteBaseTest.driver;
+    this.timeout = kiteBaseTest.timeout;
   }
 
   stepDescription() {
     return "Verify that the ICE connection state is 'connected'";
   }
 
-  async step(allureTestReport, reporter) {
+  async step() {
     let state;
     let time = 0;
-    let notFinished = true;
-    while(time < this.timeout && notFinished) {
+
+    while(time < this.timeout) {
 
       state = await apprtcMeetingPage.getIceConnectionState(this.driver);
 
       if (state === "failed") {
         console.log("The ICE connection failed");
-        allureTestReport.status = Status.FAILED;
-        notFinished = false;
+        throw new KiteTestError(Status.FAILED, "The ICE connection failed");
       }
       if (state === "connected" || state === "completed") {
         console.log('Success ! ' + 'State: ' + state);
-        notFinished = false;
+        break;
       }
 
       // Every 1 sec
@@ -41,10 +40,8 @@ class PeerConnectionCheck extends TestStep {
       time++;
     }
 
-    if (time == this.timeout) {
-      result = 'failed';
-      console.log("Time out !");
-      allureTestReport.status = Status.FAILED;
+    if (time === this.timeout) {
+      throw new KiteTestError(Status.FAILED, "The ICE connection failed (Time out)");
     }
     else {
       console.log("Peer connection ckecked !");

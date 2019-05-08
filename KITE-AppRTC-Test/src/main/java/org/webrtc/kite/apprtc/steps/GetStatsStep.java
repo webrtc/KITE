@@ -31,6 +31,7 @@ public class GetStatsStep extends TestStep {
   protected int statsCollectionDuration = TEN_SECOND_INTERVAL;
   protected int statsCollectionInterval = ONE_SECOND_INTERVAL;
   protected JsonArray selectedStats = null;
+  protected AppRTCMeetingPage appRTCMeetingPage = null;
 
   
   public void setStatsCollectionDuration(int statsCollectionDuration) {
@@ -56,9 +57,12 @@ public class GetStatsStep extends TestStep {
   
   @Override
   protected void step() {
-    final AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
-    JsonObject stats = appRTCMeetingPage.getStatOvertime(
-      webDriver, statsCollectionDuration, statsCollectionInterval, selectedStats).build();
+    if (appRTCMeetingPage == null) {
+      appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
+    }
+    JsonObject stats = appRTCMeetingPage.getPCStatOvertime(statsCollectionDuration, statsCollectionInterval, selectedStats).build();
+    JsonObject statsSummary = appRTCMeetingPage.buildstatSummary(stats, selectedStats);
     Reporter.getInstance().jsonAttachment(this.report, "Peer connection's stats", stats);
+    Reporter.getInstance().jsonAttachment(this.report, "Stats Summary", statsSummary);
   }
 }

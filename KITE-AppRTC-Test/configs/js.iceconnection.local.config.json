@@ -16,7 +16,7 @@
       "payload" : {
         "url": "https://appr.tc",
         "testTimeout": 60,
-        "statsCollectionDuration": 3,
+        "statsCollectionTime": 3,
         "statsCollectionInterval": 1,
         "getStats": true,
         "selectedStats": [

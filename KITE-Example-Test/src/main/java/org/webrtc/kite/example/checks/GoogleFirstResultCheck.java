@@ -23,9 +23,9 @@ public class GoogleFirstResultCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
-    final GoogleResultPage searchPage = new GoogleResultPage(this.webDriver, logger);
-    searchPage.openFirstResult();
-    String found = searchPage.getTitle().trim();
+    final GoogleResultPage resultPage = new GoogleResultPage(this.webDriver, logger);
+    resultPage.openFirstResult();
+    String found = resultPage.getTitle().trim();
     if (!found.equalsIgnoreCase(EXPECTED_RESULT)){
       throw new KiteTestException("The title of the first Google result was not correct: \n" +
         "Expected: " + EXPECTED_RESULT + " but found " + found, Status.FAILED);

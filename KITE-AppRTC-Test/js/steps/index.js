@@ -1,3 +1,3 @@
-exports.ConnectToApprtcRoomStep = require("./ConnectToAppRoomStep");
+exports.ConnectToAppRoomStep = require("./ConnectToAppRoomStep");
 exports.GetStatsStep = require("./GetStatsStep");
-exports.OpenApprtcUrl = require('./OpenAppUrlStep');
+exports.OpenAppUrlStep = require('./OpenAppUrlStep');

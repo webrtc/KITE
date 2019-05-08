@@ -1,7 +1,8 @@
 package org.webrtc.kite.tests;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
-import io.cosmosoftware.kite.instrumentation.NWInstConfig;
+import io.cosmosoftware.kite.instrumentation.Instrumentation;
+import io.cosmosoftware.kite.instrumentation.Scenario;
 import io.cosmosoftware.kite.manager.RoomManager;
 import io.cosmosoftware.kite.report.AllureStepReport;
 import io.cosmosoftware.kite.report.AllureTestReport;
@@ -43,7 +44,7 @@ import static org.webrtc.kite.Utils.populateInfoFromNavigator;
 
 public abstract class KiteBaseTest {
   protected String name = this.getClass().getSimpleName();
-  protected Logger logger = null;
+  protected Logger logger = Logger.getLogger(this.getClass().getName());
   protected final List<TestRunner> testRunners = new ArrayList<>();
   protected String parentSuite = "";
   protected String suite = "";
@@ -52,12 +53,12 @@ public abstract class KiteBaseTest {
   protected boolean multiThread = true;
   protected int tupleSize;
   protected JsonObject payload;
+  protected Instrumentation instrumentation = null;
 
   protected String url;
   private boolean fastRampUp = false;
   private boolean getStats = false;
   private JsonArray selectedStats = null;
-  private NWInstConfig nwInstConfig = null;
   private int statsCollectionInterval = 1;
   private int statsCollectionTime = 10;
   private boolean takeScreenshotForEachTest = false; // false by default
@@ -73,6 +74,7 @@ public abstract class KiteBaseTest {
 
   protected Map<WebDriver, Map<String, Object>> sessionData =
       new HashMap<WebDriver, Map<String, Object>>();
+  protected ArrayList<Scenario> scenarioArrayList = new ArrayList<>();
 
   /**
    * The Remote address.
@@ -108,6 +110,7 @@ public abstract class KiteBaseTest {
   public void init() throws KiteTestException, IOException {
     this.report.setStartTimestamp();
     AllureStepReport initStep = new AllureStepReport("Creating webdrivers and preparing threads..");
+    instrumentation = getInstrumentation();
     try {
       initStep.setStartTimestamp();
       if (this.payload != null) {
@@ -155,13 +158,15 @@ public abstract class KiteBaseTest {
       roomManager = RoomManager.getInstance(url, getMaxUsersPerRoom());
     }
     fastRampUp = payload.getBoolean("fastRampUp", fastRampUp);
-    try {
-      JsonObject obj = payload.getJsonObject("instrumentation");
-      if (obj != null) {
-        nwInstConfig = new NWInstConfig(obj);
+    if (this.payload.containsKey("scenarios")) {
+      JsonArray jsonArray2 = this.payload.getJsonArray("scenarios");
+      for (int i = 0; i < jsonArray2.size(); ++i) {
+        try {
+          this.scenarioArrayList.add(new Scenario(jsonArray2.getJsonObject(i), logger, i, instrumentation));
+        } catch (Exception e) {
+          logger.error("Invalid scenario number : " + i + "\r\n" + ReportUtils.getStackTrace(e));
+        }
       }
-    } catch (Exception e) {
-      logger.error("Invalid network instrumentation config.\r\n" + ReportUtils.getStackTrace(e));
     }
   }
   
@@ -198,6 +203,23 @@ public abstract class KiteBaseTest {
       }
     }
   }
+
+  /**
+   * Check if the steps are completed for all runners.
+   *
+   * @param stepName class name of the step
+   * @return true if the step has been completed on all runners
+   */
+
+  public boolean stepCompleted(String stepName)  throws  KiteTestException {
+    for (TestRunner runner : testRunners) {
+      if (!runner.completed(stepName)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   
   protected void fillOutReport(){
     this.report = new AllureTestReport(timestamp());
@@ -274,9 +296,13 @@ public abstract class KiteBaseTest {
   public void setRemoteAddress(String remoteAddress) {
     this.remoteAddress = remoteAddress;
   }
-  
+
   public void setPayload(JsonValue payload) {
     this.payload = (JsonObject)payload;
+  }
+
+  public void setInstrumentation(Instrumentation instrumentation) {
+    this.instrumentation = instrumentation;
   }
 
   public void setLogger(Logger logger) {
@@ -363,12 +389,12 @@ public abstract class KiteBaseTest {
   }
 
   /**
-   * Gets nw inst config.
+   * Gets the Instrumentation object
    *
-   * @return the network instrumentation config
+   * @return the network instrumentation object
    */
-  public NWInstConfig getNWInstConfig() {
-    return this.nwInstConfig;
+  public Instrumentation getInstrumentation() {
+    return this.instrumentation;
   }
 
   /**

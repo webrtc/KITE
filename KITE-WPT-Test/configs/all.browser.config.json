@@ -31,22 +31,22 @@
     {
       "browserName": "chrome",
       "platform": "LINUX",
-      "version": "73"
+      "version": "74"
     },
     {
       "browserName": "chrome",
       "platform": "MAC",
-      "version": "73"
+      "version": "74"
     },
     {
       "browserName": "chrome",
       "platform": "WINDOWS",
-      "version": "73"
+      "version": "74"
     },
     {
       "browserName": "firefox",
       "platform": "LINUX",
-      "version": "65"
+      "version": "66"
     },
     {
       "browserName": "firefox",

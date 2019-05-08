@@ -1,7 +1,7 @@
 #! /bin/bash
 BASEDIR=$(dirname "$0")
 cd $BASEDIR
-source config.sh
+source gridConfig.sh
 
 /Applications/Firefox.app/Contents/MacOS/firefox --version >firefox.txt
 firefoxFile="firefox.txt"
