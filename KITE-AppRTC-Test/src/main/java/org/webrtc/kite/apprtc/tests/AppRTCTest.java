@@ -20,9 +20,6 @@ import org.webrtc.kite.tests.KiteBaseTest;
 import javax.json.JsonArray;
 import java.util.Random;
 
-import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
-import static io.cosmosoftware.kite.entities.Timeouts.TEN_SECOND_INTERVAL;
-
 public abstract class AppRTCTest extends KiteBaseTest {
 
   final int DEFAULT_BITRATE = 8000;
@@ -31,23 +28,15 @@ public abstract class AppRTCTest extends KiteBaseTest {
   protected final String roomId = String.valueOf(Math.abs(rand.nextLong()));
 
   public static String apprtcURL = "https://appr.tc";
-  protected String commandName;
   protected boolean getStats = true;
   protected int bitrate;
-  protected int statsCollectionDuration = TEN_SECOND_INTERVAL;
-  protected int statsCollectionInterval = ONE_SECOND_INTERVAL;
   protected JsonArray selectedStats = null;
-  
-  
-  public void setCommandName(String commandName) {
-    this.commandName = commandName;
-  }
   
   @Override
   protected void payloadHandling() {
     super.payloadHandling();
     if (this.payload != null) {
-      apprtcURL = payload.getString("url", apprtcURL); // this can be mod to throw exception
+      apprtcURL = payload.getString("url", apprtcURL); 
       bitrate = payload.getInt("bitrate", DEFAULT_BITRATE);
     }
   }

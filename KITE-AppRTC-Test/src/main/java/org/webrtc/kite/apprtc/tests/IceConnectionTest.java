@@ -25,7 +25,6 @@ import org.webrtc.kite.tests.TestRunner;
 public class IceConnectionTest extends AppRTCTest {
 
 
-
   @Override
   protected String debugOption() {
     return null;
