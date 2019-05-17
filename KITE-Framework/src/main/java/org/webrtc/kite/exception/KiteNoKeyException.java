@@ -21,9 +21,7 @@ package org.webrtc.kite.exception;
  */
 public class KiteNoKeyException extends NullPointerException {
 
-  private static final long serialVersionUID = 772908462246522793L;
-
-  private String key;
+  private final String key;
   
   /**
    * Constructs a KiteNoKeyException with the missing key.

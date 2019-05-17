@@ -28,8 +28,17 @@ import java.util.Map;
  */
 public class RTCIceCandidatePairStats extends RTCStatObject {
 
-  private String transportId, localCandidateId, remoteCandidateId, state, priority, nominated,
-    bytesSent, bytesReceived, totalRoundTripTime, currentRoundTripTime, timestamp;
+  private final String transportId;
+  private final String localCandidateId;
+  private final String remoteCandidateId;
+  private final String state;
+  private final String priority;
+  private final String nominated;
+  private final String bytesSent;
+  private final String bytesReceived;
+  private final String totalRoundTripTime;
+  private final String currentRoundTripTime;
+  private final String timestamp;
 
   public RTCIceCandidatePairStats(Map<Object, Object> statObject) {
     this.setId(getStatByName(statObject, "id"));
@@ -48,19 +57,17 @@ public class RTCIceCandidatePairStats extends RTCStatObject {
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("transportId", this.transportId)
-        .add("localCandidateId", this.localCandidateId)
-        .add("remoteCandidateId", this.remoteCandidateId)
-        .add("state", this.state)
-        .add("priority", this.priority)
-        .add("nominated", this.nominated)
-        .add("bytesSent", this.bytesSent)
-        .add("currentRoundTripTime", this.currentRoundTripTime)
-        .add("totalRoundTripTime", this.totalRoundTripTime)
-        .add("bytesReceived", this.bytesReceived)
-        .add("timestamp", this.timestamp);
-    return jsonObjectBuilder;
+    return Json.createObjectBuilder()
+      .add("transportId", this.transportId)
+      .add("localCandidateId", this.localCandidateId)
+      .add("remoteCandidateId", this.remoteCandidateId)
+      .add("state", this.state)
+      .add("priority", this.priority)
+      .add("nominated", this.nominated)
+      .add("bytesSent", this.bytesSent)
+      .add("currentRoundTripTime", this.currentRoundTripTime)
+      .add("totalRoundTripTime", this.totalRoundTripTime)
+      .add("bytesReceived", this.bytesReceived)
+      .add("timestamp", this.timestamp);
   }
 }

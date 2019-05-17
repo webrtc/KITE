@@ -32,34 +32,16 @@ import java.util.Set;
  * The type Config handler.
  */
 public abstract class ConfigHandler {
-
+  
+  /**
+   * The Endpoint list.
+   */
+  protected List<EndPoint> endPointList;
   /**
    * The Test list.
    */
   protected List<Test> testList;
-  /**
-   * The Browser list.
-   */
-  protected List<EndPoint> endPointList;
-
-  /**
-   * Gets test list.
-   *
-   * @return the test list
-   */
-  public List<? extends Test> getTestList() {
-    return this.testList;
-  }
-
-  /**
-   * Gets browser list.
-   *
-   * @return the browser list
-   */
-  public List<? extends EndPoint> getEndPointList() {
-    return this.endPointList;
-  }
-
+  
   /**
    * Builds the browser list and sets the remote address in each of the browser object.
    * <p>
@@ -72,22 +54,23 @@ public abstract class ConfigHandler {
    *
    * @param remoteManager  RemoteManager
    * @param jsonObjectList an implementation of List<JsonObject>.
-   * @param objectClass   the browser class
+   * @param objectClass    the browser class
+   *
    * @throws NoSuchMethodException     the no such method exception
    * @throws IllegalAccessException    the illegal access exception
    * @throws InvocationTargetException the invocation target exception
    * @throws InstantiationException    the instantiation exception
    */
   protected void adjustRemotes(RemoteManager remoteManager, List<JsonObject> jsonObjectList,
-      Class objectClass)
-      throws NoSuchMethodException, IllegalAccessException, InvocationTargetException,
-      InstantiationException {
-  
+                               Class objectClass)
+    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException,
+    InstantiationException {
+    
     Set<EndPoint> set = new LinkedHashSet<>();
-  
+    
     List<Remote> remoteList = remoteManager.getRemoteList();
     int remoteListSize = remoteList.size();
-  
+    
     if (remoteListSize == 1) {
       String remoteAddress = remoteList.get(0).getRemoteAddress();
       for (JsonObject object : jsonObjectList) {
@@ -104,14 +87,14 @@ public abstract class ConfigHandler {
       Remote defaultRemote = remoteList.get(0);
       if (defaultRemote.isLocal())
         index = 1;
-    
+      
       List<RemoteGridFetcher> fetcherList = new ArrayList<>();
       for (; index < remoteListSize; index++)
         fetcherList.add(remoteList.get(index).getGridFetcher());
-    
+      
       RemoteAddressManager remoteAddressManager = new RemoteAddressManager(fetcherList);
       remoteAddressManager.communicateWithRemotes();
-    
+      
       for (JsonObject object : jsonObjectList) {
         Constructor constructor =
           objectClass.getConstructor(new Class[]{String.class, JsonObject.class});
@@ -131,9 +114,20 @@ public abstract class ConfigHandler {
   }
   
   /**
-   * Gets job class.
+   * Gets browser list.
    *
-   * @return the job class
+   * @return the browser list
    */
-  abstract public Class<? extends Job> getJobClass();
+  public List<? extends EndPoint> getEndPointList() {
+    return this.endPointList;
+  }
+  
+  /**
+   * Gets test list.
+   *
+   * @return the test list
+   */
+  public List<? extends Test> getTestList() {
+    return this.testList;
+  }
 }

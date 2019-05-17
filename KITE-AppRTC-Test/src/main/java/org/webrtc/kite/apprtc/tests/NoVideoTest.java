@@ -40,12 +40,8 @@ public class NoVideoTest extends AppRTCTest {
 
     runner.addStep(joinRoomStep);
     runner.addStep(new PeerConnectionCheck(runner.getWebDriver()));
-    if (this.getStats) {
-      GetStatsStep getStatsStep = new GetStatsStep(runner.getWebDriver());
-      getStatsStep.setStatsCollectionDuration(statsCollectionDuration);
-      getStatsStep.setStatsCollectionInterval(statsCollectionInterval);
-      getStatsStep.setSelectedStats(selectedStats);
-      runner.addStep(getStatsStep);
+    if (this.getStats()) {
+      runner.addStep(new GetStatsStep(runner.getWebDriver(), getStatsConfig));
     }
   }
 }

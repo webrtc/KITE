@@ -26,10 +26,10 @@ import java.util.List;
  * browserstack implementation of RemoteGridFetcher.
  */
 public class BrowserStackGridFetcher extends RemoteGridFetcher {
-
-  private final String username;
+  
   private final String accesskey;
-
+  private final String username;
+  
   /**
    * Constructs a new BrowserStackGridFetcher with the given pathToDB, remoteAddress, restApiUrl,
    * username and password.
@@ -42,17 +42,18 @@ public class BrowserStackGridFetcher extends RemoteGridFetcher {
    * @param pass          password
    */
   public BrowserStackGridFetcher(String pathToDB, String remoteAddress, String restApiUrl,
-      String usr, String pass) {
+                                 String usr, String pass) {
     super(pathToDB, "BROWSER_STACK", remoteAddress, restApiUrl);
     this.username = usr;
     this.accesskey = pass;
   }
-
-  @Override public void fetchConfig() throws IOException {
-
+  
+  @Override
+  public void fetchConfig() throws IOException {
+    
     List<JsonObject> availableConfigList =
-        this.getAvailableConfigList(this.username, this.accesskey);
-
+      this.getAvailableConfigList(this.username, this.accesskey);
+    
     /* might be not necessary, depending on data format it DB */
     for (JsonObject jsonObject : availableConfigList) {
       String name = jsonObject.getString("browser", "").trim().toLowerCase();
@@ -60,10 +61,10 @@ public class BrowserStackGridFetcher extends RemoteGridFetcher {
         name = "microsoftedge";
       if (name.equalsIgnoreCase("ie"))
         name = "iexplore";
-
+      
       Browser browser = new Browser(name);
       browser.setVersion(jsonObject.getString("browser_version", ""));
-
+      
       String os = jsonObject.getString("os", "");
       String platform = jsonObject.getString("os_version", "").toUpperCase();
       if (os.equalsIgnoreCase("OS X")) {
@@ -85,10 +86,10 @@ public class BrowserStackGridFetcher extends RemoteGridFetcher {
         }
       }
       browser.setPlatform(platform.toUpperCase());
-
+      
       this.browserList.add(browser);
     }
-
+    
   }
-
+  
 }

@@ -46,7 +46,7 @@ public class Mobile extends KiteConfigObject {
   public Mobile(JsonObject jsonObject) {
     this.deviceName = jsonObject.getString("deviceName");
     this.platformName = jsonObject.getString("platformName");
-    this.platformVersion = jsonObject.getString("platformVersion");
+    this.platformVersion = jsonObject.getString("platformVersion", null);
   }
   
   /**
@@ -126,7 +126,8 @@ public class Mobile extends KiteConfigObject {
     return this.deviceName.hashCode() + this.platformName.hashCode() + platformVersion.hashCode();
   }
 
-  @Override public JsonObjectBuilder getJsonObjectBuilder() {
+  @Override
+  public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder().add("deviceName", this.getDeviceName())
         .add("platformName", this.getPlatformName())
         .add("platformVersion", this.getPlatformVersion());

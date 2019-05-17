@@ -22,9 +22,7 @@ package org.webrtc.kite.exception;
  */
 public class KiteUnsupportedIntervalException extends Exception {
 
-  private static final long serialVersionUID = -4432513235311821656L;
-
-  private String intervalName;
+  private final String intervalName;
   
   /**
    * Constructs a KiteUnsupportedIntervalException with the specified interval name.

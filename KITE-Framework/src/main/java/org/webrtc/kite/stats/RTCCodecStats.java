@@ -27,7 +27,11 @@ import java.util.Map;
  */
 public class RTCCodecStats extends RTCStatObject {
 
-  private String payloadType, codec, clockRate, channels, sdpFmtpLine;
+  private final String payloadType;
+  private final String codec;
+  private final String clockRate;
+  private final String channels;
+  private final String sdpFmtpLine;
 
 
   public RTCCodecStats(Map<Object, Object> statObject) {
@@ -41,13 +45,11 @@ public class RTCCodecStats extends RTCStatObject {
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("payloadType", this.payloadType)
-        .add("clockRate", this.clockRate)
-        .add("channels", this.channels)
-        .add("codec", this.codec)
-        .add("sdpFmtpLine", this.sdpFmtpLine);
-    return jsonObjectBuilder;
+    return Json.createObjectBuilder()
+      .add("payloadType", this.payloadType)
+      .add("clockRate", this.clockRate)
+      .add("channels", this.channels)
+      .add("codec", this.codec)
+      .add("sdpFmtpLine", this.sdpFmtpLine);
   }
 }

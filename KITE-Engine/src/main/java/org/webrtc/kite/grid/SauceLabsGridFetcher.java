@@ -26,7 +26,7 @@ import java.util.List;
  * saucelabs implementation of RemoteGridFetcher.
  */
 public class SauceLabsGridFetcher extends RemoteGridFetcher {
-
+  
   /**
    * Constructs a new SauceLabsGridFetcher with the given pathToDB, remoteAddress and restApiUrl.
    *
@@ -38,21 +38,22 @@ public class SauceLabsGridFetcher extends RemoteGridFetcher {
   public SauceLabsGridFetcher(String pathToDB, String remoteAddress, String restApiUrl) {
     super(pathToDB, "SAUCE_LABS", remoteAddress, restApiUrl);
   }
-
-  @Override public void fetchConfig() throws IOException {
-
+  
+  @Override
+  public void fetchConfig() throws IOException {
+    
     List<JsonObject> availableConfigList
-        = this.getAvailableConfigList(null, null);
-
+      = this.getAvailableConfigList(null, null);
+    
     /* might be not necessary, depending on data format it DB */
     for (JsonObject jsonObject : availableConfigList) {
       String name = jsonObject.getString("api_name", "").trim().toLowerCase();
       if (name.equalsIgnoreCase("internet explorer"))
         name = "iexplore";
-
+      
       Browser browser = new Browser(name);
       browser.setVersion(jsonObject.getString("short_version", ""));
-
+      
       String platform = jsonObject.getString("os", "");
       switch (platform) {
         case "Windows 2003":
@@ -87,9 +88,9 @@ public class SauceLabsGridFetcher extends RemoteGridFetcher {
           break;
       }
       browser.setPlatform(platform.toUpperCase());
-
+      
       this.browserList.add(browser);
     }
   }
-
+  
 }

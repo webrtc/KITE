@@ -45,15 +45,10 @@ public abstract class AppRTCTest extends KiteBaseTest {
   
   @Override
   protected void payloadHandling() {
+    super.payloadHandling();
     if (this.payload != null) {
       apprtcURL = payload.getString("url", apprtcURL); // this can be mod to throw exception
       bitrate = payload.getInt("bitrate", DEFAULT_BITRATE);
-      getStats = payload.getBoolean("getStats", getStats); // getstats by default
-      if (getStats) {
-        statsCollectionDuration = payload.getInt("statsCollectionDuration", statsCollectionDuration);
-        statsCollectionInterval = payload.getInt("statsCollectionInterval", statsCollectionInterval);
-        selectedStats = payload.getJsonArray("selectedStats");
-      }
     }
   }
   

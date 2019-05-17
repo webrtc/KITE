@@ -24,9 +24,15 @@ import java.util.Map;
  * Represent RTCRTPStreamStats, outbound and inbound, sent and received.
  */
 public class RTCRTPStreamStats extends RTCStatObject {
-  private String ssrc, mediaType, trackId, transportId, codecId, nackCount, timestamp;
-  private Map<Object, Object> statObject;
-  private boolean inbound;
+  private final String ssrc;
+  private final String mediaType;
+  private final String trackId;
+  private final String transportId;
+  private final String codecId;
+  private final String nackCount;
+  private final String timestamp;
+  private final Map<Object, Object> statObject;
+  private final boolean inbound;
 
   public RTCRTPStreamStats(Map<Object, Object> statObject, boolean inbound) {
     this.setId(getStatByName(statObject, "id"));

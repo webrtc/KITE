@@ -28,9 +28,20 @@ import java.util.Map;
  * framesDecoded, framesDropped, framesCorrupted, audioLevel
  */
 public class RTCMediaStreamTrackStats extends RTCStatObject {
-  private String trackIdentifier, remoteSource, ended, detached,
-    frameWidth, frameHeight, framesPerSecond, framesSent, framesReceived,
-    framesDecoded, framesDropped, framesCorrupted, audioLevel, timestamp;
+  private final String trackIdentifier;
+  private final String remoteSource;
+  private final String ended;
+  private final String detached;
+  private final String frameWidth;
+  private final String frameHeight;
+  private final String framesPerSecond;
+  private final String framesSent;
+  private final String framesReceived;
+  private final String framesDecoded;
+  private final String framesDropped;
+  private final String framesCorrupted;
+  private final String audioLevel;
+  private final String timestamp;
 
   public RTCMediaStreamTrackStats(Map<Object, Object> statObject) {
     this.setId(getStatByName(statObject, "id"));
@@ -53,24 +64,21 @@ public class RTCMediaStreamTrackStats extends RTCStatObject {
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("trackIdentifier", this.trackIdentifier)
-        .add("remoteSource", this.remoteSource)
-        .add("ended", this.ended)
-        .add("detached", this.detached)
-        .add("frameWidth", this.frameWidth)
-        .add("frameHeight", this.frameHeight)
-        .add("framesPerSecond", this.framesPerSecond)
-        .add("framesSent", this.framesSent)
-        .add("framesReceived", this.framesReceived)
-        .add("frameHeight", this.frameHeight)
-        .add("framesDecoded", this.framesDecoded)
-        .add("framesDropped", this.framesDropped)
-        .add("framesCorrupted", this.framesCorrupted)
-        .add("audioLevel", this.audioLevel)
-        .add("timestamp", this.timestamp);
-
-    return jsonObjectBuilder;
+    return       Json.createObjectBuilder()
+      .add("trackIdentifier", this.trackIdentifier)
+      .add("remoteSource", this.remoteSource)
+      .add("ended", this.ended)
+      .add("detached", this.detached)
+      .add("frameWidth", this.frameWidth)
+      .add("frameHeight", this.frameHeight)
+      .add("framesPerSecond", this.framesPerSecond)
+      .add("framesSent", this.framesSent)
+      .add("framesReceived", this.framesReceived)
+      .add("frameHeight", this.frameHeight)
+      .add("framesDecoded", this.framesDecoded)
+      .add("framesDropped", this.framesDropped)
+      .add("framesCorrupted", this.framesCorrupted)
+      .add("audioLevel", this.audioLevel)
+      .add("timestamp", this.timestamp);
   }
 }

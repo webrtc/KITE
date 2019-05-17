@@ -21,9 +21,7 @@ package org.webrtc.kite.exception;
  */
 public class KiteBadValueException extends ClassCastException {
 
-  private static final long serialVersionUID = 7060558542316118129L;
-
-  private String key;
+  private final String key;
   
   /**
    * Constructs a KiteBadValueException with the specified key.

@@ -15,54 +15,47 @@
  */
 package org.webrtc.kite.apprtc.steps;
 
+import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.Reporter;
+import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestStep;
 import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
 
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
-import static io.cosmosoftware.kite.entities.Timeouts.TEN_SECOND_INTERVAL;
+import static org.webrtc.kite.Utils.getStackTrace;
+import static org.webrtc.kite.stats.StatsUtils.getPCStatOvertime;
 
 public class GetStatsStep extends TestStep {
   
-  protected int statsCollectionDuration = TEN_SECOND_INTERVAL;
-  protected int statsCollectionInterval = ONE_SECOND_INTERVAL;
-  protected JsonArray selectedStats = null;
   protected AppRTCMeetingPage appRTCMeetingPage = null;
 
-  
-  public void setStatsCollectionDuration(int statsCollectionDuration) {
-    this.statsCollectionDuration = statsCollectionDuration;
-  }
-  
-  public void setStatsCollectionInterval(int statsCollectionInterval) {
-    this.statsCollectionInterval = statsCollectionInterval;
-  }
-  
-  public void setSelectedStats(JsonArray selectedStats) {
-    this.selectedStats = selectedStats;
-  }
-  
-  public GetStatsStep(WebDriver webDriver) {
+  private final JsonObject getStatsConfig;
+
+  public GetStatsStep(WebDriver webDriver, JsonObject getStatsConfig) {
     super(webDriver);
+    this.getStatsConfig = getStatsConfig;
   }
-  
+
   @Override
   public String stepDescription() {
-    return "Get the peer connection's stats";
+    return "GetStats";
   }
-  
+
   @Override
-  protected void step() {
+  protected void step() throws KiteTestException {
     if (appRTCMeetingPage == null) {
       appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
     }
-    JsonObject stats = appRTCMeetingPage.getPCStatOvertime(statsCollectionDuration, statsCollectionInterval, selectedStats).build();
-    JsonObject statsSummary = appRTCMeetingPage.buildstatSummary(stats, selectedStats);
-    Reporter.getInstance().jsonAttachment(this.report, "Peer connection's stats", stats);
-    Reporter.getInstance().jsonAttachment(this.report, "Stats Summary", statsSummary);
+    try {
+      JsonObject stats = getPCStatOvertime(webDriver, getStatsConfig).get(0);
+      JsonObject statsSummary = appRTCMeetingPage.buildstatSummary(stats, getStatsConfig.getJsonArray("selectedStats"));
+      Reporter.getInstance().jsonAttachment(report, "getStatsRaw", stats);
+      Reporter.getInstance().jsonAttachment(this.report, "Stats Summary", statsSummary);
+    } catch (Exception e) {
+      logger.error(getStackTrace(e));
+      throw new KiteTestException("Failed to getStats", Status.BROKEN, e);
+    }
   }
 }

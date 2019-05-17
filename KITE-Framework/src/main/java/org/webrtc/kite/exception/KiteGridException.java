@@ -21,8 +21,6 @@ package org.webrtc.kite.exception;
  */
 public class KiteGridException extends Exception {
 
-  private static final long serialVersionUID = -4543756362274949902L;
-  
   /**
    * Constructs a KiteGridException with the specified detailed message.
    *

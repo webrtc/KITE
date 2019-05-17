@@ -19,6 +19,7 @@ import org.webrtc.kite.apprtc.checks.PeerConnectionCheck;
 import org.webrtc.kite.apprtc.checks.RemoteVideoDisplayCheck;
 import org.webrtc.kite.apprtc.steps.GetStatsStep;
 import org.webrtc.kite.apprtc.steps.JoinRoomStep;
+import org.webrtc.kite.steps.ScreenshotStep;
 import org.webrtc.kite.tests.TestRunner;
 
 public class IceConnectionTest extends AppRTCTest {
@@ -38,12 +39,11 @@ public class IceConnectionTest extends AppRTCTest {
     runner.addStep(joinRoomStep);
     runner.addStep(new PeerConnectionCheck(runner.getWebDriver()));
     runner.addStep(new RemoteVideoDisplayCheck(runner.getWebDriver()));
-    if (this.getStats) {
-      GetStatsStep getStatsStep = new GetStatsStep(runner.getWebDriver());
-      getStatsStep.setStatsCollectionDuration(statsCollectionDuration);
-      getStatsStep.setStatsCollectionInterval(statsCollectionInterval);
-      getStatsStep.setSelectedStats(selectedStats);
-      runner.addStep(getStatsStep);
+    if (this.getStats()) {
+      runner.addStep(new GetStatsStep(runner.getWebDriver(), getStatsConfig));
+    }
+    if (this.takeScreenshotForEachTest()) {
+      runner.addStep(new ScreenshotStep(runner.getWebDriver()));
     }
   }
 }

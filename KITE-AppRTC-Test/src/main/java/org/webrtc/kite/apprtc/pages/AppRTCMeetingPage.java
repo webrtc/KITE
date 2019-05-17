@@ -79,11 +79,11 @@ public class AppRTCMeetingPage extends BasePage {
     click(fullScreenButton);
   }
 
-  public String getICEConnectionState() {
+  public String getICEConnectionState() throws KiteTestException {
     return (String) executeJsScript(webDriver, getIceConnectionStateScript());
   }
 
-  public long getRemoteVideoPixelSum() {
+  public long getRemoteVideoPixelSum() throws KiteTestException {
     return (Long) executeJsScript(webDriver, getRemoteVideoPixelSumScript());
   }
 
@@ -99,7 +99,7 @@ public class AppRTCMeetingPage extends BasePage {
    * @param source local or remote track
    * @return JsonObject json object
    */
-  public JsonObject getResolution(String source) {
+  public JsonObject getResolution(String source) throws KiteTestException {
     executeJsScript(webDriver, stashResolutionScript(source.equalsIgnoreCase("remote")));
     waitAround(ONE_SECOND_INTERVAL);
     String resolution = (String) executeJsScript(webDriver, getStashedResolutionScript());
@@ -115,7 +115,7 @@ public class AppRTCMeetingPage extends BasePage {
    * @param direction direction of the media stream (sending/receiving)
    * @return the bytesSent or bytesReceived value from the stats
    */
-  public long getBitrate(String mediaType, String direction) {
+  public long getBitrate(String mediaType, String direction) throws KiteTestException {
     executeJsScript(webDriver, stashBitrateScript(mediaType, direction));
     waitAround(ONE_SECOND_INTERVAL);
     return (Long) executeJsScript(webDriver, getStashedBitrateScript());
@@ -131,7 +131,7 @@ public class AppRTCMeetingPage extends BasePage {
    * @throws Exception
    */
   public JsonObjectBuilder getStatOvertime(
-      WebDriver webDriver, int duration, int interval, JsonArray selectedStats) {
+      WebDriver webDriver, int duration, int interval, JsonArray selectedStats) throws KiteTestException {
     Map<String, Object> statMap = new HashMap<>();
     for (int timer = 0; timer < duration; timer += interval) {
       waitAround(interval);
@@ -148,7 +148,7 @@ public class AppRTCMeetingPage extends BasePage {
     return buildClientRTCStatObject(statMap, selectedStats);
   }
 
-  public JsonObjectBuilder getPCStatOvertime(int duration, int interval, JsonArray selectedStats) {
+  public JsonObjectBuilder getPCStatOvertime(int duration, int interval, JsonArray selectedStats) throws KiteTestException {
     Map<String, Object> statMap = new HashMap<>();
     for (int timer = 0; timer < duration; timer += interval) {
       waitAround(interval);
@@ -320,7 +320,7 @@ public class AppRTCMeetingPage extends BasePage {
    * @return String.
    * @throws InterruptedException
    */
-  private Object getStatOnce() {
+  private Object getStatOnce() throws KiteTestException {
     String stashStatsScript =
         "  appController.call_.pcClient_.pc_.getStats()"
             + "    .then(data => {"
@@ -440,7 +440,7 @@ public class AppRTCMeetingPage extends BasePage {
     try {
       JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
       Map<String, Object> clientStatMap = clientStats;
-      List<Object> clientStatArray = (ArrayList) clientStatMap.get("stats");
+      List<Object> clientStatArray = (ArrayList<Object>) clientStatMap.get("stats");
       JsonArrayBuilder jsonclientStatArray = Json.createArrayBuilder();
       for (Object stats : clientStatArray) {
         JsonObjectBuilder jsonRTCStatObjectBuilder = buildSingleRTCStatObject(stats, selectedStats);

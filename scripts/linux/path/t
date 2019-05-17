@@ -1,0 +1,249 @@
+#!/bin/bash
+
+
+function downloadTests(){
+	echo "PREPARING TESTS:"
+	downloadSampleTests
+	downloadPrivateTests
+	echo "FINISH PREPARING TESTS:"
+	echo "================================================================="
+
+}
+
+function downloadSampleTests(){
+	if [ -d KITE-Sample-Tests ]
+	then
+		read -p "KITE-Sample-Tests already exists, do you want to delete and clone this repository again [y/n]? " yn
+		case $yn in
+		[Nn]* )
+			echo "Skipped downloading Kite sample tests!"
+			;;
+		* )
+			echo "Removing existing KITE-Sample-Tests directory..."
+			rm -rf KITE-Sample-Tests &&
+			echo "Start cloning Kite sample tests repository at: https://github.com/CoSMoSoftware/KITE-Sample-Tests"
+			git clone https://github.com/CoSMoSoftware/KITE-Sample-Tests
+			;;
+		esac
+	else
+		read -p "Do you want to download Kite sample tests [y/n]? " yn
+		case $yn in
+		[Nn]* )
+			echo "Skipped downloading Kite sample tests!"
+			;;
+		* )
+			echo "Start cloning Kite sample tests repository at: https://github.com/CoSMoSoftware/KITE-Sample-Tests..."
+			git clone https://github.com/CoSMoSoftware/KITE-Sample-Tests
+			;;
+		esac
+	fi
+}
+
+function downloadPrivateTests(){
+	if [ -d KITE-Private-Tests ]
+	then
+		read -p "KITE-Private-Tests already exists, do you want to delete and clone this repository again
+		(only do this if you have a CoSMo account) [y/n]? " yn
+		case $yn in
+		[Nn]* )
+			echo "Skipped downloading Kite private tests"
+			;;
+		* )
+			echo "Removing existing KITE-Private-Tests directory..."
+			rm -rf KITE-Private-Tests &&
+			echo "Start cloning Kite private tests repository at: https://github.com/CoSMoSoftware/KITE-Private-Tests..."
+			git clone https://github.com/CoSMoSoftware/KITE-Private-Tests
+			;;
+		esac
+	else
+		read -p "Do you want to download Kite private tests (only do this if you have a CoSMo account) [y/n]? " yn
+		case $yn in
+		[Nn]* )
+			echo "Skipped downloading Kite private tests!"
+			;;
+		* )
+			echo "Start cloning Kite sample tests repository at: https://github.com/CoSMoSoftware/KITE-Private-Tests..."
+			git clone https://github.com/CoSMoSoftware/KITE-Private-Tests
+			;;
+		esac
+	fi
+}
+
+function compileTests(){
+	read -p "Do you want to compile Kite tests [y/n]? " yn
+	case $yn in
+	[Nn]* )
+		echo "Skipped compiling Kite tests!"
+		;;
+	* )
+		echo "COMPILING TESTS:"
+		if [ -d KITE-Sample-Tests ]
+		then
+			echo "Compiling Kite sample tests.."
+			cd KITE-Sample-Tests &&
+			c &&
+			cd ../
+		fi
+
+		if [ -d KITE-Private-Tests ]
+		then
+			echo "Compiling Kite private tests.."
+			cd KITE-Private-Tests &&
+			c &&
+			cd ../
+		fi
+		echo "FINISH COMPILING TESTS:"
+		echo "================================================================="
+		;;
+	esac
+}
+
+function createConfigFile() {
+  read -p "Which browser will you run the test against(chrome/firefox/safari)? " browser
+	read -p "Which version? " version
+	read -p "Which platform (MAC/WINDOWS/LINUX)? " platform
+	echo "{
+    \"browserName\": \"$browser\",
+    \"version\": \"$version\",
+    \"platform\": \"$platform\"
+    }" >> config.json
+}
+
+function confirmHubCapacity() {
+  read -p "Have you set up a hub locally to run Kite tests [y/n]?  " yn
+	case $yn in
+	[Nn]* )
+		echo "Without a hub, cannot proceed to running unit tests."
+		exit
+		;;
+	* )
+		echo "For CI check, only one browser config will be use to run unit tests:"
+		if [ -f config.json ]
+		then
+			cat config.json
+			read -p "Is this your browser configuration [y/n]? "  ynX
+			case $ynX in
+			[Nn]* )
+				rm config.json
+				createConfigFile
+				;;
+			* )
+				;;
+			esac
+		else
+			createConfigFile
+		fi
+		;;
+	esac
+}
+
+function runTest() {
+	if [ ! -z $2 ]
+	then
+    java -Dkite.custom.config="$mypath/config.json" -Dkite.firefox.profile="$KITE_HOME/third_party/" -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:$1/target/*" org.webrtc.kite.Engine "$1/configs/local.config.json"
+	else
+		read -p "Do you want to run $1 with custom config [y/n]? " yn
+		case $yn in
+		[Nn]* )
+			echo "Skipped running $1!"
+			;;
+		* )
+		#  echo "java -Dkite.custom.config=$mypath/config.json -Dkite.firefox.profile=$KITE_HOME/third_party/ -cp $KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:$1/target/* org.webrtc.kite.Engine $1/configs/local.config.json"
+		  java -Dkite.custom.config="$mypath/config.json" -Dkite.firefox.profile="$KITE_HOME/third_party/" -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:$1/target/*" org.webrtc.kite.Engine "$1/configs/local.config.json"
+			;;
+		esac
+	fi
+
+}
+
+function runUnitTests() {
+	# clean up old report, if exist
+	if [ -d kite-allure-reports ]
+	then
+		if [ ! -d old-reports ]
+		then
+			mkdir old-reports
+		fi
+		timestamp=`date +"%T"`
+		mv kite-allure-reports old-reports/kite-allure-reports-$timestamp
+	fi
+	read -p "Do you want to run all tests without confirm prompt? [y/n]? " yn
+	case $yn in
+		[Nn]* )
+		  runTest $KITE_HOME/KITE-Example-Test
+		  runTest $KITE_HOME/KITE-AppRTC-Test
+      if [ -d KITE-Sample-Tests ]
+	    then
+		  runTest $mypath/KITE-Sample-Tests/KITE-Janus-Test
+		  runTest $mypath/KITE-Sample-Tests/KITE-Jitsi-Test
+		  fi
+	    if [ -d KITE-Private-Tests ]
+	    then
+			  runTest $mypath/KITE-Private-Tests/KITE-Private-Janus-Test
+			  runTest $mypath/KITE-Private-Tests/KITE-GridManager-Test
+		  fi
+			;;
+		* )
+		  runTest $KITE_HOME/KITE-Example-Test skip
+		  runTest $KITE_HOME/KITE-AppRTC-Test skip
+      if [ -d KITE-Sample-Tests ]
+	    then
+		  runTest $mypath/KITE-Sample-Tests/KITE-Janus-Test skip
+		  runTest $mypath/KITE-Sample-Tests/KITE-Jitsi-Test skip
+		  fi
+	    if [ -d KITE-Private-Tests ]
+	    then
+			  runTest $mypath/KITE-Private-Tests/KITE-Private-Janus-Test skip
+			  runTest $mypath/KITE-Private-Tests/KITE-GridManager-Test skip
+		  fi
+		;;
+esac
+
+
+	echo "FINISH RUNNING TESTS:"
+	echo "================================================================="
+}
+
+function showReport() {
+	read -p "Do you want see the reports [y/n]? " yn
+	case $yn in
+	[Nn]* )
+		echo "Skipped showing report!"
+		;;
+	* )
+	  allure serve $mypath/kite-allure-reports
+		;;
+	esac
+}
+
+if [ -z $KITE_HOME ]
+then
+  echo "KITE_HOME is not defined. Please run configure or manually add KITE_HOME to your environment variables. Follow the tutorial at: https://github.com/CoSMoSoftware/KITE-2.0"
+  exit 0
+else
+	echo "KITE_HOME is defined at $KITE_HOME."
+	echo "If this is not your current working directory, please configure KITE again. Follow the tutorial at: https://github.com/CoSMoSoftware/KITE-2.0"
+
+	echo "KITE CONFIGURATION VERIFIED"
+	echo "================================================================="
+fi
+
+cd $KITE_HOME
+cd ..
+echo "we are at `pwd`"
+mypath=`pwd`
+
+# Download Kite sample tests and private tests.
+downloadTests
+
+# Compile Kite sample tests and private tests, this will probably fail if kite-base had not been compiled
+# and install with maven.
+compileTests
+
+confirmHubCapacity
+
+runUnitTests
+
+showReport
+
+exit

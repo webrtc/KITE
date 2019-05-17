@@ -11,7 +11,7 @@ Write automated interoperability test scripts in Java or Javascript and run them
 
 __KITE__ can be setup on Windows, Mac or Linux.  The installation process only takes 10 to 15 minutes.  
 
-Additional free WebRTC sample tests are available at https://github.com/CoSMoSoftware/KITE-Sample-Tests  
+Additional free WebRTC sample tests are available https://github.com/CoSMoSoftware/KITE-Sample-Tests  
 
 For advanced features such as:
  * load testing
@@ -34,19 +34,26 @@ You will need Git, JDK 8 and Maven. Here's where you can find them:
 * [JDK 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  
 * [Maven](https://maven.apache.org/download.cgi?Preferred=ftp://mirror.reverse.net/pub/apache/)  
 
-Maven requires you to add JAVA_HOME to your environment variables and MAVEN/bin to your PATH.  
+##### Maven installation
 
-If this is your first time installing Maven or JDK, you might want to check out these guides:
+If you are not familiar with Maven and/or new to the concept of PATH and environmnent variables, Maven's
+ installation can prove quite tricky as it requires you to add JAVA_HOME to
+ your environment variables and MAVEN/bin to your PATH. To make this easier, we're providing an installation script. 
+ If you would like to use our script to install Maven, you can skip it for now and install it after cloning the git repo
+ (following the instructions at B.2.).
+ 
+ 
+Alternatively, you can always install Maven manually and the following guides could help you with this:
 * On Windows: https://www.mkyong.com/maven/how-to-install-maven-in-windows/
-* On Mac: https://www.mkyong.com/maven/install-maven-on-mac-osx/
 * On Ubuntu: https://www.mkyong.com/maven/how-to-install-maven-in-ubuntu/
+* On Mac: https://www.mkyong.com/maven/install-maven-on-mac-osx/
 
 
-To verify your setup, in a new command prompt or shell terminal, type
+To verify your setup, in a new command prompt or shell terminal, type:
 ``` 
 mvn -version
 ```
-Expected output on Windows 10:
+Expected output (for example on Windows 10):
 ```
 Apache Maven 3.6.1
 Maven home: C:\Program Files\Maven\apache-maven-3.6.1\bin\..
@@ -62,6 +69,7 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
 ## B. Install KITE 2.0
 
 1. Clone this repo into a folder __without any space__, for example under `\GitHub\`:  
+     
     ```
     mkdir GitHub
     cd GitHub
@@ -69,24 +77,45 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
     cd KITE
     ```
 
-	
+2. Maven installation
 
-2. Configure __KITE__  
+    If you haven't installed Maven yet, you can install it using the installMaven script.
+ 
+    On Windows, open a Command Prompt window and enter the following commands:
+
+    ```
+    scripts/windows/installMaven.bat
+    ```
+
+    On Linux, open a terminal and enter the following commands:
+    ```
+    chmod -R +x /scripts/linux
+    scripts/linux/installMaven.sh
+    ```     
+    
+    2.3 On Mac, open a terminal and enter the following commands:
+    ```
+    chmod -R +x /scripts/mac
+    scripts/mac/installMaven.sh
+    ```
+    
+3. Configure __KITE__  
+
 
     This will set KITE_HOME environment variable and add utility scripts to your path.  
 
-    2.1 On Windows, open a Command Prompt window and enter the following commands:
+    3.1 On Windows, open a Command Prompt window and enter the following commands:
     ```
     configure.bat
     ```
 
-    2.2 On Linux, open a terminal and enter the following commands:
+    3.2 On Linux, open a terminal and enter the following commands:
     ```
     chmod +x configure.sh
     ./configure.sh
     ```     
     
-    2.3 On Mac, open a terminal and enter the following commands:
+    3.3 On Mac, open a terminal and enter the following commands:
     ```
     chmod +x configure.command  
     ./configure.command
@@ -122,8 +151,8 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
     
     __Note:__ Please input only the major (i.e. 74 or 66) for the browser versions, but the full version with the minor (i.e. 74.0.3729.6 or v0.24.0) for the driver versions.   
    More details are available in the [local grid setup guide](scripts/README.md).
-
-3. Compile 
+    
+4. Compile 
 
     
 __On Windows:__  
@@ -141,23 +170,7 @@ only or __`c all`__ to recompile the entire project:
     cd %KITE_HOME%\KITE-AppRTC-Test  
     c all
     ```  
-    
-__On Linux:__  
-Just type `./c` (which will execute `mvn clean install -DskipTests`). 
-
-    ```
-    cd $KITE_HOME
-    ./c
-    ```
-If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`./c`__ to compile the test module
-only or __`./c all`__ to recompile the entire project:  
-
-    ```
-    cd $KITE_HOME/KITE-AppRTC-Test 
-    ./c all
-    ```
-    
-__On Mac:__  
+__On Linux/Mac:__  
 Just type `c` (which will execute `mvn clean install -DskipTests`).
     ```
     cd $KITE_HOME
@@ -310,12 +323,7 @@ __On Windows:__
 cd %KITE_HOME%\KITE-Example-Test
 r configs\example.config.json
 ```
-__On Linux:__  
-```
-cd $KITE_HOME/KITE-Example-Test
-./r configs/example.config.json
-```
-__On Mac:__  
+__On Linux/Mac:__   
 ```
 cd $KITE_HOME/KITE-Example-Test
 r configs/example.config.json
@@ -334,12 +342,7 @@ __On Windows:__
 cd %KITE_HOME%\KITE-AppRTC-Test
 r configs\iceconnection.local.config.json
 ```
-__On Linux:__  
-```
-cd $KITE_HOME/KITE-AppRTC-Test
-./r configs/iceconnection.local.config.json
-```
-__On Mac:__  
+__On Linux/Mac:__   
 ```
 cd $KITE_HOME/KITE-AppRTC-Test
 r configs/iceconnection.local.config.json
@@ -365,12 +368,7 @@ __On Windows:__
 cd %KITE_HOME%\KITE-AppRTC-Test
 a
 ```
-__On Linux:__  
-```
-cd $KITE_HOME/KITE-AppRTC-Test
-./a
-```
-__On Mac:__  
+__On Linux/Mac:__  
 ```
 cd $KITE_HOME/KITE-AppRTC-Test
 a

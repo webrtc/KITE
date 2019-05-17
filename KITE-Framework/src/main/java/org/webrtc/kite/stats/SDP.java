@@ -28,7 +28,8 @@ import java.util.Map;
  */
 public class SDP extends RTCStatObject {
 
-  private String type, sdp;
+  private final String type;
+  private final String sdp;
 
   public SDP(Map<Object, Object> statObject) {
     this.type = getStatByName(statObject, "type");
@@ -37,10 +38,8 @@ public class SDP extends RTCStatObject {
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("type", this.type)
-        .add("sdp", this.sdp);
-    return jsonObjectBuilder;
+    return Json.createObjectBuilder()
+      .add("type", this.type)
+      .add("sdp", this.sdp);
   }
 }

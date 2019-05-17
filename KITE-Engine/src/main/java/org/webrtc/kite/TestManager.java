@@ -17,7 +17,6 @@
 package org.webrtc.kite;
 
 import io.cosmosoftware.kite.report.Container;
-import org.apache.log4j.Logger;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.EndPoint;
 import org.webrtc.kite.config.TestConf;
@@ -25,71 +24,78 @@ import org.webrtc.kite.tests.KiteBaseTest;
 import org.webrtc.kite.tests.KiteJsTest;
 
 import javax.json.JsonObject;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
  * A thread to step an implementation of KiteTest.
  * <p>
- * The algorithm of the thread is as follows: 1) Instantiate the WebDriver objects. 2) Instantiate
- * KiteTest implementation. 3) Set the WebDriver objects to the implementation. 4) Execute the test.
- * 5) Retrieve, parse and populate from userAgent. 6) Get the stack trace of an exception if it
- * occurs during the execution. 7) Quit all WebDrivers. 8) Develop result json. 9) Post the result
- * to the callback url synchronously for the first and last test and asynchronously for the rest of
- * the tests.
+ * The algorithm of the thread is as follows:
+ * 1) Instantiate the WebDriver objects.
+ * 2) Instantiate KiteBaseTest implementation.
+ * 3) Set the endpoint list to the implementation.
+ * 4) Execute the test.
+ * 5) Retrieve, parse and populate from userAgent.
+ * 6) Get the stack trace of an exception if it occurs during the execution.
+ * 7) Quit all WebDrivers.
+ * 8) Develop result json.
+ * 9) Post the result to the callback url
+ * </p>
  */
 public class TestManager implements Callable<Object> {
   
-  private static final Logger logger = Logger.getLogger(TestManager.class.getName());
-  
-  private static final boolean ENABLE_CALLBACK = true;
+  private final int retry;
+  private final boolean ENABLE_CALLBACK = true;
   private final TestConf testConf;
   private final List<EndPoint> endPointList;
-  private final int retry;
   private Container testSuite;
-  private final Logger testLogger;
+  
   /**
    * Constructs a new TestManager with the given TestConf and List<EndPoint>.
    *
-   * @param testConf             TestConf
-   * @param endPointList List<EndPoint>
+   * @param testConf     test configuration object
+   * @param endPointList tuple of endpoint for this test
    */
-  public TestManager(TestConf testConf, List<EndPoint> endPointList, int id, Logger testLogger) {
+  public TestManager(TestConf testConf, List<EndPoint> endPointList) {
     this.testConf = testConf;
     this.endPointList = endPointList;
-    this.retry = id;
-    this.testLogger = testLogger;
+    this.retry = testConf.getMaxRetryCount();
+  }
+  
+  private KiteBaseTest buildTest() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    KiteBaseTest test = testConf.isJavascript()
+      ? new KiteJsTest(testConf.getTestImpl())
+      : (KiteBaseTest) Class.forName(this.testConf.getTestImpl()).getConstructor().newInstance();
+    
+    test.setSuite(testSuite.getName());
+
+    test.setLogger(testConf.getLogger());
+    test.setDescription(testConf.getDescription());
+    test.setPayload(testConf.getPayload());
+  
+    test.setConfigFilePath(Configurator.getInstance().getConfigFilePath());
+    test.setInstrumentation(Configurator.getInstance().getInstrumentation());
+    test.setParentSuite(Configurator.getInstance().getName());
+    
+    test.setEndPointList(endPointList);
+    
+    return test;
   }
   
   @Override
   public Object call() throws Exception {
-    String testImpl = this.testConf.getTestImpl();
-    KiteBaseTest test;
-    if (this.testConf.isJavascript()) {
-      test = new KiteJsTest(testImpl);
-    } else {
-      test = (KiteBaseTest) Class.forName(this.testConf.getTestImpl()).getConstructor().newInstance();
-    }
-    test.setLogger(testLogger);
+    KiteBaseTest test = buildTest();
     testSuite.addChild(test.getReport().getUuid());
-    test.setDescription(testConf.getDescription());
-    test.setInstrumentation(Configurator.getInstance().getInstrumentation());
-    test.setParentSuite(Configurator.getInstance().getName());
-    test.setSuite(testSuite.getName());
-    test.setPayload(this.testConf.getPayload());
-    test.setEndPointList(endPointList);
+    
     JsonObject testResult = test.execute();
     
     // todo: need some retry mechanism here
     
     if (ENABLE_CALLBACK) {
-      if (this.testConf.getCallbackURL() == null) {
-        logger.warn("No callback specified for " + this.testConf);
-      } else {
+      if (this.testConf.getCallbackURL() != null) {
         CallbackThread callbackThread =
           new CallbackThread(this.testConf.getCallbackURL(), testResult);
-        // if no "meta", post result in other thread; if "meta", post result in same thread
-        // "meta" is included for the first and last tests, that are executed synchronously
         if (testResult.getString("meta", null) == null) {
           callbackThread.start();
         } else {
@@ -98,13 +104,18 @@ public class TestManager implements Callable<Object> {
       }
     }
     
-    // Update allure report:
+    // todo: Update allure report for on-going status
     
     return testResult;
   }
   
-  
+  /**
+   * Set the container for the test's parent suite, for report purpose
+   *
+   * @param testSuite test's parent suite
+   */
   public void setTestSuite(Container testSuite) {
     this.testSuite = testSuite;
   }
+  
 }

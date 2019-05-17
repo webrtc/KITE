@@ -26,7 +26,7 @@ import java.util.List;
  * testingbot implementation of RemoteGridFetcher.
  */
 public class TestingBotGridFetcher extends RemoteGridFetcher {
-
+  
   /**
    * Constructs a new TestingBotGridFetcher with the given pathToDB, remoteAddress and restApiUrl.
    *
@@ -38,29 +38,30 @@ public class TestingBotGridFetcher extends RemoteGridFetcher {
   public TestingBotGridFetcher(String pathToDB, String remoteAddress, String restApiUrl) {
     super(pathToDB, "TESTING_BOT", remoteAddress, restApiUrl);
   }
-
-  @Override public void fetchConfig() throws IOException {
-
+  
+  @Override
+  public void fetchConfig() throws IOException {
+    
     List<JsonObject> availableConfigList
-        = this.getAvailableConfigList(null, null);
-
+      = this.getAvailableConfigList(null, null);
+    
     /* might be not necessary, depending on data format it DB */
     for (JsonObject jsonObject : availableConfigList) {
       String name = jsonObject.getString("name", "").trim().toLowerCase();
       if (name.equalsIgnoreCase("googlechrome"))
         name = "chrome";
-
+      
       Browser browser = new Browser(name);
       browser.setVersion(jsonObject.getString("version", ""));
-
+      
       String platform = jsonObject.getString("platform", "").toUpperCase();
       if (platform.equalsIgnoreCase("CAPITAN"))
         platform = "EL_CAPITAN";
-
+      
       browser.setPlatform(platform);
-
+      
       this.browserList.add(browser);
     }
   }
-
+  
 }

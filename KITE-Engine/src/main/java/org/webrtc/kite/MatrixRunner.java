@@ -18,18 +18,12 @@ package org.webrtc.kite;
 
 import io.cosmosoftware.kite.report.Container;
 import io.cosmosoftware.kite.report.Reporter;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.EndPoint;
 import org.webrtc.kite.config.TestConf;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -44,59 +38,30 @@ import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
  */
 public class MatrixRunner {
   
-  private static final Logger logger = Logger.getLogger(MatrixRunner.class.getName());
-  
+  private final Logger logger = Logger.getLogger(MatrixRunner.class.getName());
   private final TestConf testConf;
-  private final String testName;
   private List<List<EndPoint>> tupleList = new ArrayList<List<EndPoint>>();
-  
-  private Container testSuite;
   
   /**
    * Constructs a new MatrixRunner with the given TestConf and List<List<EndPoint>>.
    *
    * @param testConf     TestConf
    * @param listOfTuples a list of tuples (containing 1 or multiples kite config objects).
-   * @param testName     name of the running test suite.
    */
-  public MatrixRunner(TestConf testConf, List<List<EndPoint>> listOfTuples, String testName) {
+  public MatrixRunner(TestConf testConf, List<List<EndPoint>> listOfTuples) {
     this.testConf = testConf;
-    this.testSuite = new Container(testConf.getName().contains("%ts") ?
-      testConf.getName().replaceAll("%ts", "") + " (" + timestamp() + ")" : testConf.getName());
-    this.testName = testName;
+
     this.tupleList.addAll(listOfTuples);
-    List<List<EndPoint>> customBrowserMatrix = Configurator.getInstance().getCustomBrowserMatrix();
-    this.tupleList.addAll(customBrowserMatrix);
+    this.tupleList.addAll(Configurator.getInstance().getCustomBrowserMatrix());
   }
-  
-  /**
-   * Returns a sublist from the given list of the type of objects specified by the objectClass.
-   *
-   * @param futureList  List of Future<Object>
-   * @param objectClass The class for the desired required object list.
-   * @return A sublist from the given list of the type of objects specified by the objectClass.
-   */
-  private List<?> getSubList(List<Future<Object>> futureList, Class<?> objectClass) {
-    List<Object> listOfObject = new ArrayList<Object>();
-    for (Future<Object> future : futureList) {
-      try {
-        Object object = future.get();
-        if (objectClass.isInstance(object)) {
-          listOfObject.add(object);
-        }
-      } catch (InterruptedException | ExecutionException e) {
-        logger.error(e);
-      }
-    }
-    return listOfObject;
-  }
-  
+
   /**
    * Returns a sublist of the given futureList exclusive of the type of objects specified by the
    * objectClass.
    *
    * @param futureList  List of Future<Object>
    * @param objectClass The class for the undesired required object.
+   *
    * @return A sublist of the given futureList exclusive of the type of objects specified by the
    * objectClass.
    */
@@ -117,19 +82,41 @@ public class MatrixRunner {
   }
   
   /**
+   * Returns a sublist from the given list of the type of objects specified by the objectClass.
+   *
+   * @param futureList  List of Future<Object>
+   * @param objectClass The class for the desired required object list.
+   *
+   * @return A sublist from the given list of the type of objects specified by the objectClass.
+   */
+  private List<?> getSubList(List<Future<Object>> futureList, Class<?> objectClass) {
+    List<Object> listOfObject = new ArrayList<Object>();
+    for (Future<Object> future : futureList) {
+      try {
+        Object object = future.get();
+        if (objectClass.isInstance(object)) {
+          listOfObject.add(object);
+        }
+      } catch (InterruptedException | ExecutionException e) {
+        logger.error(getStackTrace(e));
+      }
+    }
+    return listOfObject;
+  }
+  
+  /**
    * Executes the test contained inside the TestManager for the provided matrix.
    * <p>
    * The algorithm of the method is as follows: 1) Execute the first test. 2) Execute the multi
    * threaded list. 3) Execute the single threaded list. 4) Execute the last test.
    *
-   * @return List<Future   <   Object>>
-   * @throws InterruptedException if thread pool is interrupted while waiting, in which case
-   *                              unfinished tasks are cancelled
-   * @throws ExecutionException   if the computation of the first or last thread threw an exception
+   * @return List<Future < Object>>
    */
-  public List<Future<Object>> run() throws InterruptedException {
+  public List<Future<Object>> run() {
+    Container testSuite = new Container(testConf.getName().contains("%ts") ?
+      testConf.getName().replaceAll("%ts", "") + " (" + timestamp() + ")" : testConf.getName());
     
-    int totalTestCases =this.tupleList.size();
+    int totalTestCases = this.tupleList.size();
     if (totalTestCases < 1) {
       return null;
     }
@@ -142,15 +129,13 @@ public class MatrixRunner {
     
     logger.info("Executing " + this.testConf + " for " + totalTestCases + " browser tuples");
     try {
-      final Logger testLogger = createTestLogger(this.testConf.getTestClassName());
-      for (int index = 0; index < this.tupleList.size(); index ++) {
-        List<EndPoint> configObjectList = this.tupleList.get(index);
-        TestManager manager = new TestManager(this.testConf, configObjectList, testConf.getMaxRetryCount(), testLogger);
+      for (int index = 0; index < this.tupleList.size(); index++) {
+        TestManager manager = new TestManager(this.testConf, this.tupleList.get(index));
         manager.setTestSuite(testSuite);
         testManagerList.add(manager);
       }
       
-      List<Future<Object>> tempFutureList = new ArrayList<>();
+      List<Future<Object>> tempFutureList;
       while (testManagerList.size() > 0) {
         tempFutureList = multiExecutorService.invokeAll(testManagerList);
         testManagerList = (List<TestManager>) this.getSubList(tempFutureList, TestManager.class);
@@ -158,7 +143,7 @@ public class MatrixRunner {
       }
       
       testManagerList.clear();
-
+      
     } catch (Exception e) {
       logger.error(getStackTrace(e));
     } finally {
@@ -167,17 +152,6 @@ public class MatrixRunner {
       multiExecutorService.shutdown();
     }
     return futureList;
-  }
-
-
-
-
-  protected Logger createTestLogger(String testClassName) throws IOException {
-    Logger testLogger = Logger.getLogger(new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(new Date()));
-    FileAppender fileAppender = new FileAppender( new PatternLayout("%d %-5p - %m%n"), "logs/" + testClassName + "/test_" + testLogger.getName() + ".log", false);
-    fileAppender.setThreshold(Level.INFO);
-    testLogger.addAppender(fileAppender);
-    return testLogger;
   }
   
   
