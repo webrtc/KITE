@@ -206,6 +206,8 @@ In the following example, we are assuming __Chrome__ version __74__ and __Firefo
 
 ### Edit the test config file
 
+If your Grid is running on localhost and with __Chrome__ version __74__ and __Firefox__ version __66__ you can skip this step.
+
 Edit the file `./KITE-Example-Test/configs/example.config.json` with your favorite text editor.  
 You will need to change __`version`__ and __`platform`__ according to what is installed on your local grid.
 For example, if your local grid is windows and the latest stable version of __Chrome__ is __74__, you should set: 
@@ -214,13 +216,92 @@ For example, if your local grid is windows and the latest stable version of __Ch
       "platform": "WINDOWS",
 ```
 
-If you're using Linux or Mac, change "WINDOWS" to "LINUX" or "MAC".
+If you're using Linux or Mac, change "WINDOWS" to "LINUX" or "MAC". 
+Alternatively, you can use `localhost` as the platform name if the grid is running on your localhost, KITE will automatically set it according to your OS.  
+
+
+You can find more information about the Basic Configuration File [here](#basic-configuration-file).
+
+
+### Run KITE-Example-Test
+
+
+To run the example test,  
+
+__On Windows:__ 
+```
+cd %KITE_HOME%\KITE-Example-Test
+r configs\example.config.json
+```
+__On Linux/Mac:__   
+```
+cd $KITE_HOME/KITE-Example-Test
+r configs/example.config.json
+```
+
+
+### Run KITE-AppRTC-Test
+
+Edit the file `./KITE-AppRTC-Test/configs/iceconnection.local.config.json` with your favorite text editor.  
+You will need to change __`version`__ and __`platform`__ according to what is installed on your local grid.
+
+To run the AppRTC iceconnection test,
+
+__On Windows:__  
+```
+cd %KITE_HOME%\KITE-AppRTC-Test
+r configs\iceconnection.local.config.json
+```
+__On Linux/Mac:__   
+```
+cd $KITE_HOME/KITE-AppRTC-Test
+r configs/iceconnection.local.config.json
+```
+
+Alternatively, you can launch the test with the full command.  
+
+__On Windows:__    
+```
+java -Dkite.firefox.profile="%KITE_HOME%"/third_party/ -cp "%KITE_HOME%/KITE-Engine/target/kite-jar-with-dependencies.jar;target/*" org.webrtc.kite.Engine configs/iceconnection.local.config.json
+```
+__On Linux/Mac:__  
+```
+java -Dkite.firefox.profile="$KITE_HOME"/third_party/ -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:target/*" org.webrtc.kite.Engine configs/iceconnection.local.config.json
+```
+
+### Open the dashboard
+
+After running the test, you can open the Allure dashboard with the command `a`.
+
+__On Windows:__  
+```
+cd %KITE_HOME%\KITE-AppRTC-Test
+a
+```
+__On Linux/Mac:__  
+```
+cd $KITE_HOME/KITE-AppRTC-Test
+a
+```
+
+Congratulation! You should see the results of your first KITE test.
+
+![KITE Test Dashboard](third_party/allure-2.10.0/lib/Alluredashboard.png)  
 
 
 
-Read below about the configuration file, check that the desired browsers listed in your configuration file are available in your system.
 
-### Understanding a basic configuration file
+Alternatively, the full command to launch the Allure dashboard is:  
+```
+allure serve kite-allure-reports
+```
+
+
+
+
+
+
+## Basic configuration file
 
 The example example.config.json file is almost the simplest config file you can get
  (Change the version of browsers to the appropriated one that you have installed on your testing machine):
@@ -312,79 +393,7 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
   ]
 ```
 
-
-#### Run KITE-Example-Test
-
-
-To run the example test,  
-
-__On Windows:__ 
-```
-cd %KITE_HOME%\KITE-Example-Test
-r configs\example.config.json
-```
-__On Linux/Mac:__   
-```
-cd $KITE_HOME/KITE-Example-Test
-r configs/example.config.json
-```
-
-
-#### Run KITE-AppRTC-Test
-
-Edit the file `./KITE-AppRTC-Test/configs/iceconnection.local.config.json` with your favorite text editor.  
-You will need to change __`version`__ and __`platform`__ according to what is installed on your local grid.
-
-To run the AppRTC iceconnection test,
-
-__On Windows:__  
-```
-cd %KITE_HOME%\KITE-AppRTC-Test
-r configs\iceconnection.local.config.json
-```
-__On Linux/Mac:__   
-```
-cd $KITE_HOME/KITE-AppRTC-Test
-r configs/iceconnection.local.config.json
-```
-
-Alternatively, you can launch the test with the full command.  
-
-__On Windows:__    
-```
-java -Dkite.firefox.profile="%KITE_HOME%"/third_party/ -cp "%KITE_HOME%/KITE-Engine/target/kite-jar-with-dependencies.jar;target/*" org.webrtc.kite.Engine configs/iceconnection.local.config.json
-```
-__On Linux/Mac:__  
-```
-java -Dkite.firefox.profile="$KITE_HOME"/third_party/ -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:target/*" org.webrtc.kite.Engine configs/iceconnection.local.config.json
-```
-
-### Open the dashboard
-
-After running the test, you can open the Allure dashboard with the command `a`.
-
-__On Windows:__  
-```
-cd %KITE_HOME%\KITE-AppRTC-Test
-a
-```
-__On Linux/Mac:__  
-```
-cd $KITE_HOME/KITE-AppRTC-Test
-a
-```
-
-Congratulation! You should see the results of your first KITE test.
-
-![KITE Test Dashboard](third_party/allure-2.10.0/lib/Alluredashboard.png)  
-
-
-
-
-Alternatively, the full command to launch the Allure dashboard is:  
-```
-allure serve kite-allure-reports
-```
-
-
+If the grid is running on localhost (same machine as KITE), then you can use `localhost` as the platform name, KITE will automatically set
+ it according to your OS. However, if the grid or selenium node is not running on localhost, you must set the platform name according to
+  the OS of the node (MAC, WINDOWS, LINUX, Android...)  
 

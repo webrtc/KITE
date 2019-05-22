@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.webrtc.kite.Utils.getSystemPlatform;
+
 /**
  * Representation of a browser object in the config file.
  * <p>
@@ -102,6 +104,9 @@ public class Browser extends EndPoint {
       this.version = jsonObject.getString("version");
       nullValue = "platform";
       this.platformName = jsonObject.getString("platform");
+      if (this.platformName.equalsIgnoreCase("localhost")) {
+        this.platformName = getSystemPlatform();
+      }
       this.headless = jsonObject.getBoolean("headless", headless);
       this.useFakeMedia = jsonObject.getBoolean("useFakeMedia", useFakeMedia);
       this.technologyPreview = jsonObject.getBoolean("technologyPreview", technologyPreview);

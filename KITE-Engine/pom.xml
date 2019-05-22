@@ -93,7 +93,7 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.github.CoSMoSoftware.KITE-Extras</groupId>
+      <groupId>com.github.CoSMoSoftware</groupId>
       <artifactId>kite-extras</artifactId>
       <version>${kite.extras.version}</version>
     </dependency>

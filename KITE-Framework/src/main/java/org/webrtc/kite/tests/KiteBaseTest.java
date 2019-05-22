@@ -62,6 +62,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> {
   protected final List<WebDriver> webDriverList = new ArrayList<>();
   protected final ArrayList<Scenario> scenarioArrayList = new ArrayList<>();
   protected final Map<WebDriver, Map<String, Object>> sessionData = new HashMap<WebDriver, Map<String, Object>>();
+  protected String kiteServerGridId;
   
   private int testTimeout = 60;
   private int maxUsersPerRoom = 1;
@@ -569,5 +570,13 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> {
    * @param name the name
    */
   public void setName(String name) { this.name = name; }
+
+  public String getKiteServerGridId() {
+    return kiteServerGridId;
+  }
+
+  public void setKiteServerGridId(String kiteServerGridId) {
+    this.kiteServerGridId = kiteServerGridId;
+  }
 
 }
