@@ -26,13 +26,14 @@ import java.util.List;
  * Encapsulates the operations around the provided array of Remotes.
  */
 public class RemoteManager {
-
+  
   private List<Remote> remoteList = new ArrayList<Remote>();
-
+  
   /**
    * Constructs a new RemoteManager with the given List<JsonObject>.
    *
    * @param jsonObjectList an implementation of List<JsonObject>.
+   *
    * @throws KiteUnsupportedRemoteException if any of the 'name' in the provided jsonObjectList is
    *                                        not specified in SupportedRemote.
    */
@@ -45,20 +46,12 @@ public class RemoteManager {
         this.remoteList.add(remote);
     }
   }
-
-  /**
-   * Gets remote list.
-   *
-   * @return the remote list
-   */
-  public List<Remote> getRemoteList() {
-    return remoteList;
-  }
-
+  
   /**
    * Returns Remote matching the SupportedRemote.
    *
    * @param supportedRemote SupportedRemote
+   *
    * @return Remote remote
    */
   public Remote getRemote(SupportedRemote supportedRemote) {
@@ -67,5 +60,14 @@ public class RemoteManager {
         return remote;
     return null;
   }
-
+  
+  /**
+   * Gets remote list.
+   *
+   * @return the remote list
+   */
+  public List<Remote> getRemoteList() {
+    return remoteList;
+  }
+  
 }

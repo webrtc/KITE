@@ -22,8 +22,6 @@ package org.webrtc.kite.exception;
  */
 public class KiteInsufficientValueException extends Exception {
 
-  private static final long serialVersionUID = -1788678025516435737L;
-  
   /**
    * Constructs a KiteInsufficientValueException with the specified detailed message.
    *

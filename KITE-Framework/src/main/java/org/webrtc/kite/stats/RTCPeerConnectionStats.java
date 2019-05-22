@@ -26,7 +26,8 @@ import java.util.Map;
  * RTCPeerConnectionStats, with attributes dataChannelsOpened, dataChannelsClosed
  */
 public class RTCPeerConnectionStats extends RTCStatObject {
-  private String dataChannelsOpened, dataChannelsClosed;
+  private final String dataChannelsOpened;
+  private final String dataChannelsClosed;
 
   public RTCPeerConnectionStats(Map<Object, Object> statObject) {
     this.setId(getStatByName(statObject, "id"));
@@ -36,10 +37,8 @@ public class RTCPeerConnectionStats extends RTCStatObject {
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("dataChannelsOpened", this.dataChannelsOpened)
-        .add("dataChannelsClosed", this.dataChannelsClosed);
-    return jsonObjectBuilder;
+    return Json.createObjectBuilder()
+      .add("dataChannelsOpened", this.dataChannelsOpened)
+      .add("dataChannelsClosed", this.dataChannelsClosed);
   }
 }

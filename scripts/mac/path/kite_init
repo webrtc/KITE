@@ -1,0 +1,19 @@
+
+
+if [ -z $KITE_HOME ]
+then
+  echo KITE_HOME is not defined. Please run configure.bat or manually add KITE_HOME to your environment variables.
+  exit 0
+fi
+
+
+if [ [$1] = [] ]
+then
+  echo Usage:
+  echo :
+  echo init testname
+  exit 0
+fi
+
+java -cp $KITE_HOME/scripts/init/init.zip Init $1
+

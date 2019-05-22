@@ -115,8 +115,8 @@ public class WebDriverFactory {
    * Creates a Capabilities object based on the given EndPoint object.
    *
    * @param endPoint kite config object
-   * @param testName         name for individual test case
-   * @return Capabilities
+   * @param testName name for individual test case
+   * @return the capabilities for creating webdriver
    */
   private static Capabilities createCapabilities(EndPoint endPoint, String testName, String id) {
     
@@ -140,11 +140,16 @@ public class WebDriverFactory {
     return capabilities;
   }
   
+  /**
+   * Build capabilities for app appium driver
+   * @param app the App endpoint object
+   * @return  capabilities appium driver
+   */
   private static MutableCapabilities buildAppCapabilities(App app){
     MutableCapabilities capabilities = new MutableCapabilities();
     // The absolute local path or remote http URL to an .ipa or .apk file, or a .zip containing one of these.
     // Appium will attempt to install this app binary on the appropriate device first.
-    capabilities.setCapability("app", app.getAppPath());
+    capabilities.setCapability("app", app.getApp());
     capabilities.setCapability("deviceName", app.getDeviceName());
     capabilities.setCapability("platformName", app.getPlatform());
     if (app.getPlatform().equalsIgnoreCase("iOS")) {
@@ -154,7 +159,7 @@ public class WebDriverFactory {
       capabilities.setCapability("fullReset", app.getReset());
     }
     if (app.getAppPackage() == null || app.getAppActivity() == null) {
-      logger.warn("Using [" + app.getAppPath() + "]: Some mobile applications may require appPackage and appActivity " +
+      logger.warn("Using [" + app.getApp() + "]: Some mobile applications may require appPackage and appActivity " +
         "to setStartTimestamp properly ..");
       if (app.getAppPackage() != null) {
         capabilities.setCapability("appPackage", app.getAppPackage());
@@ -169,6 +174,11 @@ public class WebDriverFactory {
     return capabilities;
   }
   
+  /**
+   * Build capabilities for browser web driver
+   * @param browser the Browser endpoint object
+   * @return  capabilities appium driver
+   */
   private static MutableCapabilities buildBrowserCapabilities(Browser browser) {
     MutableCapabilities capabilities = new MutableCapabilities();
     if (browser.getVersion() != null) {
@@ -226,6 +236,11 @@ public class WebDriverFactory {
     return capabilities;
   }
   
+  /**
+   * Create common chrome option to create chrome web driver
+   * @param browser the Browser endpoint object
+   * @return  the chrome option
+   */
   private static ChromeOptions getChromeOptions(Browser browser) {
     ChromeOptions chromeOptions = new ChromeOptions();
     if (browser.useFakeMedia()) {
@@ -277,6 +292,11 @@ public class WebDriverFactory {
     return  chromeOptions;
   }
   
+  /**
+   * Create common firefox option to create firefox web driver
+   * @param browser the Browser endpoint object
+   * @return  the firefox option
+   */
   private static FirefoxOptions getFirefoxOptions(Browser browser) {
     FirefoxProfile firefoxProfile = null;
     String profile = System.getProperty("kite.firefox.profile");

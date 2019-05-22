@@ -30,21 +30,21 @@ import javax.json.JsonObjectBuilder;
 public class App extends EndPoint {
 
   // Mandatory
-  private String appPath;
+  private String app;
   private String appPackage;
   private String appActivity;
-  private String deviceName;
-  private boolean fullReset;
+  private final String deviceName;
+  private final boolean fullReset;
   
   /**
-   * Constructs a new App with the given appPath and Mobile Object.
+   * Constructs a new App with the given app and Mobile Object.
    *
-   * @param appPath      path to app package
+   * @param app          path to app package
    * @param deviceName   device's name
    * @param platformName app's platform
    */
-  public App(String appPath, String deviceName, String platformName) {
-    this.appPath = appPath;
+  public App(String app, String deviceName, String platformName) {
+    this.app = app;
     this.deviceName = deviceName;
     this.platformName = platformName;
     this.appPackage = null;
@@ -60,33 +60,39 @@ public class App extends EndPoint {
    */
   public App(String remoteAddress, JsonObject jsonObject) {
     super(remoteAddress, jsonObject);
-    this.appPath = jsonObject.getString("app");
+    this.app = jsonObject.getString("app");
     this.appPackage = jsonObject.getString("appPackage", null);
     this.appActivity = jsonObject.getString("appActivity", null);
     this.deviceName = jsonObject.getString("deviceName");
     this.platformName = jsonObject.getString("platformName");
-    String reset = jsonObject.getString("reset", "fullReset");
-    this.fullReset = reset.equalsIgnoreCase("fullReset");
+    this.fullReset = jsonObject.getString("reset", "fullReset")
+      .equalsIgnoreCase("fullReset");
     this.gateway = jsonObject.getString("gateway", null);
   }
   
   /**
    * Constructs a new App with a given App.
    *
-   * @param app App
+   * @param app given App object
    */
   public App(App app) {
     super(app);
-    this.appPath = app.getAppPath();
+    this.app = app.getApp();
     this.appPackage = app.getAppPackage();
     this.appActivity = app.getAppActivity();
     this.deviceName = app.getDeviceName();
+    this.fullReset = app.isFullReset();
   }
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
     JsonObjectBuilder jsonObjectBuilder =
-      super.getJsonObjectBuilder().add("app", this.appPath);
+      super.getJsonObjectBuilder()
+        .add("app", this.app)
+        .add("appPackage", this.appPackage)
+        .add("appActivity", this.appActivity)
+        .add("fullReset", this.appActivity)
+      ;
 
     if (this.deviceName != null) {
       jsonObjectBuilder.add("deviceName", this.deviceName);
@@ -97,12 +103,21 @@ public class App extends EndPoint {
   }
   
   /**
+   * Sets app.
+   *
+   * @param app the app
+   */
+  public void setApp(String app) {
+    this.app = app;
+  }
+  
+  /**
    * returns app's path to app package
    *
    * @return String app path
    */
-  public String getAppPath() {
-    return appPath;
+  public String getApp() {
+    return app;
   }
   
   /**
@@ -158,5 +173,11 @@ public class App extends EndPoint {
   public boolean getReset() {
     return fullReset;
   }
-
+  
+  /**
+   * @return whether the Appium fullReset option should be set to true
+   */
+  public boolean isFullReset() {
+    return fullReset;
+  }
 }

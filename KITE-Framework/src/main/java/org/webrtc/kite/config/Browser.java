@@ -19,7 +19,6 @@ package org.webrtc.kite.config;
 import eu.bitwalker.useragentutils.OperatingSystem;
 import eu.bitwalker.useragentutils.UserAgent;
 import eu.bitwalker.useragentutils.Version;
-import io.cosmosoftware.kite.usrmgmt.TypeRole;
 import is.tagomor.woothee.Classifier;
 import org.webrtc.kite.Utils;
 
@@ -31,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static org.webrtc.kite.Utils.getSystemPlatform;
 
 /**
  * Representation of a browser object in the config file.
@@ -103,6 +104,9 @@ public class Browser extends EndPoint {
       this.version = jsonObject.getString("version");
       nullValue = "platform";
       this.platformName = jsonObject.getString("platform");
+      if (this.platformName.equalsIgnoreCase("localhost")) {
+        this.platformName = getSystemPlatform();
+      }
       this.headless = jsonObject.getBoolean("headless", headless);
       this.useFakeMedia = jsonObject.getBoolean("useFakeMedia", useFakeMedia);
       this.technologyPreview = jsonObject.getBoolean("technologyPreview", technologyPreview);
@@ -139,7 +143,6 @@ public class Browser extends EndPoint {
     this.pathToBinary = browser.getPathToBinary();
     this.fakeMediaFile = browser.getFakeMediaFile();
     this.fakeMediaAudio = browser.getFakeMediaAudio();
-    this.typeRole = new TypeRole(browser.typeRole);
     this.windowSize = this.getWindowSize();
     this.flags = browser.getFlags();
     this.extraCapabilities = browser.getExtraCapabilities();
@@ -401,7 +404,7 @@ public class Browser extends EndPoint {
             version.equals(browser.version) && platformName.equals(browser.platformName) && Objects.equals(gateway, browser.gateway) &&
             Objects.equals(mobile, browser.mobile);
   }
-
+  
   @Override
   public int hashCode() {
     int hashCode = this.browserName.hashCode();
@@ -417,7 +420,6 @@ public class Browser extends EndPoint {
     if (this.gateway != null) {
       hashCode += this.gateway.hashCode();
     }
-    hashCode += this.typeRole.hashCode();
     return hashCode;
   }
   

@@ -44,12 +44,8 @@ public class HDTest extends AppRTCTest {
     runner.addStep(new PeerConnectionCheck(runner.getWebDriver()));
     runner.addStep(new RemoteVideoDisplayCheck(runner.getWebDriver()));
     runner.addStep(new RemoteVideoHDCheck(runner.getWebDriver()));
-    if (this.getStats) {
-      GetStatsStep getStatsStep = new GetStatsStep(runner.getWebDriver());
-      getStatsStep.setStatsCollectionDuration(statsCollectionDuration);
-      getStatsStep.setStatsCollectionInterval(statsCollectionInterval);
-      getStatsStep.setSelectedStats(selectedStats);
-      runner.addStep(getStatsStep);
+    if (this.getStats()) {
+      runner.addStep(new GetStatsStep(runner.getWebDriver(), getStatsConfig));
     }
   }
 }

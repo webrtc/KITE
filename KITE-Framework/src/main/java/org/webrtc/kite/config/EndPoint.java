@@ -16,8 +16,6 @@
 
 package org.webrtc.kite.config;
 
-import io.cosmosoftware.kite.usrmgmt.AccountType;
-import io.cosmosoftware.kite.usrmgmt.TypeRole;
 import org.apache.log4j.Logger;
 
 import javax.json.Json;
@@ -33,36 +31,16 @@ import java.util.Map;
 public abstract class EndPoint extends KiteConfigObject {
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
-  /**
-   * The Remote address.
-   */
   protected String remoteAddress;
-  /**
-   * The Platform name
-   */
   protected String platformName;
-  /**
-   * The Extra capabilities.
-   */
-  protected Map<String, String> extraCapabilities = new HashMap<>();
-  /**
-   * The Focus.
-   */
-  protected boolean focus;
-  /**
-   * The Is browser.
-   */
-  protected boolean isBrowser = false;
-  /**
-   * The Type role.
-   */
-  protected TypeRole typeRole;
-  /**
-   * Max instances
-   */
-  protected int maxInstances;
-
   protected String gateway;
+  protected Map<String, String> extraCapabilities = new HashMap<>();
+  protected boolean focus;
+  protected boolean isBrowser = false;
+  protected int maxInstances;
+  protected JsonObject jsonConfig;
+  
+  
   /**
    * Instantiates a new End point.
    */
@@ -76,13 +54,10 @@ public abstract class EndPoint extends KiteConfigObject {
    */
   protected EndPoint(EndPoint endPoint) {
     this.focus = endPoint.isFocus();
+    this.jsonConfig = endPoint.getJsonConfig();
     this.remoteAddress = endPoint.getRemoteAddress();
     this.platformName = endPoint.getPlatform();
     this.gateway = endPoint.getGateway();
-    TypeRole typeRole = new TypeRole();
-    typeRole.setRole(endPoint.getTypeRole().getRole());
-    typeRole.setType(endPoint.getTypeRole().getType());
-    this.typeRole = typeRole;
     for (String capabilityName : endPoint.getExtraCapabilities().keySet()) {
       this.addCapabilities(capabilityName, endPoint.getExtraCapabilities().get(capabilityName));
     }
@@ -96,8 +71,8 @@ public abstract class EndPoint extends KiteConfigObject {
    */
   protected EndPoint(String remoteAddress, JsonObject jsonObject) {
     this.remoteAddress = remoteAddress;
+    this.jsonConfig = jsonObject;
     this.focus = jsonObject.getBoolean("focus", true);
-    this.setTypeRole(jsonObject);
     JsonValue jsonValue = jsonObject.getOrDefault("extraCapabilities", null);
     if (jsonValue != null) {
       JsonObject extraCapabilitiesArray = (JsonObject) jsonValue;
@@ -172,35 +147,6 @@ public abstract class EndPoint extends KiteConfigObject {
     return this instanceof Browser;
   }
   
-  /**
-   * Gets type role.
-   *
-   * @return the type role
-   */
-  public TypeRole getTypeRole() {
-    return typeRole;
-  }
-  
-  /**
-   * Sets type role.
-   *
-   * @param typeRole the type role
-   */
-  public void setTypeRole(TypeRole typeRole) {
-    this.typeRole = typeRole;
-  }
-  
-  /**
-   * Sets type role.
-   *
-   * @param jsonObject the json object
-   */
-  protected void setTypeRole(JsonObject jsonObject) {
-    TypeRole tr = new TypeRole();
-    tr.setType(AccountType.valueOf(jsonObject.getString("accountType", AccountType.RC_ACCOUNT_A.name())));
-    this.typeRole = tr;
-  }
-
   /**
    * Returns a JsonObject representation.
    *
@@ -277,5 +223,9 @@ public abstract class EndPoint extends KiteConfigObject {
    */
   public void setMaxInstances(int maxInstances) {
     this.maxInstances = maxInstances;
+  }
+  
+  public JsonObject getJsonConfig() {
+    return jsonConfig;
   }
 }

@@ -17,13 +17,14 @@
       "testImpl": "org.webrtc.kite.apprtc.tests.IceConnectionTest",
       "payload" : {
         "url": "https://appr.tc",
-        "statsCollectionDuration": 10000,
-        "statsCollectionInterval": 1000,
-        "getStats": true,
-        "bitrate": 8000,
-        "printToCSV": false,
-        "printToJson": false,
-        "selectedStats": []
+        "getStats" : {
+          "enabled": true,
+          "statsCollectionTime": 2,
+          "statsCollectionInterval": 1,
+          "peerConnections": ["appController.call_.pcClient_.pc_"],
+          "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair", "track"]
+        },
+        "bitrate": 8000
       }
     },
     {
@@ -33,13 +34,14 @@
       "testImpl": "org.webrtc.kite.apprtc.tests.NoVideoTest",
       "payload" : {
         "url": "https://appr.tc",
-        "statsCollectionDuration": 10000,
-        "statsCollectionInterval": 1000,
-        "getStats": true,
-        "bitrate": 8000,
-        "printToCSV": false,
-        "printToJson": false,
-        "selectedStats": []
+        "getStats" : {
+          "enabled": true,
+          "statsCollectionTime": 2,
+          "statsCollectionInterval": 1,
+          "peerConnections": ["appController.call_.pcClient_.pc_"],
+          "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair", "track"]
+        },
+        "bitrate": 8000
       }
     },
     {
@@ -49,13 +51,14 @@
       "testImpl": "org.webrtc.kite.apprtc.tests.NoAudioTest",
       "payload" : {
         "url": "https://appr.tc",
-        "statsCollectionDuration": 10000,
-        "statsCollectionInterval": 1000,
-        "getStats": true,
-        "bitrate": 8000,
-        "printToCSV": false,
-        "printToJson": false,
-        "selectedStats": []
+        "getStats" : {
+          "enabled": true,
+          "statsCollectionTime": 2,
+          "statsCollectionInterval": 1,
+          "peerConnections": ["appController.call_.pcClient_.pc_"],
+          "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair", "track"]
+        },
+        "bitrate": 8000
       }
     },
     {
@@ -65,13 +68,14 @@
       "testImpl": "org.webrtc.kite.apprtc.tests.HDTest",
       "payload" : {
         "url": "https://appr.tc",
-        "statsCollectionDuration": 10000,
-        "statsCollectionInterval": 1000,
-        "getStats": true,
-        "bitrate": 8000,
-        "printToCSV": false,
-        "printToJson": false,
-        "selectedStats": []
+        "getStats" : {
+          "enabled": true,
+          "statsCollectionTime": 2,
+          "statsCollectionInterval": 1,
+          "peerConnections": ["appController.call_.pcClient_.pc_"],
+          "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair", "track"]
+        },
+        "bitrate": 8000
       }
     },
     {
@@ -81,13 +85,14 @@
       "testImpl": "org.webrtc.kite.apprtc.tests.AudioSendingBitrateTest",
       "payload" : {
         "url": "https://appr.tc",
-        "statsCollectionDuration": 10000,
-        "statsCollectionInterval": 1000,
-        "getStats": true,
-        "bitrate": 8000,
-        "printToCSV": false,
-        "printToJson": false,
-        "selectedStats": []
+        "getStats" : {
+          "enabled": true,
+          "statsCollectionTime": 2,
+          "statsCollectionInterval": 1,
+          "peerConnections": ["appController.call_.pcClient_.pc_"],
+          "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair", "track"]
+        },
+        "bitrate": 8000
       }
     },
     {
@@ -97,13 +102,14 @@
       "testImpl": "org.webrtc.kite.apprtc.tests.VideoReceivingBitrateTest",
       "payload" : {
         "url": "https://appr.tc",
-        "statsCollectionDuration": 10000,
-        "statsCollectionInterval": 1000,
-        "getStats": true,
-        "bitrate": 8000,
-        "printToCSV": false,
-        "printToJson": false,
-        "selectedStats": []
+        "getStats" : {
+          "enabled": true,
+          "statsCollectionTime": 2,
+          "statsCollectionInterval": 1,
+          "peerConnections": ["appController.call_.pcClient_.pc_"],
+          "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair", "track"]
+        },
+        "bitrate": 8000
       }
     },
     {
@@ -113,13 +119,14 @@
       "testImpl": "org.webrtc.kite.apprtc.tests.AudioReceivingBitrateTest",
       "payload" : {
         "url": "https://appr.tc",
-        "statsCollectionDuration": 10000,
-        "statsCollectionInterval": 1000,
-        "getStats": true,
-        "bitrate": 8000,
-        "printToCSV": false,
-        "printToJson": false,
-        "selectedStats": []
+        "getStats" : {
+          "enabled": true,
+          "statsCollectionTime": 2,
+          "statsCollectionInterval": 1,
+          "peerConnections": ["appController.call_.pcClient_.pc_"],
+          "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair", "track"]
+        },
+        "bitrate": 8000
       }
     },
     {
@@ -129,13 +136,14 @@
       "testImpl": "org.webrtc.kite.apprtc.tests.VideoReceivingBitrateTest",
       "payload" : {
         "url": "https://appr.tc",
-        "statsCollectionDuration": 10000,
-        "statsCollectionInterval": 1000,
-        "getStats": true,
-        "bitrate": 8000,
-        "printToCSV": false,
-        "printToJson": false,
-        "selectedStats": []
+        "getStats" : {
+          "enabled": true,
+          "statsCollectionTime": 2,
+          "statsCollectionInterval": 1,
+          "peerConnections": ["appController.call_.pcClient_.pc_"],
+          "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair", "track"]
+        },
+        "bitrate": 8000
       }
     },
     {
@@ -145,21 +153,22 @@
       "testImpl": "org.webrtc.kite.apprtc.tests.LoopbackTest",
       "payload" : {
         "url": "https://appr.tc",
-        "statsCollectionDuration": 10000,
-        "statsCollectionInterval": 1000,
-        "getStats": true,
-        "bitrate": 8000,
-        "printToCSV": false,
-        "printToJson": false,
-        "selectedStats": []
+        "getStats" : {
+          "enabled": true,
+          "statsCollectionTime": 2,
+          "statsCollectionInterval": 1,
+          "peerConnections": ["appController.call_.pcClient_.pc_"],
+          "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair", "track"]
+        },
+        "bitrate": 8000
       }
     }
   ],
   "browsers": [
     {
       "browserName": "chrome",
-      "version": "72",
-      "platform": "LINUX",
+      "version": "74",
+      "platform": "localhost",
       "flags": []
     }
   ]

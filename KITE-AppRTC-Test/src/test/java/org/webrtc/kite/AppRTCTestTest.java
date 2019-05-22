@@ -34,7 +34,7 @@ import static org.webrtc.kite.Utils.getSystemPlatform;
 public class AppRTCTestTest extends TestCase {
 
   private static final String APPRTC_URL = "https://appr.tc";
-  private static final String SELENIUM_SERVER_URL = "http://locahost:4444/wd/hub";
+  private static final String SELENIUM_SERVER_URL = "http://localhost:4444/wd/hub";
 
   private List<EndPoint> endPoints = new ArrayList<>();
 

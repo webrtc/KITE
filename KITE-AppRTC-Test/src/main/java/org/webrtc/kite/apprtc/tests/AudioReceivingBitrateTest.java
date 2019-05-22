@@ -50,12 +50,8 @@ public class AudioReceivingBitrateTest extends AppRTCTest {
     runner.addStep(new RemoteVideoDisplayCheck(runner.getWebDriver()));
     runner.addStep(bitrateCheck);
 
-    if (this.getStats) {
-      GetStatsStep getStatsStep = new GetStatsStep(runner.getWebDriver());
-      getStatsStep.setStatsCollectionDuration(statsCollectionDuration);
-      getStatsStep.setStatsCollectionInterval(statsCollectionInterval);
-      getStatsStep.setSelectedStats(selectedStats);
-      runner.addStep(getStatsStep);
+    if (this.getStats()) {
+      runner.addStep(new GetStatsStep(runner.getWebDriver(), getStatsConfig));
     }
   }
 }

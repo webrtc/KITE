@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -93,7 +93,7 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.github.CoSMoSoftware.KITE-Extras</groupId>
+      <groupId>com.github.CoSMoSoftware</groupId>
       <artifactId>kite-extras</artifactId>
       <version>${kite.extras.version}</version>
     </dependency>
@@ -114,7 +114,7 @@
       <artifactId>apprtc-test</artifactId>
       <version>${kite.apprtc.version}</version>
     </dependency>
-<!-- https://mvnrepository.com/artifact/org.quartz-scheduler/quartz -->
+    <!-- https://mvnrepository.com/artifact/org.quartz-scheduler/quartz -->
     <dependency>
       <groupId>org.quartz-scheduler</groupId>
       <artifactId>quartz</artifactId>

@@ -22,9 +22,7 @@ package org.webrtc.kite.exception;
  */
 public class KiteUnsupportedRemoteException extends Exception {
 
-  private static final long serialVersionUID = -4432513235311821656L;
-
-  private String remoteName;
+  private final String remoteName;
   
   /**
    * Constructs a KiteUnsupportedRemoteException with the specified remote name.

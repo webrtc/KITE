@@ -33,12 +33,11 @@ import java.util.concurrent.Future;
  * appropriate match from the given remotes.
  */
 public class RemoteAddressManager {
-
-  private static final Logger logger = Logger.getLogger(RemoteAddressManager.class.getName());
-
+  
   private static final Map<String, String> BROWSER_STACK_PLATFORMS =
-      new LinkedHashMap<String, String>();
-
+    new LinkedHashMap<String, String>();
+  private static final Logger logger = Logger.getLogger(RemoteAddressManager.class.getName());
+  
   static {
     BROWSER_STACK_PLATFORMS.put("MAC", "MAC");
     BROWSER_STACK_PLATFORMS.put("WIN8", "WIN8");
@@ -46,9 +45,9 @@ public class RemoteAddressManager {
     BROWSER_STACK_PLATFORMS.put("WINDOWS", "WINDOWS");
     BROWSER_STACK_PLATFORMS.put("ANY", "ANY");
   }
-
+  
   private List<RemoteGridFetcher> fetcherList;
-
+  
   /**
    * Constructs a new RemoteAddressManager with the given List<RemoteGridFetcher>.
    *
@@ -57,7 +56,7 @@ public class RemoteAddressManager {
   public RemoteAddressManager(List<RemoteGridFetcher> fetcherList) {
     this.fetcherList = fetcherList;
   }
-
+  
   /**
    * Calls rest APIs of all the remotes concurrently.
    */
@@ -71,7 +70,7 @@ public class RemoteAddressManager {
     } finally {
       executorService.shutdown();
     }
-
+    
     if (futureObjectList != null) {
       for (Future<Object> future : futureObjectList) {
         try {
@@ -87,6 +86,7 @@ public class RemoteAddressManager {
    * Finds the appropriate remote address for the given EndPoint object in sequential manner.
    *
    * @param endPoint EndPoint
+   *
    * @return string representation of the Selenium hub url or null if none of the external grids
    * supports the given browser.
    */
@@ -111,5 +111,5 @@ public class RemoteAddressManager {
     }
     return null;
   }
-
+  
 }

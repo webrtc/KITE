@@ -20,27 +20,30 @@ package org.webrtc.kite.config;
  * Enumeration of supported remotes.
  */
 public enum SupportedRemote {
-
+  
   /**
    * Local supported remote.
    */
-  local(null, null), /**
+  local(null, null),
+  /**
    * Saucelabs supported remote.
    */
   saucelabs("https://%s:%s@ondemand.saucelabs.com:443/wd/hub",
-          "https://saucelabs.com/rest/v1/info/browsers/webdriver"), /**
+    "https://saucelabs.com/rest/v1/info/browsers/webdriver"),
+  /**
    * Browserstack supported remote.
    */
   browserstack("http://%s:%s@hub.browserstack.com/wd/hub",
-          "https://browserstack.com/automate/browsers.json"), /**
+    "https://browserstack.com/automate/browsers.json"),
+  /**
    * Testingbot supported remote.
    */
   testingbot("http://%s:%s@hub.testingbot.com:4444/wd/hub",
-          "https://api.testingbot.com/v1/browsers");
-
+    "https://api.testingbot.com/v1/browsers");
+  
   private final String remoteAddress;
   private final String restApiUrl;
-
+  
   /**
    * Constructs a new SupportedRemote with the given remote address and the rest API url string
    * representation.
@@ -53,16 +56,7 @@ public enum SupportedRemote {
     this.remoteAddress = remoteAddress;
     this.restApiUrl = restApiUrl;
   }
-
-  /**
-   * Rest api url string.
-   *
-   * @return the string
-   */
-  public String restApiUrl() {
-    return restApiUrl;
-  }
-
+  
   /**
    * Remote address string.
    *
@@ -71,16 +65,26 @@ public enum SupportedRemote {
   public String remoteAddress() {
     return remoteAddress;
   }
-
+  
   /**
    * Remote address string.
    *
    * @param username  the username
    * @param accesskey the accesskey
+   *
    * @return the string
    */
   public String remoteAddress(String username, String accesskey) {
     return String.format(this.remoteAddress, username, accesskey);
   }
-
+  
+  /**
+   * Rest api url string.
+   *
+   * @return the string
+   */
+  public String restApiUrl() {
+    return restApiUrl;
+  }
+  
 }

@@ -27,7 +27,12 @@ import java.util.Map;
  */
 public class RTCIceCandidateStats extends RTCStatObject {
 
-  private String ip, port, protocol, candidateType, priority, url;
+  private final String ip;
+  private final String port;
+  private final String protocol;
+  private final String candidateType;
+  private final String priority;
+  private final String url;
 
   public RTCIceCandidateStats(Map<Object, Object> statObject) {
     this.setId(getStatByName(statObject, "id"));
@@ -42,14 +47,12 @@ public class RTCIceCandidateStats extends RTCStatObject {
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("ip", this.ip)
-        .add("port", this.port)
-        .add("protocol", this.protocol)
-        .add("candidateType", this.candidateType)
-        .add("priority", this.priority)
-        .add("url", this.url);
-    return jsonObjectBuilder;
+    return  Json.createObjectBuilder()
+      .add("ip", this.ip)
+      .add("port", this.port)
+      .add("protocol", this.protocol)
+      .add("candidateType", this.candidateType)
+      .add("priority", this.priority)
+      .add("url", this.url);
   }
 }

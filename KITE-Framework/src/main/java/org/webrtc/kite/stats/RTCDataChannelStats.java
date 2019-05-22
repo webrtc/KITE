@@ -28,7 +28,15 @@ import java.util.Map;
  */
 public class RTCDataChannelStats extends RTCStatObject {
 
-  private String label, protocol, datachannelId, state, messagesSent, bytesSent, messagesReceived, bytesReceived, timestamp;
+  private final String label;
+  private final String protocol;
+  private final String datachannelId;
+  private final String state;
+  private final String messagesSent;
+  private final String bytesSent;
+  private final String messagesReceived;
+  private final String bytesReceived;
+  private final String timestamp;
 
 
   public RTCDataChannelStats(Map<Object, Object> statObject) {
@@ -46,17 +54,15 @@ public class RTCDataChannelStats extends RTCStatObject {
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-      Json.createObjectBuilder()
-        .add("label", this.label)
-        .add("protocol", this.protocol)
-        .add("datachannelId", this.datachannelId)
-        .add("state", this.state)
-        .add("messagesSent", this.messagesSent)
-        .add("bytesSent", this.bytesSent)
-        .add("messagesReceived", this.messagesReceived)
-        .add("bytesReceived", this.bytesReceived)
-        .add("timestamp", this.timestamp);
-    return jsonObjectBuilder;
+    return Json.createObjectBuilder()
+      .add("label", this.label)
+      .add("protocol", this.protocol)
+      .add("datachannelId", this.datachannelId)
+      .add("state", this.state)
+      .add("messagesSent", this.messagesSent)
+      .add("bytesSent", this.bytesSent)
+      .add("messagesReceived", this.messagesReceived)
+      .add("bytesReceived", this.bytesReceived)
+      .add("timestamp", this.timestamp);
   }
 }

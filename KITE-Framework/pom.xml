@@ -28,18 +28,22 @@
     </plugins>
   </build>
   <dependencies>
+
     <dependency>
-      <groupId>com.github.CoSMoSoftware.KITE-Extras</groupId>
+      <groupId>com.github.CoSMoSoftware</groupId>
       <artifactId>kite-extras</artifactId>
       <version>${kite.extras.version}</version>
     </dependency>
-    <!-- Uncomment this and comment out the above dependency to use your local maven repo for KITE-Extras
+
+    <!-- Uncomment this and comment out the above dependency to use your local maven repo for KITE-Extras-->
+    <!--
     <dependency>
       <groupId>io.cosmosoftware.kite</groupId>
       <artifactId>kite-extras</artifactId>
       <version>${kite.extras.version}</version>
     </dependency>
     -->
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

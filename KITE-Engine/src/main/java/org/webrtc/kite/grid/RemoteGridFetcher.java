@@ -35,32 +35,30 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 /**
  * Parent class dealing with remote API communication.
  */
 public abstract class RemoteGridFetcher implements Callable<Object> {
-
-  private static final Logger logger = Logger.getLogger(RemoteGridFetcher.class.getName());
-
+  
   private static final List<String> OS_X_CODENAME = Arrays
-      .asList("SNOW_LEOPARD", "LION", "MOUNTAIN_LION", "MAVERICKS", "YOSEMITE", "EL_CAPITAN",
-          "SIERRA");
-
-  private String pathToDB;
-  private String tableName;
-  private String remoteAddress;
-
-  /**
-   * The Rest api url.
-   */
-  protected String restApiUrl;
+    .asList("SNOW_LEOPARD", "LION", "MOUNTAIN_LION", "MAVERICKS", "YOSEMITE", "EL_CAPITAN",
+      "SIERRA");
+  private static final Logger logger = Logger.getLogger(RemoteGridFetcher.class.getName());
   /**
    * The Browser list.
    */
   protected List<Browser> browserList = new ArrayList<Browser>();
-
+  /**
+   * The Rest api url.
+   */
+  protected String restApiUrl;
+  private String pathToDB;
+  private String remoteAddress;
+  private String tableName;
+  
   /**
    * Constructs a new RemoteGridFetcher with the given pathToDB, tableName, remoteAddress and
    * restApiUrl.
@@ -72,116 +70,35 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
    *                      browsers.
    */
   public RemoteGridFetcher(String pathToDB, String tableName, String remoteAddress,
-      String restApiUrl) {
+                           String restApiUrl) {
     this.pathToDB = pathToDB;
     this.tableName = tableName;
     this.remoteAddress = remoteAddress;
-
+    
     this.restApiUrl = restApiUrl;
   }
-
-  /**
-   * Gets remote address.
-   *
-   * @return the remote address
-   */
-  public String getRemoteAddress() {
-    return remoteAddress;
-  }
-
-  /**
-   * Returns a database connection.
-   *
-   * @return Connection
-   * @throws SQLException if a database access error occurs or the url is null.
-   */
-  private Connection getDatabaseConnection() throws SQLException {
-    return DriverManager.getConnection("jdbc:sqlite:" + pathToDB);
-  }
-
-  /**
-   * Creates the table if it doesn't already exist.
-   *
-   * @param c Connection
-   * @throws SQLException if a database access error occurs.
-   */
-  private void createTableIfNotExists(Connection c) throws SQLException {
-    String sql =
-        "CREATE TABLE IF NOT EXISTS " + this.tableName + "(BROWSER       TEXT    NOT NULL, "
-            + " VERSION       TEXT, " + " PLATFORM      TEXT, " + " PLATFORM_TYPE TEXT, "
-            + " LAST_UPDATE   INTEGER);";
-
-    Statement s = null;
-    try {
-      s = c.createStatement();
-      s.executeUpdate(sql);
-    } finally {
-      Utils.closeDBResources(s, null);
+  
+  @Override
+  public Object call() throws Exception {
+    if (!this.isUpdatedInLast24h()) {
+      this.fetchConfig();
+      this.createAndFillTable();
     }
+    return "";
   }
-
-  /**
-   * Deletes all the rows from the table.
-   *
-   * @param c Connection
-   * @throws SQLException if a database access error occurs.
-   */
-  private void clearTable(Connection c) throws SQLException {
-    String sql = "DELETE FROM " + this.tableName + ";";
-
-    Statement s = null;
-    try {
-      s = c.createStatement();
-      s.executeUpdate(sql);
-    } finally {
-      Utils.closeDBResources(s, null);
-    }
-  }
-
-  /**
-   * Insert values into the table.
-   *
-   * @param c Connection
-   * @throws SQLException if a database access error occurs.
-   */
-  private void insertValues(Connection c) throws SQLException {
-    String sql = "INSERT INTO " + this.tableName
-        + "(BROWSER, VERSION, PLATFORM, PLATFORM_TYPE, LAST_UPDATE) " + "VALUES "
-        + "(?, ?, ?, ?, ?);";
-
-    PreparedStatement ps = null;
-    try {
-      ps = c.prepareStatement(sql);
-      for (Browser browser : browserList) {
-        String platformType = browser.getPlatform();
-        if (platformType.contains("XP") || platformType.contains("VISTA") || platformType
-            .contains("WIN"))
-          platformType = "WINDOWS";
-        if (RemoteGridFetcher.OS_X_CODENAME.contains(platformType))
-          platformType = "MAC";
-        ps.setString(1, browser.getBrowserName().trim().toLowerCase());
-        ps.setString(2, browser.getVersion().trim().toLowerCase());
-        ps.setString(3, browser.getPlatform().trim());
-        ps.setString(4, platformType);
-        ps.setLong(5, System.currentTimeMillis());
-        ps.executeUpdate();
-      }
-    } finally {
-      Utils.closeDBResources(ps, null);
-    }
-  }
-
+  
   /**
    * Checks whether the table exists.
    *
    * @param c Connection
+   *
    * @return true if the table exists.
    * @throws SQLException if a database access error occurs.
    */
   private boolean checkTableExist(Connection c) throws SQLException {
     String sql =
-        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = '" + this.tableName + "';";
-
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = '" + this.tableName + "';";
+    
     Statement s = null;
     ResultSet rs = null;
     try {
@@ -195,37 +112,26 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
       Utils.closeDBResources(s, rs);
     }
   }
-
+  
   /**
-   * Checks whether the table was updated in last 24 hours.
+   * Deletes all the rows from the table.
    *
-   * @return true if the table is updated within last 24 hours.
+   * @param c Connection
+   *
    * @throws SQLException if a database access error occurs.
    */
-  private boolean isUpdatedInLast24h() throws SQLException {
-    Connection c = null;
+  private void clearTable(Connection c) throws SQLException {
+    String sql = "DELETE FROM " + this.tableName + ";";
+    
     Statement s = null;
-    ResultSet rs = null;
     try {
-      c = this.getDatabaseConnection();
-
-      if (this.checkTableExist(c)) {
-        String sql = "SELECT * FROM " + this.tableName + " LIMIT 1;";
-        s = c.createStatement();
-        rs = s.executeQuery(sql);
-        if (rs.next())
-          return (System.currentTimeMillis() - rs.getLong("LAST_UPDATE") < 86400000);
-        else
-          return false;
-      } else
-        return false;
+      s = c.createStatement();
+      s.executeUpdate(sql);
     } finally {
-      Utils.closeDBResources(s, rs);
-      if (c != null)
-        c.close();
+      Utils.closeDBResources(s, null);
     }
   }
-
+  
   /**
    * Creates the table if doesn't already exist. If it exists then clear it. Insert the values into
    * it.
@@ -257,74 +163,51 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
         c.close();
     }
   }
-
+  
   /**
-   * Checks whether the given browser is supported by the remote.
+   * Creates the table if it doesn't already exist.
    *
-   * @param browser Browser
-   * @return true if the browser is supported by the remote.
+   * @param c Connection
+   *
    * @throws SQLException if a database access error occurs.
    */
-  public boolean search(Browser browser) throws SQLException {
-    String name = browser.getBrowserName().toLowerCase();
-    String version = browser.getVersion();
-    if (version != null)
-      version = version.trim().split("\\.")[0];
-    String platform = browser.getPlatform();
-    boolean result = false;
-
+  private void createTableIfNotExists(Connection c) throws SQLException {
     String sql =
-        "SELECT * FROM " + this.tableName + " WHERE BROWSER = '" + name.trim().toLowerCase() + "'";
-    if (version != null && !version.trim().isEmpty())
-      sql += " AND VERSION LIKE '" + version + "%'";
-    if (platform != null && !platform.trim().isEmpty() && platform != "ANY") {
-      switch (platform) {
-        case "WINDOWS":
-          sql += " AND PLATFORM_TYPE = 'WINDOWS'";
-          break;
-        case "MAC":
-          sql += " AND PLATFORM_TYPE = 'MAC'";
-          break;
-        default:
-          sql += " AND PLATFORM = '" + platform + "'";
-          break;
-      }
-    }
-    sql += ";";
-
-    Connection c = null;
+      "CREATE TABLE IF NOT EXISTS " + this.tableName + "(BROWSER       TEXT    NOT NULL, "
+        + " VERSION       TEXT, " + " PLATFORM      TEXT, " + " PLATFORM_TYPE TEXT, "
+        + " LAST_UPDATE   INTEGER);";
+    
     Statement s = null;
-    ResultSet rs = null;
     try {
-      c = this.getDatabaseConnection();
       s = c.createStatement();
-      rs = s.executeQuery(sql);
-      if (rs.next())
-        result = true;
+      s.executeUpdate(sql);
     } finally {
-      Utils.closeDBResources(s, rs);
-      if (c != null)
-        c.close();
+      Utils.closeDBResources(s, null);
     }
-
-    return result;
   }
-
+  
+  /**
+   * Fetches and parses the supported browser list from the remote.
+   *
+   * @throws IOException if an I/O error occurs.
+   */
+  public abstract void fetchConfig() throws IOException;
+  
   /**
    * Gets available config list.
    *
    * @param username  the username
    * @param accesskey the accesskey
+   *
    * @return the available config list
    * @throws IOException the io exception
    */
   protected List<JsonObject> getAvailableConfigList(String username, String accesskey)
-      throws IOException {
+    throws IOException {
     URL myurl = new URL(this.restApiUrl);
-
+    
     JsonReader reader = null;
-    List<JsonObject> availableConfigList = null;
-
+    List<JsonObject> availableConfigList;
     HttpURLConnection con = null;
     InputStream is = null;
     InputStreamReader isr = null;
@@ -332,7 +215,8 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
     try {
       if (username != null && accesskey != null)
         Authenticator.setDefault(new Authenticator() {
-          @Override protected PasswordAuthentication getPasswordAuthentication() {
+          @Override
+          protected PasswordAuthentication getPasswordAuthentication() {
             return new PasswordAuthentication(username, accesskey.toCharArray());
           }
         });
@@ -366,23 +250,144 @@ public abstract class RemoteGridFetcher implements Callable<Object> {
       if (con != null)
         con.disconnect();
     }
-
+    
     return availableConfigList;
   }
-
-  @Override public Object call() throws Exception {
-    if (!this.isUpdatedInLast24h()) {
-      this.fetchConfig();
-      this.createAndFillTable();
-    }
-    return "";
-  }
-
+  
   /**
-   * Fetches and parses the supported browser list from the remote.
+   * Returns a database connection.
    *
-   * @throws IOException if an I/O error occurs.
+   * @return Connection
+   * @throws SQLException if a database access error occurs or the url is null.
    */
-  public abstract void fetchConfig() throws IOException;
-
+  private Connection getDatabaseConnection() throws SQLException {
+    return DriverManager.getConnection("jdbc:sqlite:" + pathToDB);
+  }
+  
+  /**
+   * Gets remote address.
+   *
+   * @return the remote address
+   */
+  public String getRemoteAddress() {
+    return remoteAddress;
+  }
+  
+  /**
+   * Insert values into the table.
+   *
+   * @param c Connection
+   *
+   * @throws SQLException if a database access error occurs.
+   */
+  private void insertValues(Connection c) throws SQLException {
+    String sql = "INSERT INTO " + this.tableName
+      + "(BROWSER, VERSION, PLATFORM, PLATFORM_TYPE, LAST_UPDATE) " + "VALUES "
+      + "(?, ?, ?, ?, ?);";
+    
+    PreparedStatement ps = null;
+    try {
+      ps = c.prepareStatement(sql);
+      for (Browser browser : browserList) {
+        String platformType = browser.getPlatform();
+        if (platformType.contains("XP") || platformType.contains("VISTA") || platformType
+          .contains("WIN"))
+          platformType = "WINDOWS";
+        if (RemoteGridFetcher.OS_X_CODENAME.contains(platformType))
+          platformType = "MAC";
+        ps.setString(1, browser.getBrowserName().trim().toLowerCase());
+        ps.setString(2, browser.getVersion().trim().toLowerCase());
+        ps.setString(3, browser.getPlatform().trim());
+        ps.setString(4, platformType);
+        ps.setLong(5, System.currentTimeMillis());
+        ps.executeUpdate();
+      }
+    } finally {
+      Utils.closeDBResources(ps, null);
+    }
+  }
+  
+  /**
+   * Checks whether the table was updated in last 24 hours.
+   *
+   * @return true if the table is updated within last 24 hours.
+   * @throws SQLException if a database access error occurs.
+   */
+  private boolean isUpdatedInLast24h() throws SQLException {
+    Connection c = null;
+    Statement s = null;
+    ResultSet rs = null;
+    try {
+      c = this.getDatabaseConnection();
+      
+      if (this.checkTableExist(c)) {
+        String sql = "SELECT * FROM " + this.tableName + " LIMIT 1;";
+        s = c.createStatement();
+        rs = s.executeQuery(sql);
+        if (rs.next())
+          return (System.currentTimeMillis() - rs.getLong("LAST_UPDATE") < 86400000);
+        else
+          return false;
+      } else
+        return false;
+    } finally {
+      Utils.closeDBResources(s, rs);
+      if (c != null)
+        c.close();
+    }
+  }
+  
+  /**
+   * Checks whether the given browser is supported by the remote.
+   *
+   * @param browser Browser
+   *
+   * @return true if the browser is supported by the remote.
+   * @throws SQLException if a database access error occurs.
+   */
+  public boolean search(Browser browser) throws SQLException {
+    String name = browser.getBrowserName().toLowerCase();
+    String version = browser.getVersion();
+    if (version != null)
+      version = version.trim().split("\\.")[0];
+    String platform = browser.getPlatform();
+    boolean result = false;
+    
+    String sql =
+      "SELECT * FROM " + this.tableName + " WHERE BROWSER = '" + name.trim().toLowerCase() + "'";
+    if (version != null && !version.trim().isEmpty())
+      sql += " AND VERSION LIKE '" + version + "%'";
+    if (platform != null && !platform.trim().isEmpty() && !Objects.equals(platform, "ANY")) {
+      switch (platform) {
+        case "WINDOWS":
+          sql += " AND PLATFORM_TYPE = 'WINDOWS'";
+          break;
+        case "MAC":
+          sql += " AND PLATFORM_TYPE = 'MAC'";
+          break;
+        default:
+          sql += " AND PLATFORM = '" + platform + "'";
+          break;
+      }
+    }
+    sql += ";";
+    
+    Connection c = null;
+    Statement s = null;
+    ResultSet rs = null;
+    try {
+      c = this.getDatabaseConnection();
+      s = c.createStatement();
+      rs = s.executeQuery(sql);
+      if (rs.next())
+        result = true;
+    } finally {
+      Utils.closeDBResources(s, rs);
+      if (c != null)
+        c.close();
+    }
+    
+    return result;
+  }
+  
 }

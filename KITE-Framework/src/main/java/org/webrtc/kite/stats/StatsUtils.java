@@ -34,6 +34,7 @@ import java.util.*;
 
 import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 import static io.cosmosoftware.kite.util.TestUtils.executeJsScript;
+import static io.cosmosoftware.kite.util.TestUtils.waitAround;
 
 
 /**
@@ -41,7 +42,7 @@ import static io.cosmosoftware.kite.util.TestUtils.executeJsScript;
  */
 public class StatsUtils {
 
-  private static HashMap<String, StatsUtils> instance = new HashMap<String, StatsUtils>();
+  private static final HashMap<String, StatsUtils> instance = new HashMap<String, StatsUtils>();
   private static final Logger logger = Logger.getLogger(StatsUtils.class.getName());
   private static final String[] candidatePairStats = {"bytesSent", "bytesReceived", "currentRoundTripTime", "totalRoundTripTime", "timestamp"};
   private static final String[] inboundStats = {"bytesReceived", "packetsReceived", "packetsLost", "jitter", "timestamp"};
@@ -112,7 +113,7 @@ public class StatsUtils {
   /**
    * Convert the JSON Object into a line of values that can be printed in the CSV file.
    *
-   * @param map
+   * @param map map of stats
    * @return line String to be printed in the CSV file
    */
   private String valuesLine(Map<String, String> map) {
@@ -127,7 +128,7 @@ public class StatsUtils {
   /**
    * Convert the JSON Object into a line of keys that can be printed as the header of the CSV file.
    *
-   * @param map
+   * @param map map of stats
    * @return line String to be printed in the CSV file
    */
   private String keysLine(Map<String, String> map) {
@@ -160,7 +161,7 @@ public class StatsUtils {
    *
    * @param json the JsonObject
    * @return Map<String key, Object: either json value or another Map<String, Object>
-   * @throws JsonException
+   * @throws JsonException if the Json format is not correct
    */
   private static Map<String, String> jsonToHashMap(JsonObject json) throws JsonException {
     Map<String, Object> retMap = new LinkedHashMap<String, Object>();
@@ -185,7 +186,7 @@ public class StatsUtils {
    * @param object JsonObject
    * @param parent json key of the parent json node.
    * @return Map<String key, Object: either json value or another Map<String, Object>
-   * @throws JsonException
+   * @throws JsonException if the Json format is not correct
    */
   private static Map<String, Object> toMap(JsonObject object, String parent) throws JsonException {
     Map<String, Object> map = new LinkedHashMap<String, Object>();
@@ -214,7 +215,7 @@ public class StatsUtils {
    * @param parent json key of the parent json node.
    * @return List<Object1> where Object is either a List<Object> or another Map<String, Object> (see
    *     toMap)
-   * @throws JsonException
+   * @throws JsonException if the Json format is not correct
    */
   private static List<Object> toList(JsonArray array, String parent) throws JsonException {
     List<Object> list = new ArrayList<Object>();
@@ -235,8 +236,8 @@ public class StatsUtils {
    * Build a simple JsonObject of selected stats meant to test NW Instrumentation.
    * Stats includes bitrate, packetLoss, Jitter and RTT
    *
-   * @param obj
-   * @return
+   * @param obj stats in json object format
+   * @return  a json object builder to create csv file
    */
   public static JsonObjectBuilder extractStats(JsonObject obj) {
     JsonObjectBuilder mainBuilder = Json.createObjectBuilder();
@@ -332,22 +333,22 @@ public class StatsUtils {
       JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
       Map<String, Object> clientStatMap = clientStats;
       
-      List<Object> clientStatArray = (ArrayList) clientStatMap.get("stats");
-      JsonArrayBuilder jsonclientStatArray = Json.createArrayBuilder();
+      List<Object> clientStatArray = (List) clientStatMap.get("stats");
+      JsonArrayBuilder jsonClientStatArray = Json.createArrayBuilder();
       for (Object stats : clientStatArray) {
         JsonObjectBuilder jsonStatObjectBuilder = buildSingleStatObject(stats, selectedStats);
-        jsonclientStatArray.add(jsonStatObjectBuilder);
+        jsonClientStatArray.add(jsonStatObjectBuilder);
       }
       if (selectedStats == null) {
         //only add SDP offer stuff if selectedStats is null
         JsonObjectBuilder sdpObjectBuilder = Json.createObjectBuilder();
-        Map<Object, Object> sdpOffer = (Map<Object, Object>) clientStatMap.get("offer");
-        Map<Object, Object> sdpAnswer = (Map<Object, Object>) clientStatMap.get("answer");
+        Map sdpOffer = (Map) clientStatMap.get("offer");
+        Map sdpAnswer = (Map) clientStatMap.get("answer");
         sdpObjectBuilder.add("offer", new SDP(sdpOffer).getJsonObjectBuilder())
           .add("answer", new SDP(sdpAnswer).getJsonObjectBuilder());
         jsonObjectBuilder.add("sdp", sdpObjectBuilder);
       }
-      jsonObjectBuilder.add("statsArray", jsonclientStatArray);
+      jsonObjectBuilder.add("statsArray", jsonClientStatArray);
       return jsonObjectBuilder.build();
     } catch (ClassCastException e) {
       e.printStackTrace();
@@ -376,13 +377,13 @@ public class StatsUtils {
    *
    * @return JsonObjectBuilder.
    */
-  private static JsonObjectBuilder buildSingleStatObject(Object statArray, JsonArray selectedStats) {
+  public static JsonObjectBuilder buildSingleStatObject(Object statArray, JsonArray selectedStats) {
     JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
     Map<String, List<RTCStatObject>> statObjectMap = new HashMap<>();
     if (statArray != null) {
       for (Object map : (ArrayList) statArray) {
         if (map != null) {
-          Map<Object, Object> statMap = (Map<Object, Object>) map;
+          Map statMap = (Map) map;
           String type = (String) statMap.get("type");
           if (selectedStats == null || selectedStats.size() == 0 || selectedStats.toString().contains(type)) {
             RTCStatObject statObject = null;
@@ -578,8 +579,7 @@ public class StatsUtils {
           long packetsLost = Long.parseLong(l);
           long totalPackets = Long.parseLong(s) + packetsLost;
           if (totalPackets > 0) {
-            double packetLoss = packetsLost / totalPackets;
-            return packetLoss;
+            return packetsLost / totalPackets;
           }
         }
       }
@@ -679,9 +679,9 @@ public class StatsUtils {
    * @param peerConnection the peer connection
    *
    * @return String. pc stat once
-   * @throws InterruptedException
+   * @throws KiteTestException the KITE test exception
    */
-  public static Object getPCStatOnce(WebDriver webDriver, String peerConnection) {
+  public static Object getPCStatOnce(WebDriver webDriver, String peerConnection) throws KiteTestException {
     String stashStatsScript = "const getStatsValues = () =>" +
       peerConnection + "  .getStats()" +
       "    .then(data => {" +
@@ -695,8 +695,30 @@ public class StatsUtils {
     String getStashedStatsScript = "return window.KITEStats;";
     
     executeJsScript(webDriver, stashStatsScript);
-    TestUtils.waitAround(Timeouts.ONE_SECOND_INTERVAL);
+    waitAround(Timeouts.ONE_SECOND_INTERVAL);
     return executeJsScript(webDriver, getStashedStatsScript);
+  }
+
+  /**
+   * stat JsonObjectBuilder to add to callback result.
+   *
+   * @param webDriver              used to execute command.
+   * @param getStatsConfig         the getStatsConfig
+   *
+   * @return JsonObjectBuilder of the stat object
+   * @throws KiteTestException the kite test exception
+   */
+  public static List<JsonObject> getPCStatOvertime(WebDriver webDriver, JsonObject getStatsConfig)
+    throws KiteTestException {
+    ArrayList<JsonObject> result = new ArrayList<>();
+    for (JsonString pc : getStatsConfig.getJsonArray("peerConnections").getValuesAs(JsonString.class)) {
+      result.add(getPCStatOvertime(
+        webDriver, pc.getString(),
+        getStatsConfig.getInt("statsCollectionTime"),
+        getStatsConfig.getInt("statsCollectionInterval"),
+        getStatsConfig.getJsonArray("selectedStats")));
+    }
+    return result;
   }
   
   /**
@@ -725,7 +747,7 @@ public class StatsUtils {
         statMap.put("offer", offer);
         statMap.put("answer", answer);
       }
-      List<Object> tmp = (List) statMap.get("stats");
+      List tmp = (List) statMap.get("stats");
       tmp.add(stats);
     }
     return buildClientStatObject(statMap, selectedStats);
@@ -736,7 +758,7 @@ public class StatsUtils {
    *
    * @param jsonObject of the stats
    *
-   * @return
+   * @return RTC stats in json format
    */
   private static JsonObject getRTCStats(JsonObject jsonObject, String stats, String mediaType) {
     JsonObject myObj = jsonObject.getJsonObject(stats);
@@ -791,7 +813,7 @@ public class StatsUtils {
    *
    * @param jsonObject of the successful candidate pair
    *
-   * @return
+   * @return  successful candidate info from the stat object
    */
   private static JsonObject getSuccessfulCandidate(JsonObject jsonObject) {
     JsonObject candObj = jsonObject.getJsonObject("candidate-pair");
@@ -801,7 +823,9 @@ public class StatsUtils {
     for (String key : candObj.keySet()) {
       JsonObject o = candObj.getJsonObject(key);
       if ("succeeded".equals(o.getString("state"))) {
-        return o;
+        //sometimes there are multiple successful candidates but only one carries non zero stats
+        if(!o.get("bytesReceived").equals("0") || !o.get("bytesSent").equals("0")) return o;
+        else continue;
       }
     }
     for (String key : candObj.keySet()) {
@@ -822,7 +846,7 @@ public class StatsUtils {
    *
    * @param senderStats the sender's PC stats
    * @param receiverStats the list of receiver PCs stats
-   * @return
+   * @return  the stat object in json format
    */
   public static JsonObject extractStats(JsonObject senderStats, List<JsonObject> receiverStats) {
     JsonObjectBuilder mainBuilder = Json.createObjectBuilder();
@@ -838,8 +862,9 @@ public class StatsUtils {
    * Build a simple JsonObject of selected stats meant to test NW Instrumentation.
    * Stats includes bitrate, packetLoss, Jitter and RTT
    *
-   * @param obj
-   * @return
+   * @param obj the object format
+   * @param direction sent or receive
+   * @return the inbound or outbound stat object in json format
    */
   public static JsonObjectBuilder extractStats(JsonObject obj, String direction) {
     JsonObjectBuilder mainBuilder = Json.createObjectBuilder();

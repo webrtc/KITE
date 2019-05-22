@@ -24,6 +24,7 @@ import org.webrtc.kite.config.App;
 import org.webrtc.kite.config.Browser;
 import org.webrtc.kite.config.EndPoint;
 import org.webrtc.kite.exception.KiteBadValueException;
+import org.webrtc.kite.exception.KiteInsufficientValueException;
 import org.webrtc.kite.exception.KiteNoKeyException;
 
 import javax.json.Json;
@@ -125,8 +126,8 @@ public class Utils {
   /**
    * Checks whether both the given objects are null.
    *
-   * @param object1 Object
-   * @param object2 Object
+   * @param object1 Object 1
+   * @param object2 Object 2
    *
    * @return true if both the provided objects are null.
    */
@@ -137,8 +138,8 @@ public class Utils {
   /**
    * Checks whether both the given objects are not null.
    *
-   * @param object1 Object
-   * @param object2 Object
+   * @param object1 Object 1
+   * @param object2 Object 2
    *
    * @return true if both the provided objects are not null.
    */
@@ -168,12 +169,12 @@ public class Utils {
     }
     return osName;
   }
-
   
   /**
    * Reads a json file into a JsonObject
    *
    * @param jsonFile the file to read
+   *
    * @return the jsonObject
    */
   public static JsonObject readJsonFile(String jsonFile) {
@@ -227,12 +228,12 @@ public class Utils {
     }
   }
   
-  
   /**
    * Gets the payload object for the test at index 'testIndex' in the config
    *
    * @param configFile the kite test config file
-   * @param testIndex the index of the test to get the payload from
+   * @param testIndex  the index of the test to get the payload from
+   *
    * @return the payload object for the test at index 'testIndex' in the config
    */
   public static JsonObject getPayload(String configFile, int testIndex) {
@@ -252,7 +253,8 @@ public class Utils {
    * Gets the list of Browser from the config file.
    *
    * @param configFile the kite test config file
-   * @param type the type of endpoint: "browser" or "apps"
+   * @param type       the type of endpoint: "browser" or "apps"
+   *
    * @return the list of Browser from the config file.
    */
   public static List<EndPoint> getEndPointList(String configFile, String type) {
@@ -283,19 +285,90 @@ public class Utils {
     }
     return endPoints;
   }
-
+  
   /**
    * Gets seconds from a string. e.g. 01:00 will return 60 seconds 01:00:00 will return 3600 seconds
    *
    * @param timeFormat the time format
+   *
    * @return the seconds
    */
   public static int getSeconds(String timeFormat) {
-    String timeSplit[] = timeFormat.split(":");
+    String[] timeSplit = timeFormat.split(":");
     return (timeSplit.length == 2)
         ? Integer.parseInt(timeSplit[0]) * 60 + Integer.parseInt(timeSplit[1])
         : Integer.parseInt(timeSplit[0]) * 60 * 60
             + Integer.parseInt(timeSplit[1]) * 60
             + Integer.parseInt(timeSplit[2]);
   }
+  
+  /**
+   * Gets the integer value from a given json object,
+   * overwrite it with System env or a minimum positive value if applicable
+   *
+   * @param jsonObject           the json object
+   * @param key                  name of the attribute
+   * @param minimumPositiveValue minimum positive value
+   *
+   * @return an integer value
+   * @throws KiteInsufficientValueException if the value does not exist and no minimum positive value is provided
+   */
+  public static int getIntFromJsonObject(JsonObject jsonObject, String key, int minimumPositiveValue)
+    throws KiteInsufficientValueException {
+    if (System.getProperty(key) == null) {
+      try {
+        int value = jsonObject.getInt(key);
+        if (value < minimumPositiveValue) {
+          return minimumPositiveValue;
+        } else {
+          return value;
+        }
+      } catch (NullPointerException e) {
+        if (minimumPositiveValue >= 0) {
+          return minimumPositiveValue;
+        } else {
+          throw new KiteInsufficientValueException("Invalid minimum positive value for " + key);
+        }
+      }
+    } else {
+      return Integer.parseInt(System.getProperty(key));
+    }
+  }
+  
+  /**
+   * Gets the String value from a given json object,
+   * overwrite it with System env or a default value if applicable
+   *
+   * @param jsonObject   the json object
+   * @param key          name of the attribute
+   * @param defaultValue default value
+   *
+   * @return an String value
+   */
+  public static String getStringFromJsonObject(JsonObject jsonObject, String key, String defaultValue) {
+    if (System.getProperty(key) == null) {
+      return jsonObject.getString(key, defaultValue);
+    } else {
+      return System.getProperty(key);
+    }
+  }
+  
+  /**
+   * Gets the boolean value from a given json object,
+   * overwrite it with System env or a default value if applicable
+   *
+   * @param jsonObject   the json object
+   * @param key          name of the attribute
+   * @param defaultValue default value
+   *
+   * @return an Boolean value
+   */
+  public static boolean getBooleanFromJsonObject(JsonObject jsonObject, String key, boolean defaultValue) {
+    if (System.getProperty(key) == null) {
+      return jsonObject.getBoolean(key, defaultValue);
+    } else {
+      return Boolean.parseBoolean(System.getProperty(key));
+    }
+  }
+  
 }

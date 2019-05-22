@@ -49,17 +49,13 @@ public class KiteJsTest extends KiteBaseTest {
       JsTestRunner runner = new JsTestRunner(this.report, jsTestImpl, index);
       runner.setNumberOfParticipant(endPointList.size());
       runner.setReportPath(tempPath);
-      this.testRunners.add(runner);
+      this.add(runner);
     }
   }
 
-
   @Override
   protected void populateTestSteps(TestRunner runner) {}
-
-  /**
-   * Print the payload to the js temp folder
-   */
+  
   @Override
   protected void payloadHandling() {
     super.payloadHandling();

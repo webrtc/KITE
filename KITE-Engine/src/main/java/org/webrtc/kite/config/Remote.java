@@ -43,9 +43,8 @@ import java.util.Map;
  * See SupportedRemote for possible values of the name.
  */
 public class Remote extends KiteConfigObject {
-
+  
   private static final String PATH_TO_DB = "KITE.db";
-
   private static Map<String, String> supportedRemoteMap = new HashMap<String, String>();
 
   static {
@@ -53,22 +52,23 @@ public class Remote extends KiteConfigObject {
       supportedRemoteMap.put(supportedRemote.name(), supportedRemote.name());
   }
 
-  private String name;
-  private String username;
   private String accesskey;
+  private String name;
   private String remoteAddress;
-
+  private String username;
+  
   /**
    * Constructs a new Remote with given JsonObject.
    *
    * @param jsonObject JsonObject
+   *
    * @throws KiteUnsupportedRemoteException if the 'name' is other than what is specified in
    *                                        SupportedRemote.
    */
   public Remote(JsonObject jsonObject) throws KiteUnsupportedRemoteException {
     String name = jsonObject.getString("type");
     Remote.validateRemote(name);
-
+    
     this.name = name;
     if (this.isLocal()) {
       this.remoteAddress = jsonObject.getString("remoteAddress");
@@ -76,37 +76,10 @@ public class Remote extends KiteConfigObject {
       this.username = jsonObject.getString("username");
       this.accesskey = jsonObject.getString("accesskey");
       this.remoteAddress =
-          SupportedRemote.valueOf(this.name).remoteAddress(this.username, this.accesskey);
+        SupportedRemote.valueOf(this.name).remoteAddress(this.username, this.accesskey);
     }
   }
-
-  /**
-   * Gets name.
-   *
-   * @return the name
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Gets remote address.
-   *
-   * @return the remote address
-   */
-  public String getRemoteAddress() {
-    return remoteAddress;
-  }
-
-  /**
-   * Checks whether the Remote represents 'local'.
-   *
-   * @return true if the name is 'local'.
-   */
-  public boolean isLocal() {
-    return this.name.equalsIgnoreCase(SupportedRemote.local.name());
-  }
-
+  
   /**
    * Returns RemoteGridFetcher implementation for various external Selenium grids.
    *
@@ -116,26 +89,55 @@ public class Remote extends KiteConfigObject {
     switch (this.name) {
       case "saucelabs":
         return new SauceLabsGridFetcher(PATH_TO_DB, this.remoteAddress,
-            SupportedRemote.saucelabs.restApiUrl());
+          SupportedRemote.saucelabs.restApiUrl());
       case "browserstack":
         return new BrowserStackGridFetcher(PATH_TO_DB, this.remoteAddress,
-            SupportedRemote.browserstack.restApiUrl(), this.username, this.accesskey);
+          SupportedRemote.browserstack.restApiUrl(), this.username, this.accesskey);
       case "testingbot":
         return new TestingBotGridFetcher(PATH_TO_DB, this.remoteAddress,
-            SupportedRemote.testingbot.restApiUrl());
+          SupportedRemote.testingbot.restApiUrl());
       default:
         return null;
     }
   }
-
-  @Override public JsonObjectBuilder getJsonObjectBuilder() {
+  
+  @Override
+  public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder().add("name", this.getName());
   }
-
+  
+  /**
+   * Gets name.
+   *
+   * @return the name
+   */
+  public String getName() {
+    return name;
+  }
+  
+  /**
+   * Gets remote address.
+   *
+   * @return the remote address
+   */
+  public String getRemoteAddress() {
+    return remoteAddress;
+  }
+  
+  /**
+   * Checks whether the Remote represents 'local'.
+   *
+   * @return true if the name is 'local'.
+   */
+  public boolean isLocal() {
+    return this.name.equalsIgnoreCase(SupportedRemote.local.name());
+  }
+  
   /**
    * Checks whether the provided remote is currently supported.
    *
    * @param remoteName name of the remote
+   *
    * @throws KiteUnsupportedRemoteException if the 'name' is other than what is specified in
    *                                        SupportedRemote.
    */
@@ -143,5 +145,5 @@ public class Remote extends KiteConfigObject {
     if (Remote.supportedRemoteMap.get(remoteName) == null)
       throw new KiteUnsupportedRemoteException(remoteName);
   }
-
+  
 }

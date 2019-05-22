@@ -32,7 +32,7 @@
     {
       "browserName": "chrome",
       "version": "73",
-      "platform": "WINDOWS",
+      "platform": "localhost",
       "flags": []
     }
   ]

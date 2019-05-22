@@ -30,7 +30,7 @@ class IceConnectionTest extends KiteBaseTest {
       let getStatsStep = new GetStatsStep(this);
       await getStatsStep.execute(this);
 
-      // End of Test reportWebDriverUtils
+      // End of Test report
       this.report.setStopTimestamp();
     } catch (error) {
       console.log(error);

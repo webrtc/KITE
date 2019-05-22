@@ -30,12 +30,12 @@ import java.io.IOException;
  * A thread to post the result in json format to the callback URL.
  */
 public class CallbackThread extends Thread {
-
+  
   private static final Logger logger = Logger.getLogger(CallbackThread.class.getName());
-
+  
   private String callbackURL;
   private JsonObject jsonObject;
-
+  
   /**
    * Constructs a new CallBackThread object with the given callbackURL and JsonObject.
    *
@@ -46,22 +46,18 @@ public class CallbackThread extends Thread {
     this.callbackURL = callbackURL;
     this.jsonObject = jsonObject;
   }
-
-  @Override public void run() {
-    this.postResult();
-  }
-
+  
   /**
    * Posts result to the callback URL.
    */
   public void postResult() {
-
+    
     CloseableHttpClient client = null;
     CloseableHttpResponse response = null;
-
+    
     if (logger.isDebugEnabled())
       logger.debug("Posting to '" + callbackURL + "' with body '" + jsonObject.toString() + "'");
-
+    
     try {
       client = HttpClients.createDefault();
       HttpPost httpPost = new HttpPost(callbackURL);
@@ -89,7 +85,12 @@ public class CallbackThread extends Thread {
           logger.warn("Exception while closing the CloseableHttpClient", e);
         }
     }
-
+    
   }
-
+  
+  @Override
+  public void run() {
+    this.postResult();
+  }
+  
 }

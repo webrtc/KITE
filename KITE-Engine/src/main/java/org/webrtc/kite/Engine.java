@@ -17,125 +17,102 @@
 package org.webrtc.kite;
 
 import org.apache.log4j.Logger;
-import org.quartz.*;
-import org.quartz.impl.StdSchedulerFactory;
-import org.quartz.impl.matchers.KeyMatcher;
 import org.webrtc.kite.config.Configurator;
+import org.webrtc.kite.config.EndPoint;
+import org.webrtc.kite.config.TestConf;
 import org.webrtc.kite.exception.*;
-import org.webrtc.kite.scheduler.MatrixRunnerJobListener;
 
 import javax.json.JsonException;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
+import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * Entry point of the program
  */
 public class Engine {
-
+  
+  private static final Logger logger = Logger.getLogger(Engine.class.getName());
+  
   static {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HHmmss");
     System.setProperty("current.date", dateFormat.format(new Date()));
-//    DOMConfigurator.configure("log4j.xml");
   }
-
-  private static final String IDENTITY_GROUP = "KITE";
-  public static Scheduler scheduler = null;
-
-
-  //Logger must be called after setting the system property "current.data"
-  private static final Logger logger = Logger.getLogger(Engine.class.getName());
-
+  
   /**
    * main method
    *
    * @param args relative or absolute path of the configuration file.
    */
   public static void main(String[] args) {
-
+    
     if (args.length < 1) {
       logger.error("Error [Missing Argument]: Use java -jar KITE.jar <absolute path/config.json>");
       return;
     }
-
+    
     try {
       Configurator.getInstance().setConfigFilePath(args[0]);
       Configurator.getInstance().buildConfig();
-      int interval = Configurator.getInstance().getInterval();
-
-      // Grab the Scheduler instance from the Factory
-      scheduler = StdSchedulerFactory.getDefaultScheduler();
-      // and setStartTimestamp it off
-      scheduler.start();
-
-      Class jobClass = Configurator.getInstance().getJobClass();
-      // define the job and tie it to the KiteJob class
-      JobDetail job = newJob(jobClass).withIdentity(jobClass.getName(), Engine.IDENTITY_GROUP)
-          .usingJobData("shouldShutdown", interval <= 0).build();
-
-      // Trigger the job to run now, and then repeat every 'interval' number of hours
-      Trigger trigger = null;
-      if (interval > 0) {
-        trigger = newTrigger().withIdentity(jobClass.getName(), Engine.IDENTITY_GROUP).startNow()
-            .withSchedule(simpleSchedule().withIntervalInHours(interval).repeatForever()).build();
-      } else {
-        trigger =
-            newTrigger().withIdentity(jobClass.getName(), Engine.IDENTITY_GROUP).startNow().build();
-        // Adding MatrixRunnerJobListener to shutdown the scheduler after the job is finished.
-        scheduler.getListenerManager().addJobListener(new MatrixRunnerJobListener(),
-            KeyMatcher.keyEquals(new JobKey(jobClass.getName(), Engine.IDENTITY_GROUP)));
+      Configurator.getInstance().setTimeStamp();
+      for (TestConf testConf : (List<TestConf>) Configurator.getInstance().getConfigHandler()
+        .getTestList()) {
+        try {
+          logger.info("Running " + testConf + " ...");
+      
+          List<List<EndPoint>> tupleList = Configurator.getInstance()
+            .buildTuples(testConf.getTupleSize(), testConf.isPermute(), testConf.isRegression());
+      
+          List<Future<Object>> listOfResults = new MatrixRunner(testConf, tupleList).run();
+      
+          if (listOfResults != null) {
+            StringBuilder testResults = new StringBuilder("The following are results for " + testConf + ":\n");
+            for (Future<Object> future : listOfResults) {
+              try {
+                testResults.append("\r\n").append(future.get().toString());
+              } catch (Exception e) {
+                logger.error("Exception while test execution", e);
+              }
+            }
+            testResults.append("\r\nEND OF RESULTS\r\n");
+            logger.info("Matrix Runner Completed");
+            logger.debug(testResults.toString());
+          } else {
+            logger.warn("No test case was found.");
+          }
+        } catch (Exception e) {
+          logger.fatal("Error [Interruption]: The execution has been interrupted with the "
+            + "following error: " + e.getLocalizedMessage(), e);
+        }
       }
-
-      // Tell quartz to schedule the job using the trigger
-      scheduler.scheduleJob(job, trigger);
-
     } catch (FileNotFoundException e) {
       logger
-          .fatal("Error [File Not Found]: '" + args[0] + "' either doesn't exist or is not a file.",
-              e);
+        .fatal("Error [File Not Found]: '" + args[0] + "' either doesn't exist or is not a file.",
+          e);
     } catch (JsonException | IllegalStateException e) {
       logger.fatal("Error [Config Parsing]: Unable to parse the provided configuration "
-          + "file with the following error: " + e.getLocalizedMessage(), e);
+        + "file with the following error: " + e.getLocalizedMessage(), e);
     } catch (KiteNoKeyException e) {
       logger.fatal("Error [Config Parsing]: '" + e.getKey()
-          + "' is not found in the configuration file or is null.", e);
+        + "' is not found in the configuration file or is null.", e);
     } catch (KiteBadValueException e) {
       logger.fatal("Error [Config Parsing]: '" + e.getKey()
-          + "' has an inappropriate value in the configuration file.", e);
+        + "' has an inappropriate value in the configuration file.", e);
     } catch (KiteUnsupportedIntervalException e) {
       logger.fatal(
-          "Error [Unrecognized interval]: '" + e.getIntervalName() + "' is unrecognized to KITE.",
-          e);
+        "Error [Unrecognized interval]: '" + e.getIntervalName() + "' is unrecognized to KITE.",
+        e);
     } catch (KiteInsufficientValueException e) {
       logger.fatal("Error [Config Parsing]: " + e.getLocalizedMessage(), e);
     } catch (KiteUnsupportedRemoteException e) {
       logger.fatal(
-          "Error [Unrecognized remote]: '" + e.getRemoteName() + "' is unrecognized to KITE.", e);
+        "Error [Unrecognized remote]: '" + e.getRemoteName() + "' is unrecognized to KITE.", e);
     } catch (Exception e) {
-      logger.fatal("FATAL Error: KITE has failed to setStartTimestamp execution", e);
-      try {
-        if (scheduler != null && (scheduler.isStarted() || !scheduler.isShutdown())) {
-          try {
-            scheduler.clear();
-          } catch (SchedulerException se) {
-            logger.warn("Exception while clearing the Scheduler", e);
-          }
-          try {
-            scheduler.shutdown();
-          } catch (SchedulerException se) {
-            logger.warn("Exception while clearing the Scheduler", e);
-          }
-        }
-      } catch (SchedulerException se) {
-        logger.warn("Exception while getting the scheduler status", e);
-      }
+      logger.fatal("FATAL Error: KITE has failed to start execution", e);
     }
-
+    
   }
-
+  
 }
