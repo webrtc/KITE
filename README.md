@@ -111,14 +111,14 @@ Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://w
 
     3.2 On Linux, open a terminal and enter the following commands:
     ```
-    chmod +x configure.sh
-    ./configure.sh
+    chmod +x configureLinux.sh
+    ./configureLinux.sh
     ```     
     
     3.3 On Mac, open a terminal and enter the following commands:
     ```
-    chmod +x configure.command  
-    ./configure.command
+    chmod +x configureMac.sh  
+    ./configureMac.sh
     ```
     
     During this step, you will be prompt to setup the local grid. This is an interactive setup. 
