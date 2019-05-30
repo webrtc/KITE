@@ -16,6 +16,7 @@
 
 package org.webrtc.kite;
 
+import io.cosmosoftware.kite.steps.StepPhase;
 import junit.framework.TestCase;
 import org.webrtc.kite.apprtc.tests.HDTest;
 import org.webrtc.kite.config.Browser;
@@ -75,6 +76,6 @@ public class AppRTCTestTest extends TestCase {
     HDTest test = new HDTest();
     test.setEndPointList(endPoints);
     test.setPayload(getFakePayload());
-    test.execute();
+    test.execute(StepPhase.RAMPUP);
   }
 }

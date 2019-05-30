@@ -20,13 +20,19 @@ import org.apache.log4j.Logger;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.EndPoint;
 import org.webrtc.kite.config.TestConf;
+import org.webrtc.kite.config.Tuple;
 import org.webrtc.kite.exception.*;
 
 import javax.json.JsonException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
@@ -34,12 +40,13 @@ import java.util.concurrent.Future;
  */
 public class Engine {
   
-  private static final Logger logger = Logger.getLogger(Engine.class.getName());
-  
   static {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HHmmss");
     System.setProperty("current.date", dateFormat.format(new Date()));
   }
+  
+  private static final Logger logger = Logger.getLogger(Engine.class.getName());
+  
   
   /**
    * main method
@@ -47,49 +54,46 @@ public class Engine {
    * @param args relative or absolute path of the configuration file.
    */
   public static void main(String[] args) {
-    
     if (args.length < 1) {
       logger.error("Error [Missing Argument]: Use java -jar KITE.jar <absolute path/config.json>");
       return;
     }
     
+    buildConfig(args[0]);
+
+    for (TestConf testConf : Configurator.getInstance().getConfigHandler().getTestList()) {
+      if (testConf.isLoadTest()) {
+        logger.error("Sorry this version of the Engine cannot perform load testing, please contact out team at CoSMo for help");
+      } else {
+        run(testConf);
+      }
+    }
+  }
+  
+  public static void run(TestConf testConf) {
+    ExecutorService service = Executors.newSingleThreadExecutor();
     try {
-      Configurator.getInstance().setConfigFilePath(args[0]);
+      List<Tuple> tupleList = Configurator.getInstance()
+        .buildTuples(testConf.getTupleSize(), testConf.isPermute(), testConf.isRegression());
+
+      tupleList.addAll(Configurator.getInstance().getCustomBrowserMatrix());
+      
+      service.submit(new TestRunThread(testConf, tupleList)).get();
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      service.shutdown();
+    }
+  }
+  
+  public static void buildConfig(String pathToConfigFile) {
+    try {
+      Configurator.getInstance().setConfigFilePath(pathToConfigFile);
       Configurator.getInstance().buildConfig();
       Configurator.getInstance().setTimeStamp();
-      for (TestConf testConf : (List<TestConf>) Configurator.getInstance().getConfigHandler()
-        .getTestList()) {
-        try {
-          logger.info("Running " + testConf + " ...");
-      
-          List<List<EndPoint>> tupleList = Configurator.getInstance()
-            .buildTuples(testConf.getTupleSize(), testConf.isPermute(), testConf.isRegression());
-      
-          List<Future<Object>> listOfResults = new MatrixRunner(testConf, tupleList).run();
-      
-          if (listOfResults != null) {
-            StringBuilder testResults = new StringBuilder("The following are results for " + testConf + ":\n");
-            for (Future<Object> future : listOfResults) {
-              try {
-                testResults.append("\r\n").append(future.get().toString());
-              } catch (Exception e) {
-                logger.error("Exception while test execution", e);
-              }
-            }
-            testResults.append("\r\nEND OF RESULTS\r\n");
-            logger.info("Matrix Runner Completed");
-            logger.debug(testResults.toString());
-          } else {
-            logger.warn("No test case was found.");
-          }
-        } catch (Exception e) {
-          logger.fatal("Error [Interruption]: The execution has been interrupted with the "
-            + "following error: " + e.getLocalizedMessage(), e);
-        }
-      }
     } catch (FileNotFoundException e) {
       logger
-        .fatal("Error [File Not Found]: '" + args[0] + "' either doesn't exist or is not a file.",
+        .fatal("Error [File Not Found]: '" + pathToConfigFile + "' either doesn't exist or is not a file.",
           e);
     } catch (JsonException | IllegalStateException e) {
       logger.fatal("Error [Config Parsing]: Unable to parse the provided configuration "
@@ -100,11 +104,7 @@ public class Engine {
     } catch (KiteBadValueException e) {
       logger.fatal("Error [Config Parsing]: '" + e.getKey()
         + "' has an inappropriate value in the configuration file.", e);
-    } catch (KiteUnsupportedIntervalException e) {
-      logger.fatal(
-        "Error [Unrecognized interval]: '" + e.getIntervalName() + "' is unrecognized to KITE.",
-        e);
-    } catch (KiteInsufficientValueException e) {
+    }  catch (KiteInsufficientValueException e) {
       logger.fatal("Error [Config Parsing]: " + e.getLocalizedMessage(), e);
     } catch (KiteUnsupportedRemoteException e) {
       logger.fatal(
@@ -112,7 +112,5 @@ public class Engine {
     } catch (Exception e) {
       logger.fatal("FATAL Error: KITE has failed to start execution", e);
     }
-    
   }
-  
 }

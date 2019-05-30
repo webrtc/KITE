@@ -12,6 +12,7 @@ class PeerConnectionCheck extends TestStep {
     super();
     this.driver = kiteBaseTest.driver;
     this.timeout = kiteBaseTest.timeout;
+    this.page = kiteBaseTest.page;
   }
 
   stepDescription() {
@@ -24,7 +25,7 @@ class PeerConnectionCheck extends TestStep {
 
     while(time < this.timeout) {
 
-      state = await apprtcMeetingPage.getIceConnectionState(this.driver);
+      state = await this.page.getIceConnectionState(this.driver);
 
       if (state === "failed") {
         console.log("The ICE connection failed");

@@ -4,6 +4,7 @@
 
 package org.webrtc.kite.tests;
 
+import io.cosmosoftware.kite.steps.StepPhase;
 import org.webrtc.kite.config.EndPoint;
 
 import java.util.UUID;
@@ -57,18 +58,21 @@ public class KiteJsTest extends KiteBaseTest {
   protected void populateTestSteps(TestRunner runner) {}
   
   @Override
+  protected void getInfoFromNavigator() {}
+  
+  @Override
   protected void payloadHandling() {
     super.payloadHandling();
     createDirs(JS_PATH + tempPath);
     printJsonTofile(this.payload.toString(), JS_PATH + tempPath +"/payload.json");
     if (!this.multiThread) {
-      logger.error("Sorry, JavaScript test with Kite cannot be run sequentially at the moment.");
+      logger.error("JavaScript test with KITE cannot be run sequentially at the moment.");
     }
   }
   
   @Override
-  protected void testSequentially() {
-    logger.error("Sorry, JavaScript test with Kite cannot be run sequentially at the moment.");
+  protected void testSequentially(StepPhase stepPhase) {
+    logger.error("JavaScript test with KITE cannot be run sequentially at the moment.");
   }
   
 }

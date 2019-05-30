@@ -15,6 +15,7 @@
  */
 package org.webrtc.kite.apprtc.tests;
 
+import io.cosmosoftware.kite.steps.StepPhase;
 import org.webrtc.kite.apprtc.checks.PeerConnectionCheck;
 import org.webrtc.kite.apprtc.checks.RemoteVideoDisplayCheck;
 import org.webrtc.kite.apprtc.steps.GetStatsStep;
@@ -42,7 +43,9 @@ public class IceConnectionTest extends AppRTCTest {
       runner.addStep(new GetStatsStep(runner.getWebDriver(), getStatsConfig));
     }
     if (this.takeScreenshotForEachTest()) {
-      runner.addStep(new ScreenshotStep(runner.getWebDriver()));
+      ScreenshotStep screenshotStep = new ScreenshotStep(runner.getWebDriver());
+      screenshotStep.setStepPhase(StepPhase.LOADREACHED);
+      runner.addStep(screenshotStep);
     }
   }
 }

@@ -17,15 +17,16 @@
 package org.webrtc.kite;
 
 import io.cosmosoftware.kite.report.Container;
+import io.cosmosoftware.kite.steps.StepPhase;
 import org.webrtc.kite.config.Configurator;
-import org.webrtc.kite.config.EndPoint;
 import org.webrtc.kite.config.TestConf;
+import org.webrtc.kite.config.Tuple;
 import org.webrtc.kite.tests.KiteBaseTest;
 import org.webrtc.kite.tests.KiteJsTest;
 
 import javax.json.JsonObject;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
+import java.net.URL;
 import java.util.concurrent.Callable;
 
 /**
@@ -48,18 +49,19 @@ public class TestManager implements Callable<Object> {
   private final int retry;
   private final boolean ENABLE_CALLBACK = true;
   private final TestConf testConf;
-  private final List<EndPoint> endPointList;
+  private final Tuple tuple;
+  private String id;
   private Container testSuite;
   
   /**
    * Constructs a new TestManager with the given TestConf and List<EndPoint>.
    *
    * @param testConf     test configuration object
-   * @param endPointList tuple of endpoint for this test
+   * @param tuple       tuple of endpoint for this test
    */
-  public TestManager(TestConf testConf, List<EndPoint> endPointList) {
+  public TestManager(TestConf testConf, Tuple tuple) {
     this.testConf = testConf;
-    this.endPointList = endPointList;
+    this.tuple = tuple;
     this.retry = testConf.getMaxRetryCount();
   }
   
@@ -69,34 +71,49 @@ public class TestManager implements Callable<Object> {
       : (KiteBaseTest) Class.forName(this.testConf.getTestImpl()).getConstructor().newInstance();
     
     test.setSuite(testSuite.getName());
-
-    test.setLogger(testConf.getLogger());
-    test.setDescription(testConf.getDescription());
-    test.setPayload(testConf.getPayload());
   
     test.setConfigFilePath(Configurator.getInstance().getConfigFilePath());
     test.setInstrumentation(Configurator.getInstance().getInstrumentation());
     test.setParentSuite(Configurator.getInstance().getName());
     
-    test.setEndPointList(endPointList);
+    test.setLogger(testConf.getLogger());
+    test.setDescription(testConf.getDescription());
+    test.setPayload(testConf.getPayload());
+
+    test.setEndPointList(tuple);
+    
+    if (testConf.isLoadTest()) {
+      test.setLoadTest(true);
+      String simpleHubId = "";
+      try {
+        simpleHubId = new URL(tuple.get(0).getRemoteAddress()).getHost();
+      } catch (Exception e) {
+        simpleHubId = tuple.get(0).getRemoteAddress();
+      }
+      test.setName(simpleHubId + (id == null ? "" : " " + id));
+  
+    }
     
     return test;
   }
   
   @Override
   public Object call() throws Exception {
-    KiteBaseTest test = buildTest();
-    testSuite.addChild(test.getReport().getUuid());
     
-    JsonObject testResult = test.execute();
+    KiteBaseTest test = buildTest();
+    
+    testSuite.addChild(test.getReport().getUuid());
+
+    JsonObject testResultRampup = test.execute(StepPhase.RAMPUP);
+    JsonObject testResultLoadReached = test.execute(StepPhase.LOADREACHED);
     
     // todo: need some retry mechanism here
     
     if (ENABLE_CALLBACK) {
       if (this.testConf.getCallbackURL() != null) {
         CallbackThread callbackThread =
-          new CallbackThread(this.testConf.getCallbackURL(), testResult);
-        if (testResult.getString("meta", null) == null) {
+          new CallbackThread(this.testConf.getCallbackURL(), testResultRampup);
+        if (testResultRampup.getString("meta", null) == null) {
           callbackThread.start();
         } else {
           callbackThread.postResult();
@@ -106,7 +123,7 @@ public class TestManager implements Callable<Object> {
     
     // todo: Update allure report for on-going status
     
-    return testResult;
+    return testResultRampup;
   }
   
   /**
@@ -118,4 +135,13 @@ public class TestManager implements Callable<Object> {
     this.testSuite = testSuite;
   }
   
+  
+  /**
+   * Set the id, or test case id, for report purpose
+   *
+   * @param id case id
+   */
+  public void setId(String id) {
+    this.id = id;
+  }
 }

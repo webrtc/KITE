@@ -1,2 +1,2 @@
-exports.apprtcJoinPage = require('./apprtc-join-page');
-exports.apprtcMeetingPage = require('./apprtc-meeting-page');
+exports.AppRTCJoinPage = require('./AppRTCJoinPage');
+exports.AppRTCMeetingPage = require('./AppRTCMeetingPage');

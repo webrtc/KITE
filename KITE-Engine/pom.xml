@@ -93,17 +93,10 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.github.CoSMoSoftware</groupId>
+      <groupId>${kite.extras.repo}</groupId>
       <artifactId>kite-extras</artifactId>
       <version>${kite.extras.version}</version>
     </dependency>
-    <!-- Uncomment this and comment out the above dependency to use your local maven repo for KITE-Extras
-    <dependency>
-      <groupId>io.cosmosoftware.kite</groupId>
-      <artifactId>kite-extras</artifactId>
-      <version>${kite.extras.version}</version>
-    </dependency>
-    -->
     <dependency>
       <groupId>org.webrtc.kite</groupId>
       <artifactId>kite-framework</artifactId>
@@ -113,12 +106,6 @@
       <groupId>org.webrtc.kite</groupId>
       <artifactId>apprtc-test</artifactId>
       <version>${kite.apprtc.version}</version>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/org.quartz-scheduler/quartz -->
-    <dependency>
-      <groupId>org.quartz-scheduler</groupId>
-      <artifactId>quartz</artifactId>
-      <version>${kite.quartz.version}</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
     <dependency>

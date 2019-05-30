@@ -11,7 +11,7 @@ class GetStatsStep extends TestStep {
     this.driver = kiteBaseTest.driver;
     this.statsCollectionTime = kiteBaseTest.statsCollectionTime;
     this.statsCollectionInterval = kiteBaseTest.statsCollectionInterval;
-    this.pc = "appController.call_.pcClient_.pc_";
+    this.peerConnections = kiteBaseTest.peerConnections;
     this.selectedStats = kiteBaseTest.selectedStats;
 
     // Test reporter if you want to add attachment(s)
@@ -23,8 +23,19 @@ class GetStatsStep extends TestStep {
   }
 
   async step() {
-    let getStats = await TestUtils.getStats(this);
-    this.testReporter.textAttachment(this.report, 'Peer connection\'s stats', JSON.stringify(getStats), "json");
+    try {
+      let stats = await TestUtils.getStats(this, 'kite', this.peerConnections);
+  
+      let summaryStats = await TestUtils.extractJson(stats, 'both');
+  
+      // Data
+      this.testReporter.textAttachment(this.report, 'Raw stats', JSON.stringify(stats), "json");
+      this.testReporter.textAttachment(this.report, 'Summary stats', JSON.stringify(summaryStats), "json");
+      
+      } catch (error) {
+        console.log(error);
+        throw new KiteTestError(Status.BROKEN, "Failed to getStats");
+      }
   }
 }
 

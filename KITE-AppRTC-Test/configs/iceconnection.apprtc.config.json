@@ -16,6 +16,7 @@
       "payload" : {
         "url": "https://appr.tc",
         "takeScreenshotForEachTest": true,
+        "csvReport": true,
         "getStats" : {
           "enabled": true,
           "statsCollectionTime": 2,

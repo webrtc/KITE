@@ -66,6 +66,11 @@ OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"
 Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://www.jetbrains.com/idea/download) but you can use Eclipe or any other IDE if you prefer.
 &nbsp;    
 
+If you are on Mac and are using zsh, please make sure to add the following line add the end of your `~/.zshrc` file:
+``` 
+source .bash_profile
+```
+
 ## B. Install KITE 2.0
 
 1. Clone this repo into a folder __without any space__, for example under `\GitHub\`:  

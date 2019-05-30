@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.EndPoint;
 import org.webrtc.kite.config.TestConf;
+import org.webrtc.kite.config.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,19 +41,17 @@ public class MatrixRunner {
   
   private final Logger logger = Logger.getLogger(MatrixRunner.class.getName());
   private final TestConf testConf;
-  private List<List<EndPoint>> tupleList = new ArrayList<List<EndPoint>>();
+  private List<Tuple> tupleList = new ArrayList<>();
   
   /**
-   * Constructs a new MatrixRunner with the given TestConf and List<List<EndPoint>>.
+   * Constructs a new MatrixRunner with the given TestConf and List<Tuple>.
    *
    * @param testConf     TestConf
    * @param listOfTuples a list of tuples (containing 1 or multiples kite config objects).
    */
-  public MatrixRunner(TestConf testConf, List<List<EndPoint>> listOfTuples) {
+  public MatrixRunner(TestConf testConf, List<Tuple> listOfTuples) {
     this.testConf = testConf;
-
     this.tupleList.addAll(listOfTuples);
-    this.tupleList.addAll(Configurator.getInstance().getCustomBrowserMatrix());
   }
 
   /**
@@ -106,15 +105,11 @@ public class MatrixRunner {
   
   /**
    * Executes the test contained inside the TestManager for the provided matrix.
-   * <p>
-   * The algorithm of the method is as follows: 1) Execute the first test. 2) Execute the multi
-   * threaded list. 3) Execute the single threaded list. 4) Execute the last test.
    *
    * @return List<Future < Object>>
    */
   public List<Future<Object>> run() {
-    Container testSuite = new Container(testConf.getName().contains("%ts") ?
-      testConf.getName().replaceAll("%ts", "") + " (" + timestamp() + ")" : testConf.getName());
+    Container testSuite = new Container(testConf.getName());
     
     int totalTestCases = this.tupleList.size();
     if (totalTestCases < 1) {
@@ -127,11 +122,14 @@ public class MatrixRunner {
     ExecutorService multiExecutorService =
       Executors.newFixedThreadPool(this.testConf.getNoOfThreads());
     
-    logger.info("Executing " + this.testConf + " for " + totalTestCases + " browser tuples");
+    logger.info("Executing " + this.testConf + " for " + totalTestCases + " browser tuples with size :" + tupleList.get(0).size());
     try {
       for (int index = 0; index < this.tupleList.size(); index++) {
         TestManager manager = new TestManager(this.testConf, this.tupleList.get(index));
         manager.setTestSuite(testSuite);
+        if (testConf.isLoadTest()) {
+          manager.setId("iteration " + (index + 1));
+        }
         testManagerList.add(manager);
       }
       
