@@ -27,10 +27,7 @@ import javax.json.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.entities.Timeouts.TEN_SECOND_INTERVAL_IN_SECONDS;
@@ -163,6 +160,41 @@ public class AppRTCMeetingPage extends BasePage {
     return buildPCStatObject(statMap, selectedStats);
   }
 
+  public LinkedHashMap<String, String> statsHashMap(JsonObject statsSummary) {
+    LinkedHashMap<String, String> results = new LinkedHashMap<>();
+//    {
+//      "Received": {
+//      "Total Bytes Received": 245702,
+//        "Inbound Audio Bitrate": 71664,
+//        "Inbound Video Bitrate": 1893952,
+//        "Packet Loss (%)": 0.0,
+//        "Audio Jitter": 0.0,
+//        "Audio Level Received": 0.0,
+//        "Frame Lost": 0
+//      },
+//        "Sent": {
+//        "Total Bytes Sent": 263802,
+//          "Outbound Audio Bitrate": 70312,
+//          "Outbound Video Bitrate": 2040104,
+//          "Audio Level Sent": 0.0
+//      }
+//    }
+    JsonObject received = statsSummary.getJsonObject("Received");
+    results.put("totalBytesReceived", "" + received.getInt("Total Bytes Received"));
+    results.put("videoBitrateReceived", "" + received.getInt("Inbound Video Bitrate"));
+    results.put("audioBitrateReceived", "" + received.getInt("Inbound Audio Bitrate"));
+    results.put("packetLossReceived", "" + received.getJsonNumber("Packet Loss (%)").doubleValue());
+    results.put("audioJitterReceived", "" + received.getJsonNumber("Audio Jitter").doubleValue());
+    results.put("audioLevelReceived", "" + received.getJsonNumber("Audio Level Received").doubleValue());
+    results.put("totalFramesLost", "" + received.getInt("Frame Lost"));
+    JsonObject sent = statsSummary.getJsonObject("Sent");
+    results.put("totalBytesSent", "" + sent.getInt("Total Bytes Sent"));
+    results.put("videoBitrateSent", "" + sent.getInt("Outbound Video Bitrate"));
+    results.put("audioBitrateSent", "" + sent.getInt("Outbound Audio Bitrate"));
+    results.put("audioLevelSent", "" + sent.getJsonNumber("Audio Level Sent").doubleValue());
+    return results;
+  }
+  
   public JsonObject buildstatSummary(JsonObject rawData, JsonArray selectedStats) {
     JsonObjectBuilder mainBuilder = Json.createObjectBuilder();
     JsonObjectBuilder builder = Json.createObjectBuilder();
@@ -275,7 +307,7 @@ public class AppRTCMeetingPage extends BasePage {
     builder = Json.createObjectBuilder();
     builder.add("Total Bytes Sent", audioBytesSent + videoBytesSent);
     builder.add("Outbound Audio Bitrate", audioSentBitrate);
-    builder.add("OutBound Video Bitrate", videoSentBitrate);
+    builder.add("Outbound Video Bitrate", videoSentBitrate);
     builder.add("Audio Level Sent", audioLevelSent / statsArr.size());
     mainBuilder.add("Sent", builder.build());
 

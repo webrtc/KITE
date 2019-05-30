@@ -20,13 +20,11 @@ import io.cosmosoftware.kite.steps.StepPhase;
 import junit.framework.TestCase;
 import org.webrtc.kite.apprtc.tests.HDTest;
 import org.webrtc.kite.config.Browser;
-import org.webrtc.kite.config.EndPoint;
+import org.webrtc.kite.config.Tuple;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.entities.Timeouts.TEN_SECOND_INTERVAL;
@@ -37,7 +35,7 @@ public class AppRTCTestTest extends TestCase {
   private static final String APPRTC_URL = "https://appr.tc";
   private static final String SELENIUM_SERVER_URL = "http://localhost:4444/wd/hub";
 
-  private List<EndPoint> endPoints = new ArrayList<>();
+  private Tuple endPoints = new Tuple();
 
   public void setUp() throws Exception {
     super.setUp();
@@ -76,6 +74,6 @@ public class AppRTCTestTest extends TestCase {
     HDTest test = new HDTest();
     test.setEndPointList(endPoints);
     test.setPayload(getFakePayload());
-    test.execute(StepPhase.RAMPUP);
+    test.execute();
   }
 }

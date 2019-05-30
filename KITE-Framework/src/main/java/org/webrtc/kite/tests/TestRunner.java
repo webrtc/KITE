@@ -23,27 +23,27 @@ import static io.cosmosoftware.kite.util.TestUtils.processTestStep;
 public class TestRunner extends ArrayList<TestStep> implements Callable<Object> {
   
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
-  protected final AllureTestReport testReport;
+  protected final LinkedHashMap<StepPhase, AllureTestReport> reports;
   protected final WebDriver webDriver;
   protected boolean csv = false;
   private final String uid = new SimpleDateFormat("yyyyMMdd_hhmmss").format(new Date());
   private final String resultPath;
   protected int id;
 
-  private StepPhase stepPhase = StepPhase.RAMPUP;
+  protected StepPhase stepPhase = StepPhase.DEFAULT;
   
   /**
    * Instantiates a new Test runner.
    *
    * @param webDriver  the web driver
-   * @param testReport the test report
+   * @param reports    the test reports
    * @param id         the id
    */
-  public TestRunner(WebDriver webDriver, AllureTestReport testReport, int id) {
+  public TestRunner(WebDriver webDriver, LinkedHashMap<StepPhase, AllureTestReport> reports, int id) {
     this.webDriver = webDriver;
-    this.testReport = testReport;
+    this.reports = reports;
     this.id = id;
-    this.resultPath = "results/" + uid + "_" + testReport.getName() + "/";
+    this.resultPath = "results/" + uid + "_" + reports.get(reports.keySet().toArray()[0]).getLabel("suite") + "/";
   }
 
   /**
@@ -75,12 +75,12 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object> 
   
   @Override
   public Object call() {
-    TestHelper testHelper = TestHelper.getInstance(stepPhase.name());
+    TestHelper testHelper = TestHelper.getInstance(stepPhase.getShortName());
     LinkedHashMap<String, String> csvReport = new LinkedHashMap<>();
     csvReport.put("clientId", this.get(0).getClientID());
     csvReport.put("timestamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(new Date()));
     for (TestStep step : this) {
-       processTestStep(stepPhase, step, testReport);
+       processTestStep(stepPhase, step, reports.get(stepPhase));
        LinkedHashMap<String, String> csvResult = step.getCsvResult();
        if (csvResult != null) {
         for (String s : csvResult.keySet()) {

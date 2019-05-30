@@ -926,6 +926,66 @@ public class StatsUtils {
 //    csvBuilder.add("stats", result);
     return csvBuilder;
   }
+
+
+
+
+  /**
+   * Build a simple LinkedHashMap of selected stats meant to test NW Instrumentation. * Stats
+   * includes bitrate, packetLoss, Jitter and RTT
+   *
+   * @param statsSummary the stats Summary JsonObbject
+   * @return  the stat object in LinkedHashMap format
+   */
+  public static LinkedHashMap<String, String> statsHashMap(JsonObject statsSummary, int noRemotePCs) {
+    LinkedHashMap<String, String> map = new LinkedHashMap<>();
+//    {
+//      "localPC": {
+//      "currentRoundTripTime (ms)": "",
+//        "totalRoundTripTime (ms)": "",
+//        "totalBytesReceived (Bytes)": "6697",
+//        "totalBytesSent (Bytes)": "970776",
+//        "avgSentBitrate (bps)": "363609",
+//        "avgReceivedBitrate (bps)": "690",
+//        "outboundAudioBitrate (bps)": "40930",
+//        "outboundVideoBitrate (bps)": "314619"
+//    },
+//      "remotePC[0]": {
+//        "currentRoundTripTime (ms)": "",
+//          "totalRoundTripTime (ms)": "",
+//          "totalBytesReceived (Bytes)": "777674",
+//          "totalBytesSent (Bytes)": "21441",
+//          "avgSentBitrate (bps)": "9636",
+//          "avgReceivedBitrate (bps)": "323129",
+//          "inboundAudioBitrate (bps)": "34108",
+//          "inboundVideoBitrate (bps)": "276660",
+//          "audioJitter (ms)": "6.0",
+//          "audioPacketsLoss (%)": "0.027",
+//          "videoPacketsLoss (%)": "0.074"
+//      }
+//    }
+
+    JsonObject localPC = statsSummary.getJsonObject("localPC");
+    map.put("currentRoundTripTime (ms)", localPC.getString("currentRoundTripTime (ms)"));
+    map.put("totalRoundTripTime (ms)", localPC.getString("totalRoundTripTime (ms)"));
+    map.put("totalBytesReceived (Bytes)", localPC.getString("totalBytesReceived (Bytes)"));
+    map.put("totalBytesSent (Bytes)", localPC.getString("totalBytesSent (Bytes)"));
+    map.put("avgSentBitrate (bps)", localPC.getString("avgSentBitrate (bps)"));
+    map.put("outboundAudioBitrate (bps)", localPC.getString("outboundAudioBitrate (bps)"));
+    map.put("outboundVideoBitrate (bps)", localPC.getString("outboundVideoBitrate (bps)"));
+    for (int i = 0; i < noRemotePCs; i++) {
+      JsonObject remotePC = statsSummary.getJsonObject("remotePC[" + i + "]");
+      map.put("currentRoundTripTime (ms) [" + i + "]", remotePC.getString("currentRoundTripTime (ms)"));
+      map.put("totalBytesReceived (Bytes) [" + i + "]", remotePC.getString("totalBytesReceived (Bytes)"));
+      map.put("avgReceivedBitrate (bps) [" + i + "]", remotePC.getString("avgReceivedBitrate (bps)"));
+      map.put("inboundVideoBitrate (bps) [" + i + "]", remotePC.getString("inboundVideoBitrate (bps)"));
+      map.put("inboundAudioBitrate (bps) [" + i + "]", remotePC.getString("inboundAudioBitrate (bps)"));
+      map.put("audioJitter (ms) [" + i + "]", remotePC.getString("audioJitter (ms)"));
+      map.put("audioPacketsLoss (%) [" + i + "]", remotePC.getString("audioPacketsLoss (%)"));
+      map.put("videoPacketsLoss (%) [" + i + "]", remotePC.getString("videoPacketsLoss (%)"));
+    }
+    return map;
+  }
   
   /**
    * Computes the average bitrate.

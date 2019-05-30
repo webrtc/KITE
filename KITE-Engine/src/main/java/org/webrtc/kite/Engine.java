@@ -62,11 +62,7 @@ public class Engine {
     buildConfig(args[0]);
 
     for (TestConf testConf : Configurator.getInstance().getConfigHandler().getTestList()) {
-      if (testConf.isLoadTest()) {
-        logger.error("Sorry this version of the Engine cannot perform load testing, please contact out team at CoSMo for help");
-      } else {
-        run(testConf);
-      }
+      run(testConf);
     }
   }
   

@@ -58,6 +58,8 @@ public class TestConf extends KiteConfigObject {
   private boolean loadTest;
   private boolean permute;
   private boolean regression;
+
+  private boolean closeWebDrivers = true;
   private JsonObject testJsonConfig;
   private JsonObject payload;
   private int noOfThreads;
@@ -309,6 +311,14 @@ public class TestConf extends KiteConfigObject {
   
   public boolean isLoadTest() {
     return loadTest;
+  }
+
+  public boolean isCloseWebDrivers() {
+    return closeWebDrivers;
+  }
+
+  public void setCloseWebDrivers(boolean closeWebDrivers) {
+    this.closeWebDrivers = closeWebDrivers;
   }
   
 }

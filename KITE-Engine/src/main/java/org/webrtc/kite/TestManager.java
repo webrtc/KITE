@@ -24,9 +24,14 @@ import org.webrtc.kite.config.Tuple;
 import org.webrtc.kite.tests.KiteBaseTest;
 import org.webrtc.kite.tests.KiteJsTest;
 
+import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -52,6 +57,7 @@ public class TestManager implements Callable<Object> {
   private final Tuple tuple;
   private String id;
   private Container testSuite;
+  private List<StepPhase> phases;
   
   /**
    * Constructs a new TestManager with the given TestConf and List<EndPoint>.
@@ -69,9 +75,12 @@ public class TestManager implements Callable<Object> {
     KiteBaseTest test = testConf.isJavascript()
       ? new KiteJsTest(testConf.getTestImpl())
       : (KiteBaseTest) Class.forName(this.testConf.getTestImpl()).getConstructor().newInstance();
-    
+    phases = getPhases(testConf.isLoadTest());
+    test.setCloseWebDrivers(testConf.isCloseWebDrivers());
+    test.setPhases(phases);
     test.setSuite(testSuite.getName());
   
+    
     test.setConfigFilePath(Configurator.getInstance().getConfigFilePath());
     test.setInstrumentation(Configurator.getInstance().getInstrumentation());
     test.setParentSuite(Configurator.getInstance().getName());
@@ -101,19 +110,20 @@ public class TestManager implements Callable<Object> {
   public Object call() throws Exception {
     
     KiteBaseTest test = buildTest();
-    
-    testSuite.addChild(test.getReport().getUuid());
-
-    JsonObject testResultRampup = test.execute(StepPhase.RAMPUP);
-    JsonObject testResultLoadReached = test.execute(StepPhase.LOADREACHED);
-    
+    JsonObjectBuilder builder = Json.createObjectBuilder();
+    for (StepPhase phase: phases) {
+      testSuite.addChild(test.getReport(phase).getUuid());
+      JsonObject phaseResult = test.execute(phase);
+      builder.add(phase.getName(), phaseResult);
+    }
+    JsonObject testResult = builder.build();
     // todo: need some retry mechanism here
     
     if (ENABLE_CALLBACK) {
       if (this.testConf.getCallbackURL() != null) {
         CallbackThread callbackThread =
-          new CallbackThread(this.testConf.getCallbackURL(), testResultRampup);
-        if (testResultRampup.getString("meta", null) == null) {
+          new CallbackThread(this.testConf.getCallbackURL(), testResult);
+        if (testResult.getString("meta", null) == null) {
           callbackThread.start();
         } else {
           callbackThread.postResult();
@@ -123,7 +133,18 @@ public class TestManager implements Callable<Object> {
     
     // todo: Update allure report for on-going status
     
-    return testResultRampup;
+    return testResult;
+  }
+  
+  private ArrayList<StepPhase> getPhases(boolean isLoad) {
+    ArrayList<StepPhase> phases = new ArrayList<>();
+    if (isLoad) {
+      phases.add(StepPhase.RAMPUP);
+      phases.add(StepPhase.LOADREACHED);
+    } else {
+      phases.add(StepPhase.DEFAULT);
+    }
+    return phases;
   }
   
   /**

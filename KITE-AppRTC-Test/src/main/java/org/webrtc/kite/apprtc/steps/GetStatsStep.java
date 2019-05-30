@@ -35,7 +35,6 @@ public class GetStatsStep extends TestStep {
   protected AppRTCMeetingPage appRTCMeetingPage = null;
 
   private final JsonObject getStatsConfig;
-  private final LinkedHashMap<String, String> results = new LinkedHashMap<>();
 
   public GetStatsStep(WebDriver webDriver, JsonObject getStatsConfig) {
     super(webDriver);
@@ -53,17 +52,17 @@ public class GetStatsStep extends TestStep {
     if (appRTCMeetingPage == null) {
       appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
     }
+    LinkedHashMap<String, String> results = new LinkedHashMap<>();
     try {
       JsonObject stats = getPCStatOvertime(webDriver, getStatsConfig).get(0);
       JsonObject statsSummary = appRTCMeetingPage.buildstatSummary(stats, getStatsConfig.getJsonArray("selectedStats"));
+      results = appRTCMeetingPage.statsHashMap(statsSummary);
       Reporter.getInstance().jsonAttachment(report, "getStatsRaw", stats);
       Reporter.getInstance().jsonAttachment(this.report, "Stats Summary", statsSummary);
     } catch (Exception e) {
       logger.error(getStackTrace(e));
       throw new KiteTestException("Failed to getStats", Status.BROKEN, e);
     } finally{
-      results.put("bitrate", "123");
-      results.put("rtt", "7879");
       this.setCsvResult(results);
     }
   }

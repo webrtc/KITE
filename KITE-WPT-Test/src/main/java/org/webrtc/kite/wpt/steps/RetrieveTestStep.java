@@ -48,7 +48,7 @@ public class RetrieveTestStep extends TestStep {
     logger.info("Found : " + temp.size() + " test(s) in :" + url);
     logger.info("Total is now: " + testUrlList.size() + " test(s)" );
     for (String dirName : wptDirPage.getDirNameList()) {
-      processTestStep(StepPhase.RAMPUP, new RetrieveTestStep(this.webDriver, url+dirName, sercureURL+dirName, testUrlList) ,this.report);
+      processTestStep(StepPhase.DEFAULT, new RetrieveTestStep(this.webDriver, url+dirName, sercureURL+dirName, testUrlList) ,this.report);
     }
     Reporter.getInstance().textAttachment(this.report, "List of tests", temp.toString(), "plain");
   }

@@ -93,6 +93,11 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.webrtc.kite</groupId>
+      <artifactId>apprtc-test</artifactId>
+      <version>${kite.apprtc.version}</version>
+    </dependency>
+    <dependency>
       <groupId>${kite.extras.repo}</groupId>
       <artifactId>kite-extras</artifactId>
       <version>${kite.extras.version}</version>
@@ -101,11 +106,6 @@
       <groupId>org.webrtc.kite</groupId>
       <artifactId>kite-framework</artifactId>
       <version>${kite.framework.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.webrtc.kite</groupId>
-      <artifactId>apprtc-test</artifactId>
-      <version>${kite.apprtc.version}</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
     <dependency>

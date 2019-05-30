@@ -13,6 +13,7 @@
       "tupleSize": 2,
       "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
       "testImpl": "org.webrtc.kite.apprtc.tests.IceConnectionTest",
+      "loadTest": true,
       "payload" : {
         "url": "https://appr.tc",
         "takeScreenshotForEachTest": true,

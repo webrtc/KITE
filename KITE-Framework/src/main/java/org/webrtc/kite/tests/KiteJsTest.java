@@ -47,7 +47,7 @@ public class KiteJsTest extends KiteBaseTest {
   @Override
   protected void createTestRunners() {
     for (int index = 0; index < this.endPointList.size(); index ++) {
-      JsTestRunner runner = new JsTestRunner(this.report, jsTestImpl, index);
+      JsTestRunner runner = new JsTestRunner(this.reports, jsTestImpl, index);
       runner.setNumberOfParticipant(endPointList.size());
       runner.setReportPath(tempPath);
       this.add(runner);
