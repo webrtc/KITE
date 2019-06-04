@@ -260,8 +260,6 @@ public class WebDriverFactory {
       String extension = System.getProperty("kite.chrome.extension");
       if (extension != null) {
         chromeOptions.addExtensions(new File(extension));
-      } else {
-        logger.warn("CHROME: Some of the test (screen sharing, ...) need specific extension to be able to work properly.");
       }
     } else {
       // ELECTRON CLIENT ONLY:

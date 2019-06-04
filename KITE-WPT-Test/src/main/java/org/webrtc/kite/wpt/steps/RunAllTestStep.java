@@ -3,6 +3,7 @@ package org.webrtc.kite.wpt.steps;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.Reporter;
 import io.cosmosoftware.kite.report.Status;
+import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.steps.TestStep;
 import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.wpt.RunInfo;
@@ -43,7 +44,7 @@ public class RunAllTestStep extends TestStep {
       String url = urlList.get(index);
       RunOneTestStep runOneTestStep = new RunOneTestStep(this.webDriver, url);
       logger.info("---->>> [" + (index+1) + "/" + urlList.size() + "]");
-      processTestStep(runOneTestStep ,this.report);
+      processTestStep(StepPhase.DEFAULT, runOneTestStep ,this.report);
       testSummary.addResult(runOneTestStep.getTestResult());
     }
     Reporter.getInstance().textAttachment(this.report, "Test run summary", testSummary.toString(), "json");

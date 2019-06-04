@@ -2,6 +2,7 @@ package org.webrtc.kite.tests;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.*;
+import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.util.TestUtils;
 
 
@@ -10,6 +11,7 @@ import javax.json.JsonObject;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
@@ -25,7 +27,7 @@ public class JsTestRunner extends TestRunner {
   private int numberOfParticipant;
   private String reportPath;
   
-  public JsTestRunner(AllureTestReport testReport, String jsTestImpl, int id) {
+  public JsTestRunner(LinkedHashMap<StepPhase, AllureTestReport> testReport, String jsTestImpl, int id) {
     super(null, testReport, id);
     this.jsTestImpl = jsTestImpl;
   }
@@ -46,7 +48,7 @@ public class JsTestRunner extends TestRunner {
     // todo: NOTE: result from JS does not need to be in Allure report format (yet)
     String resultPath = WORKING_DIR + this.reportPath + "/" + id + "/result.json";
     try {
-      String uuid =  this.testReport.getUuid();
+      String uuid =  this.reports.get(this.stepPhase).getUuid();
       List<String> command = java.util.Arrays.asList("node", jsTestImpl,
        "" + numberOfParticipant, "" + id,uuid,  reportPath);
       logger.info("Executing command: " + "node " + jsTestImpl + " " + numberOfParticipant
@@ -76,7 +78,7 @@ public class JsTestRunner extends TestRunner {
     String path =  WORKING_DIR + this.reportPath + "/" + id + "/";
     if (result != null) {
       String status = result.getString("status", "passed");
-      this.testReport.setStatus(Status.fromValue(status));
+      this.reports.get(this.stepPhase).setStatus(Status.fromValue(status));
 
       // Step report
       AllureStepReport stepReport = null;
@@ -112,7 +114,7 @@ public class JsTestRunner extends TestRunner {
           JsonObject child = (JsonObject) childSteps.get(k);
           stepReport.addStepReport(processResult(child));
         }
-        this.testReport.addStepReport(stepReport);
+        this.reports.get(this.stepPhase).addStepReport(stepReport);
       }
       return stepReport;
     }

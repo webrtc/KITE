@@ -1,11 +1,13 @@
 package org.webrtc.kite.example;
 
+import org.webrtc.kite.example.checks.GmailSignInCheck;
 import org.webrtc.kite.example.checks.GoogleFirstResultCheck;
+import org.webrtc.kite.example.steps.GmailSignInStep;
 import org.webrtc.kite.example.steps.GoogleSearchStep;
 import org.webrtc.kite.tests.KiteBaseTest;
 import org.webrtc.kite.tests.TestRunner;
 
-public class KiteExampleTest extends KiteBaseTest {
+public class KiteExampleAuthTest extends KiteBaseTest {
 
   
   @Override
@@ -13,8 +15,8 @@ public class KiteExampleTest extends KiteBaseTest {
 
   @Override
   public void populateTestSteps(TestRunner runner) {
-    runner.addStep(new GoogleSearchStep(runner.getWebDriver()));
-    runner.addStep(new GoogleFirstResultCheck(runner.getWebDriver()));
+    runner.addStep(new GmailSignInStep(runner.getWebDriver()));
+    runner.addStep(new GmailSignInCheck(runner.getWebDriver()));
   }
 
 }

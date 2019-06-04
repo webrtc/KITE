@@ -3,11 +3,16 @@ package org.webrtc.kite.tests;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.AllureTestReport;
 import io.cosmosoftware.kite.report.Status;
+import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.steps.TestStep;
+import io.cosmosoftware.kite.util.TestHelper;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.concurrent.Callable;
 
 import static io.cosmosoftware.kite.util.TestUtils.processTestStep;
@@ -18,36 +23,29 @@ import static io.cosmosoftware.kite.util.TestUtils.processTestStep;
 public class TestRunner extends ArrayList<TestStep> implements Callable<Object> {
   
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
-  protected final AllureTestReport testReport;
+  protected final LinkedHashMap<StepPhase, AllureTestReport> reports;
   protected final WebDriver webDriver;
+  protected boolean csv = false;
+  private final String uid = new SimpleDateFormat("yyyyMMdd_hhmmss").format(new Date());
+  private final String resultPath;
   protected int id;
+
+  protected StepPhase stepPhase = StepPhase.DEFAULT;
   
   /**
    * Instantiates a new Test runner.
    *
    * @param webDriver  the web driver
-   * @param testReport the test report
-   */
-  public TestRunner(WebDriver webDriver, AllureTestReport testReport) {
-    super();
-    this.webDriver = webDriver;
-    this.testReport = testReport;
-  }
-  
-  /**
-   * Instantiates a new Test runner.
-   *
-   * @param webDriver  the web driver
-   * @param testReport the test report
+   * @param reports    the test reports
    * @param id         the id
    */
-  public TestRunner(WebDriver webDriver, AllureTestReport testReport, int id) {
-    super();
+  public TestRunner(WebDriver webDriver, LinkedHashMap<StepPhase, AllureTestReport> reports, int id) {
     this.webDriver = webDriver;
-    this.testReport = testReport;
+    this.reports = reports;
     this.id = id;
+    this.resultPath = "results/" + uid + "_" + reports.get(reports.keySet().toArray()[0]).getLabel("suite") + "/";
   }
-  
+
   /**
    * Sets id.
    *
@@ -55,6 +53,15 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object> 
    */
   public void setId(int id) {
     this.id = id;
+  }
+
+  /**
+   * Set to true to print CSV file
+   *
+   * @param csv
+   */
+  public void setCsv(boolean csv) {
+    this.csv = csv;
   }
   
   /**
@@ -68,8 +75,21 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object> 
   
   @Override
   public Object call() {
+    TestHelper testHelper = TestHelper.getInstance(stepPhase.getShortName());
+    LinkedHashMap<String, String> csvReport = new LinkedHashMap<>();
+    csvReport.put("clientId", this.get(0).getClientID());
+    csvReport.put("timestamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(new Date()));
     for (TestStep step : this) {
-      processTestStep(step, testReport);
+       processTestStep(stepPhase, step, reports.get(stepPhase));
+       LinkedHashMap<String, String> csvResult = step.getCsvResult();
+       if (csvResult != null) {
+        for (String s : csvResult.keySet()) {
+          csvReport.put(s, csvResult.get(s));
+         }
+       }
+    }
+    if (csv) {
+      testHelper.println(csvReport, resultPath);
     }
     return null;
   }
@@ -111,5 +131,9 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object> 
   
   public boolean addStep(TestStep step) {
     return add(step);
+  }
+
+  public void setStepPhase(StepPhase stepPhase) {
+    this.stepPhase = stepPhase;
   }
 }

@@ -1,0 +1,30 @@
+{
+  "name": "Kite Test Example with Allure reporting",
+  "remotes": [
+    {
+      "type": "local",
+      "remoteAddress": "http://localhost:4444/wd/hub"
+    }
+  ],
+  "tests": [
+    {
+      "name": "KiteExampleAuthTest %ts",
+      "tupleSize": 1,
+      "description": "This example test opens gmail page, sign in and verifies it.",
+      "testImpl": "org.webrtc.kite.example.KiteExampleAuthTest",
+      "payload" : {
+        "test1": "ONE",
+        "test2": "TWO"
+      }
+    }
+  ],
+  "browsers": [
+    {
+      "browserName": "chrome",
+      "version": "74",
+      "platform": "localhost",
+      "flags": []
+    }
+  ],
+  "apps":[]
+}

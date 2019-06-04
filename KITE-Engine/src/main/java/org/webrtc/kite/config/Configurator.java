@@ -18,9 +18,9 @@ package org.webrtc.kite.config;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.instrumentation.Instrumentation;
+import io.cosmosoftware.kite.instrumentation.NetworkProfileHashMap;
 import io.cosmosoftware.kite.report.Reporter;
 import org.apache.log4j.Logger;
-import org.quartz.Job;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
 import org.webrtc.kite.exception.KiteUnsupportedIntervalException;
 import org.webrtc.kite.exception.KiteUnsupportedRemoteException;
@@ -58,17 +58,19 @@ public class Configurator {
   
   /* Singleton boiler plate code */
   private static Configurator instance = new Configurator();
+  private String name;
   private String commandName;
   private String configFilePath;
-  private ConfigHandler configHandler;
-  private List<List<EndPoint>> customBrowserMatrix = new ArrayList<>();
-  private List<JsonObject> customMatrix;
-  private boolean customMatrixOnly = false;
-  private Instrumentation instrumentation = null;
-  private String name;
-  private List<JsonObject> remoteObjectList = null;
   private boolean skipSame = false;
   private long timeStamp = System.currentTimeMillis();
+  private JsonObject jsonConfigObject;
+  private ConfigHandler configHandler;
+  private List<JsonObject> testObjectList;
+  private List<JsonObject> customMatrix;
+  private List<JsonObject> remoteObjectList = null;
+  private Instrumentation instrumentation = null;
+  private NetworkProfileHashMap networks = null;
+  private String instrumentUrl = null;
   
   private Configurator() {
   }
@@ -87,15 +89,15 @@ public class Configurator {
    * @throws InvocationTargetException        the invocation target exception
    */
   public void buildConfig()
-    throws IOException, KiteUnsupportedIntervalException, KiteInsufficientValueException,
+    throws IOException, KiteInsufficientValueException,
     NoSuchMethodException, IllegalAccessException, InstantiationException,
     KiteUnsupportedRemoteException, InvocationTargetException {
+  
+    this.jsonConfigObject = readJsonFile(configFilePath);
     
-    JsonObject jsonObject = readJsonFile(configFilePath);
-    
-    this.name = jsonObject.getString("name", "");
+    this.name = jsonConfigObject.getString("name", "");
     this.name = name.contains("%ts") ? name.replaceAll("%ts", "") + " (" + timestamp() + ")" : name;
-    String reportPath = jsonObject.getString("reportFolder", null);
+    String reportPath = jsonConfigObject.getString("reportFolder", null);
     
     // for CI testing purpose, the report path will be the default one: pwd/kite-allure-reports
     if (System.getProperty("kite.custom.config") != null) {
@@ -104,10 +106,10 @@ public class Configurator {
       Reporter.getInstance().setReportPath(reportPath);
     }
     
-    String callbackURL = jsonObject.getString("callback", null);
+    String callbackURL = jsonConfigObject.getString("callback", null);
     
-    List<JsonObject> testObjectList = (List<JsonObject>)
-      throwNoKeyOrBadValueException(jsonObject, "tests", JsonArray.class, false);
+    this.testObjectList = (List<JsonObject>)
+      throwNoKeyOrBadValueException(jsonConfigObject, "tests", JsonArray.class, false);
     
     if (testObjectList.size() < 1) {
       throw new KiteInsufficientValueException("Test objects are less than one.");
@@ -122,10 +124,10 @@ public class Configurator {
       logger.info("Running test on custom browser config: \n" + customBrowser.toString());
       browserObjectList.add(customBrowser);
     } else {
-      browserObjectList = (List<JsonObject>) throwNoKeyOrBadValueException(jsonObject, "browsers", JsonArray.class, false);
+      browserObjectList = (List<JsonObject>) throwNoKeyOrBadValueException(jsonConfigObject, "browsers", JsonArray.class, false);
   
       appObjectList = (List<JsonObject>)
-        throwNoKeyOrBadValueException(jsonObject, "apps", JsonArray.class, true);
+        throwNoKeyOrBadValueException(jsonConfigObject, "apps", JsonArray.class, true);
   
       int size = (browserObjectList != null ? browserObjectList.size() : 0) 
                    + (appObjectList != null ? appObjectList.size() : 0);
@@ -134,10 +136,8 @@ public class Configurator {
         throw new KiteInsufficientValueException("Less than one browser or app object.");
       }
   
-      this.customMatrixOnly = jsonObject.getBoolean("customMatrixOnly", this.customMatrixOnly);
-  
       this.customMatrix = (List<JsonObject>)
-        throwNoKeyOrBadValueException(jsonObject, "matrix", JsonArray.class, true);
+        throwNoKeyOrBadValueException(jsonConfigObject, "matrix", JsonArray.class, true);
   
       if (browserObjectList != null) {
         browserObjectList = new ArrayList<>(new LinkedHashSet<>(browserObjectList));
@@ -153,33 +153,48 @@ public class Configurator {
       }
     }
   
-    boolean permute = jsonObject.getBoolean("permute", true);
+    boolean permute = jsonConfigObject.getBoolean("permute", true);
   
-    int type = jsonObject.getInt("type", 1);
+    int type = jsonConfigObject.getInt("type", 1);
     
     Object object =
-      throwNoKeyOrBadValueException(jsonObject, "remotes", JsonArray.class, type == 2);
+      throwNoKeyOrBadValueException(jsonConfigObject, "remotes", JsonArray.class, type == 2);
     
     if (object != null) {
       remoteObjectList = (List<JsonObject>) object;
     }
     
     configHandler =
-      new InteropConfigHandler(permute, callbackURL, remoteObjectList, testObjectList,
+      new ConfigHandler(permute, callbackURL, remoteObjectList, testObjectList,
         browserObjectList, appObjectList);
     
-    String instrumentUrl = jsonObject.getString("instrumentUrl", null);
+    this.instrumentUrl = jsonConfigObject.getString("instrumentUrl", null);
     if (instrumentUrl != null) {
       try {
         String instrumentFile = System.getProperty("java.io.tmpdir") + "instrumentation.json";
-        downloadFile(instrumentUrl, instrumentFile);
+        if (instrumentUrl.contains("://")) {
+          //if this is a url, then download it
+          downloadFile(this.instrumentUrl, instrumentFile);
+        } else {
+          //otherwise assume it can be read directly.
+          instrumentFile = this.instrumentUrl;
+        }
         JsonObject instrumentObject = readJsonFile(instrumentFile);
-        this.instrumentation = new Instrumentation(instrumentObject);
+        this.instrumentation = new Instrumentation(instrumentObject, instrumentUrl, getRemoteAddress());
       } catch (KiteTestException e) {
         logger.error(getStackTrace(e));
       }
     }
-    skipSame = jsonObject.getBoolean("skipSame", skipSame);
+    JsonArray networksArray =  jsonConfigObject.containsKey("networks") ?  jsonConfigObject.getJsonArray("networks"):null;
+    if (networksArray != null ) {
+      try {
+        this.networks = new NetworkProfileHashMap(networksArray);
+      } catch (Exception e) {
+        logger.error(getStackTrace(e));
+      }
+
+    }
+    skipSame =  jsonConfigObject.getBoolean("skipSame", skipSame);
     logger.info("Finished reading the configuration file");
   }
   
@@ -188,30 +203,28 @@ public class Configurator {
    *
    * @param tupleSize tuple size
    *
-   * @return a matrix of browser tuples as List<List<EndPoint>>
+   * @return a matrix of browser tuples as List<Tuple>
    */
-  public List<List<EndPoint>> buildTuples(int tupleSize, boolean permute, boolean regression) {
-    List<List<EndPoint>> listOfTuples = new ArrayList<>();
+  public List<Tuple> buildTuples(int tupleSize, boolean permute, boolean regression) {
+    List<Tuple> listOfTuples = new ArrayList<>();
     if (regression) {
       // only add 1 placeholder tuple
-      listOfTuples.add(new ArrayList<>());
+      listOfTuples.add(new Tuple());
     } else {
       if (this.customMatrix != null) {
+        List<Tuple> customBrowserMatrix = new ArrayList<>();
         for (JsonStructure structure : this.customMatrix) {
           JsonArray jsonArray = (JsonArray) structure;
-          List<EndPoint> browserList = new ArrayList<>();
+          Tuple tuple = new Tuple();
           for (int i = 0; i < jsonArray.size(); i++) {
-            browserList.add(this.configHandler.getEndPointList().get(jsonArray.getInt(i)));
+            tuple.add(this.configHandler.getEndPointList().get(jsonArray.getInt(i)));
           }
-          this.customBrowserMatrix.add(browserList);
+          customBrowserMatrix.add(tuple);
         }
-        
-        if (this.customMatrixOnly)
-          return null;
+        return customBrowserMatrix;
       }
       
-      List<EndPoint> endPointList =
-        (List<EndPoint>) this.configHandler.getEndPointList();
+      List<EndPoint> endPointList = this.configHandler.getEndPointList();
       
       List<EndPoint> focusedList = new ArrayList<>();
       for (EndPoint browser : endPointList) {
@@ -220,17 +233,16 @@ public class Configurator {
         }
       }
       
-      listOfTuples = recursivelyBuildTuples(tupleSize, 0, endPointList, new ArrayList<>(), permute);
+      listOfTuples = recursivelyBuildTuples(tupleSize, 0, endPointList, new Tuple(), permute);
       
-      List<List<EndPoint>> tempListOfTuples = new ArrayList<>(listOfTuples);
-      for (List<EndPoint> tuple : tempListOfTuples) {
+      List<Tuple> tempListOfTuples = new ArrayList<>(listOfTuples);
+      for (Tuple tuple : tempListOfTuples) {
         if (Collections.disjoint(tuple, focusedList)
           || (skipSame && tuple.stream().distinct().limit(2).count() <= 1)) {
           listOfTuples.remove(tuple);
         }
-      }
-      
-      Collections.shuffle(listOfTuples);
+      }      
+      //Collections.shuffle(listOfTuples);
     }
     return listOfTuples;
   }
@@ -269,16 +281,7 @@ public class Configurator {
   public ConfigHandler getConfigHandler() {
     return this.configHandler;
   }
-  
-  /**
-   * getCustomBrowserMatrix
-   *
-   * @return the custom browser matrix
-   */
-  public List<List<EndPoint>> getCustomBrowserMatrix() {
-    return this.customBrowserMatrix;
-  }
-  
+
   /**
    * Gets instance.
    *
@@ -290,6 +293,12 @@ public class Configurator {
   
   public Instrumentation getInstrumentation() {
     return instrumentation;
+  }
+
+  public String getInstrumentUrl() { return this.instrumentUrl; }
+
+  public NetworkProfileHashMap getNetworks() {
+    return networks;
   }
   
   /**
@@ -308,7 +317,7 @@ public class Configurator {
    */
   public String getRemoteAddress() {
     if (remoteObjectList != null && remoteObjectList.size() > 0) {
-      return remoteObjectList.get(0).getString("remoteAddress");
+      return remoteObjectList.get(0).getString("remoteAddress").split("/")[2].split(":")[0];
     }
     return null;
   }
@@ -332,37 +341,28 @@ public class Configurator {
   }
   
   /**
-   * isCustomerMatrixOnly
-   *
-   * @return  true if the test is using custom matrix only
-   */
-  public boolean isCustomMatrixOnly() {
-    return customMatrixOnly;
-  }
-  
-  /**
    * Build a list of tuple from given endpoints list, permutation or combination
    *
    * @param targetSize   targeted tuple size
    * @param currentIndex index of the endpoint in the list
    * @param fullList     list of provided endpoints
-   * @param refList      list of endpoint currently being built
+   * @param refTuple     tuple currently being built
    * @param permutation  true if this is permutation, false if combination
    *
    * @return a list of tuples of endpoints.
    */
-  private List<List<EndPoint>> recursivelyBuildTuples(int targetSize, int currentIndex, List<EndPoint> fullList, List<EndPoint> refList, boolean permutation) {
-    List<List<EndPoint>> result = new ArrayList<>();
+  private List<Tuple> recursivelyBuildTuples(int targetSize, int currentIndex, List<EndPoint> fullList, Tuple refTuple, boolean permutation) {
+    List<Tuple> result = new ArrayList<>();
     if (currentIndex < targetSize - 1) {
       for (int index = 0; index < fullList.size(); index++) {
-        List<EndPoint> temp = new ArrayList<>(refList);
+        Tuple temp = new Tuple(refTuple);
         temp.add(fullList.get(index));
         result.addAll(recursivelyBuildTuples(targetSize, currentIndex + 1,
           fullList.subList(permutation ? 0 : index, fullList.size()), temp, permutation));
       }
     } else {
       for (EndPoint endPoint : fullList) {
-        List<EndPoint> temp = new ArrayList<>(refList);
+        Tuple temp = new Tuple(refTuple);
         temp.add(endPoint);
         result.add(temp);
       }
@@ -377,4 +377,7 @@ public class Configurator {
     this.timeStamp = System.currentTimeMillis();
   }
   
+  public JsonObject getJsonConfigObject() {
+    return jsonConfigObject;
+  }
 }

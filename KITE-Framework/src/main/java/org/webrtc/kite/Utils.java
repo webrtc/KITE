@@ -23,6 +23,7 @@ import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.config.App;
 import org.webrtc.kite.config.Browser;
 import org.webrtc.kite.config.EndPoint;
+import org.webrtc.kite.config.Tuple;
 import org.webrtc.kite.exception.KiteBadValueException;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
 import org.webrtc.kite.exception.KiteNoKeyException;
@@ -38,6 +39,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.io.IOException;
 /**
  * Utils class holding various static methods.
  */
@@ -257,8 +259,8 @@ public class Utils {
    *
    * @return the list of Browser from the config file.
    */
-  public static List<EndPoint> getEndPointList(String configFile, String type) {
-    List<EndPoint> endPoints = new ArrayList<>();
+  public static Tuple getEndPointList(String configFile, String type) {
+    Tuple endPoints = new Tuple();
     try {
       JsonObject jsonObject = readJsonFile(configFile);
       List<JsonObject> endpointObjectList =

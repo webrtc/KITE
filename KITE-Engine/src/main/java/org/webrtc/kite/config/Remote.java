@@ -34,7 +34,7 @@ import java.util.Map;
  * {
  * "name": "local",
  * "username": "xxx",
- * "accesskey": "xxx",
+ * "accessKey": "xxx",
  * "remoteAddress": "http://localhost:4444/wd/hub"
  * }
  * <p>
@@ -52,7 +52,7 @@ public class Remote extends KiteConfigObject {
       supportedRemoteMap.put(supportedRemote.name(), supportedRemote.name());
   }
 
-  private String accesskey;
+  private String accessKey;
   private String name;
   private String remoteAddress;
   private String username;
@@ -74,9 +74,9 @@ public class Remote extends KiteConfigObject {
       this.remoteAddress = jsonObject.getString("remoteAddress");
     } else {
       this.username = jsonObject.getString("username");
-      this.accesskey = jsonObject.getString("accesskey");
+      this.accessKey = jsonObject.getString("accessKey");
       this.remoteAddress =
-        SupportedRemote.valueOf(this.name).remoteAddress(this.username, this.accesskey);
+        SupportedRemote.valueOf(this.name).remoteAddress(this.username, this.accessKey);
     }
   }
   
@@ -92,7 +92,7 @@ public class Remote extends KiteConfigObject {
           SupportedRemote.saucelabs.restApiUrl());
       case "browserstack":
         return new BrowserStackGridFetcher(PATH_TO_DB, this.remoteAddress,
-          SupportedRemote.browserstack.restApiUrl(), this.username, this.accesskey);
+          SupportedRemote.browserstack.restApiUrl(), this.username, this.accessKey);
       case "testingbot":
         return new TestingBotGridFetcher(PATH_TO_DB, this.remoteAddress,
           SupportedRemote.testingbot.restApiUrl());

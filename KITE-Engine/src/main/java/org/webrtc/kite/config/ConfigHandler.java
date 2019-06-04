@@ -16,11 +16,13 @@
 
 package org.webrtc.kite.config;
 
-import org.quartz.Job;
+import org.webrtc.kite.exception.KiteInsufficientValueException;
+import org.webrtc.kite.exception.KiteUnsupportedRemoteException;
 import org.webrtc.kite.grid.RemoteAddressManager;
 import org.webrtc.kite.grid.RemoteGridFetcher;
 
 import javax.json.JsonObject;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -31,16 +33,52 @@ import java.util.Set;
 /**
  * The type Config handler.
  */
-public abstract class ConfigHandler {
+public class ConfigHandler {
   
   /**
    * The Endpoint list.
    */
   protected List<EndPoint> endPointList;
   /**
-   * The Test list.
+   * The TestConf list.
    */
-  protected List<Test> testList;
+  protected List<TestConf> testList;
+  
+  
+  /**
+   * Instantiates a new Config type one handler.
+   *
+   * @param permute           permutation is true, combination if false
+   * @param callbackURL       the callback url
+   * @param remoteObjectList  the remote object list
+   * @param testObjectList    the test object list
+   * @param browserObjectList the browser object list
+   * @param appObjectList     the app object list
+   *
+   * @throws KiteInsufficientValueException the kite insufficient value exception
+   * @throws KiteUnsupportedRemoteException the kite unsupported remote exception
+   * @throws InvocationTargetException      the invocation target exception
+   * @throws NoSuchMethodException          the no such method exception
+   * @throws InstantiationException         the instantiation exception
+   * @throws IllegalAccessException         the illegal access exception
+   */
+  public ConfigHandler(boolean permute, String callbackURL, List<JsonObject> remoteObjectList,
+                              List<JsonObject> testObjectList, List<JsonObject> browserObjectList, List<JsonObject> appObjectList)
+    throws KiteInsufficientValueException, KiteUnsupportedRemoteException,
+    InvocationTargetException, NoSuchMethodException, InstantiationException,
+    IllegalAccessException, IOException {
+    
+    this.testList = new ArrayList<>();
+    for (JsonObject object : testObjectList) {
+      this.testList.add(new TestConf(permute, callbackURL, object));
+    }
+    if (browserObjectList != null) {
+      this.adjustRemotes(new RemoteManager(remoteObjectList), browserObjectList, Browser.class);
+    }
+    if (appObjectList != null) {
+      this.adjustRemotes(new RemoteManager(remoteObjectList), appObjectList, App.class);
+    }
+  }
   
   /**
    * Builds the browser list and sets the remote address in each of the browser object.
@@ -83,14 +121,13 @@ public abstract class ConfigHandler {
         set.add(endPoint);
       }
     } else {
-      int index = 0;
       Remote defaultRemote = remoteList.get(0);
-      if (defaultRemote.isLocal())
-        index = 1;
+      int index = defaultRemote.isLocal() ? 1 : 0;
       
       List<RemoteGridFetcher> fetcherList = new ArrayList<>();
-      for (; index < remoteListSize; index++)
+      for (; index < remoteListSize; index++) {
         fetcherList.add(remoteList.get(index).getGridFetcher());
+      }
       
       RemoteAddressManager remoteAddressManager = new RemoteAddressManager(fetcherList);
       remoteAddressManager.communicateWithRemotes();
@@ -118,7 +155,7 @@ public abstract class ConfigHandler {
    *
    * @return the browser list
    */
-  public List<? extends EndPoint> getEndPointList() {
+  public List<EndPoint> getEndPointList() {
     return this.endPointList;
   }
   
@@ -127,7 +164,11 @@ public abstract class ConfigHandler {
    *
    * @return the test list
    */
-  public List<? extends Test> getTestList() {
+  public List<TestConf> getTestList() {
     return this.testList;
+  }
+  
+  public void setEndPointList(List<EndPoint> endPointList) {
+    this.endPointList = endPointList;
   }
 }

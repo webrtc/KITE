@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * The type End point.
  */
-public abstract class EndPoint extends KiteConfigObject {
+public class EndPoint extends KiteConfigObject {
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
   protected String remoteAddress;
@@ -36,8 +36,8 @@ public abstract class EndPoint extends KiteConfigObject {
   protected String gateway;
   protected Map<String, String> extraCapabilities = new HashMap<>();
   protected boolean focus;
-  protected boolean isBrowser = false;
   protected int maxInstances;
+  protected int count;
   protected JsonObject jsonConfig;
   
   
@@ -52,12 +52,13 @@ public abstract class EndPoint extends KiteConfigObject {
    *
    * @param endPoint the end point
    */
-  protected EndPoint(EndPoint endPoint) {
+  public EndPoint(EndPoint endPoint) {
     this.focus = endPoint.isFocus();
     this.jsonConfig = endPoint.getJsonConfig();
     this.remoteAddress = endPoint.getRemoteAddress();
     this.platformName = endPoint.getPlatform();
     this.gateway = endPoint.getGateway();
+    this.count = endPoint.getCount();
     for (String capabilityName : endPoint.getExtraCapabilities().keySet()) {
       this.addCapabilities(capabilityName, endPoint.getExtraCapabilities().get(capabilityName));
     }
@@ -73,6 +74,7 @@ public abstract class EndPoint extends KiteConfigObject {
     this.remoteAddress = remoteAddress;
     this.jsonConfig = jsonObject;
     this.focus = jsonObject.getBoolean("focus", true);
+    this.count = jsonObject.getInt("count", 1);
     JsonValue jsonValue = jsonObject.getOrDefault("extraCapabilities", null);
     if (jsonValue != null) {
       JsonObject extraCapabilitiesArray = (JsonObject) jsonValue;
@@ -227,5 +229,9 @@ public abstract class EndPoint extends KiteConfigObject {
   
   public JsonObject getJsonConfig() {
     return jsonConfig;
+  }
+  
+  public int getCount() {
+    return count;
   }
 }

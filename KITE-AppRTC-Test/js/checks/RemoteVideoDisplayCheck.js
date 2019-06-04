@@ -1,5 +1,4 @@
 const {TestUtils, TestStep} = require('kite-common');
-const {apprtcMeetingPage} = require('../pages');
 
 /**
  * Class: RemoteVideoDisplayCheck
@@ -10,6 +9,7 @@ class RemoteVideoDisplayCheck extends TestStep {
   constructor(kiteBaseTest) {
     super();
     this.driver = kiteBaseTest.driver;
+    this.page = kiteBaseTest.page;
 
     // Test reporter if you want to add attachment(s)
     this.testReporter = kiteBaseTest.reporter;
@@ -20,10 +20,33 @@ class RemoteVideoDisplayCheck extends TestStep {
   }
 
   async step() {
-    let videoCheck = await apprtcMeetingPage.verifyRemoteVideoDisplay(this.driver);
-    let screenshot = await TestUtils.takeScreenshot(this.driver);
-    this.testReporter.jsonAttachment(this.report, 'videoCheck', videoCheck);
-    this.testReporter.screenshotAttachment(this.report, 'remote-video-display-check', screenshot);
+    let result = "";
+    let tmp;
+    let error = false;
+    try {
+      // By index
+      for(let i = 1; i < this.numberOfParticipant; i++) {
+        tmp = await this.page.videoCheck(this, i);
+        result += tmp;
+        if (i < this.numberOfParticipant) {
+          result += ' | ';
+        }
+        if (tmp != 'video') {
+          error = true;
+        }
+      }
+      if (error) {
+        this.testReporter.textAttachment(this.report, "Received videos", result, "plain");
+        throw new KiteTestError(Status.FAILED, "Some videos are still or blank: " + result);
+      }
+    } catch (error) {
+      console.log(error);
+      if (error instanceof KiteTestError) {
+        throw error;
+      } else {
+        throw new KiteTestError(Status.BROKEN, "Error looking for the video");
+      }
+    }
   }
 
 }

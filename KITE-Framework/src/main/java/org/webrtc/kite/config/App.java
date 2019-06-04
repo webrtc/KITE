@@ -87,17 +87,16 @@ public class App extends EndPoint {
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
     JsonObjectBuilder jsonObjectBuilder =
-      super.getJsonObjectBuilder()
-        .add("app", this.app)
-        .add("appPackage", this.appPackage)
-        .add("appActivity", this.appActivity)
-        .add("fullReset", this.appActivity)
-      ;
-
+        super.getJsonObjectBuilder().add("app", this.app).add("fullReset", this.fullReset);
+    if (this.appPackage != null) {
+      jsonObjectBuilder.add("appPackage", this.appPackage);
+    }
+    if (this.appActivity != null) {
+      jsonObjectBuilder.add("appPackage", this.appActivity);
+    }
     if (this.deviceName != null) {
       jsonObjectBuilder.add("deviceName", this.deviceName);
     }
-
     return jsonObjectBuilder;
 
   }

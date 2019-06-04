@@ -21,16 +21,14 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.webrtc.kite.stats.*;
+import org.webrtc.kite.stats.StatsUtils;
 
 import javax.json.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.entities.Timeouts.TEN_SECOND_INTERVAL_IN_SECONDS;
@@ -109,232 +107,6 @@ public class AppRTCMeetingPage extends BasePage {
   }
 
   /**
-   * Return the bitrate of a media track
-   *
-   * @param mediaType type of media (video/audio)
-   * @param direction direction of the media stream (sending/receiving)
-   * @return the bytesSent or bytesReceived value from the stats
-   */
-  public long getBitrate(String mediaType, String direction) throws KiteTestException {
-    executeJsScript(webDriver, stashBitrateScript(mediaType, direction));
-    waitAround(ONE_SECOND_INTERVAL);
-    return (Long) executeJsScript(webDriver, getStashedBitrateScript());
-  }
-
-  /**
-   * stat JsonObjectBuilder to add to callback result.
-   *
-   * @param webDriver used to execute command.
-   * @param duration during which the stats will be collected.
-   * @param interval between each time getStats gets called.
-   * @return JsonObjectBuilder of the stat object
-   * @throws Exception
-   */
-  public JsonObjectBuilder getStatOvertime(
-      WebDriver webDriver, int duration, int interval, JsonArray selectedStats) throws KiteTestException {
-    Map<String, Object> statMap = new HashMap<>();
-    for (int timer = 0; timer < duration; timer += interval) {
-      waitAround(interval);
-      Object stats = getStatOnce();
-      if (timer == 0) {
-        statMap.put("stats", new ArrayList<>());
-        Object offer = executeJsScript(webDriver, getSDPMessageScript("offer"));
-        Object answer = executeJsScript(webDriver, getSDPMessageScript("answer"));
-        statMap.put("offer", offer);
-        statMap.put("answer", answer);
-      }
-      ((List<Object>) statMap.get("stats")).add(stats);
-    }
-    return buildClientRTCStatObject(statMap, selectedStats);
-  }
-
-  public JsonObjectBuilder getPCStatOvertime(int duration, int interval, JsonArray selectedStats) throws KiteTestException {
-    Map<String, Object> statMap = new HashMap<>();
-    for (int timer = 0; timer < duration; timer += interval) {
-      waitAround(interval);
-      Object stats = getStatOnce();
-      if (timer == 0) {
-        statMap.put("stats", new ArrayList<>());
-        ((List<Object>) statMap.get("stats")).add(stats);
-      } else if (timer + interval == duration) {
-        ((List<Object>) statMap.get("stats")).add(stats);
-      }
-    }
-    return buildPCStatObject(statMap, selectedStats);
-  }
-
-  public JsonObject buildstatSummary(JsonObject rawData, JsonArray selectedStats) {
-    JsonObjectBuilder mainBuilder = Json.createObjectBuilder();
-    JsonObjectBuilder builder = Json.createObjectBuilder();
-    JsonArray statsArr = rawData.getJsonArray("statsArray");
-    long audioByteReceived = 0;
-    long audioBytesSent = 0;
-    long videoByteReceived = 0;
-    long videoBytesSent = 0;
-    long audioRcvdBitrate = 0;
-    long audioSentBitrate = 0;
-    long videoRcvdBitrate = 0;
-    long videoSentBitrate = 0;
-    double packetLoss = 0;
-    double audioJitter = 0;
-    double audioLevelRcvd = 0;
-    double audioLevelSent = 0;
-    double frameRcvdLost = 0;
-    ArrayList<Long> timestampArr = new ArrayList<>();
-    for (int i = 0; i < statsArr.size(); i++) {
-      for (int j = 0; j < selectedStats.size(); j++) {
-        if (statsArr.getJsonObject(i).getJsonObject(selectedStats.getString(j)) != null) {
-          switch (selectedStats.getString(j)) {
-            case "inbound-rtp":
-              JsonObject inboundData = statsArr.getJsonObject(i).getJsonObject("inbound-rtp");
-              List<String> keyArr = findKeys(inboundData);
-              inboundData = formatData(inboundData, keyArr);
-              timestampArr.add(
-                  Long.parseLong(
-                      inboundData.getJsonObject(keyArr.get(0)).get("timestamp").toString()));
-              for (String key : keyArr) {
-                JsonObject data = inboundData.getJsonObject(key);
-                long elapsedTime = timestampArr.get(timestampArr.size() - 1) - timestampArr.get(0);
-                if (data.getString("mediaType").equals("audio")) {
-                  audioByteReceived = data.getInt("bytesReceived");
-                  if (elapsedTime != 0) {
-                    audioRcvdBitrate = audioByteReceived * 8 / (elapsedTime / 1000);
-                  }
-                  packetLoss +=
-                      (double) data.getInt("packetsLost") / data.getInt("packetsReceived") * 100;
-                  audioJitter +=
-                      data.get("jitter").toString().equals("0")
-                          ? 0
-                          : Double.parseDouble(data.getString("jitter"));
-                } else {
-                  videoByteReceived = data.getInt("bytesReceived");
-                  if (elapsedTime != 0) {
-                    videoRcvdBitrate = videoByteReceived * 8 / (elapsedTime / 1000);
-                  }
-                }
-              }
-              break;
-            case "outbound-rtp":
-              JsonObject outboundData = statsArr.getJsonObject(i).getJsonObject("outbound-rtp");
-              keyArr = findKeys(outboundData);
-              outboundData = formatData(outboundData, keyArr);
-              for (String key : keyArr) {
-                JsonObject data = outboundData.getJsonObject(key);
-                long elapsedTime = timestampArr.get(timestampArr.size() - 1) - timestampArr.get(0);
-                if (data.getString("mediaType").equals("audio")) {
-                  audioBytesSent = data.getInt("bytesSent");
-                  if (elapsedTime != 0) {
-                    audioSentBitrate = audioBytesSent * 8 / (elapsedTime / 1000);
-                  }
-                } else {
-                  videoBytesSent = data.getInt("bytesSent");
-                  if (elapsedTime != 0) {
-                    videoSentBitrate = videoBytesSent * 8 / (elapsedTime / 1000);
-                  }
-                }
-              }
-              break;
-            case "track":
-              JsonObject trackData = statsArr.getJsonObject(i).getJsonObject("track");
-              keyArr = findKeys(trackData);
-              for (String key : keyArr) {
-                JsonObject data = trackData.getJsonObject(key);
-                String audioLevel = data.getString("audioLevel");
-                if (audioLevel.equals("0") || audioLevel.equals("NA") || audioLevel.length() > 9) {
-                  continue;
-                }
-                if (key.contains("1")) {
-                  if (key.contains("receiver")) {
-                    audioLevelRcvd += Double.parseDouble(data.getString("audioLevel"));
-                  } else {
-                    audioLevelSent += Double.parseDouble(data.getString("audioLevel"));
-                  }
-                } else {
-                  if (key.contains("receiver")) {
-                    frameRcvdLost +=
-                        (double)
-                                (Integer.parseInt(data.getString("framesDropped"))
-                                    / Integer.parseInt(data.getString("framesReceived")))
-                            * 100;
-                  }
-                }
-              }
-              break;
-          }
-        }
-      }
-    }
-    builder.add("Total Bytes Received", audioByteReceived + videoByteReceived);
-    builder.add("Inbound Audio Bitrate", audioRcvdBitrate);
-    builder.add("Inbound Video Bitrate", videoRcvdBitrate);
-    builder.add("Packet Loss (%)", packetLoss / statsArr.size());
-    builder.add("Audio Jitter", audioJitter / statsArr.size());
-    builder.add("Audio Level Received", audioLevelRcvd / statsArr.size());
-    builder.add("Frame Lost", Math.round(frameRcvdLost / statsArr.size() * 1000) / 1000);
-    mainBuilder.add("Received", builder.build());
-    builder = Json.createObjectBuilder();
-    builder.add("Total Bytes Sent", audioBytesSent + videoBytesSent);
-    builder.add("Outbound Audio Bitrate", audioSentBitrate);
-    builder.add("OutBound Video Bitrate", videoSentBitrate);
-    builder.add("Audio Level Sent", audioLevelSent / statsArr.size());
-    mainBuilder.add("Sent", builder.build());
-
-    return mainBuilder.build();
-  }
-
-  private JsonObject formatData(JsonObject json, List<String> keyArr) {
-    JsonObjectBuilder mainBuilder = Json.createObjectBuilder();
-    for (String key : keyArr) {
-      JsonObject data = json.getJsonObject(key);
-      JsonObjectBuilder innerBuilder = Json.createObjectBuilder();
-      for (String innerKey : data.keySet()) {
-        String s = data.getString(innerKey);
-        if (s.matches("-?\\d+")) {
-          if (s.length() < 10) {
-            innerBuilder.add(innerKey, Integer.parseInt(s));
-          } else {
-            innerBuilder.add(innerKey, Long.parseLong(s));
-          }
-        } else {
-          innerBuilder.add(innerKey, s);
-        }
-      }
-      mainBuilder.add(key, innerBuilder.build());
-    }
-    return mainBuilder.build();
-  }
-
-  private List<String> findKeys(JsonObject json) {
-    ArrayList<String> keyArr = new ArrayList<>();
-    for (String key : json.keySet()) {
-      if (key.contains("RTC")) {
-        keyArr.add(key);
-      }
-    }
-    return keyArr;
-  }
-
-  /**
-   * Stashes stats into a global variable and collects them 1s after
-   *
-   * @return String.
-   * @throws InterruptedException
-   */
-  private Object getStatOnce() throws KiteTestException {
-    String stashStatsScript =
-        "  appController.call_.pcClient_.pc_.getStats()"
-            + "    .then(data => {"
-            + "      window.KITEStats = [...data.values()];"
-            + "    });";
-
-    String getStashedStatsScript = "return window.KITEStats;";
-
-    executeJsScript(webDriver, stashStatsScript);
-    waitAround(ONE_SECOND_INTERVAL);
-    return executeJsScript(webDriver, getStashedStatsScript);
-  }
-
-  /**
    * Returns the test JavaScript to retrieve appController.call_.pcClient_.pc_.iceConnectionState.
    * If it doesn't exist then the method returns 'unknown'.
    *
@@ -365,49 +137,6 @@ public class AppRTCMeetingPage extends BasePage {
         + "return sum;";
   }
 
-  /**
-   * Returns the test's getSDPMessageScript to retrieve the sdp message for either the offer or
-   * answer. If it doesn't exist then the method returns 'unknown'.
-   *
-   * @return the getSDPMessageScript as string.
-   */
-  private static String getSDPMessageScript(String type) {
-    switch (type) {
-      case "offer":
-        return "var SDP;"
-            + "try {SDP = appController.call_.pcClient_.pc_.remoteDescription;} catch (exception) {} "
-            + "if (SDP) {return SDP;} else {return 'unknown';}";
-      case "answer":
-        return "var SDP;"
-            + "try {SDP = appController.call_.pcClient_.pc_.localDescription;} catch (exception) {} "
-            + "if (SDP) {return SDP;} else {return 'unknown';}";
-    }
-    return null;
-  }
-
-  private String stashBitrateScript(String mediaType, String direction) {
-    return "appController.call_.pcClient_.pc_.getStats().then(data => {"
-        + "   [...data.values()].forEach(function(e){"
-        + "       if (e.type.startsWith('"
-        + (direction.equalsIgnoreCase("sending") ? "outbound-rtp" : "inbound-rtp")
-        + "')){"
-        + "           if (e.mediaType.startsWith('"
-        + mediaType
-        + "')){ "
-        + "                   window.bitrate = e."
-        + (direction.equalsIgnoreCase("sending") ? "bytesSent" : "bytesReceived")
-        + ";  "
-        + "           }"
-        + "       }"
-        + "   });"
-        + "});"
-        + "return 0;";
-  }
-
-  private String getStashedBitrateScript() {
-    return "return window.bitrate";
-  }
-
   private String stashResolutionScript(boolean remote) {
     return "window.resolution = {width: -1, height: -1};"
         + "appController.call_.pcClient_.pc_.getStats().then(data => {"
@@ -428,162 +157,20 @@ public class AppRTCMeetingPage extends BasePage {
     return "return JSON.stringify(window.resolution);";
   }
 
-  /**
-   * Create a JsonObjectBuilder Object to eventually build a Json object from data obtained via
-   * tests.
-   *
-   * @param clientStats array of data sent back from test
-   * @return JsonObjectBuilder.
-   */
-  public static JsonObjectBuilder buildClientRTCStatObject(
-      Map<String, Object> clientStats, JsonArray selectedStats) {
-    try {
-      JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-      Map<String, Object> clientStatMap = clientStats;
-      List<Object> clientStatArray = (ArrayList<Object>) clientStatMap.get("stats");
-      JsonArrayBuilder jsonclientStatArray = Json.createArrayBuilder();
-      for (Object stats : clientStatArray) {
-        JsonObjectBuilder jsonRTCStatObjectBuilder = buildSingleRTCStatObject(stats, selectedStats);
-        jsonclientStatArray.add(jsonRTCStatObjectBuilder);
-      }
-
-      JsonObjectBuilder sdpObjectBuilder = Json.createObjectBuilder();
-      Map<Object, Object> sdpOffer = (Map<Object, Object>) clientStatMap.get("offer");
-      Map<Object, Object> sdpAnswer = (Map<Object, Object>) clientStatMap.get("answer");
-      sdpObjectBuilder
-          .add("offer", new SDP(sdpOffer).getJsonObjectBuilder())
-          .add("answer", new SDP(sdpAnswer).getJsonObjectBuilder());
-
-      jsonObjectBuilder.add("sdp", sdpObjectBuilder).add("statsArray", jsonclientStatArray);
-
-      return jsonObjectBuilder;
-    } catch (ClassCastException e) {
-      return Json.createObjectBuilder();
-    }
+  public List<JsonObject> getPCStatOvertime(WebDriver webDriver, JsonObject getStatsConfig)
+    throws KiteTestException {
+    return StatsUtils.getPCStatOvertime(webDriver, getStatsConfig);
   }
 
-  public static JsonObjectBuilder buildPCStatObject(
-      Map<String, Object> clientStats, JsonArray selectedStats) {
-    try {
-      JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-      Map<String, Object> clientStatMap = clientStats;
-      List<Object> clientStatArray = (ArrayList) clientStatMap.get("stats");
-      JsonArrayBuilder jsonClientStatArray = Json.createArrayBuilder();
-      for (Object stats : clientStatArray) {
-        JsonObjectBuilder jsonRTCStatObjectBuilder = buildSingleRTCStatObject(stats, selectedStats);
-        jsonClientStatArray.add(jsonRTCStatObjectBuilder);
-      }
-      jsonObjectBuilder.add("statsArray", jsonClientStatArray);
-      return jsonObjectBuilder;
 
-    } catch (ClassCastException e) {
-      return Json.createObjectBuilder();
-    }
+  public JsonObject buildstatSummary(JsonObject rawData, JsonArray selectedStats)
+    throws KiteTestException {
+    return StatsUtils.buildstatSummary(rawData, selectedStats);
   }
 
-  /**
-   * Create a JsonObjectBuilder Object to eventually build a Json object from data obtained via
-   * tests.
-   *
-   * @param statArray array of data sent back from test
-   * @return JsonObjectBuilder.
-   */
-  public static JsonObjectBuilder buildSingleRTCStatObject(Object statArray) {
-    return buildSingleRTCStatObject(statArray, null);
+  public LinkedHashMap<String, String> statsHashMap(JsonObject statsSummary)
+    throws KiteTestException {
+    return StatsUtils.statsHashMap(statsSummary);
   }
-
-  /**
-   * Create a JsonObjectBuilder Object to eventually build a Json object from data obtained via
-   * tests.
-   *
-   * @param statArray array of data sent back from test
-   * @param statsSelection ArrayList<String> of the selected stats
-   * @return JsonObjectBuilder.
-   */
-  public static JsonObjectBuilder buildSingleRTCStatObject(
-      Object statArray, JsonArray statsSelection) {
-    JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-    Map<String, List<RTCStatObject>> statObjectMap = new HashMap<>();
-    if (statArray != null) {
-      for (Object map : (ArrayList) statArray) {
-        if (map != null) {
-          Map<Object, Object> statMap = (Map<Object, Object>) map;
-          String type = (String) statMap.get("type");
-          if (statsSelection == null || statsSelection.toString().contains(type)) {
-            RTCStatObject statObject = null;
-            switch (type) {
-              case "codec":
-                {
-                  statObject = new RTCCodecStats(statMap);
-                  break;
-                }
-              case "track":
-                {
-                  statObject = new RTCMediaStreamTrackStats(statMap);
-                  break;
-                }
-              case "stream":
-                {
-                  statObject = new RTCMediaStreamStats(statMap);
-                  break;
-                }
-              case "inbound-rtp":
-                {
-                  statObject = new RTCRTPStreamStats(statMap, true);
-                  break;
-                }
-              case "outbound-rtp":
-                {
-                  statObject = new RTCRTPStreamStats(statMap, false);
-                  break;
-                }
-              case "peer-connection":
-                {
-                  statObject = new RTCPeerConnectionStats(statMap);
-                  break;
-                }
-              case "transport":
-                {
-                  statObject = new RTCTransportStats(statMap);
-                  break;
-                }
-              case "candidate-pair":
-                {
-                  statObject = new RTCIceCandidatePairStats(statMap);
-                  break;
-                }
-              case "remote-candidate":
-                {
-                  statObject = new RTCIceCandidateStats(statMap);
-                  break;
-                }
-              case "local-candidate":
-                {
-                  statObject = new RTCIceCandidateStats(statMap);
-                  break;
-                }
-            }
-            if (statObject != null) {
-              if (statObjectMap.get(type) == null) {
-                statObjectMap.put(type, new ArrayList<RTCStatObject>());
-              }
-              statObjectMap.get(type).add(statObject);
-            }
-          }
-        }
-      }
-    }
-    if (!statObjectMap.isEmpty()) {
-      for (String type : statObjectMap.keySet()) {
-        //        JsonArrayBuilder tmp = Json.createArrayBuilder();
-        JsonObjectBuilder tmp = Json.createObjectBuilder();
-        for (RTCStatObject stat : statObjectMap.get(type)) {
-          tmp.add(stat.getId(), stat.getJsonObjectBuilder());
-          //          tmp.add(/*stat.getId(),*/ stat.getJsonObjectBuilder());
-        }
-        jsonObjectBuilder.add(type, tmp);
-      }
-    }
-    return jsonObjectBuilder;
-  }
+  
 }

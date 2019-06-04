@@ -1,6 +1,7 @@
 package org.webrtc.kite.wpt.steps;
 
 import io.cosmosoftware.kite.report.Reporter;
+import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.steps.TestStep;
 import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.wpt.pages.WPTDirPage;
@@ -47,7 +48,7 @@ public class RetrieveTestStep extends TestStep {
     logger.info("Found : " + temp.size() + " test(s) in :" + url);
     logger.info("Total is now: " + testUrlList.size() + " test(s)" );
     for (String dirName : wptDirPage.getDirNameList()) {
-      processTestStep(new RetrieveTestStep(this.webDriver, url+dirName, sercureURL+dirName, testUrlList) ,this.report);
+      processTestStep(StepPhase.DEFAULT, new RetrieveTestStep(this.webDriver, url+dirName, sercureURL+dirName, testUrlList) ,this.report);
     }
     Reporter.getInstance().textAttachment(this.report, "List of tests", temp.toString(), "plain");
   }

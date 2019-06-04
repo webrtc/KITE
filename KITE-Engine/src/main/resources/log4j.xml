@@ -30,8 +30,7 @@
       <param name="ConversionPattern" value="%d %-5p - %m%n "/>
     </layout>
   </appender>
-
-
+  
   <root>
     <appender-ref ref="debugFileAppender"/>
     <appender-ref ref="infoFileAppender"/>

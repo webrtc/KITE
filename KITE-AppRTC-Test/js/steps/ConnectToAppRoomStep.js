@@ -1,12 +1,4 @@
 const {TestStep} = require('kite-common');
-const {apprtcJoinPage} = require('../pages');
-
-
-// Todo: change it
-// Random room id with Date
-var today = new Date()
-const roomId = (today.getDate()) * (today.getHours()+100) * (today.getMinutes()+100) 
-
 
 /**
  * Class: ConnectToAppRoomStep
@@ -18,7 +10,8 @@ class ConnectToAppRoomStep extends TestStep {
     super();
     this.driver = kiteBaseTest.driver;
     this.timeout = kiteBaseTest.timeout;
-    this.roomId = roomId;
+    this.uuid =  kiteBaseTest.uuid;
+    this.page = kiteBaseTest.page;
   }
 
   stepDescription() {
@@ -26,9 +19,9 @@ class ConnectToAppRoomStep extends TestStep {
   }
 
   async step() {
-    await apprtcJoinPage.enterRoomId(this);
+    await this.page.enterRoomId('apprtc' + this.uuid);
     // Join the room and wait until the page is ready
-    await apprtcJoinPage.joinRoom(this);
+    await this.page.joinRoom(this);
   }
 }
 
