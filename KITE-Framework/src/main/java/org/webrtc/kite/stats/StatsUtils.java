@@ -32,6 +32,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 import static io.cosmosoftware.kite.util.TestUtils.executeJsScript;
 import static io.cosmosoftware.kite.util.TestUtils.waitAround;
@@ -904,16 +905,16 @@ public class StatsUtils {
     JsonObject result = mainBuilder.build();
     JsonObjectBuilder csvBuilder = Json.createObjectBuilder();
     csvBuilder.add("currentRoundTripTime (ms)", computeRoundTripTime(result, noStats, "current"));
-    csvBuilder.add("totalRoundTripTime (ms)", computeRoundTripTime(result, noStats, "total"));
-    csvBuilder.add("totalBytesReceived (Bytes)", totalBytes(result, noStats, "Received"));
-    csvBuilder.add("totalBytesSent (Bytes)", totalBytes(result, noStats, "Sent"));
-    csvBuilder.add("avgSentBitrate (bps)", computeBitrate(result, noStats, "Sent", "candidate-pair"));
-    csvBuilder.add("avgReceivedBitrate (bps)", computeBitrate(result, noStats, "Received", "candidate-pair"));
+//    csvBuilder.add("totalRoundTripTime (ms)", computeRoundTripTime(result, noStats, "total"));
     if ("both".equalsIgnoreCase(direction) || "in".equalsIgnoreCase(direction)) {
+      csvBuilder.add("totalBytesReceived (Bytes)", totalBytes(result, noStats, "Received"));
+      csvBuilder.add("avgReceivedBitrate (bps)", computeBitrate(result, noStats, "Received", "candidate-pair"));
       csvBuilder.add("inboundAudioBitrate (bps)", computeBitrate(result, noStats, "in", "audio"));
       csvBuilder.add("inboundVideoBitrate (bps)", computeBitrate(result, noStats, "in", "video"));
     }
     if ("both".equalsIgnoreCase(direction) || "out".equalsIgnoreCase(direction)) {
+      csvBuilder.add("totalBytesSent (Bytes)", totalBytes(result, noStats, "Sent"));
+      csvBuilder.add("avgSentBitrate (bps)", computeBitrate(result, noStats, "Sent", "candidate-pair"));
       csvBuilder.add("outboundAudioBitrate (bps)", computeBitrate(result, noStats, "out", "audio"));
       csvBuilder.add("outboundVideoBitrate (bps)", computeBitrate(result, noStats, "out", "video"));
     }
@@ -967,8 +968,8 @@ public class StatsUtils {
 
     JsonObject localPC = statsSummary.getJsonObject("localPC");
     map.put("currentRoundTripTime (ms)", localPC.getString("currentRoundTripTime (ms)"));
-    map.put("totalRoundTripTime (ms)", localPC.getString("totalRoundTripTime (ms)"));
-    map.put("totalBytesReceived (Bytes)", localPC.getString("totalBytesReceived (Bytes)"));
+//    map.put("totalRoundTripTime (ms)", localPC.getString("totalRoundTripTime (ms)"));
+//    map.put("totalBytesReceived (Bytes)", localPC.getString("totalBytesReceived (Bytes)"));
     map.put("totalBytesSent (Bytes)", localPC.getString("totalBytesSent (Bytes)"));
     map.put("avgSentBitrate (bps)", localPC.getString("avgSentBitrate (bps)"));
     map.put("outboundAudioBitrate (bps)", localPC.getString("outboundAudioBitrate (bps)"));
@@ -1208,6 +1209,373 @@ public class StatsUtils {
       }
     }
     return subBuilder;
+  }
+
+
+
+  /**
+   * stat JsonObjectBuilder to add to callback result.
+   *
+   * @param webDriver used to execute command.
+   * @param duration during which the stats will be collected.
+   * @param interval between each time getStats gets called.
+   * @return JsonObjectBuilder of the stat object
+   * @throws Exception
+   */
+  public static JsonObjectBuilder getStatOvertime(
+    WebDriver webDriver, int duration, int interval, JsonArray selectedStats) throws KiteTestException {
+    Map<String, Object> statMap = new HashMap<>();
+    for (int timer = 0; timer < duration; timer += interval) {
+      waitAround(interval);
+      Object stats = getStatOnce(webDriver);
+      if (timer == 0) {
+        statMap.put("stats", new ArrayList<>());
+        Object offer = executeJsScript(webDriver, getSDPMessageScript("appController.call_.pcClient_.pc_", "offer"));
+        Object answer = executeJsScript(webDriver, getSDPMessageScript("appController.call_.pcClient_.pc_", "answer"));
+        statMap.put("offer", offer);
+        statMap.put("answer", answer);
+      }
+      ((List<Object>) statMap.get("stats")).add(stats);
+    }
+    return buildClientRTCStatObject(statMap, selectedStats);
+  }
+
+
+  /**
+   * Stashes stats into a global variable and collects them 1s after
+   *
+   * @return String.
+   * @throws InterruptedException
+   */
+  private static Object getStatOnce(WebDriver webDriver) throws KiteTestException {
+    String stashStatsScript =
+      "  appController.call_.pcClient_.pc_.getStats()"
+        + "    .then(data => {"
+        + "      window.KITEStats = [...data.values()];"
+        + "    });";
+
+    String getStashedStatsScript = "return window.KITEStats;";
+
+    executeJsScript(webDriver, stashStatsScript);
+    waitAround(ONE_SECOND_INTERVAL);
+    return executeJsScript(webDriver, getStashedStatsScript);
+  }
+  
+  public static LinkedHashMap<String, String> statsHashMap(JsonObject statsSummary) {
+    LinkedHashMap<String, String> results = new LinkedHashMap<>();
+//    {
+//      "Received": {
+//      "Total Bytes Received": 245702,
+//        "Inbound Audio Bitrate": 71664,
+//        "Inbound Video Bitrate": 1893952,
+//        "Packet Loss (%)": 0.0,
+//        "Audio Jitter": 0.0,
+//        "Audio Level Received": 0.0,
+//        "Frame Lost": 0
+//      },
+//        "Sent": {
+//        "Total Bytes Sent": 263802,
+//          "Outbound Audio Bitrate": 70312,
+//          "Outbound Video Bitrate": 2040104,
+//          "Audio Level Sent": 0.0
+//      }
+//    }
+    JsonObject received = statsSummary.getJsonObject("Received");
+    results.put("totalBytesReceived", "" + received.getInt("Total Bytes Received"));
+    results.put("videoBitrateReceived", "" + received.getInt("Inbound Video Bitrate"));
+    results.put("audioBitrateReceived", "" + received.getInt("Inbound Audio Bitrate"));
+    results.put("packetLossReceived", "" + received.getJsonNumber("Packet Loss (%)").doubleValue());
+    results.put("audioJitterReceived", "" + received.getJsonNumber("Audio Jitter").doubleValue());
+    results.put("audioLevelReceived", "" + received.getJsonNumber("Audio Level Received").doubleValue());
+    results.put("totalFramesLost", "" + received.getInt("Frame Lost"));
+    JsonObject sent = statsSummary.getJsonObject("Sent");
+    results.put("totalBytesSent", "" + sent.getInt("Total Bytes Sent"));
+    results.put("videoBitrateSent", "" + sent.getInt("Outbound Video Bitrate"));
+    results.put("audioBitrateSent", "" + sent.getInt("Outbound Audio Bitrate"));
+    results.put("audioLevelSent", "" + sent.getJsonNumber("Audio Level Sent").doubleValue());
+    return results;
+  }
+
+  public static JsonObject buildstatSummary(JsonObject rawData, JsonArray selectedStats) {
+    JsonObjectBuilder mainBuilder = Json.createObjectBuilder();
+    JsonObjectBuilder builder = Json.createObjectBuilder();
+    JsonArray statsArr = rawData.getJsonArray("statsArray");
+    long audioByteReceived = 0;
+    long audioBytesSent = 0;
+    long videoByteReceived = 0;
+    long videoBytesSent = 0;
+    long audioRcvdBitrate = 0;
+    long audioSentBitrate = 0;
+    long videoRcvdBitrate = 0;
+    long videoSentBitrate = 0;
+    double packetLoss = 0;
+    double audioJitter = 0;
+    double audioLevelRcvd = 0;
+    double audioLevelSent = 0;
+    double frameRcvdLost = 0;
+    ArrayList<Long> timestampArr = new ArrayList<>();
+    for (int i = 0; i < statsArr.size(); i++) {
+      for (int j = 0; j < selectedStats.size(); j++) {
+        if (statsArr.getJsonObject(i).getJsonObject(selectedStats.getString(j)) != null) {
+          switch (selectedStats.getString(j)) {
+            case "inbound-rtp":
+              JsonObject inboundData = statsArr.getJsonObject(i).getJsonObject("inbound-rtp");
+              List<String> keyArr = findKeys(inboundData);
+              inboundData = formatData(inboundData, keyArr);
+              timestampArr.add(
+                Long.parseLong(
+                  inboundData.getJsonObject(keyArr.get(0)).get("timestamp").toString()));
+              for (String key : keyArr) {
+                JsonObject data = inboundData.getJsonObject(key);
+                long elapsedTime = timestampArr.get(timestampArr.size() - 1) - timestampArr.get(0);
+                if (data.getString("mediaType").equals("audio")) {
+                  audioByteReceived = data.getInt("bytesReceived");
+                  if (elapsedTime != 0) {
+                    audioRcvdBitrate = audioByteReceived * 8 / (elapsedTime / 1000);
+                  }
+                  packetLoss +=
+                    (double) data.getInt("packetsLost") / data.getInt("packetsReceived") * 100;
+                  audioJitter +=
+                    data.get("jitter").toString().equals("0")
+                      ? 0
+                      : Double.parseDouble(data.getString("jitter"));
+                } else {
+                  videoByteReceived = data.getInt("bytesReceived");
+                  if (elapsedTime != 0) {
+                    videoRcvdBitrate = videoByteReceived * 8 / (elapsedTime / 1000);
+                  }
+                }
+              }
+              break;
+            case "outbound-rtp":
+              JsonObject outboundData = statsArr.getJsonObject(i).getJsonObject("outbound-rtp");
+              keyArr = findKeys(outboundData);
+              outboundData = formatData(outboundData, keyArr);
+              for (String key : keyArr) {
+                JsonObject data = outboundData.getJsonObject(key);
+                long elapsedTime = timestampArr.get(timestampArr.size() - 1) - timestampArr.get(0);
+                if (data.getString("mediaType").equals("audio")) {
+                  audioBytesSent = data.getInt("bytesSent");
+                  if (elapsedTime != 0) {
+                    audioSentBitrate = audioBytesSent * 8 / (elapsedTime / 1000);
+                  }
+                } else {
+                  videoBytesSent = data.getInt("bytesSent");
+                  if (elapsedTime != 0) {
+                    videoSentBitrate = videoBytesSent * 8 / (elapsedTime / 1000);
+                  }
+                }
+              }
+              break;
+            case "track":
+              JsonObject trackData = statsArr.getJsonObject(i).getJsonObject("track");
+              keyArr = findKeys(trackData);
+              for (String key : keyArr) {
+                JsonObject data = trackData.getJsonObject(key);
+                String audioLevel = data.getString("audioLevel");
+                if (audioLevel.equals("0") || audioLevel.equals("NA") || audioLevel.length() > 9) {
+                  continue;
+                }
+                if (key.contains("1")) {
+                  if (key.contains("receiver")) {
+                    audioLevelRcvd += Double.parseDouble(data.getString("audioLevel"));
+                  } else {
+                    audioLevelSent += Double.parseDouble(data.getString("audioLevel"));
+                  }
+                } else {
+                  if (key.contains("receiver")) {
+                    frameRcvdLost +=
+                      (double)
+                        (Integer.parseInt(data.getString("framesDropped"))
+                          / Integer.parseInt(data.getString("framesReceived")))
+                        * 100;
+                  }
+                }
+              }
+              break;
+          }
+        }
+      }
+    }
+    builder.add("Total Bytes Received", audioByteReceived + videoByteReceived);
+    builder.add("Inbound Audio Bitrate", audioRcvdBitrate);
+    builder.add("Inbound Video Bitrate", videoRcvdBitrate);
+    builder.add("Packet Loss (%)", packetLoss / statsArr.size());
+    builder.add("Audio Jitter", audioJitter / statsArr.size());
+    builder.add("Audio Level Received", audioLevelRcvd / statsArr.size());
+    builder.add("Frame Lost", Math.round(frameRcvdLost / statsArr.size() * 1000) / 1000);
+    mainBuilder.add("Received", builder.build());
+    builder = Json.createObjectBuilder();
+    builder.add("Total Bytes Sent", audioBytesSent + videoBytesSent);
+    builder.add("Outbound Audio Bitrate", audioSentBitrate);
+    builder.add("Outbound Video Bitrate", videoSentBitrate);
+    builder.add("Audio Level Sent", audioLevelSent / statsArr.size());
+    mainBuilder.add("Sent", builder.build());
+
+    return mainBuilder.build();
+  }
+
+  private static JsonObject formatData(JsonObject json, List<String> keyArr) {
+    JsonObjectBuilder mainBuilder = Json.createObjectBuilder();
+    for (String key : keyArr) {
+      JsonObject data = json.getJsonObject(key);
+      JsonObjectBuilder innerBuilder = Json.createObjectBuilder();
+      for (String innerKey : data.keySet()) {
+        String s = data.getString(innerKey);
+        if (s.matches("-?\\d+")) {
+          if (s.length() < 10) {
+            innerBuilder.add(innerKey, Integer.parseInt(s));
+          } else {
+            innerBuilder.add(innerKey, Long.parseLong(s));
+          }
+        } else {
+          innerBuilder.add(innerKey, s);
+        }
+      }
+      mainBuilder.add(key, innerBuilder.build());
+    }
+    return mainBuilder.build();
+  }
+
+  private static List<String> findKeys(JsonObject json) {
+    ArrayList<String> keyArr = new ArrayList<>();
+    for (String key : json.keySet()) {
+      if (key.contains("RTC")) {
+        keyArr.add(key);
+      }
+    }
+    return keyArr;
+  }
+
+
+
+  /**
+   * Create a JsonObjectBuilder Object to eventually build a Json object from data obtained via
+   * tests.
+   *
+   * @param clientStats array of data sent back from test
+   * @return JsonObjectBuilder.
+   */
+  public static JsonObjectBuilder buildClientRTCStatObject(
+    Map<String, Object> clientStats, JsonArray selectedStats) {
+    try {
+      JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+      Map<String, Object> clientStatMap = clientStats;
+      List<Object> clientStatArray = (ArrayList<Object>) clientStatMap.get("stats");
+      JsonArrayBuilder jsonclientStatArray = Json.createArrayBuilder();
+      for (Object stats : clientStatArray) {
+        JsonObjectBuilder jsonRTCStatObjectBuilder = buildSingleRTCStatObject(stats, selectedStats);
+        jsonclientStatArray.add(jsonRTCStatObjectBuilder);
+      }
+
+      JsonObjectBuilder sdpObjectBuilder = Json.createObjectBuilder();
+      Map<Object, Object> sdpOffer = (Map<Object, Object>) clientStatMap.get("offer");
+      Map<Object, Object> sdpAnswer = (Map<Object, Object>) clientStatMap.get("answer");
+      sdpObjectBuilder
+        .add("offer", new SDP(sdpOffer).getJsonObjectBuilder())
+        .add("answer", new SDP(sdpAnswer).getJsonObjectBuilder());
+
+      jsonObjectBuilder.add("sdp", sdpObjectBuilder).add("statsArray", jsonclientStatArray);
+
+      return jsonObjectBuilder;
+    } catch (ClassCastException e) {
+      return Json.createObjectBuilder();
+    }
+  }
+
+  /**
+   * Create a JsonObjectBuilder Object to eventually build a Json object from data obtained via
+   * tests.
+   *
+   * @param statArray array of data sent back from test
+   * @param statsSelection ArrayList<String> of the selected stats
+   * @return JsonObjectBuilder.
+   */
+  public static JsonObjectBuilder buildSingleRTCStatObject(
+    Object statArray, JsonArray statsSelection) {
+    JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+    Map<String, List<RTCStatObject>> statObjectMap = new HashMap<>();
+    if (statArray != null) {
+      for (Object map : (ArrayList) statArray) {
+        if (map != null) {
+          Map<Object, Object> statMap = (Map<Object, Object>) map;
+          String type = (String) statMap.get("type");
+          if (statsSelection == null || statsSelection.toString().contains(type)) {
+            RTCStatObject statObject = null;
+            switch (type) {
+              case "codec":
+              {
+                statObject = new RTCCodecStats(statMap);
+                break;
+              }
+              case "track":
+              {
+                statObject = new RTCMediaStreamTrackStats(statMap);
+                break;
+              }
+              case "stream":
+              {
+                statObject = new RTCMediaStreamStats(statMap);
+                break;
+              }
+              case "inbound-rtp":
+              {
+                statObject = new RTCRTPStreamStats(statMap, true);
+                break;
+              }
+              case "outbound-rtp":
+              {
+                statObject = new RTCRTPStreamStats(statMap, false);
+                break;
+              }
+              case "peer-connection":
+              {
+                statObject = new RTCPeerConnectionStats(statMap);
+                break;
+              }
+              case "transport":
+              {
+                statObject = new RTCTransportStats(statMap);
+                break;
+              }
+              case "candidate-pair":
+              {
+                statObject = new RTCIceCandidatePairStats(statMap);
+                break;
+              }
+              case "remote-candidate":
+              {
+                statObject = new RTCIceCandidateStats(statMap);
+                break;
+              }
+              case "local-candidate":
+              {
+                statObject = new RTCIceCandidateStats(statMap);
+                break;
+              }
+            }
+            if (statObject != null) {
+              if (statObjectMap.get(type) == null) {
+                statObjectMap.put(type, new ArrayList<RTCStatObject>());
+              }
+              statObjectMap.get(type).add(statObject);
+            }
+          }
+        }
+      }
+    }
+    if (!statObjectMap.isEmpty()) {
+      for (String type : statObjectMap.keySet()) {
+        //        JsonArrayBuilder tmp = Json.createArrayBuilder();
+        JsonObjectBuilder tmp = Json.createObjectBuilder();
+        for (RTCStatObject stat : statObjectMap.get(type)) {
+          tmp.add(stat.getId(), stat.getJsonObjectBuilder());
+          //          tmp.add(/*stat.getId(),*/ stat.getJsonObjectBuilder());
+        }
+        jsonObjectBuilder.add(type, tmp);
+      }
+    }
+    return jsonObjectBuilder;
   }
   
 }

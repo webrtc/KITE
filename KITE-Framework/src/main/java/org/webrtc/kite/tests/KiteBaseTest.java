@@ -2,6 +2,7 @@ package org.webrtc.kite.tests;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.instrumentation.Instrumentation;
+import io.cosmosoftware.kite.instrumentation.NetworkProfileHashMap;
 import io.cosmosoftware.kite.instrumentation.Scenario;
 import io.cosmosoftware.kite.manager.RoomManager;
 import io.cosmosoftware.kite.report.AllureStepReport;
@@ -11,7 +12,6 @@ import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.steps.TestStep;
 import io.cosmosoftware.kite.util.ReportUtils;
-import io.cosmosoftware.kite.util.TestHelper;
 import io.cosmosoftware.kite.util.TestUtils;
 import io.cosmosoftware.kite.util.WebDriverUtils;
 import org.apache.log4j.Logger;
@@ -27,6 +27,7 @@ import org.webrtc.kite.exception.KiteGridException;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
+import java.lang.ref.SoftReference;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -57,13 +58,16 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> {
   protected JsonObject payload;
   protected JsonObject getStatsConfig = null;
   protected Instrumentation instrumentation = null;
+  protected NetworkProfileHashMap networks = null;
+  protected String instrumentUrl = null;
 
   protected final LinkedHashMap<StepPhase, AllureTestReport> reports = new LinkedHashMap<>();
+  
   protected List<EndPoint> endPointList = new ArrayList<>();
   protected final List<WebDriver> webDriverList = new ArrayList<>();
   protected final ArrayList<Scenario> scenarioArrayList = new ArrayList<>();
   protected final Map<WebDriver, Map<String, Object>> sessionData = new HashMap<WebDriver, Map<String, Object>>();
-  private List<StepPhase> phases = null;
+  private List<StepPhase> phases = new ArrayList<>();
   protected String kiteServerGridId;
   
   private int testTimeout = 60;
@@ -76,12 +80,19 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> {
 
   private boolean closeWebDrivers = true;
   private static RoomManager roomManager = null;
-  protected JsonArray networks;
   
-  public KiteBaseTest() {}
-  
+  public KiteBaseTest() {
+    setPhases(new ArrayList<>(Arrays.asList(StepPhase.DEFAULT)));
+  }
+
+  /**
+   * Sets the List of StepPhases.
+   * 
+   * @param phases
+   */
   public void setPhases(List<StepPhase> phases) {
     this.phases = phases;
+    this.reports.clear();
     for (StepPhase stepPhase : phases) {
       fillOutReport(stepPhase);
     }
@@ -151,7 +162,6 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> {
   public void init(StepPhase stepPhase) throws KiteTestException {
     this.reports.get(stepPhase).setStartTimestamp();
     AllureStepReport initStep = new AllureStepReport("Creating webdrivers and preparing threads..");
-    instrumentation = getInstrumentation();
     try {
       initStep.setStartTimestamp();
       if (this.payload != null) {
@@ -210,14 +220,14 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> {
       JsonArray jsonArray2 = this.payload.getJsonArray("scenarios");
       for (int i = 0; i < jsonArray2.size(); ++i) {
         try {
-          this.scenarioArrayList.add(new Scenario(jsonArray2.getJsonObject(i), logger, i, instrumentation));
+          this.scenarioArrayList.add(new Scenario(jsonArray2.getJsonObject(i), logger, networks, instrumentation));
         } catch (Exception e) {
           logger.error("Invalid scenario number : " + i + "\r\n" + ReportUtils.getStackTrace(e));
         }
       }
     }
   }
-  
+
   /**
    /**
    * Executes the tests in parallel.
@@ -356,7 +366,15 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> {
   public void setRemoteAddress(String remoteAddress) {
     this.remoteAddress = remoteAddress;
   }
-  
+
+  public String getRemoteAddress() {
+    return this.remoteAddress;
+  }
+
+  public String getInstrumentUrl() {
+    return this.instrumentation.getInstrumentUrl();
+  }
+
   /**
    * Sets payload.
    *
@@ -373,6 +391,23 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> {
    */
   public void setInstrumentation(Instrumentation instrumentation) {
     this.instrumentation = instrumentation;
+  }
+
+  /**
+   * Sets networks.
+   *
+   * @param networks the networks
+   */
+  public void setNetworks(NetworkProfileHashMap networks) {
+    this.networks = networks;
+  }
+
+  public void setNetworks(JsonArray networks) {
+    try {
+      this.networks = new NetworkProfileHashMap(networks);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -510,6 +545,15 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> {
   }
 
   /**
+   * Gets the Networks object
+   *
+   * @return the networks object
+   */
+  public NetworkProfileHashMap getNetworks() {
+    return this.networks;
+  }
+
+  /**
    * Gets selected stats.
    *
    * @return the jsonArray of selected stats for getStats
@@ -623,6 +667,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> {
 
   public void setKiteServerGridId(String kiteServerGridId) {
     this.kiteServerGridId = kiteServerGridId;
+    this.instrumentation.setKiteServerGridId(kiteServerGridId);
   }
   
   
@@ -634,9 +679,6 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> {
     return isLoadTest;
   }
 
-  public void setNetworks(JsonArray networks) {
-    this.networks = networks;
-  }
 
   public void setCloseWebDrivers(boolean closeWebDrivers) {
     this.closeWebDrivers = closeWebDrivers;

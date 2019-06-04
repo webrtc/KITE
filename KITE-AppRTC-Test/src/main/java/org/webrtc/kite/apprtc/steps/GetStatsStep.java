@@ -54,7 +54,7 @@ public class GetStatsStep extends TestStep {
     }
     LinkedHashMap<String, String> results = new LinkedHashMap<>();
     try {
-      JsonObject stats = getPCStatOvertime(webDriver, getStatsConfig).get(0);
+      JsonObject stats = appRTCMeetingPage.getPCStatOvertime(webDriver, getStatsConfig).get(0);
       JsonObject statsSummary = appRTCMeetingPage.buildstatSummary(stats, getStatsConfig.getJsonArray("selectedStats"));
       results = appRTCMeetingPage.statsHashMap(statsSummary);
       Reporter.getInstance().jsonAttachment(report, "getStatsRaw", stats);

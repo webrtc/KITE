@@ -12,13 +12,26 @@ Write automated interoperability test scripts in Java or Javascript and run them
 __KITE__ can be setup on Windows, Mac or Linux.  The installation process only takes 10 to 15 minutes.  
 
 Additional free WebRTC sample tests are available https://github.com/CoSMoSoftware/KITE-Sample-Tests  
+The sample tests cover all the major open-source SFUs demos:  
+ * Jisti
+ * Janus
+ * Kurento/openvidu
+ * Mediasoup
+ * Medooze (Simulcast demo)
 
-For advanced features such as:
- * load testing
- * network instrumentation
- * sample tests on native apps
 
-Please contact [contact@cosmosoftware.io](mailto:contact@cosmosoftware.io)
+__KITE__ also supports additional features such as:
+ * Load Testing (> 100,000 clients)
+ * Native Apps Testing on Android, iOS, Windows and MacOS
+ * Network Instrumentation in the cloud or on premises, for all platforms (browser and native)
+Please contact [contact@cosmosoftware.io](mailto:contact@cosmosoftware.io) for more information.  
+
+
+#### Tutorials: Writing a simple KITE Test for Jitsi in Java and/or Javascript
+
+Once you've completed the installation and run the sample tests, pleaae try to write your own KITE test following our tutorials.  
+ * [KITE Test for Jitsi in Java](tutorial/Tutorial_Java.md)
+ * [KITE Test for Jitsi in Javascript](tutorial/Tutorial_Javascript.md)
 
 
 #### _This is not an official Google product_
@@ -308,7 +321,7 @@ allure serve kite-allure-reports
 
 ## Basic configuration file
 
-The example example.config.json file is almost the simplest config file you can get
+The example search.local.config.json file is almost the simplest config file you can get
  (Change the version of browsers to the appropriated one that you have installed on your testing machine):
 
 ```json
@@ -323,10 +336,10 @@ The example example.config.json file is almost the simplest config file you can 
   ],
   "tests": [
     {
-      "name": "KiteExampleTest",
+      "name": "KiteExampleSearchTest",
       "tupleSize": 1,
       "description": "This example test opens google and searches for Cosmo Software Consulting and verify the first result",
-      "testImpl": "KiteExampleTest",
+      "testImpl": "KiteExampleSearchTest",
       "payload" : {
         "test1": "ONE",
         "test2": "TWO"
@@ -365,10 +378,10 @@ It registers IceConnectionTest class as a test (this class is implemented in KIT
 ```json
   "tests": [
     {
-      "name": "KiteExampleTest",
+      "name": "KiteExampleSearchTest",
       "tupleSize": 1,
       "description": "This example test opens google and searches for Cosmo Software Consulting and verify the first result",
-      "testImpl": "KiteExampleTest",
+      "testImpl": "KiteExampleSearchTest",
       "payload" : {
         "test1": "ONE",
         "test2": "TWO"

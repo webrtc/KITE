@@ -75,20 +75,20 @@ public class TestManager implements Callable<Object> {
     KiteBaseTest test = testConf.isJavascript()
       ? new KiteJsTest(testConf.getTestImpl())
       : (KiteBaseTest) Class.forName(this.testConf.getTestImpl()).getConstructor().newInstance();
+    
     phases = getPhases(testConf.isLoadTest());
     test.setCloseWebDrivers(testConf.isCloseWebDrivers());
     test.setPhases(phases);
     test.setSuite(testSuite.getName());
-  
     
     test.setConfigFilePath(Configurator.getInstance().getConfigFilePath());
     test.setInstrumentation(Configurator.getInstance().getInstrumentation());
-    test.setParentSuite(Configurator.getInstance().getName());
-    
+    test.setNetworks(Configurator.getInstance().getNetworks());
+    test.setParentSuite(Configurator.getInstance().getName());    
     test.setLogger(testConf.getLogger());
     test.setDescription(testConf.getDescription());
     test.setPayload(testConf.getPayload());
-
+    test.setRemoteAddress(Configurator.getInstance().getRemoteAddress());
     test.setEndPointList(tuple);
     
     if (testConf.isLoadTest()) {

@@ -21,6 +21,7 @@ import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestCheck;
 import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
+import org.webrtc.kite.stats.StatsUtils;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -59,7 +60,7 @@ public class BitrateCheck extends TestCheck {
         .add(stat)
         .build();
     // Get a stats array of the selected stat for 5 seconds
-    JsonObject stats = appRTCMeetingPage.getStatOvertime(
+    JsonObject stats = StatsUtils.getStatOvertime(
       webDriver, FIVE_SECOND_INTERVAL, ONE_SECOND_INTERVAL, selectedStat).build();
     double avgBitrate = computeBitrate(stats.getJsonArray("statsArray"), stat, mediaType);
     System.out.println("avgBitrate lah =>>>>>> " + avgBitrate);

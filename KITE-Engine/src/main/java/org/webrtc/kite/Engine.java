@@ -71,8 +71,6 @@ public class Engine {
     try {
       List<Tuple> tupleList = Configurator.getInstance()
         .buildTuples(testConf.getTupleSize(), testConf.isPermute(), testConf.isRegression());
-
-      tupleList.addAll(Configurator.getInstance().getCustomBrowserMatrix());
       
       service.submit(new TestRunThread(testConf, tupleList)).get();
     } catch (Exception e) {

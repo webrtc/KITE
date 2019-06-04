@@ -18,6 +18,7 @@ package org.webrtc.kite.config;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.instrumentation.Instrumentation;
+import io.cosmosoftware.kite.instrumentation.NetworkProfileHashMap;
 import io.cosmosoftware.kite.report.Reporter;
 import org.apache.log4j.Logger;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
@@ -60,16 +61,16 @@ public class Configurator {
   private String name;
   private String commandName;
   private String configFilePath;
-  private boolean customMatrixOnly = false;
   private boolean skipSame = false;
   private long timeStamp = System.currentTimeMillis();
   private JsonObject jsonConfigObject;
   private ConfigHandler configHandler;
-  private List<Tuple> customBrowserMatrix = new ArrayList<>();
   private List<JsonObject> testObjectList;
   private List<JsonObject> customMatrix;
   private List<JsonObject> remoteObjectList = null;
   private Instrumentation instrumentation = null;
+  private NetworkProfileHashMap networks = null;
+  private String instrumentUrl = null;
   
   private Configurator() {
   }
@@ -135,8 +136,6 @@ public class Configurator {
         throw new KiteInsufficientValueException("Less than one browser or app object.");
       }
   
-      this.customMatrixOnly = jsonConfigObject.getBoolean("customMatrixOnly", this.customMatrixOnly);
-  
       this.customMatrix = (List<JsonObject>)
         throwNoKeyOrBadValueException(jsonConfigObject, "matrix", JsonArray.class, true);
   
@@ -169,24 +168,33 @@ public class Configurator {
       new ConfigHandler(permute, callbackURL, remoteObjectList, testObjectList,
         browserObjectList, appObjectList);
     
-    String instrumentUrl = jsonConfigObject.getString("instrumentUrl", null);
+    this.instrumentUrl = jsonConfigObject.getString("instrumentUrl", null);
     if (instrumentUrl != null) {
       try {
         String instrumentFile = System.getProperty("java.io.tmpdir") + "instrumentation.json";
         if (instrumentUrl.contains("://")) {
           //if this is a url, then download it
-          downloadFile(instrumentUrl, instrumentFile);
+          downloadFile(this.instrumentUrl, instrumentFile);
         } else {
           //otherwise assume it can be read directly.
-          instrumentFile = instrumentUrl;
+          instrumentFile = this.instrumentUrl;
         }
         JsonObject instrumentObject = readJsonFile(instrumentFile);
-        this.instrumentation = new Instrumentation(instrumentObject);
+        this.instrumentation = new Instrumentation(instrumentObject, instrumentUrl, getRemoteAddress());
       } catch (KiteTestException e) {
         logger.error(getStackTrace(e));
       }
     }
-    skipSame = jsonConfigObject.getBoolean("skipSame", skipSame);
+    JsonArray networksArray =  jsonConfigObject.containsKey("networks") ?  jsonConfigObject.getJsonArray("networks"):null;
+    if (networksArray != null ) {
+      try {
+        this.networks = new NetworkProfileHashMap(networksArray);
+      } catch (Exception e) {
+        logger.error(getStackTrace(e));
+      }
+
+    }
+    skipSame =  jsonConfigObject.getBoolean("skipSame", skipSame);
     logger.info("Finished reading the configuration file");
   }
   
@@ -204,17 +212,16 @@ public class Configurator {
       listOfTuples.add(new Tuple());
     } else {
       if (this.customMatrix != null) {
+        List<Tuple> customBrowserMatrix = new ArrayList<>();
         for (JsonStructure structure : this.customMatrix) {
           JsonArray jsonArray = (JsonArray) structure;
           Tuple tuple = new Tuple();
           for (int i = 0; i < jsonArray.size(); i++) {
             tuple.add(this.configHandler.getEndPointList().get(jsonArray.getInt(i)));
           }
-          this.customBrowserMatrix.add(tuple);
+          customBrowserMatrix.add(tuple);
         }
-        
-        if (this.customMatrixOnly)
-          return null;
+        return customBrowserMatrix;
       }
       
       List<EndPoint> endPointList = this.configHandler.getEndPointList();
@@ -234,9 +241,8 @@ public class Configurator {
           || (skipSame && tuple.stream().distinct().limit(2).count() <= 1)) {
           listOfTuples.remove(tuple);
         }
-      }
-      
-      Collections.shuffle(listOfTuples);
+      }      
+      //Collections.shuffle(listOfTuples);
     }
     return listOfTuples;
   }
@@ -275,15 +281,6 @@ public class Configurator {
   public ConfigHandler getConfigHandler() {
     return this.configHandler;
   }
-  
-  /**
-   * getCustomBrowserMatrix
-   *
-   * @return the custom browser matrix
-   */
-  public List<Tuple> getCustomBrowserMatrix() {
-    return this.customBrowserMatrix;
-  }
 
   /**
    * Gets instance.
@@ -296,6 +293,12 @@ public class Configurator {
   
   public Instrumentation getInstrumentation() {
     return instrumentation;
+  }
+
+  public String getInstrumentUrl() { return this.instrumentUrl; }
+
+  public NetworkProfileHashMap getNetworks() {
+    return networks;
   }
   
   /**
@@ -314,7 +317,7 @@ public class Configurator {
    */
   public String getRemoteAddress() {
     if (remoteObjectList != null && remoteObjectList.size() > 0) {
-      return remoteObjectList.get(0).getString("remoteAddress");
+      return remoteObjectList.get(0).getString("remoteAddress").split("/")[2].split(":")[0];
     }
     return null;
   }
@@ -335,15 +338,6 @@ public class Configurator {
    */
   public long getTimeStamp() {
     return this.timeStamp;
-  }
-  
-  /**
-   * isCustomerMatrixOnly
-   *
-   * @return  true if the test is using custom matrix only
-   */
-  public boolean isCustomMatrixOnly() {
-    return customMatrixOnly;
   }
   
   /**

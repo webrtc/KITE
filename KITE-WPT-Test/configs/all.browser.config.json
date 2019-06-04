@@ -5,7 +5,7 @@
   "remotes": [
     {
       "type": "local",
-      "remoteAddress": "http://192.168.1.33:4444/wd/hub"
+      "remoteAddress": "http://localhost:4444/wd/hub"
     }
   ],
   "callback": null,
