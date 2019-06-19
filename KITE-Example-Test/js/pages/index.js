@@ -1,3 +1,3 @@
-exports.googleResultPage = require("./google-result-page"); 
-exports.googleSearchPage = require("./google-search-page"); 
+exports.GoogleResultPage = require("./GoogleResultPage"); 
+exports.GoogleSearchPage = require("./GoogleSearchPage"); 
 

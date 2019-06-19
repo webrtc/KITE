@@ -13,9 +13,9 @@ java -cp kite-jar-with-dependencies.jar:apprtc-test-1.0.jar org.webrtc.kite.Engi
         "callback": "http://localhost:8080/kiteweb/datacenter",
         "remotes": [
             {
-                "type": "local",
-                "remoteAddress": "http://localhost:4444/wd/hub"
-            }
+      "type": "local",
+      "url": "http://localhost:4444/wd/hub"
+    }
         ],
         "tests": [
             {

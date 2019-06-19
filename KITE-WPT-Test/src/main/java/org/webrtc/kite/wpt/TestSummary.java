@@ -10,35 +10,17 @@ import java.util.List;
  * The type Test report.
  */
 public class TestSummary {
+  private long endTime = System.currentTimeMillis();
   private String name;
+  private List<Result> results = new ArrayList<>();
   private RunInfo runInfo;
   private long startTime = System.currentTimeMillis();
-  private long endTime = System.currentTimeMillis();
-  private List<Result> results = new ArrayList<>();
   
   /**
    * Instantiates a new Test report.
    */
   public TestSummary() {
-  
-  }
-  
-  /**
-   * Sets start time.
-   *
-   * @param startTime the start time
-   */
-  public void setStartTime(long startTime) {
-    this.startTime = startTime;
-  }
-  
-  /**
-   * Sets end time.
-   *
-   * @param endTime the end time
-   */
-  public void setEndTime(long endTime) {
-    this.endTime = endTime;
+
   }
   
   /**
@@ -48,6 +30,37 @@ public class TestSummary {
    */
   public void addResult(Result result) {
     this.results.add(result);
+  }
+  
+  /**
+   * Gets json.
+   *
+   * @return the json
+   */
+  private JsonObject getJson() {
+    JsonArrayBuilder resultArray = Json.createArrayBuilder();
+    for (Result result : results) {
+      resultArray.add(result.getJson());
+    }
+
+    return Json.createObjectBuilder()
+      .add("run_info", runInfo.getJson())
+      .add("startTime", startTime)
+      .add("endTime", endTime)
+      .add("results", resultArray).build();
+  }
+  
+  public String getName() {
+    return name;
+  }
+  
+  /**
+   * Sets end time.
+   *
+   * @param endTime the end time
+   */
+  public void setEndTime(long endTime) {
+    this.endTime = endTime;
   }
   
   /**
@@ -61,29 +74,16 @@ public class TestSummary {
   }
   
   /**
-   * Gets json.
+   * Sets start time.
    *
-   * @return the json
+   * @param startTime the start time
    */
-  private JsonObject getJson() {
-    JsonArrayBuilder resultArray = Json.createArrayBuilder();
-    for (Result result: results) {
-      resultArray.add(result.getJson());
-    }
-    
-    return Json.createObjectBuilder()
-      .add("run_info", runInfo.getJson())
-      .add("startTime", startTime)
-      .add("endTime", endTime)
-      .add("results", resultArray).build();
+  public void setStartTime(long startTime) {
+    this.startTime = startTime;
   }
   
   @Override
   public String toString() {
     return getJson().toString();
-  }
-  
-  public String getName() {
-    return name;
   }
 }

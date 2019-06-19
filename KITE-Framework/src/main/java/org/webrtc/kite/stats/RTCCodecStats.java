@@ -17,7 +17,6 @@
 package org.webrtc.kite.stats;
 
 
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
@@ -27,10 +26,10 @@ import java.util.Map;
  */
 public class RTCCodecStats extends RTCStatObject {
 
-  private final String payloadType;
-  private final String codec;
-  private final String clockRate;
   private final String channels;
+  private final String clockRate;
+  private final String codec;
+  private final String payloadType;
   private final String sdpFmtpLine;
 
 

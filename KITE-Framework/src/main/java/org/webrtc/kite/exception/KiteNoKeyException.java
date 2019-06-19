@@ -20,7 +20,7 @@ package org.webrtc.kite.exception;
  * The KiteNoKeyException is thrown if the specified key is missing.
  */
 public class KiteNoKeyException extends NullPointerException {
-
+  
   private final String key;
   
   /**
@@ -41,5 +41,5 @@ public class KiteNoKeyException extends NullPointerException {
   public String getKey() {
     return key;
   }
-
+  
 }

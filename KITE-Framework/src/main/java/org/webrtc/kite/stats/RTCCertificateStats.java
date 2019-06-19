@@ -28,9 +28,9 @@ import java.util.Map;
  */
 public class RTCCertificateStats extends RTCStatObject {
 
+  private final String base64Certificate;
   private final String fingerprint;
   private final String fingerprintAlgorithm;
-  private final String base64Certificate;
   private final String issuerCertificateId;
 
   public RTCCertificateStats(Map<Object, Object> statObject) {

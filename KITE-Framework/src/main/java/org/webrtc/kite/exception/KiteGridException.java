@@ -20,7 +20,7 @@ package org.webrtc.kite.exception;
  * The KiteGridException is thrown to specify that KITE is unable to instantiate web drivers.
  */
 public class KiteGridException extends Exception {
-
+  
   /**
    * Constructs a KiteGridException with the specified detailed message.
    *
@@ -29,5 +29,5 @@ public class KiteGridException extends Exception {
   public KiteGridException(String message) {
     super(message);
   }
-
+  
 }

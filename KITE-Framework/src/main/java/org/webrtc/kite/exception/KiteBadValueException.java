@@ -20,7 +20,7 @@ package org.webrtc.kite.exception;
  * The KiteBadValueException is thrown if the value of the specified key is invalid.
  */
 public class KiteBadValueException extends ClassCastException {
-
+  
   private final String key;
   
   /**
@@ -41,5 +41,5 @@ public class KiteBadValueException extends ClassCastException {
   public String getKey() {
     return key;
   }
-
+  
 }

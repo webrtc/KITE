@@ -18,10 +18,10 @@ package org.webrtc.kite.apprtc.checks;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.Reporter;
 import io.cosmosoftware.kite.report.Status;
+import io.cosmosoftware.kite.interfaces.Runner;
 import io.cosmosoftware.kite.steps.TestCheck;
 import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
-import org.webrtc.kite.stats.StatsUtils;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -29,14 +29,15 @@ import javax.json.JsonObject;
 
 import static io.cosmosoftware.kite.entities.Timeouts.FIVE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
+import static org.webrtc.kite.stats.StatsUtils.getStatOvertime;
 
 public class BitrateCheck extends TestCheck {
   private int expectedBitrate = -1;
   private String mediaType;
   private String direction;
   
-  public BitrateCheck(WebDriver webDriver) {
-    super(webDriver);
+  public BitrateCheck(Runner runner) {
+    super(runner);
   }
   
   @Override
@@ -53,14 +54,13 @@ public class BitrateCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
-    final AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
     String stat = direction.equalsIgnoreCase("sending") ? "inbound-rtp" : "outbound-rtp";
     JsonArray selectedStat =
       Json.createArrayBuilder()
         .add(stat)
         .build();
     // Get a stats array of the selected stat for 5 seconds
-    JsonObject stats = StatsUtils.getStatOvertime(
+    JsonObject stats = getStatOvertime(
       webDriver, FIVE_SECOND_INTERVAL, ONE_SECOND_INTERVAL, selectedStat).build();
     double avgBitrate = computeBitrate(stats.getJsonArray("statsArray"), stat, mediaType);
     System.out.println("avgBitrate lah =>>>>>> " + avgBitrate);

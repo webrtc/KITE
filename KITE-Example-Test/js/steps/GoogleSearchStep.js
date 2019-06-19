@@ -1,5 +1,4 @@
-const {TestUtils, TestStep} = require('kite-common');
-const {googleSearchPage} = require('../pages');
+const {TestStep} = require('kite-common');
 /**
  * Class: GoogleSearchStep
  * Extends: TestStep
@@ -11,6 +10,7 @@ class GoogleSearchStep extends TestStep {
     this.driver = kiteBaseTest.driver;
     this.timeout = kiteBaseTest.timeout;
     this.url = url;
+    this.page = kiteBaseTest.page;
     this.target = "CoSMo Software Consulting";
   }
 
@@ -19,8 +19,8 @@ class GoogleSearchStep extends TestStep {
   }
 
   async step() {
-    await TestUtils.open(this);
-    await googleSearchPage.searchFor(this);
+    await this.page.open(this);
+    await this.page.searchFor(this.target);
   }
 }
 

@@ -1,4 +1,4 @@
-const {TestUtils, TestStep} = require('kite-common');
+const {TestStep} = require('kite-common');
 
 /**
  * Class: RemoteVideoDisplayCheck

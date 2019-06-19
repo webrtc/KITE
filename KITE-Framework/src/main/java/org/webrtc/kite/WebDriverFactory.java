@@ -19,7 +19,7 @@ package org.webrtc.kite;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
-import org.apache.log4j.Logger;
+import io.cosmosoftware.kite.report.KiteLogger;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.WebDriver;
@@ -33,10 +33,10 @@ import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariOptions;
-import org.webrtc.kite.config.App;
-import org.webrtc.kite.config.Browser;
-import org.webrtc.kite.config.EndPoint;
-import org.webrtc.kite.config.Mobile;
+import org.webrtc.kite.config.client.App;
+import org.webrtc.kite.config.client.Browser;
+import org.webrtc.kite.config.client.Client;
+import org.webrtc.kite.config.client.MobileSpecs;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -50,113 +50,27 @@ import java.util.logging.Level;
  */
 public class WebDriverFactory {
   
-  private static final Logger logger = Logger.getLogger(WebDriverFactory.class.getName());
-  
-  /**
-   * Creates a web driver based on the given Browser object.
-   *
-   * @param endPoint EndPoint
-   * @param testName the test name
-   * @param id       an ID to identify the WebDriver
-   *
-   * @return WebDriver web driver
-   * @throws MalformedURLException if no protocol is specified in the remoteAddress of the endPoint,
-   * or an unknown protocol is found, or spec is null.
-   * @throws WebDriverException    the web driver exception
-   */
-  public static WebDriver createWebDriver(EndPoint endPoint, String testName, String id)
-    throws MalformedURLException, WebDriverException {
-    if (endPoint instanceof Browser) {
-      return new RemoteWebDriver(new URL(endPoint.getRemoteAddress()),
-        WebDriverFactory.createCapabilities(endPoint, testName, id));
-    } else {
-      if (endPoint.getPlatform().equalsIgnoreCase("android")) {
-        return new AndroidDriver<>(new URL(endPoint.getRemoteAddress()),
-          WebDriverFactory.createCapabilities(endPoint, testName, id));
-      } else {
-        return new IOSDriver<>(new URL(endPoint.getRemoteAddress()),
-          WebDriverFactory.createCapabilities(endPoint, testName, id));
-      }
-    }
-  }
-  
-  /**
-   * Gets web driver for endPoint.
-   *
-   * @param testName the test name
-   * @param endPoint the endPoint
-   *
-   * @return the web driver for endPoint
-   * @throws MalformedURLException the malformed url exception
-   * @throws WebDriverException    the web driver exception
-   */
-  public static WebDriver getWebDriverForEndPoint(String testName, EndPoint endPoint)
-    throws MalformedURLException, WebDriverException {
-    return createWebDriver(endPoint, testName, "");
-  }
-  
-  /**
-   * Gets web driver for endPoint.
-   *
-   * @param testName the test name
-   * @param endPoint the endPoint
-   * @param id       an ID to identify the WebDriver
-   *
-   * @return the web driver for endPoint
-   * @throws MalformedURLException the malformed url exception
-   * @throws WebDriverException    the web driver exception
-   */
-  public static WebDriver getWebDriverForEndPoint(String testName, EndPoint endPoint, String id)
-    throws MalformedURLException, WebDriverException {
-    return createWebDriver(endPoint, testName, id);
-  }
-  
-  /**
-   * Creates a Capabilities object based on the given EndPoint object.
-   *
-   * @param endPoint kite config object
-   * @param testName name for individual test case
-   * @return the capabilities for creating webdriver
-   */
-  private static Capabilities createCapabilities(EndPoint endPoint, String testName, String id) {
-    
-    MutableCapabilities capabilities;
-    if (endPoint instanceof Browser) {
-      capabilities = buildBrowserCapabilities((Browser) endPoint);
-    } else {
-      capabilities = buildAppCapabilities((App) endPoint);
-    }
-    // Remote test identifier
-    if (testName != null) {
-      capabilities.setCapability("name", testName);
-    }
-    if (id != null) {
-      capabilities.setCapability("id", id);
-    }
-    for (String capabilityName : endPoint.getExtraCapabilities().keySet()) {
-      logger.info("extraCapabilites : " + capabilityName + ": " + endPoint.getExtraCapabilities().get(capabilityName));
-      capabilities.setCapability(capabilityName, endPoint.getExtraCapabilities().get(capabilityName));
-    }
-    return capabilities;
-  }
+  private static final KiteLogger logger = KiteLogger.getLogger(WebDriverFactory.class.getName());
   
   /**
    * Build capabilities for app appium driver
-   * @param app the App endpoint object
-   * @return  capabilities appium driver
+   *
+   * @param app the App client object
+   *
+   * @return capabilities appium driver
    */
-  private static MutableCapabilities buildAppCapabilities(App app){
+  private static MutableCapabilities buildAppCapabilities(App app) {
     MutableCapabilities capabilities = new MutableCapabilities();
     // The absolute local path or remote http URL to an .ipa or .apk file, or a .zip containing one of these.
     // Appium will attempt to install this app binary on the appropriate device first.
     capabilities.setCapability("app", app.getApp());
-    capabilities.setCapability("deviceName", app.getDeviceName());
-    capabilities.setCapability("platformName", app.getPlatform());
-    if (app.getPlatform().equalsIgnoreCase("iOS")) {
+    capabilities.setCapability("deviceName", app.retrieveDeviceName());
+    capabilities.setCapability("platformName", app.retrievePlatform());
+    if (app.retrievePlatform().name().equalsIgnoreCase("iOS")) {
       capabilities.setCapability("automationName", "XCUITest");
     } else {
       capabilities.setCapability("autoGrantPermissions", true);
-      capabilities.setCapability("fullReset", app.getReset());
+      capabilities.setCapability("fullReset", app.isFullReset());
     }
     if (app.getAppPackage() == null || app.getAppActivity() == null) {
       logger.warn("Using [" + app.getApp() + "]: Some mobile applications may require appPackage and appActivity " +
@@ -176,29 +90,31 @@ public class WebDriverFactory {
   
   /**
    * Build capabilities for browser web driver
-   * @param browser the Browser endpoint object
-   * @return  capabilities appium driver
+   *
+   * @param browser the Browser client object
+   *
+   * @return capabilities appium driver
    */
   private static MutableCapabilities buildBrowserCapabilities(Browser browser) {
     MutableCapabilities capabilities = new MutableCapabilities();
     if (browser.getVersion() != null) {
       capabilities.setCapability(CapabilityType.VERSION, browser.getVersion());
     }
-    if (browser.getPlatform() != null) {
-      capabilities.setCapability(CapabilityType.PLATFORM_NAME, browser.getPlatform());
+    if (browser.retrievePlatform() != null) {
+      capabilities.setCapability(CapabilityType.PLATFORM_NAME, browser.retrievePlatform());
     }
-
+    
     if (browser.getGateway() != null) {
       capabilities.setCapability("gateway", browser.getGateway());
     }
-  
+    
     // Only consider next code block if this is a browser.
     switch (browser.getBrowserName()) {
       case "chrome":
-        capabilities.setCapability(ChromeOptions.CAPABILITY, getChromeOptions(browser));
+        capabilities.setCapability(ChromeOptions.CAPABILITY, setCommonChromeOptions(browser));
         break;
       case "firefox":
-        capabilities.merge(getFirefoxOptions(browser));
+        capabilities.merge(setCommonFirefoxOptions(browser));
         break;
       case "MicrosoftEdge":
         EdgeOptions MicrosoftEdgeOptions = new EdgeOptions();
@@ -217,7 +133,7 @@ public class WebDriverFactory {
     logPrefs.enable(LogType.BROWSER, Level.ALL);
     capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
     // Capabilities for mobile browser/app
-    Mobile mobile = browser.getMobile();
+    MobileSpecs mobile = browser.getMobile();
     if (mobile != null) {
       // deviceName:
       // On iOS, this should be one of the valid devices returned by instruments with instruments -s devices.
@@ -225,7 +141,7 @@ public class WebDriverFactory {
       capabilities.setCapability("deviceName", mobile.getDeviceName());
       capabilities.setCapability("platformName", mobile.getPlatformName());
       capabilities.setCapability("platformVersion", mobile.getPlatformVersion());
-      if (mobile.getPlatformName().equalsIgnoreCase("iOS")) {
+      if (mobile.getPlatformName().name().equalsIgnoreCase("iOS")) {
         capabilities.setCapability("automationName", "XCUITest");
       } else {
         capabilities.setCapability("autoGrantPermissions", true);
@@ -237,22 +153,113 @@ public class WebDriverFactory {
   }
   
   /**
-   * Create common chrome option to create chrome web driver
-   * @param browser the Browser endpoint object
-   * @return  the chrome option
+   * Creates a Capabilities object based on the given Client object.
+   *
+   * @param client   kite config object
+   * @param testName name for individual test case
+   *
+   * @return the capabilities for creating webdriver
    */
-  private static ChromeOptions getChromeOptions(Browser browser) {
-    ChromeOptions chromeOptions = new ChromeOptions();
-    if (browser.useFakeMedia()) {
-      chromeOptions.addArguments("use-fake-ui-for-media-stream");
-      chromeOptions.addArguments("use-fake-device-for-media-stream");
+  private static Capabilities createCapabilities(Client client, String testName, String id) {
+    
+    MutableCapabilities capabilities;
+    if (client instanceof Browser) {
+      capabilities = buildBrowserCapabilities((Browser) client);
     } else {
-      // Create an Hashmap to edit user profil
+      capabilities = buildAppCapabilities((App) client);
+    }
+    // Remote test identifier
+    if (testName != null) {
+      capabilities.setCapability("name", testName);
+    }
+    if (id != null) {
+      capabilities.setCapability("id", id);
+    }
+    for (String capabilityName : client.getExtraCapabilities().keySet()) {
+      logger.info("extraCapabilites : " + capabilityName + ": " + client.getExtraCapabilities().get(capabilityName));
+      capabilities.setCapability(capabilityName, client.getExtraCapabilities().get(capabilityName));
+    }
+    return capabilities;
+  }
+  
+  /**
+   * Creates a web driver based on the given Browser object.
+   *
+   * @param client   Client
+   * @param testName the test name
+   * @param id       an ID to identify the WebDriver
+   *
+   * @return WebDriver web driver
+   * @throws MalformedURLException if no protocol is specified in the remoteAddress of the client,
+   *                               or an unknown protocol is found, or spec is null.
+   * @throws WebDriverException    the web driver exception
+   */
+  public static WebDriver createWebDriver(Client client, String testName, String id)
+    throws MalformedURLException, WebDriverException {
+    
+    URL url = new URL(client.getPaas().getUrl());
+    
+    if (client instanceof Browser) {
+      return new RemoteWebDriver(url, WebDriverFactory.createCapabilities(client, testName, id));
+    } else {
+      if (client.retrievePlatform().name().equalsIgnoreCase("android")) {
+        return new AndroidDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
+      } else {
+        return new IOSDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
+      }
+    }
+  }
+  
+  /**
+   * Gets web driver for client.
+   *
+   * @param testName the test name
+   * @param client   the client
+   * @param id       an ID to identify the WebDriver
+   *
+   * @return the web driver for client
+   * @throws MalformedURLException the malformed url exception
+   * @throws WebDriverException    the web driver exception
+   */
+  public static WebDriver getWebDriverForClient(String testName, Client client, String id)
+    throws MalformedURLException, WebDriverException {
+    return createWebDriver(client, testName, id);
+  }
+  
+  /**
+   * Gets web driver for client.
+   *
+   * @param testName the test name
+   * @param client   the client
+   *
+   * @return the web driver for client
+   * @throws MalformedURLException the malformed url exception
+   * @throws WebDriverException    the web driver exception
+   */
+  public static WebDriver getWebDriverForClient(String testName, Client client)
+    throws MalformedURLException, WebDriverException {
+    return createWebDriver(client, testName, "");
+  }
+  
+  /**
+   * Create common chrome option to create chrome web driver
+   *
+   * @param browser the Browser client object
+   *
+   * @return the chrome option
+   */
+  private static ChromeOptions setCommonChromeOptions(Browser browser) {
+    ChromeOptions chromeOptions = new ChromeOptions();
+    if (!browser.useFakeMedia()){
+      // Create an Hashmap to edit user profile
       Map<String, Object> prefs = new HashMap<String, Object>();
       // Allow access to camera & micro
       prefs.put("profile.default_content_setting_values.media_stream_camera", 1);
       prefs.put("profile.default_content_setting_values.media_stream_mic", 1);
       chromeOptions.setExperimentalOption("prefs", prefs);
+    } else {
+      chromeOptions.addArguments("use-fake-ui-for-media-stream");
+      chromeOptions.addArguments("use-fake-device-for-media-stream");
     }
     chromeOptions.addArguments("auto-select-desktop-capture-source=Entire screen");
     if (!"electron".equals(browser.getVersion())) {
@@ -261,17 +268,24 @@ public class WebDriverFactory {
       if (extension != null) {
         chromeOptions.addExtensions(new File(extension));
       }
-    } else {
-      // ELECTRON CLIENT ONLY:
-      // Cannot use it for every chrome because there might be 2 instances using same port (conflict)
-      // chromeOptions.addArguments("remote-debugging-port=5000");
     }
-    if (browser.getFakeMediaFile() != null) {
+    if (browser.getVideo() != null || browser.getAudio() != null) {
       chromeOptions.addArguments("allow-file-access-from-files");
-      chromeOptions.addArguments("use-file-for-fake-video-capture=" + browser.getFakeMediaFile() + "");
-      if (browser.getFakeMediaAudio() != null && browser.getFakeMediaAudio().length() > 0) {
-        chromeOptions.addArguments("use-file-for-fake-audio-capture=" + browser.getFakeMediaAudio());
-      }
+    }
+    if (browser.getVideo() != null) {
+      chromeOptions.addArguments("use-file-for-fake-video-capture="
+        + browser.fetchMediaPath(browser.getVideo(), browser.getBrowserName()));
+    }
+    if (browser.getAudio() != null) {
+      chromeOptions.addArguments("use-file-for-fake-audio-capture="
+        + browser.fetchMediaPath(browser.getAudio(), browser.getBrowserName()));
+    }
+    /*
+     * if (browser.getVersion().toLowerCase().contains("electron")) {
+     * chromeOptions.setBinary(browser.getSpecs().getPathToBinary()); }
+     */
+    if (browser.getSpecs().getPathToBinary() != null) {
+      chromeOptions.setBinary(browser.getSpecs().getPathToBinary());
     }
     if (browser.isHeadless()) {
       chromeOptions.addArguments("headless");
@@ -287,19 +301,21 @@ public class WebDriverFactory {
        * chromeOptions.addArguments("no-sandbox");
        */
     }
-    return  chromeOptions;
+    return chromeOptions;
   }
   
   /**
    * Create common firefox option to create firefox web driver
-   * @param browser the Browser endpoint object
-   * @return  the firefox option
+   *
+   * @param browser the Browser client object
+   *
+   * @return the firefox option
    */
-  private static FirefoxOptions getFirefoxOptions(Browser browser) {
+  private static FirefoxOptions setCommonFirefoxOptions(Browser browser) {
     FirefoxProfile firefoxProfile = null;
     String profile = System.getProperty("kite.firefox.profile");
     if (profile != null) {
-      switch (browser.getPlatform().toUpperCase()) {
+      switch (browser.retrievePlatform().name().toUpperCase()) {
         case "WINDOWS":
           profile += "firefox-h264-profiles/h264-windows";
           break;
@@ -315,7 +331,11 @@ public class WebDriverFactory {
       logger.warn("FIREFOX: Some tests require specific profile for firefox to work properly.");
       firefoxProfile = new FirefoxProfile();
     }
-    firefoxProfile.setPreference("media.navigator.streams.fake", browser.useFakeMedia());
+    if (!browser.useFakeMedia()) {
+      logger.info("Use media files.");
+    } else {
+      firefoxProfile.setPreference("media.navigator.streams.fake", browser.useFakeMedia());
+    }
     FirefoxOptions firefoxOptions = new FirefoxOptions();
     firefoxOptions.setProfile(firefoxProfile);
     if (browser.isHeadless()) {

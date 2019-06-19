@@ -17,22 +17,6 @@ public abstract class RTCStatObject {
   private String id;
   
   /**
-   * Obtain a value of a key in the data map if not null
-   *
-   * @param statObject data Map
-   * @param statName   name of the key
-   * @return true if both the provided objects are not null.
-   */
-  protected String getStatByName(Map<Object, Object> statObject, String statName) {
-    String str = statObject.get(statName) != null ?  statObject.get(statName).toString() : "NA";
-    if ("timestamp".equals(statName)){
-      str = formatTimestamp(str);
-    }
-    return str;
-  }
-
-
-  /**
    * Gets id.
    *
    * @return the id
@@ -40,7 +24,7 @@ public abstract class RTCStatObject {
   public String getId() {
     return id;
   }
-  
+
   /**
    * Sets id.
    *
@@ -65,6 +49,22 @@ public abstract class RTCStatObject {
    * @return JsonObjectBuilder json object builder
    */
   public abstract JsonObjectBuilder getJsonObjectBuilder();
+  
+  /**
+   * Obtain a value of a key in the data map if not null
+   *
+   * @param statObject data Map
+   * @param statName   name of the key
+   *
+   * @return true if both the provided objects are not null.
+   */
+  protected String getStatByName(Map<Object, Object> statObject, String statName) {
+    String str = statObject.get(statName) != null ? statObject.get(statName).toString() : "NA";
+    if ("timestamp".equals(statName)) {
+      str = formatTimestamp(str);
+    }
+    return str;
+  }
   
   @Override
   public String toString() {

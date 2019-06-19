@@ -21,7 +21,7 @@ package org.webrtc.kite.exception;
  * value.
  */
 public class KiteInsufficientValueException extends Exception {
-
+  
   /**
    * Constructs a KiteInsufficientValueException with the specified detailed message.
    *
@@ -30,5 +30,5 @@ public class KiteInsufficientValueException extends Exception {
   public KiteInsufficientValueException(String message) {
     super(message);
   }
-
+  
 }

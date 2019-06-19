@@ -10,8 +10,8 @@ import java.util.ArrayList;
  */
 public class Result extends ArrayList<SubTest> {
   private final String test; // or path to test
-  private String status = "n/a"; // or harness status
   private long duration = 0;
+  private String status = "n/a"; // or harness status
   
   /**
    * Instantiates a new Result.
@@ -22,22 +22,8 @@ public class Result extends ArrayList<SubTest> {
     this.test = test;
   }
   
-  /**
-   * Sets status.
-   *
-   * @param status the status
-   */
-  public void setStatus(String status) {
-    this.status = status;
-  }
-  
-  /**
-   * Sets duration.
-   *
-   * @param duration the duration
-   */
-  public void setDuration(long duration) {
-    this.duration = duration;
+  public boolean failed() {
+    return !this.status.equalsIgnoreCase("ok");
   }
   
   /**
@@ -46,12 +32,12 @@ public class Result extends ArrayList<SubTest> {
    * @return the json
    */
   public JsonObject getJson() {
-  
+
     JsonArrayBuilder subTestResults = Json.createArrayBuilder();
-    for(SubTest subTest: this) {
+    for (SubTest subTest : this) {
       subTestResults.add(subTest.getJson());
     }
-    
+
     return Json.createObjectBuilder()
       .add("test", test)
       .add("status", status)
@@ -63,12 +49,26 @@ public class Result extends ArrayList<SubTest> {
     return status;
   }
   
-  public boolean failed(){
-    return !this.status.equalsIgnoreCase("ok");
+  /**
+   * Sets status.
+   *
+   * @param status the status
+   */
+  public void setStatus(String status) {
+    this.status = status;
   }
   
-  public boolean isBroken(){
+  public boolean isBroken() {
     return this.size() < 1;
+  }
+  
+  /**
+   * Sets duration.
+   *
+   * @param duration the duration
+   */
+  public void setDuration(long duration) {
+    this.duration = duration;
   }
   
   @Override

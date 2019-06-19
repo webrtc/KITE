@@ -1,8 +1,8 @@
 {
   "name": "Web Platform Test 1",
-  "reportFolder" : "/home/nam/workSpace/BackEnd/KITEs/KITE.example/",
+  "reportFolder": "/home/nam/workSpace/BackEnd/KITEs/KITE.example/",
   "callable": true,
-  "remotes": [
+  "grids": [
     {
       "type": "local",
       "remoteAddress": "http://localhost:4444/wd/hub"

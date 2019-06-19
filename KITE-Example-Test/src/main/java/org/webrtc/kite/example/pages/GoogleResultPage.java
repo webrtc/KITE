@@ -2,7 +2,8 @@ package org.webrtc.kite.example.pages;
 
 import io.cosmosoftware.kite.exception.KiteInteractionException;
 import io.cosmosoftware.kite.pages.BasePage;
-import org.apache.log4j.Logger;
+import io.cosmosoftware.kite.report.KiteLogger;
+import io.cosmosoftware.kite.interfaces.Runner;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -10,19 +11,19 @@ import org.openqa.selenium.support.FindBy;
 
 public class GoogleResultPage extends BasePage {
   
-  @FindBy(className="LC20lb")
+  @FindBy(className = "LC20lb")
   WebElement result;
   
-  public GoogleResultPage(WebDriver webDriver, Logger logger) {
-    super(webDriver, logger);
+  public GoogleResultPage(Runner runner) {
+    super(runner);
+  }
+  
+  public String getTitle() {
+    return webDriver.getTitle();
   }
   
   public void openFirstResult() throws KiteInteractionException {
     waitUntilVisibilityOf(result, 10);
     result.click();
-  }
-  
-  public String getTitle() {
-    return webDriver.getTitle();
   }
 }

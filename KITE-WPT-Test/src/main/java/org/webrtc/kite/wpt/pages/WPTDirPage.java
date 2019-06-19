@@ -1,8 +1,7 @@
 package org.webrtc.kite.wpt.pages;
 
 import io.cosmosoftware.kite.pages.BasePage;
-import org.apache.log4j.Logger;
-import org.openqa.selenium.WebDriver;
+import io.cosmosoftware.kite.interfaces.Runner;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
@@ -11,20 +10,51 @@ import java.util.List;
 
 public class WPTDirPage extends BasePage {
   
-  @FindBy(tagName = "li")
-  List<WebElement> items;
-  
+  private final String pageUrl;
   @FindBy(className = "dir")
   List<WebElement> dirs;
   
   @FindBy(className = "file")
   List<WebElement> files;
+  @FindBy(tagName = "li")
+  List<WebElement> items;
   
-  private final String pageUrl;
-  
-  public WPTDirPage(WebDriver webDriver, Logger logger, String pageUrl) {
-    super(webDriver, logger);
+  public WPTDirPage(Runner runner, String pageUrl) {
+    super(runner);
     this.pageUrl = pageUrl;
+  }
+  
+  /**
+   * Determine whether the item name is a valid directory that contains test
+   *
+   * @param itemName name of the item to validate
+   *
+   * @return true if the item name is a valid directory that contains test
+   */
+  private boolean dirNameIsValid(String itemName) {
+    return !(
+      itemName.contains("resources")
+        || itemName.startsWith(".")
+        || itemName.equalsIgnoreCase("tools")
+    );
+  }
+  
+  private String fixTestName(String itemName) {
+    // particular cases
+    if (itemName.contains("idlharness.https") && itemName.endsWith("js")) {
+      return itemName.replace("js", "html");
+    }
+    return itemName;
+  }
+  
+  public List<String> getDirNameList() {
+    List<String> dirNameList = new ArrayList<>();
+    for (WebElement dir : dirs) {
+      if (dirNameIsValid(dir.getText())) {
+        dirNameList.add(dir.getText() + "/");
+      }
+    }
+    return dirNameList;
   }
   
   public List<WebElement> getDirs() {
@@ -39,10 +69,6 @@ public class WPTDirPage extends BasePage {
     return items;
   }
   
-  public void openPage() {
-    this.webDriver.get(pageUrl);
-  }
-  
   public List<String> getTestList() {
     List<String> testList = new ArrayList<>();
     for (WebElement file : files) {
@@ -51,17 +77,11 @@ public class WPTDirPage extends BasePage {
         testList.add(fileName);
       }
     }
-    return  testList;
+    return testList;
   }
   
-  public List<String> getDirNameList() {
-    List<String> dirNameList = new ArrayList<>();
-    for (WebElement dir: dirs) {
-      if (dirNameIsValid(dir.getText())) {
-        dirNameList.add(dir.getText() + "/");
-      }
-    }
-    return dirNameList;
+  public void openPage() {
+    this.webDriver.get(pageUrl);
   }
   
   /**
@@ -81,28 +101,5 @@ public class WPTDirPage extends BasePage {
       }
     }
     return false;
-  }
-  
-  private String fixTestName(String itemName) {
-    // particular cases
-    if (itemName.contains("idlharness.https") && itemName.endsWith("js")) {
-      return itemName.replace("js", "html");
-    }
-    return itemName;
-  }
-  
-  /**
-   * Determine whether the item name is a valid directory that contains test
-   *
-   * @param itemName name of the item to validate
-   *
-   * @return true if the item name is a valid directory that contains test
-   */
-  private boolean dirNameIsValid(String itemName) {
-    return !(
-      itemName.contains("resources")
-      || itemName.startsWith(".")
-      || itemName.equalsIgnoreCase("tools")
-    );
   }
 }

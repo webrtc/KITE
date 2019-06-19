@@ -3,9 +3,8 @@ package org.webrtc.kite.wpt.pages;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.pages.BasePage;
 import io.cosmosoftware.kite.report.Status;
-import org.apache.log4j.Logger;
+import io.cosmosoftware.kite.interfaces.Runner;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.webrtc.kite.wpt.Result;
@@ -20,64 +19,28 @@ import static io.cosmosoftware.kite.util.WebDriverUtils.setImplicitWait;
 
 public class WPTTestPage extends BasePage {
   
+  private final Result resultReport;
   @FindBy(className = "instructions")
   WebElement description;
-  
   @FindBy(id = "results")
   WebElement result;
-  
-  @FindBy(id = "summary")
-  WebElement summary;
-  
   @FindBy(tagName = "tr")
   List<WebElement> resultLines;
-  
-  private final Result resultReport;
+  @FindBy(id = "summary")
+  WebElement summary;
   //private final WebDriverWait driverWait;
   private String pageUrl;
-  private long start;
   private int retry = 0;
+  private long start;
   
-  public WPTTestPage(WebDriver webDriver, Logger logger, String pageUrl) {
-    super(webDriver, logger);
+  public WPTTestPage(Runner runner, String pageUrl) {
+    super(runner);
     setImplicitWait(webDriver, EXTENDED_TIMEOUT);
     this.pageUrl = pageUrl;
     this.resultReport = new Result(pageUrl);
     //this.driverWait = new WebDriverWait(webDriver, SHORT_TIMEOUT_IN_SECONDS);
   }
 
-  public String getStatus() {
-    //driverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("summary")));
-    return summary.findElement(By.tagName("p")).getText();
-  }
-  
-  public void runTest() throws KiteTestException {
-    this.start = System.currentTimeMillis();
-    try {
-      webDriver.get(pageUrl);
-      //driverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("log")));
-    } catch (Exception e) {
-      if (retry < 4) {
-        if (!pageUrl.startsWith("https")) {
-          // retry with https:
-          pageUrl = pageUrl.replace("http", "https");
-        } else {
-          // retry with http:
-          pageUrl = pageUrl.replace("https", "http");
-        }
-        retry ++;
-        logger.warn("Failed to load page, trying again at: " + pageUrl);
-        waitAround(HALF_SECOND_INTERVAL);
-        webDriver.get("https://google.com"); // to refresh the cache on browser
-        waitAround(HALF_SECOND_INTERVAL);
-        runTest();
-      } else {
-        logger.error("Could not load the page after " + retry + " tries");
-        throw new KiteTestException("Could not load the page properly", Status.BROKEN, e);
-      }
-    }
-  }
-  
   public void fillResultReport() throws KiteTestException {
     try {
       String status = getStatus();
@@ -98,6 +61,11 @@ public class WPTTestPage extends BasePage {
     return resultReport;
   }
   
+  public String getStatus() {
+    //driverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("summary")));
+    return summary.findElement(By.tagName("p")).getText();
+  }
+  
   /**
    * Get the sub test result from the web element
    *
@@ -108,7 +76,7 @@ public class WPTTestPage extends BasePage {
   private SubTest getSubTestResult(WebElement resultLine) {
     SubTest subTest = new SubTest();
     List<WebElement> cells = resultLine.findElements(By.tagName("td"));
-    for (int indexCell = 0; indexCell < cells.size(); indexCell ++) {
+    for (int indexCell = 0; indexCell < cells.size(); indexCell++) {
       String value = cells.get(indexCell).getText();
       switch (indexCell) {
         case 0: { // contains the result value
@@ -127,5 +95,32 @@ public class WPTTestPage extends BasePage {
       }
     }
     return subTest;
+  }
+  
+  public void runTest() throws KiteTestException {
+    this.start = System.currentTimeMillis();
+    try {
+      webDriver.get(pageUrl);
+      //driverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("log")));
+    } catch (Exception e) {
+      if (retry < 4) {
+        if (!pageUrl.startsWith("https")) {
+          // retry with https:
+          pageUrl = pageUrl.replace("http", "https");
+        } else {
+          // retry with http:
+          pageUrl = pageUrl.replace("https", "http");
+        }
+        retry++;
+        logger.warn("Failed to load page, trying again at: " + pageUrl);
+        waitAround(HALF_SECOND_INTERVAL);
+        webDriver.get("https://google.com"); // to refresh the cache on browser
+        waitAround(HALF_SECOND_INTERVAL);
+        runTest();
+      } else {
+        logger.error("Could not load the page after " + retry + " tries");
+        throw new KiteTestException("Could not load the page properly", Status.BROKEN, e);
+      }
+    }
   }
 }

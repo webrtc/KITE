@@ -1,6 +1,4 @@
 const {TestUtils, TestStep, Status, KiteTestError} = require('kite-common');
-const {apprtcMeetingPage} = require('../pages');
-
 
 /**
  * Class: PeerConnectionCheck
@@ -37,7 +35,7 @@ class PeerConnectionCheck extends TestStep {
       }
 
       // Every 1 sec
-      await TestUtils.waitAround(1000)
+      await TestUtils.waitAround(1000);
       time++;
     }
 

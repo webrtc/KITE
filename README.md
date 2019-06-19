@@ -226,7 +226,7 @@ In the following example, we are assuming __Chrome__ version __74__ and __Firefo
 
 If your Grid is running on localhost and with __Chrome__ version __74__ and __Firefox__ version __66__ you can skip this step.
 
-Edit the file `./KITE-Example-Test/configs/example.config.json` with your favorite text editor.  
+Edit the file `./KITE-Example-Test/configs/search.local.config.json` with your favorite text editor.  
 You will need to change __`version`__ and __`platform`__ according to what is installed on your local grid.
 For example, if your local grid is windows and the latest stable version of __Chrome__ is __74__, you should set: 
 ```json
@@ -249,18 +249,18 @@ To run the example test,
 __On Windows:__ 
 ```
 cd %KITE_HOME%\KITE-Example-Test
-r configs\example.config.json
+r configs\search.local.config.json
 ```
 __On Linux/Mac:__   
 ```
 cd $KITE_HOME/KITE-Example-Test
-r configs/example.config.json
+r configs/search.local.config.json
 ```
 
 
 ### Run KITE-AppRTC-Test
 
-Edit the file `./KITE-AppRTC-Test/configs/iceconnection.local.config.json` with your favorite text editor.  
+Edit the file `./KITE-AppRTC-Test/configs/iceconnection.apprtc.config.json` with your favorite text editor.  
 You will need to change __`version`__ and __`platform`__ according to what is installed on your local grid.
 
 To run the AppRTC iceconnection test,
@@ -268,23 +268,23 @@ To run the AppRTC iceconnection test,
 __On Windows:__  
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
-r configs\iceconnection.local.config.json
+r configs\iceconnection.apprtc.config.json
 ```
 __On Linux/Mac:__   
 ```
 cd $KITE_HOME/KITE-AppRTC-Test
-r configs/iceconnection.local.config.json
+r configs/iceconnection.apprtc.config.json
 ```
 
 Alternatively, you can launch the test with the full command.  
 
 __On Windows:__    
 ```
-java -Dkite.firefox.profile="%KITE_HOME%"/third_party/ -cp "%KITE_HOME%/KITE-Engine/target/kite-jar-with-dependencies.jar;target/*" org.webrtc.kite.Engine configs/iceconnection.local.config.json
+java -Dkite.firefox.profile="%KITE_HOME%"/third_party/ -cp "%KITE_HOME%/KITE-Engine/target/kite-jar-with-dependencies.jar;target/*" org.webrtc.kite.Engine configs/iceconnection.apprtc.config.json
 ```
 __On Linux/Mac:__  
 ```
-java -Dkite.firefox.profile="$KITE_HOME"/third_party/ -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:target/*" org.webrtc.kite.Engine configs/iceconnection.local.config.json
+java -Dkite.firefox.profile="$KITE_HOME"/third_party/ -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:target/*" org.webrtc.kite.Engine configs/iceconnection.apprtc.config.json
 ```
 
 ### Open the dashboard
@@ -328,10 +328,10 @@ The example search.local.config.json file is almost the simplest config file you
 {
   "name": "Kite test example (with Allure reporting)",
   "callback": null,
-  "remotes": [
+  "grids": [
     {
       "type": "local",
-      "remoteAddress": "http://localhost:4444/wd/hub"
+      "url": "http://localhost:4444/wd/hub"
     }
   ],
   "tests": [
@@ -346,7 +346,7 @@ The example search.local.config.json file is almost the simplest config file you
       }
     }
   ],
-  "browsers": [
+  "clients": [
     {
       "browserName": "chrome",
       "version": "74",
@@ -366,10 +366,10 @@ The example search.local.config.json file is almost the simplest config file you
 
 It registers only selenium server in the local machine:
 ```json
-  "remotes": [
+  "grids": [
     {
       "type": "local",
-      "remoteAddress": "http://localhost:4444/wd/hub"
+      "url": "http://localhost:4444/wd/hub"
     }
   ],
 ```
@@ -395,7 +395,7 @@ It requests for firefox and chrome. Version and platform are required fields. Ve
 Sample config files in `KITE-Example-Test/configs` contain the example with different browser, version and platform configuration, take a closer look
 
 ```json
-  "browsers": [
+  "clients": [
     {
       "browserName": "chrome",
       "version": "74",

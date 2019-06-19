@@ -17,7 +17,6 @@
 package org.webrtc.kite.stats;
 
 
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;

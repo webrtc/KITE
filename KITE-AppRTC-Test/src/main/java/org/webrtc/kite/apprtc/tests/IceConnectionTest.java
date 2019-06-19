@@ -15,13 +15,15 @@
  */
 package org.webrtc.kite.apprtc.tests;
 
-import io.cosmosoftware.kite.steps.StepPhase;
+import io.cosmosoftware.kite.steps.ScreenshotStep;
+import io.cosmosoftware.kite.steps.WebRTCInternalsStep;
 import org.webrtc.kite.apprtc.checks.PeerConnectionCheck;
 import org.webrtc.kite.apprtc.checks.RemoteVideoDisplayCheck;
 import org.webrtc.kite.apprtc.steps.GetStatsStep;
 import org.webrtc.kite.apprtc.steps.JoinRoomStep;
-import org.webrtc.kite.steps.ScreenshotStep;
 import org.webrtc.kite.tests.TestRunner;
+
+import static io.cosmosoftware.kite.util.WebDriverUtils.isChrome;
 
 public class IceConnectionTest extends AppRTCTest {
 
@@ -33,19 +35,20 @@ public class IceConnectionTest extends AppRTCTest {
   
   @Override
   public void populateTestSteps(TestRunner runner) {
-    JoinRoomStep joinRoomStep = new JoinRoomStep(runner.getWebDriver());
+    JoinRoomStep joinRoomStep = new JoinRoomStep(runner);
     joinRoomStep.setRoomId(roomId);
 
     runner.addStep(joinRoomStep);
-    runner.addStep(new PeerConnectionCheck(runner.getWebDriver()));
-    runner.addStep(new RemoteVideoDisplayCheck(runner.getWebDriver()));
+    runner.addStep(new PeerConnectionCheck(runner));
+    runner.addStep(new RemoteVideoDisplayCheck(runner));
     if (this.getStats()) {
-      runner.addStep(new GetStatsStep(runner.getWebDriver(), getStatsConfig));
+      runner.addStep(new GetStatsStep(runner, getStatsConfig));
     }
     if (this.takeScreenshotForEachTest()) {
-      ScreenshotStep screenshotStep = new ScreenshotStep(runner.getWebDriver());
-      screenshotStep.setStepPhase(StepPhase.LOADREACHED);
-      runner.addStep(screenshotStep);
+      runner.addStep(new ScreenshotStep(runner));
+    }
+    if (isChrome(runner.getWebDriver())) {
+      runner.addStep(new WebRTCInternalsStep(runner));
     }
   }
 }

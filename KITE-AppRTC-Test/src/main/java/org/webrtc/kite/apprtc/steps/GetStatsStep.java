@@ -18,14 +18,11 @@ package org.webrtc.kite.apprtc.steps;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.Reporter;
 import io.cosmosoftware.kite.report.Status;
-import io.cosmosoftware.kite.steps.StepPhase;
+import io.cosmosoftware.kite.interfaces.Runner;
 import io.cosmosoftware.kite.steps.TestStep;
-import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
 
 import javax.json.JsonObject;
-
-import java.util.LinkedHashMap;
 
 import static org.webrtc.kite.Utils.getStackTrace;
 import static org.webrtc.kite.stats.StatsUtils.getPCStatOvertime;
@@ -36,10 +33,10 @@ public class GetStatsStep extends TestStep {
 
   private final JsonObject getStatsConfig;
 
-  public GetStatsStep(WebDriver webDriver, JsonObject getStatsConfig) {
-    super(webDriver);
+  public GetStatsStep(Runner runner, JsonObject getStatsConfig) {
+    super(runner);
     this.getStatsConfig = getStatsConfig;
-    setStepPhase(StepPhase.ALL);
+    appRTCMeetingPage = new AppRTCMeetingPage(runner);
   }
 
   @Override
@@ -49,21 +46,14 @@ public class GetStatsStep extends TestStep {
 
   @Override
   protected void step() throws KiteTestException {
-    if (appRTCMeetingPage == null) {
-      appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
-    }
-    LinkedHashMap<String, String> results = new LinkedHashMap<>();
     try {
-      JsonObject stats = appRTCMeetingPage.getPCStatOvertime(webDriver, getStatsConfig).get(0);
+      JsonObject stats = getPCStatOvertime(webDriver, getStatsConfig).get(0);
       JsonObject statsSummary = appRTCMeetingPage.buildstatSummary(stats, getStatsConfig.getJsonArray("selectedStats"));
-      results = appRTCMeetingPage.statsHashMap(statsSummary);
       Reporter.getInstance().jsonAttachment(report, "getStatsRaw", stats);
       Reporter.getInstance().jsonAttachment(this.report, "Stats Summary", statsSummary);
     } catch (Exception e) {
       logger.error(getStackTrace(e));
       throw new KiteTestException("Failed to getStats", Status.BROKEN, e);
-    } finally{
-      this.setCsvResult(results);
     }
   }
 }

@@ -17,7 +17,6 @@
 package org.webrtc.kite.stats;
 
 
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
@@ -28,17 +27,17 @@ import java.util.Map;
  */
 public class RTCIceCandidatePairStats extends RTCStatObject {
 
-  private final String transportId;
+  private final String bytesReceived;
+  private final String bytesSent;
+  private final String currentRoundTripTime;
   private final String localCandidateId;
+  private final String nominated;
+  private final String priority;
   private final String remoteCandidateId;
   private final String state;
-  private final String priority;
-  private final String nominated;
-  private final String bytesSent;
-  private final String bytesReceived;
-  private final String totalRoundTripTime;
-  private final String currentRoundTripTime;
   private final String timestamp;
+  private final String totalRoundTripTime;
+  private final String transportId;
 
   public RTCIceCandidatePairStats(Map<Object, Object> statObject) {
     this.setId(getStatByName(statObject, "id"));

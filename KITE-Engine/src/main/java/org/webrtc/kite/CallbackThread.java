@@ -16,12 +16,12 @@
 
 package org.webrtc.kite;
 
+import io.cosmosoftware.kite.report.KiteLogger;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.log4j.Logger;
 
 import javax.json.JsonObject;
 import java.io.IOException;
@@ -31,7 +31,7 @@ import java.io.IOException;
  */
 public class CallbackThread extends Thread {
   
-  private static final Logger logger = Logger.getLogger(CallbackThread.class.getName());
+  private static final KiteLogger logger = KiteLogger.getLogger(CallbackThread.class.getName());
   
   private String callbackURL;
   private JsonObject jsonObject;
@@ -45,6 +45,7 @@ public class CallbackThread extends Thread {
   public CallbackThread(String callbackURL, JsonObject jsonObject) {
     this.callbackURL = callbackURL;
     this.jsonObject = jsonObject;
+    
   }
   
   /**

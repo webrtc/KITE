@@ -17,7 +17,6 @@
 package org.webrtc.kite.stats;
 
 
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
@@ -27,11 +26,11 @@ import java.util.Map;
  */
 public class RTCIceCandidateStats extends RTCStatObject {
 
+  private final String candidateType;
   private final String ip;
   private final String port;
-  private final String protocol;
-  private final String candidateType;
   private final String priority;
+  private final String protocol;
   private final String url;
 
   public RTCIceCandidateStats(Map<Object, Object> statObject) {
@@ -47,7 +46,7 @@ public class RTCIceCandidateStats extends RTCStatObject {
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    return  Json.createObjectBuilder()
+    return Json.createObjectBuilder()
       .add("ip", this.ip)
       .add("port", this.port)
       .add("protocol", this.protocol)

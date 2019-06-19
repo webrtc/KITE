@@ -17,7 +17,6 @@
 package org.webrtc.kite.stats;
 
 
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
@@ -28,8 +27,8 @@ import java.util.Map;
  */
 public class SDP extends RTCStatObject {
 
-  private final String type;
   private final String sdp;
+  private final String type;
 
   public SDP(Map<Object, Object> statObject) {
     this.type = getStatByName(statObject, "type");

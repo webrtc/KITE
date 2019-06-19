@@ -17,11 +17,52 @@ import java.io.IOException;
  */
 public class RunInfo {
   private final String revision;
-  private String product = "n/a";
-  private String browserVersion = "n/a";
   private int bits = 64;
+  private String browserVersion = "n/a";
   private String os = "n/a";
   private String osVersion = "n/a";
+  private String product = "n/a";
+  
+  /**
+   * Instantiates a new Run info.
+   *
+   * @param revision the revision
+   */
+  public RunInfo(String revision) {
+    this.revision = revision;
+  }
+  
+  /**
+   * Gets info from user agent.
+   *
+   * @param userAgentString the user agent string
+   *
+   * @throws IOException    the io exception
+   * @throws ParseException the parse exception
+   */
+  private void getInfoFromUserAgent(String userAgentString) throws IOException, ParseException {
+    final UserAgentParser parser = new UserAgentService().loadParser();
+    final Capabilities capabilities = parser.parse(userAgentString);
+    this.os = capabilities.getPlatform();
+    this.osVersion = capabilities.getPlatformVersion();
+  }
+  
+  /**
+   * Gets info from web driver.
+   *
+   * @param webDriver the web driver
+   *
+   * @throws IOException the io exception
+   */
+  public void getInfoFromWebDriver(WebDriver webDriver) throws IOException, ParseException {
+    org.openqa.selenium.Capabilities cap = ((RemoteWebDriver) webDriver).getCapabilities();
+    setProduct(cap.getBrowserName());
+    setBrowserVersion(cap.getVersion());
+
+    webDriver.get("http://www.google.com");
+    String userAgentString = (String) ((JavascriptExecutor) webDriver).executeScript(userAgentScript());
+    getInfoFromUserAgent(userAgentString);
+  }
   
   /**
    * Gets json.
@@ -38,18 +79,31 @@ public class RunInfo {
       .add("osVersion", osVersion).build();
   }
   
-  @Override
-  public String toString() {
-    return getJson().toString();
+  /**
+   * Gets revision.
+   *
+   * @return the revision
+   */
+  public String getRevision() {
+    return revision;
   }
   
   /**
-   * Instantiates a new Run info.
+   * Put the product name, version and os into a String as a summarized name of the run
    *
-   * @param revision the revision
+   * @return a summarized name of the run
    */
-  public RunInfo(String revision) {
-    this.revision = revision;
+  public String getSummarizedName() {
+    return this.product + "_" + this.browserVersion + "_" + this.os;
+  }
+  
+  /**
+   * Sets bits.
+   *
+   * @param bits the bits
+   */
+  public void setBits(int bits) {
+    this.bits = bits;
   }
   
   /**
@@ -88,65 +142,10 @@ public class RunInfo {
     this.product = product;
   }
   
-  /**
-   * Sets bits.
-   *
-   * @param bits the bits
-   */
-  public void setBits(int bits) {
-    this.bits = bits;
+  @Override
+  public String toString() {
+    return getJson().toString();
   }
-  
-  /**
-   * Gets revision.
-   *
-   * @return the revision
-   */
-  public String getRevision() {
-    return revision;
-  }
-  
-  /**
-   * Gets info from web driver.
-   *
-   * @param webDriver the web driver
-   *
-   * @throws IOException    the io exception
-   */
-  public void getInfoFromWebDriver(WebDriver webDriver) throws IOException, ParseException {
-    org.openqa.selenium.Capabilities cap = ((RemoteWebDriver)webDriver).getCapabilities();
-    setProduct(cap.getBrowserName());
-    setBrowserVersion(cap.getVersion());
-    
-    webDriver.get("http://www.google.com");
-    String userAgentString =  (String)((JavascriptExecutor) webDriver).executeScript(userAgentScript());
-    getInfoFromUserAgent(userAgentString);
-  }
-  
-  /**
-   * Gets info from user agent.
-   *
-   * @param userAgentString the user agent string
-   *
-   * @throws IOException    the io exception
-   * @throws ParseException the parse exception
-   */
-  private void getInfoFromUserAgent(String userAgentString) throws IOException, ParseException {
-    final UserAgentParser parser = new UserAgentService().loadParser();
-    final Capabilities capabilities = parser.parse(userAgentString);
-    this.os = capabilities.getPlatform();
-    this.osVersion = capabilities.getPlatformVersion();
-  }
-  
-  /**
-   * Put the product name, version and os into a String as a summarized name of the run
-   *
-   * @return a summarized name of the run
-   */
-  public String getSummarizedName() {
-    return this.product + "_" + this.browserVersion + "_" + this.os;
-  }
-  
   
   private final static String userAgentScript() {
     return "var nav = '';" + "try { var myNavigator = {};"
