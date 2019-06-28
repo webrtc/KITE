@@ -65,9 +65,9 @@ public class RunAllTestStep extends TestStep {
       processTestStep(StepPhase.DEFAULT, runOneTestStep, this.report);
       testSummary.addResult(runOneTestStep.getTestResult());
     }
-    Reporter.getInstance().textAttachment(this.report, "Test run summary", testSummary.toString(), "json");
+    reporter.textAttachment(this.report, "Test run summary", testSummary.toString(), "json");
     if (!this.report.broken()) {
-      Reporter.getInstance().saveAttachmentToSubFolder(testSummary.getName(), testSummary.toString(), "json",
+      reporter.saveAttachmentToSubFolder(testSummary.getName(), testSummary.toString(), "json",
         "wpt-results/" + revision.substring(revision.length() - 7) + "/" + testName + "(" + timestamp().split(" ")[0] + ")");
     }
   }

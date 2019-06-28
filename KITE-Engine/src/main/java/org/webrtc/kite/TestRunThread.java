@@ -13,10 +13,15 @@ public class TestRunThread implements Callable<List<Future<Object>>> {
   private final KiteLogger logger = KiteLogger.getLogger(this.getClass().getName());
   private final TestConfig testConfig;
   private final List<Tuple> tupleList;
+  private String name;
   
   public TestRunThread(TestConfig testConfig, List<Tuple> tupleList) {
     this.testConfig = testConfig;
     this.tupleList = tupleList;
+  }
+  
+  public void setName(String name) {
+    this.name = name;
   }
   
   @Override
@@ -24,7 +29,7 @@ public class TestRunThread implements Callable<List<Future<Object>>> {
     List<Future<Object>> listOfResults = null;
     try {
       logger.info("Running " + testConfig + " ...");
-      listOfResults = new MatrixRunner(testConfig, tupleList).run();
+      listOfResults = new MatrixRunner(testConfig, tupleList, this.name).run();
     } catch (Exception e) {
       logger.fatal("Error [Interruption]: The execution has been interrupted with the "
         + "following error: " + e.getLocalizedMessage(), e);

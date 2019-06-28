@@ -52,7 +52,7 @@ public class RemoteVideoHDCheck extends TestCheck {
         , Status.FAILED);
     }
     
-    Reporter.getInstance().textAttachment(this.report, "Remote video resolution:  width:", width + ", height:" + height, "plain");
+    reporter.textAttachment(this.report, "Remote video resolution:  width:", width + ", height:" + height, "plain");
   }
   
   

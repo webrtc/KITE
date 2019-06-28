@@ -6,10 +6,7 @@ package org.webrtc.kite.config.media;
 /**
  * The enum Media file type.
  */
-public enum MediaFileType {
-  /** The portrait. */
+public enum MediaFileType {  
   Video,
-  /** The landscape. */
   Audio
-
 }

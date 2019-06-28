@@ -19,6 +19,7 @@ package org.webrtc.kite;
 import io.cosmosoftware.kite.report.KiteLogger;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.client.Client;
+import org.webrtc.kite.config.client.MobileSpecs;
 import org.webrtc.kite.config.paas.Paas;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
@@ -29,6 +30,7 @@ import org.webrtc.kite.exception.KiteNoKeyException;
 import javax.json.JsonException;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -45,14 +47,14 @@ public class Engine {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HHmmss");
     System.setProperty("current.date", dateFormat.format(new Date()));
   }
-  
+
   private static final KiteLogger logger = KiteLogger.getLogger(Engine.class.getName());
   
-  public static void buildConfig(String pathToConfigFile) {
+  public static void buildConfig(Configurator configurator, String pathToConfigFile) {
     try {
-      Configurator.getInstance().setConfigFilePath(pathToConfigFile);
-      Configurator.getInstance().buildConfig();
-      Configurator.getInstance().setTimeStamp();
+      configurator.setConfigFilePath(pathToConfigFile);
+      configurator.buildConfig();
+      configurator.setTimeStamp();
     } catch (FileNotFoundException e) {
       logger
         .fatal("Error [File Not Found]: '" + pathToConfigFile + "' either doesn't exist or is not a file.",
@@ -73,11 +75,12 @@ public class Engine {
     }
   }
   
-  private static void distributeRemote(List<Tuple> tupleList) {
+  public static void distributeRemote(Configurator configurator, List<Tuple> tupleList) {
     // setting remote hub address to client, using circular linked list
     // each tuple will be prioritised to be in the same hub
+    //need to handle mobile == null
     for (Tuple tuple : tupleList) {
-      Paas paas = Configurator.getInstance().getRemoteList().get();
+      Paas paas = configurator.getRemoteList().get();
       for (Client client : tuple.getClients()) {
         if (client.getPaas() == null) {
           client.setPaas(paas);
@@ -96,13 +99,30 @@ public class Engine {
       logger.error("Error [Missing Argument]: Use java -jar KITE.jar <absolute path/config.json>");
       return;
     }
-    
-    buildConfig(args[0]);
-    
-    for (TestConfig testConfig : Configurator.getInstance().getConfigHandler().getTestList()) {
+    Configurator configurator = new Configurator();
+    buildConfig(configurator, args[0]);
+
+
+    for (TestConfig testConfig : configurator.getConfigHandler().getTestList()) {
+      List<Tuple> tupleList = new ArrayList<>();
+      List<List<Integer>> matrix = testConfig.getMatrix();
+      if (matrix != null && !matrix.isEmpty()) {
+        for (List<Integer> indexList: matrix ) {
+          Tuple tuple = new Tuple();
+          for (int index: indexList) {
+            tuple.add(configurator.getConfigHandler().getClientList().get(index));
+          }
+          tupleList.add(tuple);
+        }
+      } else {
+        tupleList = configurator
+          .buildTuples(testConfig.getTupleSize(), testConfig.isPermute(), testConfig.isRegression());
+      }
+      distributeRemote(configurator, tupleList);
+      testConfig.setReportPath(configurator.getReportPath());
       ExecutorService service = Executors.newSingleThreadExecutor();
       try {
-        runInterop(service, testConfig);
+        runInterop(service, configurator.getName(), testConfig, tupleList);
       } catch (Exception e) {
         e.printStackTrace();
       } finally {
@@ -111,17 +131,10 @@ public class Engine {
     }
   }
   
-  public static List<Future<Object>> runInterop(ExecutorService service, TestConfig testConfig) throws ExecutionException, InterruptedException {
-    if (service == null) {
-      service = Executors.newSingleThreadExecutor();
-    }
-    List<Tuple> tupleList = Configurator.getInstance()
-      .buildTuples(testConfig.getTupleSize(), testConfig.isPermute(), testConfig.isRegression());
-    distributeRemote(tupleList);
-    return runInterop(service, testConfig, tupleList);
-  }
   
-  public static List<Future<Object>> runInterop(ExecutorService service, TestConfig testConfig, List<Tuple> tupleList) throws ExecutionException, InterruptedException {
-    return service.submit(new TestRunThread(testConfig, tupleList)).get();
+  public static List<Future<Object>> runInterop(ExecutorService service, String testSuiteName, TestConfig testConfig, List<Tuple> tupleList) throws ExecutionException, InterruptedException {
+    TestRunThread runThread = new TestRunThread(testConfig, tupleList);
+    runThread.setName(testSuiteName);
+    return service.submit(runThread).get();
   }
 }

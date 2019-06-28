@@ -16,15 +16,18 @@
 
 package org.webrtc.kite.config.test;
 
+import io.cosmosoftware.kite.config.KiteEntity;
+import io.cosmosoftware.kite.instrumentation.NetworkInstrumentation;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import io.cosmosoftware.kite.interfaces.SampleData;
+import io.cosmosoftware.kite.manager.RoomManager;
 import io.cosmosoftware.kite.report.KiteLogger;
+import io.cosmosoftware.kite.report.Reporter;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.webrtc.kite.config.KiteEntity;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
 
 import javax.json.Json;
@@ -32,13 +35,18 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.persistence.*;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
+import static io.cosmosoftware.kite.util.TestUtils.readJsonStream;
+import static io.cosmosoftware.kite.util.TestUtils.readJsonString;
 import static org.webrtc.kite.Utils.getIntFromJsonObject;
 
 /**
@@ -65,6 +73,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   private boolean matrixOnly = false;
   private int maxRetryCount;
   private String name;
+  private String kiteRequestId;
   private int noOfThreads;
   private String payload;
   private boolean permute;
@@ -73,6 +82,9 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   private JsonObject testJsonConfig;
   private int tupleSize;
   private TestType type;
+  private Reporter reporter;
+  private RoomManager roomManager;
+  private NetworkInstrumentation networkInstrumentation = null;
   
   /**
    * Instantiates a new test config.
@@ -103,7 +115,10 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    */
   public TestConfig(JsonObject jsonObject) throws KiteInsufficientValueException, IOException {
     this.testJsonConfig = jsonObject;
+    this.reporter = new Reporter();
     this.payload = jsonObject.getJsonObject("payload").toString();
+    this.initRoomManagerFromPayload();
+  
     // Mandatory
     this.type = TestType.valueOf(jsonObject.getString("type", "interop"));
     this.name = jsonObject.getString("name").contains("%ts")
@@ -128,7 +143,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.permute = jsonObject.getBoolean("permute", true);
     this.closeWebDrivers = jsonObject.getBoolean("closeWebDrivers", true);
     this.matrixOnly = jsonObject.getBoolean("matrixOnly", false);
-    
+  
     
     JsonArray jsonArray = jsonObject.getJsonArray("matrix");
     if (jsonArray != null) {
@@ -144,6 +159,33 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.logger = createTestLogger();
   }
   
+  /**
+   * Sets kite request id.
+   *
+   * @param kiteRequestId the kite request id
+   */
+  public void setKiteRequestId(String kiteRequestId) {
+    this.kiteRequestId = kiteRequestId;
+  }
+  
+  /**
+   * Gets reporter.
+   *
+   * @return the reporter
+   */
+  @Transient
+  public Reporter getReporter() {
+    return reporter;
+  }
+  
+  public void setReportPath(String reportPath) {
+    if (this.reporter == null) {
+      this.reporter = new Reporter();
+    }
+    System.out.println("trying to set report path : " + reportPath);
+    this.reporter.setReportPath(reportPath);
+  }
+
   /*
    * (non-Javadoc)
    *
@@ -173,7 +215,9 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    */
   private KiteLogger createTestLogger() throws IOException {
     KiteLogger testLogger = KiteLogger.getLogger(new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(new Date()));
-    FileAppender fileAppender = new FileAppender(new PatternLayout("%d %-5p - %m%n"), "logs/" + getTestClassName() + "/test_" + testLogger.getName() + ".log", false);
+    FileAppender fileAppender = new FileAppender(new PatternLayout("%d %-5p - %m%n")
+      , "logs/" + ((kiteRequestId == null || kiteRequestId.equals("null")) ? "" : (kiteRequestId + "_"))
+      + getTestClassName() + "/test_" + testLogger.getName() + ".log", false);
     fileAppender.setThreshold(Level.INFO);
     testLogger.addAppender(fileAppender);
     return testLogger;
@@ -597,6 +641,41 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    */
   public boolean isRegression() {
     return regression;
+  }
+  
+  private void initRoomManagerFromPayload() {
+    JsonObject payload = readJsonString(this.payload);
+    String url = payload.getString("url", null);
+    int maxUsersPerRoom = payload.getInt("usersPerRoom", 1);
+    boolean loopRooms = payload.getBoolean("loopRooms", false);
+    if (maxUsersPerRoom > 0) {
+      roomManager = new RoomManager(url, maxUsersPerRoom, loopRooms);
+      String[] rooms;
+      if (payload.getJsonArray("rooms") != null) {
+        JsonArray roomArr = payload.getJsonArray("rooms");
+        rooms = new String[roomArr.size()];
+        for (int i = 0; i < roomArr.size(); i++) {
+          rooms[i] = roomArr.getString(i);
+          roomManager.setRoomNames(rooms);
+        }
+      }
+    }
+  }
+  
+  public void setNetworkInstrumentation(NetworkInstrumentation networkInstrumentation) {
+    this.networkInstrumentation = networkInstrumentation;
+  }
+  @Transient
+  public NetworkInstrumentation getNetworkInstrumentation() {
+    return networkInstrumentation;
+  }
+  
+  @Transient
+  public RoomManager getRoomManager() {
+    if (this.roomManager == null) {
+      this.initRoomManagerFromPayload();
+    }
+    return roomManager;
   }
   
   /**

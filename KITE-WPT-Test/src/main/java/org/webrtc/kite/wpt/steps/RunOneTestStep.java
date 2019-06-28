@@ -35,7 +35,7 @@ public class RunOneTestStep extends TestStep {
     if (result.isBroken()) {
       throw new KiteTestException("No sub tests was found, possibly because connection problem", Status.BROKEN);
     }
-    Reporter.getInstance().textAttachment(this.report, "Test result", result.toString(), "json");
+    reporter.textAttachment(this.report, "Test result", result.toString(), "json");
     if (result.failed()) {
       this.report.setStatus(Status.FAILED);
       this.report.setIgnore(true);

@@ -27,8 +27,9 @@ public class JsTestRunner extends TestRunner {
   private int numberOfParticipant;
   private String reportPath;
   
-  public JsTestRunner(LinkedHashMap<StepPhase, AllureTestReport> testReport, String jsTestImpl, KiteLogger logger, int id) {
-    super(null, testReport, logger, id);
+  public JsTestRunner(LinkedHashMap<StepPhase, AllureTestReport> testReport, String jsTestImpl, 
+                      KiteLogger logger, Reporter reporter, int id) {
+    super(null, testReport, logger, reporter, id);
     this.jsTestImpl = jsTestImpl;
   }
   
@@ -81,9 +82,9 @@ public class JsTestRunner extends TestRunner {
             try {
               if (!extension.equals("png")) {
                 String text = TestUtils.readFile(path + attachmentSource);
-                Reporter.getInstance().textAttachment(stepReport, "attachment", text, extension);
+                reporter.textAttachment(stepReport, "attachment", text, extension);
               } else {
-                Reporter.getInstance().screenshotAttachment(stepReport, "Screenshot", Files.readAllBytes(Paths.get(path + "/screenshots/" + attachmentSource)));
+                reporter.screenshotAttachment(stepReport, "Screenshot", Files.readAllBytes(Paths.get(path + "/screenshots/" + attachmentSource)));
               }
             } catch (IOException e) {
               throw new KiteTestException("Error reading the report generated in javascript", Status.BROKEN, e);

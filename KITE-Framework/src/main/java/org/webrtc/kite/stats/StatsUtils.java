@@ -45,8 +45,8 @@ public class StatsUtils {
   private static final HashMap<String, StatsUtils> instance = new HashMap<String, StatsUtils>();
   private static final KiteLogger logger = KiteLogger.getLogger(StatsUtils.class.getName());
   private static final String[] candidatePairStats = {"bytesSent", "bytesReceived", "currentRoundTripTime", "totalRoundTripTime", "timestamp"};
-  private static final String[] inboundStats = {"bytesReceived", "packetsReceived", "packetsLost", "jitter", "timestamp"};
-  private static final String[] outboundStats = {"bytesSent", "timestamp"};
+  private static final String[] inboundStats = {"bytesReceived", "packetsReceived", "packetsLost", "jitter", "timestamp", "framesDecoded"};
+  private static final String[] outboundStats = {"bytesSent", "timestamp", "framesSent"};
   private final String filename;
 
   private static Map<String, String> keyValMap = new LinkedHashMap<String, String>();
@@ -260,6 +260,8 @@ public class StatsUtils {
     }
     JsonObject result = mainBuilder.build();
     JsonObjectBuilder csvBuilder = Json.createObjectBuilder();
+    csvBuilder.add("timestamp start", getTimestamp(result, 0));
+    csvBuilder.add("timestamp end", getTimestamp(result, noStats - 1));
     csvBuilder.add("currentRoundTripTime (ms)", computeRoundTripTime(result, noStats, "current"));
     csvBuilder.add("totalRoundTripTime (ms)", computeRoundTripTime(result, noStats, "total"));
     csvBuilder.add("totalBytesReceived (Bytes)", totalBytes(result, noStats, "Received"));
@@ -268,8 +270,10 @@ public class StatsUtils {
     csvBuilder.add("avgReceivedBitrate (bps)", computeBitrate(result, noStats, "Received", "candidate-pair"));
     csvBuilder.add("inboundAudioBitrate (bps)", computeBitrate(result, noStats, "in", "audio"));
     csvBuilder.add("inboundVideoBitrate (bps)", computeBitrate(result, noStats, "in", "video"));
+    csvBuilder.add("inboundVideoFramerate (fps)", computeFramerate(result, noStats, "in", "video"));
     csvBuilder.add("outboundAudioBitrate (bps)", computeBitrate(result, noStats, "out", "audio"));
     csvBuilder.add("outboundVideoBitrate (bps)", computeBitrate(result, noStats, "out", "video"));
+    csvBuilder.add("outboundVideoFramerate (fps)", computeFramerate(result, noStats, "out", "video"));
     csvBuilder.add("audioJitter (ms)", computeAudioJitter(result, noStats));
     csvBuilder.add("audioPacketsLoss (%)", computePacketsLoss(result, noStats, "audio"));
     csvBuilder.add("videoPacketsLoss (%)", computePacketsLoss(result, noStats, "video"));
@@ -491,7 +495,25 @@ public class StatsUtils {
     }
     return -1;
   }
-  
+
+
+
+  /**
+   * Computes the average framerate.
+   *
+   * @param statsArray object containing the list getStats result.
+   * @param noStats    how many stats in jsonObject
+   * @param direction  "in" or "out" or "Sent" or "Received"
+   * @param mediaType  "audio", "video" or "candidate-pair"
+   *
+   * @return totalNumberBytes sent or received
+   * @throws KiteTestException the kite test exception
+   */
+  public static double computeFramerate(JsonArray statsArray, int noStats,
+                                      String direction, String mediaType) throws KiteTestException {
+    return computeRate(statsArray, noStats, direction, mediaType, false);
+  }
+
   /**
    * Computes the average bitrate.
    *
@@ -503,7 +525,13 @@ public class StatsUtils {
    * @return totalNumberBytes sent or received
    * @throws KiteTestException the kite test exception
    */
-  public static double computeBitrate(JsonArray statsArray, int noStats, String direction, String mediaType) throws KiteTestException {
+  public static double computeBitrate(JsonArray statsArray, int noStats,
+                                   String direction, String mediaType) throws KiteTestException {
+    return computeRate(statsArray, noStats, direction, mediaType, false);
+  }
+  
+  private static double computeRate(JsonArray statsArray, int noStats,
+                                      String direction, String mediaType, boolean frames) throws KiteTestException {
     long bytesStart = 0;
     long bytesEnd = 0;
     long tsStart = 0;
@@ -514,7 +542,7 @@ public class StatsUtils {
     }
     try {
       String jsonObjName = getJsonObjectName(direction, mediaType);
-      String jsonKey = getJsonKey(direction);
+      String jsonKey = getJsonKey(direction, frames);
       for (int index = 0; index < noStats; index++) {
         JsonObject singleStatObject = statsArray.getJsonObject(index);
         if (singleStatObject != null) {
@@ -662,12 +690,12 @@ public class StatsUtils {
    * @param direction "in" or "out" or "Sent" or "Received"
    * @return bytesSent or bytesReceived
    */
-  private static String getJsonKey(String direction) {
+  private static String getJsonKey(String direction, boolean frames) {
     if ("Sent".equals(direction) || "out".equals(direction)) {
-      return "bytesSent";
+      return frames ? "framesSent" : "bytesSent";
     }
     if ("Received".equals(direction) || "in".equals(direction)) {
-      return "bytesReceived";
+      return frames ? "framesDecoded" : "bytesReceived";
     }
     return null;
   }
@@ -735,21 +763,19 @@ public class StatsUtils {
    */
   public static JsonObject getPCStatOvertime(WebDriver webDriver, String peerConnection, int durationInMilliSeconds, int intervalInMilliSeconds, JsonArray selectedStats)
     throws KiteTestException {
-    Map<String, Object> statMap = new HashMap<String, Object>();
-    for (int timer = 0; timer < durationInMilliSeconds; timer += intervalInMilliSeconds) {
-      // No sleep needed since already sleep in getPCStatOnce
-      Object stats = getPCStatOnce(webDriver, peerConnection);
-      if (timer == 0) {
-        statMap.put("stats", new ArrayList<>());
-        
-        Object offer = getSDPMessage(webDriver, peerConnection, "offer");
-        Object answer = getSDPMessage(webDriver, peerConnection, "answer");
-        statMap.put("offer", offer);
-        statMap.put("answer", answer);
+    Map<String, Object> statMap = new HashMap<>();
+    List<Object> statsList = new ArrayList<>();
+    Object offer = getSDPMessage(webDriver, peerConnection, "offer");
+    Object answer = getSDPMessage(webDriver, peerConnection, "answer");
+    statMap.put("offer", offer);
+    statMap.put("answer", answer);
+    for (int timer = 0; timer <= durationInMilliSeconds; timer += intervalInMilliSeconds) {
+      statsList.add(getPCStatOnce(webDriver, peerConnection));
+      if (timer <= durationInMilliSeconds - intervalInMilliSeconds) {
+        waitAround(Math.abs(intervalInMilliSeconds - ONE_SECOND_INTERVAL));
       }
-      List tmp = (List) statMap.get("stats");
-      tmp.add(stats);
     }
+    statMap.put("stats", statsList);
     return buildClientStatObject(statMap, selectedStats);
   }
   
@@ -965,7 +991,7 @@ public class StatsUtils {
 //      }
 //    }
 
-    JsonObject localPC = statsSummary.getJsonObject("localPC");
+    JsonObject localPC = statsSummary.getJsonObject(noRemotePCs > 0 ? "localPC" : "");
     map.put("currentRoundTripTime (ms)", localPC.getString("currentRoundTripTime (ms)"));
 //    map.put("totalRoundTripTime (ms)", localPC.getString("totalRoundTripTime (ms)"));
 //    map.put("totalBytesReceived (Bytes)", localPC.getString("totalBytesReceived (Bytes)"));
@@ -986,7 +1012,24 @@ public class StatsUtils {
     }
     return map;
   }
+
+
   
+  
+  /**
+   * Computes the average framerate.
+   *
+   * @param jsonObject object containing the list getStats result.
+   * @param noStats how many stats in jsonObject
+   * @param direction "in" or "out" or "Sent" or "Received"
+   * @param mediaType "audio", "video" or "candidate-pair"
+   * @return totalNumberBytes sent or received
+   */
+  private static String computeFramerate(JsonObject jsonObject, int noStats,
+                                       String direction, String mediaType) {
+    return computeRate(jsonObject, noStats, direction, mediaType, true);
+  }
+
   /**
    * Computes the average bitrate.
    *
@@ -996,7 +1039,13 @@ public class StatsUtils {
    * @param mediaType "audio", "video" or "candidate-pair"
    * @return totalNumberBytes sent or received
    */
-  private static String computeBitrate(JsonObject jsonObject, int noStats, String direction, String mediaType) {
+  private static String computeBitrate(JsonObject jsonObject, int noStats,
+                                       String direction, String mediaType) {
+    return computeRate(jsonObject, noStats, direction, mediaType, false);
+  }
+  
+  private static String computeRate(JsonObject jsonObject, int noStats, 
+                                       String direction, String mediaType, boolean frames) {
     long bytesStart = 0;
     long bytesEnd = 0;
     long tsStart = 0;
@@ -1007,7 +1056,7 @@ public class StatsUtils {
         return "Error: less than 2 stats";
       }
       String jsonObjName = getJsonObjectName(direction, mediaType);
-      String jsonKey = getJsonKey(direction);
+      String jsonKey =  getJsonKey(direction, frames);
       boolean debug = false;
       if (debug) {
         logger.info(" jsonObject:     " + jsonObject );
@@ -1036,17 +1085,16 @@ public class StatsUtils {
         }
         if (debug) {
           logger.info("jsonKey:     " + jsonKey);
-          logger.info("bytesEnd:   " + bytesEnd);
-          logger.info("bytesStart: " + bytesStart);
-          logger.info("tsEnd:   " + tsEnd);
+          logger.info((frames ? "framesStart: " : "bytesStart: ") + bytesStart);
+          logger.info((frames ? "framesEnd: " : "bytesEnd:   ") + bytesEnd);
           logger.info("tsStart: " + tsStart);
+          logger.info("tsEnd:   " + tsEnd);
         }
       }
       
       if (tsEnd != tsStart) {
         long timediff = (tsEnd - tsStart);
-        avgBitrate = (8000 * (bytesEnd - bytesStart)) / timediff;
-        avgBitrate = (avgBitrate < 0) ? avgBitrate * -1 : avgBitrate;
+        avgBitrate = Math.abs(((frames ? 1000 : 8000) * (bytesEnd - bytesStart)) / timediff);
         if (debug) {
           logger.info(
             "computeBitrate()(8000 * ( " + bytesEnd + " - " + bytesStart + " )) /" + timediff);
@@ -1088,6 +1136,28 @@ public class StatsUtils {
       return "" + ((int)rtt/ct);
     }
     return "";
+  }
+
+
+
+  /**
+   *  Gets the timestamp of the first getStats at index 
+   *
+   * @param jsonObject object containing the list getStats result.
+   * @param index the index of the getStats (0 for first, noStats- 1 for last)
+   * @return the timestamp of the first getStats
+   */
+  private static String getTimestamp(JsonObject jsonObject, int index) {
+    JsonObject myObject = jsonObject.getJsonObject("outbound-audio_" + index);
+    long ts = 0;
+    if (myObject != null) {
+      try {
+        ts = Long.parseLong(myObject.getString("timestamp"));
+      } catch (Exception e) {
+        logger.error("error in getTimestamp(" + jsonObject + ", " + index + ") : \r\n" + getStackTrace(e));
+      }
+    }
+    return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date(ts));
   }
   
   /**

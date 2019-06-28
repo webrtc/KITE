@@ -58,19 +58,22 @@ public class RTCRTPStreamStats extends RTCStatObject {
         .add("nackCount", this.nackCount)
         .add("codecId", this.codecId)
         .add("timestamp", this.timestamp);
-    if (this.inbound)
-      jsonObjectBuilder.add("packetsReceived", getStatByName(this.statObject, "packetsReceived"))
-        .add("bytesReceived", getStatByName(this.statObject, "bytesReceived"))
-        .add("packetsLost", getStatByName(this.statObject, "packetsLost"))
-        .add("packetsDiscarded", getStatByName(this.statObject, "packetsDiscarded"))
-        .add("jitter", getStatByName(this.statObject, "jitter"))
-        .add("remoteId", getStatByName(this.statObject, "remoteId"))
-        .add("framesDecoded", getStatByName(this.statObject, "framesDecoded"));
-    else
-      jsonObjectBuilder.add("packetsSent", getStatByName(this.statObject, "packetsSent"))
-        .add("bytesSent", getStatByName(this.statObject, "bytesSent"))
-        .add("remoteId", getStatByName(this.statObject, "remoteId"))
-        .add("framesDecoded", getStatByName(this.statObject, "framesDecoded"));
+    if (this.inbound) {
+      jsonObjectBuilder
+          .add("packetsReceived", getStatByName(this.statObject, "packetsReceived"))
+          .add("bytesReceived", getStatByName(this.statObject, "bytesReceived"))
+          .add("packetsLost", getStatByName(this.statObject, "packetsLost"))
+          .add("packetsDiscarded", getStatByName(this.statObject, "packetsDiscarded"))
+          .add("jitter", getStatByName(this.statObject, "jitter"))
+          .add("remoteId", getStatByName(this.statObject, "remoteId"))
+          .add("framesDecoded", getStatByName(this.statObject, "framesDecoded"));
+    } else {
+      jsonObjectBuilder
+          .add("packetsSent", getStatByName(this.statObject, "packetsSent"))
+          .add("bytesSent", getStatByName(this.statObject, "bytesSent"))
+          .add("remoteId", getStatByName(this.statObject, "remoteId"))
+          .add("framesSent", getStatByName(this.statObject, "framesSent"));
+      }
     
     return jsonObjectBuilder;
   }

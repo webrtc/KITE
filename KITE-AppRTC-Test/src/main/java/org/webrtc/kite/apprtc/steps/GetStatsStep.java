@@ -49,8 +49,8 @@ public class GetStatsStep extends TestStep {
     try {
       JsonObject stats = getPCStatOvertime(webDriver, getStatsConfig).get(0);
       JsonObject statsSummary = appRTCMeetingPage.buildstatSummary(stats, getStatsConfig.getJsonArray("selectedStats"));
-      Reporter.getInstance().jsonAttachment(report, "getStatsRaw", stats);
-      Reporter.getInstance().jsonAttachment(this.report, "Stats Summary", statsSummary);
+      reporter.jsonAttachment(report, "getStatsRaw", stats);
+      reporter.jsonAttachment(this.report, "Stats Summary", statsSummary);
     } catch (Exception e) {
       logger.error(getStackTrace(e));
       throw new KiteTestException("Failed to getStats", Status.BROKEN, e);

@@ -16,12 +16,14 @@
 
 package org.webrtc.kite;
 
+import io.cosmosoftware.kite.instrumentation.NetworkInstrumentation;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.WebDriverUtils;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.config.client.App;
 import org.webrtc.kite.config.client.Browser;
+import org.webrtc.kite.config.media.MediaFile;
 import org.webrtc.kite.config.test.Tuple;
 import org.webrtc.kite.exception.KiteBadValueException;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
@@ -29,14 +31,15 @@ import org.webrtc.kite.exception.KiteNoKeyException;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import static io.cosmosoftware.kite.util.TestUtils.getPrivateIp;
 import static io.cosmosoftware.kite.util.TestUtils.readJsonFile;
 
 /**
@@ -332,5 +335,21 @@ public class Utils {
       throw new KiteBadValueException(key);
     }
   }
-  
+
+
+  static void makeCommand(String gridId, String nodeIp, String command){
+    logger.info(gridId + " GRID ID");
+    logger.info(nodeIp + " Node IP ");
+    logger.info(command + " command");
+
+    String url = "http://localhost:8080/KITEServer" + "/command?id=" + gridId + "&ip=" + nodeIp + "&cmd=" + command;
+    try {
+      URLConnection connection = new URL(url).openConnection();
+      connection.setRequestProperty("Accept-Charset", "UTF-8");
+      InputStream response = connection.getInputStream();
+      System.out.println("SUCCEEDED and got response: " + response);
+    } catch (IOException e) {
+      System.out.println("ERROR: " + e.getLocalizedMessage());
+    }
+  }
 }
