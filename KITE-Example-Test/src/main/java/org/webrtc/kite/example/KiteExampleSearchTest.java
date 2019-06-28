@@ -6,15 +6,11 @@ import org.webrtc.kite.tests.KiteBaseTest;
 import org.webrtc.kite.tests.TestRunner;
 
 public class KiteExampleSearchTest extends KiteBaseTest {
-
   
   @Override
-  protected void payloadHandling() {}
-
-  @Override
   public void populateTestSteps(TestRunner runner) {
-    runner.addStep(new GoogleSearchStep(runner.getWebDriver()));
-    runner.addStep(new GoogleFirstResultCheck(runner.getWebDriver()));
+    runner.addStep(new GoogleSearchStep(runner));
+    runner.addStep(new GoogleFirstResultCheck(runner));
   }
-
+  
 }

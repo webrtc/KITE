@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite.config;
+package org.webrtc.kite.config.client;
+
+import io.cosmosoftware.kite.interfaces.SampleData;
+import org.openqa.selenium.Platform;
 
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.persistence.Entity;
 
 /**
  * Representation of a App object in the config file.
@@ -27,48 +31,36 @@ import javax.json.JsonObjectBuilder;
  * }
  * <p>
  */
-public class App extends EndPoint {
-
+@Entity (name = Client.TABLE_NAME)
+public class App extends Client {
+  
   // Mandatory
   private String app;
-  private String appPackage;
   private String appActivity;
-  private final String deviceName;
-  private final boolean fullReset;
+  private String appPackage;
+  private boolean fullReset;
   
   /**
-   * Constructs a new App with the given app and Mobile Object.
-   *
-   * @param app          path to app package
-   * @param deviceName   device's name
-   * @param platformName app's platform
+   * Instantiates a new App.
    */
-  public App(String app, String deviceName, String platformName) {
-    this.app = app;
-    this.deviceName = deviceName;
-    this.platformName = platformName;
-    this.appPackage = null;
-    this.appActivity = null;
-    this.fullReset = true;
+  public App() {
+    super();
   }
   
   /**
    * Constructs a new App with the given remote address and JsonObject.
    *
-   * @param remoteAddress a string representation of the Selenium hub url
-   * @param jsonObject    JsonObject
+   * @param jsonObject JsonObject
    */
-  public App(String remoteAddress, JsonObject jsonObject) {
-    super(remoteAddress, jsonObject);
+  public App(JsonObject jsonObject) {
+    super(jsonObject);
     this.app = jsonObject.getString("app");
     this.appPackage = jsonObject.getString("appPackage", null);
     this.appActivity = jsonObject.getString("appActivity", null);
-    this.deviceName = jsonObject.getString("deviceName");
-    this.platformName = jsonObject.getString("platformName");
     this.fullReset = jsonObject.getString("reset", "fullReset")
       .equalsIgnoreCase("fullReset");
-    this.gateway = jsonObject.getString("gateway", null);
   }
+  
   
   /**
    * Constructs a new App with a given App.
@@ -80,34 +72,22 @@ public class App extends EndPoint {
     this.app = app.getApp();
     this.appPackage = app.getAppPackage();
     this.appActivity = app.getAppActivity();
-    this.deviceName = app.getDeviceName();
     this.fullReset = app.isFullReset();
   }
-
+  
   @Override
-  public JsonObjectBuilder getJsonObjectBuilder() {
-    JsonObjectBuilder jsonObjectBuilder =
-        super.getJsonObjectBuilder().add("app", this.app).add("fullReset", this.fullReset);
-    if (this.appPackage != null) {
-      jsonObjectBuilder.add("appPackage", this.appPackage);
-    }
-    if (this.appActivity != null) {
-      jsonObjectBuilder.add("appPackage", this.appActivity);
-    }
-    if (this.deviceName != null) {
-      jsonObjectBuilder.add("deviceName", this.deviceName);
-    }
-    return jsonObjectBuilder;
-
+  public JsonObjectBuilder buildJsonObjectBuilder() {
+    JsonObjectBuilder builder = super.buildJsonObjectBuilder()
+      .add("app", app)
+      .add("appPackage", appPackage)
+      .add("appActivity", appActivity)
+      .add("fullReset", fullReset);
+    return builder;
   }
   
-  /**
-   * Sets app.
-   *
-   * @param app the app
-   */
-  public void setApp(String app) {
-    this.app = app;
+  @Override
+  public Platform retrievePlatform() {
+    return this.mobile.getPlatformName();
   }
   
   /**
@@ -120,12 +100,12 @@ public class App extends EndPoint {
   }
   
   /**
-   * returns app's DeviceName
+   * Sets app.
    *
-   * @return String device name
+   * @param app the app
    */
-  public String getDeviceName() {
-    return deviceName;
+  public void setApp(String app) {
+    this.app = app;
   }
   
   /**
@@ -152,7 +132,7 @@ public class App extends EndPoint {
    * @return String app package
    */
   public String getAppPackage() {
-    return appPackage;
+    return appPackage == null ? "" : appPackage;
   }
   
   /**
@@ -165,18 +145,45 @@ public class App extends EndPoint {
   }
   
   /**
-   * returns app's reset value
+   * Is full reset boolean.
    *
-   * @return Boolean reset
-   */
-  public boolean getReset() {
-    return fullReset;
-  }
-  
-  /**
    * @return whether the Appium fullReset option should be set to true
    */
   public boolean isFullReset() {
     return fullReset;
   }
+  
+  /**
+   * Sets full reset.
+   *
+   * @param fullReset the full reset
+   */
+  public void setFullReset(boolean fullReset) {
+    this.fullReset = fullReset;
+  }
+  
+  @Override
+  public SampleData makeSampleData() {
+    // todo
+    return null;
+  }
+  
+  /**
+   * returns app's DeviceName
+   *
+   * @return String device name
+   */
+  public String retrieveDeviceName() {
+    return mobile.getDeviceName();
+  }
+  
+  /**
+   * Retrieve platform version string.
+   *
+   * @return the string
+   */
+  public String retrievePlatformVersion() {
+    return this.mobile.getPlatformVersion();
+  }
+  
 }

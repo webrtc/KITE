@@ -33,15 +33,15 @@ public class NoVideoTest extends AppRTCTest {
   
   @Override
   public void populateTestSteps(TestRunner runner) {
-    JoinRoomStep joinRoomStep = new JoinRoomStep(runner.getWebDriver());
+    JoinRoomStep joinRoomStep = new JoinRoomStep(runner);
     joinRoomStep.setRoomId(roomId);
     joinRoomStep.setDebugOption(this.debugOption() == null ? "" : this.debugOption());
 
 
     runner.addStep(joinRoomStep);
-    runner.addStep(new PeerConnectionCheck(runner.getWebDriver()));
+    runner.addStep(new PeerConnectionCheck(runner));
     if (this.getStats()) {
-      runner.addStep(new GetStatsStep(runner.getWebDriver(), getStatsConfig));
+      runner.addStep(new GetStatsStep(runner, getStatsConfig));
     }
   }
 }

@@ -1,5 +1,7 @@
 [back](../README.md)
 
+Note 2019-06-19: this tutorial is slightly outdated.
+
 # Tutorial: Writing a simple KITE Test for Jitsi in Javascript
 *****
 ### KITE Test Design Pattern

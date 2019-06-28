@@ -17,16 +17,19 @@ package org.webrtc.kite.apprtc.checks;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.Status;
+import io.cosmosoftware.kite.interfaces.Runner;
 import io.cosmosoftware.kite.steps.TestCheck;
-import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
 
 import static io.cosmosoftware.kite.util.TestUtils.waitAround;
 
 public class PeerConnectionCheck extends TestCheck {
+  
+  private final AppRTCMeetingPage appRTCMeetingPage;
 
-  public PeerConnectionCheck(WebDriver webDriver) {
-    super(webDriver);
+  public PeerConnectionCheck(Runner runner) {
+    super(runner);
+    appRTCMeetingPage = new AppRTCMeetingPage(runner);
   }
   
   @Override
@@ -36,7 +39,6 @@ public class PeerConnectionCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
-    final AppRTCMeetingPage appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
     for (int elapsedTime = 0; elapsedTime < this.checkTimeout; elapsedTime += this.checkInterval) {
       String state = appRTCMeetingPage.getICEConnectionState();
       if (state.equalsIgnoreCase("failed")) {

@@ -17,10 +17,9 @@ package org.webrtc.kite.stats;
 
 import io.cosmosoftware.kite.entities.Timeouts;
 import io.cosmosoftware.kite.exception.KiteTestException;
+import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.util.ReportUtils;
-import io.cosmosoftware.kite.util.TestUtils;
-import org.apache.log4j.Logger;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
@@ -44,7 +43,7 @@ import static io.cosmosoftware.kite.util.TestUtils.waitAround;
 public class StatsUtils {
 
   private static final HashMap<String, StatsUtils> instance = new HashMap<String, StatsUtils>();
-  private static final Logger logger = Logger.getLogger(StatsUtils.class.getName());
+  private static final KiteLogger logger = KiteLogger.getLogger(StatsUtils.class.getName());
   private static final String[] candidatePairStats = {"bytesSent", "bytesReceived", "currentRoundTripTime", "totalRoundTripTime", "timestamp"};
   private static final String[] inboundStats = {"bytesReceived", "packetsReceived", "packetsLost", "jitter", "timestamp"};
   private static final String[] outboundStats = {"bytesSent", "timestamp"};
@@ -1440,7 +1439,7 @@ public class StatsUtils {
   private static List<String> findKeys(JsonObject json) {
     ArrayList<String> keyArr = new ArrayList<>();
     for (String key : json.keySet()) {
-      if (key.contains("RTC")) {
+      if (key.contains("RTC")||key.contains("rtp")) {
         keyArr.add(key);
       }
     }

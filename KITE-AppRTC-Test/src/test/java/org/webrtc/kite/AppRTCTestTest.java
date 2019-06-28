@@ -16,38 +16,38 @@
 
 package org.webrtc.kite;
 
-import io.cosmosoftware.kite.steps.StepPhase;
 import junit.framework.TestCase;
 import org.webrtc.kite.apprtc.tests.HDTest;
-import org.webrtc.kite.config.Browser;
-import org.webrtc.kite.config.Tuple;
+import org.webrtc.kite.config.client.Browser;
+import org.webrtc.kite.config.client.Client;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.entities.Timeouts.TEN_SECOND_INTERVAL;
-import static org.webrtc.kite.Utils.getSystemPlatform;
 
 public class AppRTCTestTest extends TestCase {
 
   private static final String APPRTC_URL = "https://appr.tc";
   private static final String SELENIUM_SERVER_URL = "http://localhost:4444/wd/hub";
 
-  private Tuple endPoints = new Tuple();
+  private List<Client> clients = new ArrayList<>();
 
   public void setUp() throws Exception {
     super.setUp();
 
-    final Browser browser = new Browser(
+    final Browser browser = new Browser(/*
             "chrome",
             "74",
       getSystemPlatform());
-    browser.setRemoteAddress(SELENIUM_SERVER_URL);
+    browser.setRemoteAddress(SELENIUM_SERVER_URL*/);
     
-    endPoints.add(browser);
-    endPoints.add(browser);
+    clients.add(browser);
+    clients.add(browser);
   }
   
   private JsonObject getFakePayload () {
@@ -72,7 +72,7 @@ public class AppRTCTestTest extends TestCase {
 
   public void testTestScript() {
     HDTest test = new HDTest();
-    test.setEndPointList(endPoints);
+    test.setTuple(clients);
     test.setPayload(getFakePayload());
     test.execute();
   }

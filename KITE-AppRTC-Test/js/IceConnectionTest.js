@@ -1,4 +1,4 @@
-const {TestUtils, WebDriverFactory, KiteBaseTest, Status} = require('kite-common');
+const {TestUtils, WebDriverFactory, KiteBaseTest} = require('kite-common');
 
 // Steps & checks
 const {OpenAppUrlStep, ConnectToAppRoomStep, GetStatsStep} = require('./steps');
@@ -39,6 +39,7 @@ class IceConnectionTest extends KiteBaseTest {
         await getStatsStep.execute(this);
       }
 
+      await super.waitAllSteps();
     } catch (error) {
       console.log(error);
     } finally {

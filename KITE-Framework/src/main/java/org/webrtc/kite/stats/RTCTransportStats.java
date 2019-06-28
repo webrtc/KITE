@@ -17,7 +17,6 @@
 package org.webrtc.kite.stats;
 
 
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
@@ -27,12 +26,12 @@ import java.util.Map;
  */
 public class RTCTransportStats extends RTCStatObject {
 
-  private final String bytesSent;
   private final String bytesReceived;
-  private final String rtcpTransportStatsId;
-  private final String selectedCandidatePairId;
+  private final String bytesSent;
   private final String localCertificateId;
   private final String remoteCertificateId;
+  private final String rtcpTransportStatsId;
+  private final String selectedCandidatePairId;
   private final String timestamp;
 
   public RTCTransportStats(Map<Object, Object> statObject) {

@@ -16,19 +16,18 @@
 
 package org.webrtc.kite.config;
 
+import org.webrtc.kite.config.client.App;
+import org.webrtc.kite.config.client.Browser;
+import org.webrtc.kite.config.client.Client;
+import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
 import org.webrtc.kite.exception.KiteUnsupportedRemoteException;
-import org.webrtc.kite.grid.RemoteAddressManager;
-import org.webrtc.kite.grid.RemoteGridFetcher;
 
 import javax.json.JsonObject;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * The type Config handler.
@@ -36,24 +35,19 @@ import java.util.Set;
 public class ConfigHandler {
   
   /**
-   * The Endpoint list.
+   * The Client list.
    */
-  protected List<EndPoint> endPointList;
+  protected List<Client> clientList = new ArrayList<>();
   /**
-   * The TestConf list.
+   * The TestConfig list.
    */
-  protected List<TestConf> testList;
+  protected List<TestConfig> testList;
   
   
   /**
    * Instantiates a new Config type one handler.
    *
-   * @param permute           permutation is true, combination if false
-   * @param callbackURL       the callback url
-   * @param remoteObjectList  the remote object list
-   * @param testObjectList    the test object list
-   * @param browserObjectList the browser object list
-   * @param appObjectList     the app object list
+   * @param testObjectList the test object list
    *
    * @throws KiteInsufficientValueException the kite insufficient value exception
    * @throws KiteUnsupportedRemoteException the kite unsupported remote exception
@@ -62,92 +56,17 @@ public class ConfigHandler {
    * @throws InstantiationException         the instantiation exception
    * @throws IllegalAccessException         the illegal access exception
    */
-  public ConfigHandler(boolean permute, String callbackURL, List<JsonObject> remoteObjectList,
-                              List<JsonObject> testObjectList, List<JsonObject> browserObjectList, List<JsonObject> appObjectList)
-    throws KiteInsufficientValueException, KiteUnsupportedRemoteException,
-    InvocationTargetException, NoSuchMethodException, InstantiationException,
-    IllegalAccessException, IOException {
-    
+  public ConfigHandler(List<JsonObject> testObjectList, List<JsonObject> clientList)
+    throws KiteInsufficientValueException, IOException {
+    for (JsonObject client : clientList) {
+      this.clientList.add(client.getString("browserName", null) != null
+        ? new Browser(client)
+        : new App(client));
+    }
     this.testList = new ArrayList<>();
     for (JsonObject object : testObjectList) {
-      this.testList.add(new TestConf(permute, callbackURL, object));
+      this.testList.add(new TestConfig(object));
     }
-    if (browserObjectList != null) {
-      this.adjustRemotes(new RemoteManager(remoteObjectList), browserObjectList, Browser.class);
-    }
-    if (appObjectList != null) {
-      this.adjustRemotes(new RemoteManager(remoteObjectList), appObjectList, App.class);
-    }
-  }
-  
-  /**
-   * Builds the browser list and sets the remote address in each of the browser object.
-   * <p>
-   * The algorithm is as follows:
-   * 1) If there is only one remote provided then sets that remote for every browser.
-   * 2) If there are more than one remotes then query all remotes against the provided browsers in
-   * sequential order to check if a remote can spawn the browser.
-   * 3) If a browser is not supported by a remote then set 'local' as its remote if provided
-   * otherwise set the top remote from the remote array.
-   *
-   * @param remoteManager  RemoteManager
-   * @param jsonObjectList an implementation of List<JsonObject>.
-   * @param objectClass    the browser class
-   *
-   * @throws NoSuchMethodException     the no such method exception
-   * @throws IllegalAccessException    the illegal access exception
-   * @throws InvocationTargetException the invocation target exception
-   * @throws InstantiationException    the instantiation exception
-   */
-  protected void adjustRemotes(RemoteManager remoteManager, List<JsonObject> jsonObjectList,
-                               Class objectClass)
-    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException,
-    InstantiationException {
-    
-    Set<EndPoint> set = new LinkedHashSet<>();
-    
-    List<Remote> remoteList = remoteManager.getRemoteList();
-    int remoteListSize = remoteList.size();
-    
-    if (remoteListSize == 1) {
-      String remoteAddress = remoteList.get(0).getRemoteAddress();
-      for (JsonObject object : jsonObjectList) {
-        Constructor constructor =
-          objectClass.getConstructor(new Class[]{String.class, JsonObject.class});
-        EndPoint endPoint = (EndPoint) constructor.newInstance(null, object);
-        if (endPoint.getRemoteAddress() == null) {
-          endPoint.setRemoteAddress(remoteAddress);
-        }
-        set.add(endPoint);
-      }
-    } else {
-      Remote defaultRemote = remoteList.get(0);
-      int index = defaultRemote.isLocal() ? 1 : 0;
-      
-      List<RemoteGridFetcher> fetcherList = new ArrayList<>();
-      for (; index < remoteListSize; index++) {
-        fetcherList.add(remoteList.get(index).getGridFetcher());
-      }
-      
-      RemoteAddressManager remoteAddressManager = new RemoteAddressManager(fetcherList);
-      remoteAddressManager.communicateWithRemotes();
-      
-      for (JsonObject object : jsonObjectList) {
-        Constructor constructor =
-          objectClass.getConstructor(new Class[]{String.class, JsonObject.class});
-        EndPoint endPoint = (EndPoint) constructor.newInstance(null, object);
-        if (endPoint.getRemoteAddress() == null) {
-          String remoteAddress = remoteAddressManager.findAppropriateRemoteAddress(endPoint);
-          endPoint.setRemoteAddress(
-            remoteAddress == null ? defaultRemote.getRemoteAddress() : remoteAddress);
-        }
-        set.add(endPoint);
-      }
-    }
-    if (this.endPointList != null) {
-      set.addAll(this.endPointList);
-    }
-    this.endPointList = new ArrayList<>(set);
   }
   
   /**
@@ -155,8 +74,12 @@ public class ConfigHandler {
    *
    * @return the browser list
    */
-  public List<EndPoint> getEndPointList() {
-    return this.endPointList;
+  public List<Client> getClientList() {
+    return this.clientList;
+  }
+  
+  public void setClientList(List<Client> clientList) {
+    this.clientList = clientList;
   }
   
   /**
@@ -164,11 +87,8 @@ public class ConfigHandler {
    *
    * @return the test list
    */
-  public List<TestConf> getTestList() {
+  public List<TestConfig> getTestList() {
     return this.testList;
   }
-  
-  public void setEndPointList(List<EndPoint> endPointList) {
-    this.endPointList = endPointList;
-  }
 }
+

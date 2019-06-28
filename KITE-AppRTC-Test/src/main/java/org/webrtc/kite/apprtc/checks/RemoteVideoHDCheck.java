@@ -19,16 +19,17 @@ import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.Reporter;
 import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestCheck;
-import org.openqa.selenium.WebDriver;
+import io.cosmosoftware.kite.interfaces.Runner;
 import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
 
 import javax.json.JsonObject;
 
 public class RemoteVideoHDCheck extends TestCheck {
-  protected AppRTCMeetingPage appRTCMeetingPage = null;
+  protected AppRTCMeetingPage appRTCMeetingPage;
   
-  public RemoteVideoHDCheck(WebDriver webDriver) {
-    super(webDriver);
+  public RemoteVideoHDCheck(Runner runner) {
+    super(runner);
+    appRTCMeetingPage = new AppRTCMeetingPage(runner);
   }
   
   @Override
@@ -38,9 +39,6 @@ public class RemoteVideoHDCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
-    if (appRTCMeetingPage == null) {
-      appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
-    }
     JsonObject resolution = appRTCMeetingPage.getResolution("remote");
     int width = resolution.getInt("width");
     int height = resolution.getInt("height");

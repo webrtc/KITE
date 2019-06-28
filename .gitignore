@@ -13,3 +13,4 @@ package-lock.json
 .project
 .DS_Store
 results
+/localGrid

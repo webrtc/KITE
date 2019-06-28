@@ -18,20 +18,11 @@ import java.util.List;
 public class WPTTest extends KiteBaseTest {
   
 
-  private String securedURL;
   private String nonSecuredURL;
   private String revision;
-  private List<String> tests = new ArrayList<>();
+  private String securedURL;
   private List<String> testURLList = new ArrayList<>();
-  
-  
-  @Override
-  public void populateTestSteps(TestRunner runner) {
-    for (String test : tests) {
-      runner.addStep(new RetrieveTestStep(runner.getWebDriver(), nonSecuredURL + test, securedURL + test, testURLList));
-      runner.addStep(new RunAllTestStep(runner.getWebDriver(), testURLList, this.revision, test));
-    }
-  }
+  private List<String> tests = new ArrayList<>();
   
   @Override
   protected void payloadHandling() {
@@ -53,10 +44,18 @@ public class WPTTest extends KiteBaseTest {
       } else {
         JsonArray testArray = payload.getJsonArray("tests");
         logger.info("Running tests for: " + testArray.toString());
-        for (int index = 0; index < testArray.size(); index ++) {
+        for (int index = 0; index < testArray.size(); index++) {
           tests.add(testArray.getString(index));
         }
       }
+    }
+  }
+  
+  @Override
+  public void populateTestSteps(TestRunner runner) {
+    for (String test : tests) {
+      runner.addStep(new RetrieveTestStep(runner, nonSecuredURL + test, securedURL + test, testURLList));
+      runner.addStep(new RunAllTestStep(runner, testURLList, this.revision, test));
     }
   }
   

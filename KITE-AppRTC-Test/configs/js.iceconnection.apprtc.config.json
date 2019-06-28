@@ -1,10 +1,10 @@
 {
   "name": "IceConnectionTest JS",
   "callable": true,
-  "remotes": [
+  "grids": [
     {
       "type": "local",
-      "remoteAddress": "http://localhost:4444/wd/hub"
+      "url": "http://localhost:4444/wd/hub"
     }
   ],
   "tests": [
@@ -15,6 +15,7 @@
       "testImpl": "IceConnectionTest.js",
       "payload" : {
         "url": "https://appr.tc",
+        "port": 30000,
         "testTimeout": 60,
         "getStats" : {
           "enabled": true,

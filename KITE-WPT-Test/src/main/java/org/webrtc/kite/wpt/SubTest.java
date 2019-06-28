@@ -8,9 +8,9 @@ import javax.json.JsonObjectBuilder;
  * The type Sub test.
  */
 public class SubTest {
-  private String name = "n/a";
-  private String message = "n/a";
   private String actualResult = "n/a"; // or status
+  private String message = "n/a";
+  private String name = "n/a";
   
   
   /**
@@ -20,12 +20,20 @@ public class SubTest {
   }
   
   /**
-   * Sets name.
+   * Gets json.
    *
-   * @param name the name
+   * @return the json
    */
-  public void setName(String name) {
-    this.name = name;
+  public JsonObject getJson() {
+    JsonObjectBuilder res = Json.createObjectBuilder();
+    res.add("name", name);
+    res.add("status", actualResult);
+    res.add("message", message);
+    String expectedResult = "PASS";
+    if (!actualResult.equalsIgnoreCase(expectedResult)) {
+      res.add("expected", expectedResult);
+    }
+    return res.build();
   }
   
   /**
@@ -47,20 +55,12 @@ public class SubTest {
   }
   
   /**
-   * Gets json.
+   * Sets name.
    *
-   * @return the json
+   * @param name the name
    */
-  public JsonObject getJson() {
-    JsonObjectBuilder res = Json.createObjectBuilder();
-    res.add("name", name);
-    res.add("status", actualResult);
-    res.add("message", message);
-    String expectedResult = "PASS";
-    if (!actualResult.equalsIgnoreCase(expectedResult)) {
-      res.add("expected", expectedResult);
-    }
-    return res.build();
+  public void setName(String name) {
+    this.name = name;
   }
   
   @Override

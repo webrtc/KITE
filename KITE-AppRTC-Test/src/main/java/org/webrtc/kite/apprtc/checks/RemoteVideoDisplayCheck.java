@@ -19,14 +19,15 @@ import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.Reporter;
 import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestCheck;
-import org.openqa.selenium.WebDriver;
+import io.cosmosoftware.kite.interfaces.Runner;
 import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
 
 public class RemoteVideoDisplayCheck extends TestCheck {
-  protected AppRTCMeetingPage appRTCMeetingPage = null;
+  protected AppRTCMeetingPage appRTCMeetingPage;
 
-  public RemoteVideoDisplayCheck(WebDriver webDriver) {
-    super(webDriver);
+  public RemoteVideoDisplayCheck(Runner runner) {
+    super(runner);
+    appRTCMeetingPage = new AppRTCMeetingPage(runner);
   }
   
   @Override
@@ -36,11 +37,7 @@ public class RemoteVideoDisplayCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
-    if (appRTCMeetingPage == null) {
-      appRTCMeetingPage = new AppRTCMeetingPage(webDriver, logger);
-    }
     logger.info("Looking for video object");
-
     String videoCheck = appRTCMeetingPage.remoteVideoCheck();
     if (!"video".equalsIgnoreCase(videoCheck)) {
       Reporter.getInstance().textAttachment(report, "Remote Video", videoCheck, "plain");

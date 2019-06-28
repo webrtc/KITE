@@ -1,10 +1,10 @@
 {
   "name": "IceConnectionTest Suite",
   "callable": true,
-  "remotes": [
+  "grids": [
     {
       "type": "local",
-      "remoteAddress": "http://localhost:4444/wd/hub"
+      "url": "http://localhost:4444/wd/hub"
     }
   ],
   "tests": [
@@ -13,11 +13,9 @@
       "tupleSize": 2,
       "description": "This test check the ICEConnection state between two browsers communicating via appr.tc",
       "testImpl": "org.webrtc.kite.apprtc.tests.IceConnectionTest",
-      "loadTest": true,
       "payload" : {
         "url": "https://appr.tc",
         "takeScreenshotForEachTest": true,
-        "csvReport": true,
         "getStats" : {
           "enabled": true,
           "statsCollectionTime": 2,
@@ -28,11 +26,12 @@
       }
     }
   ],
-  "browsers": [
+  "clients": [
     {
       "browserName": "chrome",
       "version": "74",
       "platform": "localhost",
+      "headless": true,
       "flags": []
     }
   ]

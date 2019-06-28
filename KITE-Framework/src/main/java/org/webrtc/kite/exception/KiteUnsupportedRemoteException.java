@@ -21,7 +21,7 @@ package org.webrtc.kite.exception;
  * ones.
  */
 public class KiteUnsupportedRemoteException extends Exception {
-
+  
   private final String remoteName;
   
   /**
@@ -42,5 +42,5 @@ public class KiteUnsupportedRemoteException extends Exception {
   public String getRemoteName() {
     return remoteName;
   }
-
+  
 }

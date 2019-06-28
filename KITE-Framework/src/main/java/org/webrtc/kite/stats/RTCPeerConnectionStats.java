@@ -17,7 +17,6 @@
 package org.webrtc.kite.stats;
 
 
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
@@ -26,8 +25,8 @@ import java.util.Map;
  * RTCPeerConnectionStats, with attributes dataChannelsOpened, dataChannelsClosed
  */
 public class RTCPeerConnectionStats extends RTCStatObject {
-  private final String dataChannelsOpened;
   private final String dataChannelsClosed;
+  private final String dataChannelsOpened;
 
   public RTCPeerConnectionStats(Map<Object, Object> statObject) {
     this.setId(getStatByName(statObject, "id"));

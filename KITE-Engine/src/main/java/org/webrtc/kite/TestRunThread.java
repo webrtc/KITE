@@ -1,43 +1,40 @@
 package org.webrtc.kite;
 
-import org.apache.log4j.Logger;
-import org.webrtc.kite.config.TestConf;
-import org.webrtc.kite.config.Tuple;
+import io.cosmosoftware.kite.report.KiteLogger;
+import org.webrtc.kite.config.test.TestConfig;
+import org.webrtc.kite.config.test.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-public class TestRunThread implements Callable<Object> {
-  private final Logger logger = Logger.getLogger(this.getClass().getName());
-  private final TestConf testConf;
+public class TestRunThread implements Callable<List<Future<Object>>> {
+  private final KiteLogger logger = KiteLogger.getLogger(this.getClass().getName());
+  private final TestConfig testConfig;
   private final List<Tuple> tupleList;
   
-  public TestRunThread(TestConf testConf, List<Tuple> tupleList) {
-    this.testConf = testConf;
+  public TestRunThread(TestConfig testConfig, List<Tuple> tupleList) {
+    this.testConfig = testConfig;
     this.tupleList = tupleList;
-  }
-  public TestRunThread(TestConf testConf, Tuple tuple) {
-    this.testConf = testConf;
-    this.tupleList = new ArrayList<>();
-    this.tupleList.add(tuple);
   }
   
   @Override
-  public Object call() {
+  public List<Future<Object>> call() {
     List<Future<Object>> listOfResults = null;
     try {
-      logger.info("Running " + testConf + " ...");
-      listOfResults = new MatrixRunner(testConf, tupleList).run();
+      logger.info("Running " + testConfig + " ...");
+      listOfResults = new MatrixRunner(testConfig, tupleList).run();
     } catch (Exception e) {
       logger.fatal("Error [Interruption]: The execution has been interrupted with the "
         + "following error: " + e.getLocalizedMessage(), e);
     }
-  
-    StringBuilder testResults = new StringBuilder("The following are results for " + testConf + ":\n");
+    
+    StringBuilder testResults = new StringBuilder("The following are results for " + testConfig + ":\n");
+    
     if (listOfResults != null) {
-      for (Future<Object> future : listOfResults) {
+      List<Future<Object>> temp = new ArrayList<>(listOfResults);
+      for (Future<Object> future : temp) {
         try {
           testResults.append("\r\n").append(future.get().toString());
         } catch (Exception e) {
@@ -49,6 +46,6 @@ public class TestRunThread implements Callable<Object> {
     } else {
       logger.warn("No test case was found.");
     }
-    return testResults;
+    return listOfResults;
   }
 }

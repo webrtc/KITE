@@ -17,13 +17,17 @@ package org.webrtc.kite.apprtc.pages;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.pages.BasePage;
-import org.apache.log4j.Logger;
+import io.cosmosoftware.kite.report.KiteLogger;
+import io.cosmosoftware.kite.interfaces.Runner;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.webrtc.kite.stats.StatsUtils;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -35,61 +39,61 @@ import static io.cosmosoftware.kite.entities.Timeouts.TEN_SECOND_INTERVAL_IN_SEC
 import static io.cosmosoftware.kite.util.TestUtils.*;
 
 public class AppRTCMeetingPage extends BasePage {
-
+  
   @FindBy(id = "mini-video")
   WebElement miniVideo;
-
+  
   @FindBy(id = "local-video")
   WebElement localVideo;
-
+  
   @FindBy(id = "remote-video")
   WebElement remoteVideo;
-
+  
   @FindBy(id = "hangup")
   WebElement hangUpButton;
-
+  
   @FindBy(id = "fullscreen")
   WebElement fullScreenButton;
-
+  
   @FindBy(id = "mute-audio")
   WebElement muteAudioButton;
-
+  
   @FindBy(id = "mute-video")
   WebElement muteVideoButton;
-
-  public AppRTCMeetingPage(WebDriver webDriver, Logger logger) {
-    super(webDriver, logger);
+  
+  public AppRTCMeetingPage(Runner runner) {
+    super(runner);
   }
-
+  
   public void muteAudio() throws KiteTestException {
     click(muteAudioButton);
   }
-
+  
   public void muteVideo() throws KiteTestException {
     click(muteVideoButton);
   }
-
+  
   public void hangup() throws KiteTestException {
     click(hangUpButton);
   }
-
+  
   public void goFullScreen() throws KiteTestException {
     click(fullScreenButton);
   }
-
+  
   public String getICEConnectionState() throws KiteTestException {
     return (String) executeJsScript(webDriver, getIceConnectionStateScript());
   }
-
+  
   public long getRemoteVideoPixelSum() throws KiteTestException {
     return (Long) executeJsScript(webDriver, getRemoteVideoPixelSumScript());
   }
-
+  
   public String remoteVideoCheck() throws KiteTestException {
     waitUntilVisibilityOf(remoteVideo, TEN_SECOND_INTERVAL_IN_SECONDS);
     return videoCheck(webDriver, 1);
   }
-
+  
   /**
    * Returns the test's GetResolutionScript to stash the result and stats of the test in a global
    * variable to retrieve later.
@@ -105,7 +109,7 @@ public class AppRTCMeetingPage extends BasePage {
     JsonReader reader = Json.createReader(stream);
     return reader.readObject();
   }
-
+  
   /**
    * Returns the test JavaScript to retrieve appController.call_.pcClient_.pc_.iceConnectionState.
    * If it doesn't exist then the method returns 'unknown'.
@@ -114,10 +118,10 @@ public class AppRTCMeetingPage extends BasePage {
    */
   private String getIceConnectionStateScript() {
     return "var retValue;"
-        + "try {retValue = appController.call_.pcClient_.pc_.iceConnectionState;} catch (exception) {} "
-        + "if (retValue) {return retValue;} else {return 'unknown';}";
+      + "try {retValue = appController.call_.pcClient_.pc_.iceConnectionState;} catch (exception) {} "
+      + "if (retValue) {return retValue;} else {return 'unknown';}";
   }
-
+  
   /**
    * Returns the test's canvasCheck to check if the video is blank, and if it changes overtime.
    *
@@ -125,49 +129,49 @@ public class AppRTCMeetingPage extends BasePage {
    */
   private String getRemoteVideoPixelSumScript() {
     return "function getSum(total, num) {"
-        + "    return total + num;"
-        + "};"
-        + "var canvas = document.createElement('canvas');"
-        + "var ctx = canvas.getContext('2d');"
-        + "ctx.drawImage(remoteVideo,1,1,remoteVideo.videoHeight-1,remoteVideo.videoWidth-1);"
-        + "var imageData = ctx.getImageData(1,1,remoteVideo.videoHeight-1,remoteVideo.videoWidth-1).data;"
-        + "var sum = imageData.reduce(getSum);"
-        + "if (sum===255*(Math.pow(remoteVideo.videoHeight-1,(remoteVideo.videoWidth-1)*(remoteVideo.videoWidth-1))))"
-        + "   return 0;"
-        + "return sum;";
+      + "    return total + num;"
+      + "};"
+      + "var canvas = document.createElement('canvas');"
+      + "var ctx = canvas.getContext('2d');"
+      + "ctx.drawImage(remoteVideo,1,1,remoteVideo.videoHeight-1,remoteVideo.videoWidth-1);"
+      + "var imageData = ctx.getImageData(1,1,remoteVideo.videoHeight-1,remoteVideo.videoWidth-1).data;"
+      + "var sum = imageData.reduce(getSum);"
+      + "if (sum===255*(Math.pow(remoteVideo.videoHeight-1,(remoteVideo.videoWidth-1)*(remoteVideo.videoWidth-1))))"
+      + "   return 0;"
+      + "return sum;";
   }
-
+  
   private String stashResolutionScript(boolean remote) {
     return "window.resolution = {width: -1, height: -1};"
-        + "appController.call_.pcClient_.pc_.getStats().then(data => {"
-        + "   [...data.values()].forEach(function(e){"
-        + "       if (e.type.startsWith('track')){"
-        + "           if ((e.remoteSource=="
-        + remote
-        + ") && (typeof e.audioLevel == 'undefined')) { "
-        + "               window.resolution.width = e.frameWidth;"
-        + "               window.resolution.height = e.frameHeight;"
-        + "           }"
-        + "       }"
-        + "   });"
-        + "});";
+      + "appController.call_.pcClient_.pc_.getStats().then(data => {"
+      + "   [...data.values()].forEach(function(e){"
+      + "       if (e.type.startsWith('track')){"
+      + "           if ((e.remoteSource=="
+      + remote
+      + ") && (typeof e.audioLevel == 'undefined')) { "
+      + "               window.resolution.width = e.frameWidth;"
+      + "               window.resolution.height = e.frameHeight;"
+      + "           }"
+      + "       }"
+      + "   });"
+      + "});";
   }
-
+  
   private String getStashedResolutionScript() {
     return "return JSON.stringify(window.resolution);";
   }
-
+  
   public List<JsonObject> getPCStatOvertime(WebDriver webDriver, JsonObject getStatsConfig)
     throws KiteTestException {
     return StatsUtils.getPCStatOvertime(webDriver, getStatsConfig);
   }
-
-
+  
+  
   public JsonObject buildstatSummary(JsonObject rawData, JsonArray selectedStats)
     throws KiteTestException {
     return StatsUtils.buildstatSummary(rawData, selectedStats);
   }
-
+  
   public LinkedHashMap<String, String> statsHashMap(JsonObject statsSummary)
     throws KiteTestException {
     return StatsUtils.statsHashMap(statsSummary);

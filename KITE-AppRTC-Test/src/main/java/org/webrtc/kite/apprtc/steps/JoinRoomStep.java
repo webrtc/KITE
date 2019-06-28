@@ -17,7 +17,7 @@ package org.webrtc.kite.apprtc.steps;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.steps.TestStep;
-import org.openqa.selenium.WebDriver;
+import io.cosmosoftware.kite.interfaces.Runner;
 import org.webrtc.kite.apprtc.pages.AppRTCJoinPage;
 
 public class JoinRoomStep extends TestStep {
@@ -25,6 +25,8 @@ public class JoinRoomStep extends TestStep {
   protected String roomId;
   private String debugOption;
 
+  private final AppRTCJoinPage appRTCJoinPage;
+  
   public void setRoomId(String roomId) {
     this.roomId = roomId;
   }
@@ -33,8 +35,9 @@ public class JoinRoomStep extends TestStep {
     this.debugOption = debugOption;
   }
 
-  public JoinRoomStep(WebDriver webDriver) {
-    super(webDriver);
+  public JoinRoomStep(Runner runner) {
+    super(runner);
+    appRTCJoinPage = new AppRTCJoinPage(runner);
   }
 
   @Override
@@ -44,7 +47,6 @@ public class JoinRoomStep extends TestStep {
 
   @Override
   protected void step() throws KiteTestException {
-    final AppRTCJoinPage appRTCJoinPage = new AppRTCJoinPage(webDriver, logger);
     appRTCJoinPage.joinRoom(roomId + (debugOption != null ? debugOption : ""));
   }
 }

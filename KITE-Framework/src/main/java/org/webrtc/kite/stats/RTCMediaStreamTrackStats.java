@@ -17,7 +17,6 @@
 package org.webrtc.kite.stats;
 
 
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
@@ -28,20 +27,20 @@ import java.util.Map;
  * framesDecoded, framesDropped, framesCorrupted, audioLevel
  */
 public class RTCMediaStreamTrackStats extends RTCStatObject {
-  private final String trackIdentifier;
-  private final String remoteSource;
-  private final String ended;
+  private final String audioLevel;
   private final String detached;
-  private final String frameWidth;
+  private final String ended;
   private final String frameHeight;
-  private final String framesPerSecond;
-  private final String framesSent;
-  private final String framesReceived;
+  private final String frameWidth;
+  private final String framesCorrupted;
   private final String framesDecoded;
   private final String framesDropped;
-  private final String framesCorrupted;
-  private final String audioLevel;
+  private final String framesPerSecond;
+  private final String framesReceived;
+  private final String framesSent;
+  private final String remoteSource;
   private final String timestamp;
+  private final String trackIdentifier;
 
   public RTCMediaStreamTrackStats(Map<Object, Object> statObject) {
     this.setId(getStatByName(statObject, "id"));
@@ -64,7 +63,7 @@ public class RTCMediaStreamTrackStats extends RTCStatObject {
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    return       Json.createObjectBuilder()
+    return Json.createObjectBuilder()
       .add("trackIdentifier", this.trackIdentifier)
       .add("remoteSource", this.remoteSource)
       .add("ended", this.ended)

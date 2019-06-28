@@ -16,13 +16,12 @@
 
 package org.webrtc.kite;
 
+import io.cosmosoftware.kite.manager.RoomManager;
 import io.cosmosoftware.kite.report.Container;
+import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.report.Reporter;
-import org.apache.log4j.Logger;
-import org.webrtc.kite.config.Configurator;
-import org.webrtc.kite.config.EndPoint;
-import org.webrtc.kite.config.TestConf;
-import org.webrtc.kite.config.Tuple;
+import org.webrtc.kite.config.test.TestConfig;
+import org.webrtc.kite.config.test.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,28 +31,29 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
-import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
 
 /**
  * A class to manage the asynchronous execution of TestManager objects.
  */
 public class MatrixRunner {
   
-  private final Logger logger = Logger.getLogger(MatrixRunner.class.getName());
-  private final TestConf testConf;
+  private final KiteLogger logger = KiteLogger.getLogger(MatrixRunner.class.getName());
+  private final TestConfig testConfig;
+  private boolean interrupted;
+  private ExecutorService multiExecutorService;
   private List<Tuple> tupleList = new ArrayList<>();
   
   /**
-   * Constructs a new MatrixRunner with the given TestConf and List<Tuple>.
+   * Constructs a new MatrixRunner with the given TestConfig and List<Tuple>.
    *
-   * @param testConf     TestConf
+   * @param testConfig   TestConfig
    * @param listOfTuples a list of tuples (containing 1 or multiples kite config objects).
    */
-  public MatrixRunner(TestConf testConf, List<Tuple> listOfTuples) {
-    this.testConf = testConf;
+  public MatrixRunner(TestConfig testConfig, List<Tuple> listOfTuples) {
+    this.testConfig = testConfig;
     this.tupleList.addAll(listOfTuples);
   }
-
+  
   /**
    * Returns a sublist of the given futureList exclusive of the type of objects specified by the
    * objectClass.
@@ -104,12 +104,20 @@ public class MatrixRunner {
   }
   
   /**
+   * Interrupt.
+   */
+  public void interrupt() {
+    this.interrupted = true;
+    this.shutdownExecutors();
+  }
+  
+  /**
    * Executes the test contained inside the TestManager for the provided matrix.
    *
    * @return List<Future < Object>>
    */
   public List<Future<Object>> run() {
-    Container testSuite = new Container(testConf.getName());
+    Container testSuite = new Container(testConfig.getName());
     
     int totalTestCases = this.tupleList.size();
     if (totalTestCases < 1) {
@@ -118,16 +126,16 @@ public class MatrixRunner {
     
     List<TestManager> testManagerList = new ArrayList<>();
     List<Future<Object>> futureList = new ArrayList<>();
+    RoomManager.init();
+    this.multiExecutorService =
+      Executors.newFixedThreadPool(this.testConfig.getNoOfThreads());
     
-    ExecutorService multiExecutorService =
-      Executors.newFixedThreadPool(this.testConf.getNoOfThreads());
-    
-    logger.info("Executing " + this.testConf + " for " + totalTestCases + " browser tuples with size :" + tupleList.get(0).size());
+    logger.info("Executing " + this.testConfig + " for " + totalTestCases + " browser tuples with size :" + tupleList.get(0).size());
     try {
       for (int index = 0; index < this.tupleList.size(); index++) {
-        TestManager manager = new TestManager(this.testConf, this.tupleList.get(index));
+        TestManager manager = new TestManager(this.testConfig, this.tupleList.get(index));
         manager.setTestSuite(testSuite);
-        if (testConf.isLoadTest()) {
+        if (testConfig.isLoadTest()) {
           manager.setId("iteration " + (index + 1));
         }
         testManagerList.add(manager);
@@ -147,10 +155,20 @@ public class MatrixRunner {
     } finally {
       testSuite.setStopTimestamp();
       Reporter.getInstance().generateReportFiles();
-      multiExecutorService.shutdown();
+      this.shutdownExecutors();
     }
+    
     return futureList;
   }
   
+  /**
+   * Shutdown executors.
+   */
+  synchronized private void shutdownExecutors() {
+    if (this.multiExecutorService != null && !this.multiExecutorService.isShutdown()) {
+      this.multiExecutorService.shutdownNow();
+      this.multiExecutorService = null;
+    }
+  }
   
 }

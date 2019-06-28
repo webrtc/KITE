@@ -19,20 +19,26 @@ package org.webrtc.kite;
 import io.cosmosoftware.kite.report.Container;
 import io.cosmosoftware.kite.steps.StepPhase;
 import org.webrtc.kite.config.Configurator;
-import org.webrtc.kite.config.TestConf;
-import org.webrtc.kite.config.Tuple;
+import org.webrtc.kite.config.test.TestConfig;
+import org.webrtc.kite.config.test.Tuple;
 import org.webrtc.kite.tests.KiteBaseTest;
 import org.webrtc.kite.tests.KiteJsTest;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import java.lang.reflect.InvocationTargetException;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
+
+import static io.cosmosoftware.kite.util.TestUtils.getDir;
 
 /**
  * A thread to step an implementation of KiteTest.
@@ -40,7 +46,7 @@ import java.util.concurrent.Callable;
  * The algorithm of the thread is as follows:
  * 1) Instantiate the WebDriver objects.
  * 2) Instantiate KiteBaseTest implementation.
- * 3) Set the endpoint list to the implementation.
+ * 3) Set the client list to the implementation.
  * 4) Execute the test.
  * 5) Retrieve, parse and populate from userAgent.
  * 6) Get the stack trace of an exception if it occurs during the execution.
@@ -50,57 +56,62 @@ import java.util.concurrent.Callable;
  * </p>
  */
 public class TestManager implements Callable<Object> {
-  
-  private final int retry;
+  final String JAR_DOWNLOAD_PATH = getDir("java.io.tmpdir");
   private final boolean ENABLE_CALLBACK = true;
-  private final TestConf testConf;
+  private final int retry;
+  private long startTimestamp = System.currentTimeMillis();
+  private long endTimestamp = 0;
+  private final TestConfig testConfig;
   private final Tuple tuple;
   private String id;
-  private Container testSuite;
   private List<StepPhase> phases;
+  private Container testSuite;
   
   /**
-   * Constructs a new TestManager with the given TestConf and List<EndPoint>.
+   * Constructs a new TestManager with the given TestConfig and List<Client>.
    *
-   * @param testConf     test configuration object
-   * @param tuple       tuple of endpoint for this test
+   * @param testConfig test configuration object
+   * @param tuple      tuple of client for this test
    */
-  public TestManager(TestConf testConf, Tuple tuple) {
-    this.testConf = testConf;
+  public TestManager(TestConfig testConfig, Tuple tuple) {
+    this.testConfig = testConfig;
     this.tuple = tuple;
-    this.retry = testConf.getMaxRetryCount();
+    this.retry = testConfig.getMaxRetryCount();
   }
   
-  private KiteBaseTest buildTest() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-    KiteBaseTest test = testConf.isJavascript()
-      ? new KiteJsTest(testConf.getTestImpl())
-      : (KiteBaseTest) Class.forName(this.testConf.getTestImpl()).getConstructor().newInstance();
-    
-    phases = getPhases(testConf.isLoadTest());
-    test.setCloseWebDrivers(testConf.isCloseWebDrivers());
-    test.setPhases(phases);
-    test.setSuite(testSuite.getName());
-    
+  private KiteBaseTest buildTest() throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
+    KiteBaseTest test = testConfig.isJavascript()
+      ? new KiteJsTest(testConfig.getTestImpl())
+      : (KiteBaseTest) instantiate(testConfig.getTestImpl(),
+      testConfig.getImplJar() == null
+        ? null : JAR_DOWNLOAD_PATH + testConfig.getName() + ".jar");
+  
+    test.setLogger(testConfig.getLogger());
     test.setConfigFilePath(Configurator.getInstance().getConfigFilePath());
-    test.setInstrumentation(Configurator.getInstance().getInstrumentation());
-    test.setNetworks(Configurator.getInstance().getNetworks());
-    test.setParentSuite(Configurator.getInstance().getName());    
-    test.setLogger(testConf.getLogger());
-    test.setDescription(testConf.getDescription());
-    test.setPayload(testConf.getPayload());
-    test.setRemoteAddress(Configurator.getInstance().getRemoteAddress());
-    test.setEndPointList(tuple);
+    test.setTuple(tuple);
+    test.setCloseWebDrivers(testConfig.getCloseWebDrivers());
+    phases = getPhases(testConfig.isLoadTest());
+    test.setPhases(phases);
+    test.setNetworkInstrumentation(Configurator.getInstance().getNetworkInstrumentation());
+    test.setParentSuite(Configurator.getInstance().getName());
+    test.setSuite(testSuite);
+    test.setDescription(testConfig.getDescription());
+    test.setDescription(testConfig.getDescription());
+
+    if (testConfig.getPayload() != null) {
+      JsonObject payload = (JsonObject) Json.createReader(new ByteArrayInputStream(testConfig.getPayload().getBytes())).read();
+      test.setPayload(payload);
+    }
     
-    if (testConf.isLoadTest()) {
+    if (testConfig.isLoadTest()) {
       test.setLoadTest(true);
       String simpleHubId = "";
       try {
-        simpleHubId = new URL(tuple.get(0).getRemoteAddress()).getHost();
+        simpleHubId = new URL(tuple.get(0).getPaas().getUrl()).getHost();
       } catch (Exception e) {
-        simpleHubId = tuple.get(0).getRemoteAddress();
+        simpleHubId = tuple.get(0).getPaas().getUrl();
       }
       test.setName(simpleHubId + (id == null ? "" : " " + id));
-  
     }
     
     return test;
@@ -108,32 +119,52 @@ public class TestManager implements Callable<Object> {
   
   @Override
   public Object call() throws Exception {
-    
+    startTimestamp = System.currentTimeMillis();
     KiteBaseTest test = buildTest();
     JsonObjectBuilder builder = Json.createObjectBuilder();
-    for (StepPhase phase: phases) {
+    for (StepPhase phase : phases) {
       testSuite.addChild(test.getReport(phase).getUuid());
-      JsonObject phaseResult = test.execute(phase);
-      builder.add(phase.getName(), phaseResult);
+      Object phaseResult = test.execute(phase);
+      builder.add(phase.getName(), (JsonObject) phaseResult);
     }
     JsonObject testResult = builder.build();
     // todo: need some retry mechanism here
     
+    JsonObject jsonTestResult = developResult(testResult);
+    
     if (ENABLE_CALLBACK) {
-      if (this.testConf.getCallbackURL() != null) {
+      if (this.testConfig.getCallbackUrl() != null) {
         CallbackThread callbackThread =
-          new CallbackThread(this.testConf.getCallbackURL(), testResult);
-        if (testResult.getString("meta", null) == null) {
-          callbackThread.start();
-        } else {
-          callbackThread.postResult();
-        }
+          new CallbackThread(this.testConfig.getCallbackUrl(), jsonTestResult);
+        // todo: to be advised
+//        if (testResult.getString("meta", null) == null) {
+//          callbackThread.start();
+//        } else {
+//          callbackThread.postResult();
+//        }
       }
     }
     
     // todo: Update allure report for on-going status
     
-    return testResult;
+    endTimestamp = System.currentTimeMillis();
+    return jsonTestResult;
+  }
+  
+  private JsonObject developResult(Object object) {
+    if (endTimestamp == 0) {
+      endTimestamp = System.currentTimeMillis();
+    }
+    return Json.createObjectBuilder()
+      .add("resultId", tuple.getResultId() == null
+        ? UUID.randomUUID().toString()
+        : tuple.getResultId())
+      .add("startTimestamp", "" + startTimestamp)
+      .add("endTimestamp", "" +
+        ( endTimestamp == 0 ? System.currentTimeMillis() : endTimestamp))
+      .add("result", object instanceof Exception
+        ? ((Exception) object).getMessage()
+        : object.toString()).build();
   }
   
   private ArrayList<StepPhase> getPhases(boolean isLoad) {
@@ -148,14 +179,29 @@ public class TestManager implements Callable<Object> {
   }
   
   /**
-   * Set the container for the test's parent suite, for report purpose
+   * Instantiate.
    *
-   * @param testSuite test's parent suite
+   * @param className the class name
+   * @param jarFile   the jar file
+   *
+   * @return the object
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   * @throws ClassNotFoundException the class not found exception
+   * @throws MalformedURLException  the malformed URL exception
    */
-  public void setTestSuite(Container testSuite) {
-    this.testSuite = testSuite;
+  private Object instantiate(String className, String jarFile)
+    throws InstantiationException, IllegalAccessException, ClassNotFoundException, MalformedURLException {
+    Object object = null;
+    if (jarFile == null) {
+      object = Class.forName(className).newInstance();
+    } else {
+      object = URLClassLoader
+        .newInstance(new URL[]{new File(jarFile).toURI().toURL()}, TestManager.class.getClassLoader())
+        .loadClass(className).newInstance();
+    }
+    return object;
   }
-  
   
   /**
    * Set the id, or test case id, for report purpose
@@ -164,5 +210,14 @@ public class TestManager implements Callable<Object> {
    */
   public void setId(String id) {
     this.id = id;
+  }
+  
+  /**
+   * Set the container for the test's parent suite, for report purpose
+   *
+   * @param testSuite test's parent suite
+   */
+  public void setTestSuite(Container testSuite) {
+    this.testSuite = testSuite;
   }
 }

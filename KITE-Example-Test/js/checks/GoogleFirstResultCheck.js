@@ -1,5 +1,4 @@
 const {TestUtils, TestStep, Status, KiteTestError} = require('kite-common');
-const {googleResultPage} = require('../pages');
 /**
  * Class: GoogleResultPage
  * Extends: TestStep
@@ -11,6 +10,7 @@ class GoogleResultPage extends TestStep {
     this.driver = kiteBaseTest.driver;
     this.timeout = kiteBaseTest.timeout;
     this.expectedResult = "CoSMo Software | WebRTC Technology & Implementation";
+    this.page = kiteBaseTest.page;
 
     // Test reporter if you want to add attachment(s)
     this.testReporter = kiteBaseTest.reporter;
@@ -21,8 +21,8 @@ class GoogleResultPage extends TestStep {
   }
 
   async step() {
-    await googleResultPage.openFirstResult(this.driver);
-    let found = await googleResultPage.getTitle(this.driver);
+    await this.page.openFirstResult(this.driver);
+    let found = await this.page.getTitle(this.driver);
     if (found != this.expectedResult) {
       throw new KiteTestError(Status.FAILED, "The title of the first Google result was not correct: \n" +
       "Expected: " + this.expectedResult + " but found " + found);
