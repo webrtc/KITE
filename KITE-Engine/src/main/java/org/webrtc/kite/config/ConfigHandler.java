@@ -33,7 +33,7 @@ import java.util.List;
  * The type Config handler.
  */
 public class ConfigHandler {
-  
+
   /**
    * The Client list.
    */
@@ -42,13 +42,12 @@ public class ConfigHandler {
    * The TestConfig list.
    */
   protected List<TestConfig> testList;
-  
-  
+
+
   /**
    * Instantiates a new Config type one handler.
    *
    * @param testObjectList the test object list
-   *
    * @throws KiteInsufficientValueException the kite insufficient value exception
    * @throws KiteUnsupportedRemoteException the kite unsupported remote exception
    * @throws InvocationTargetException      the invocation target exception
@@ -57,18 +56,18 @@ public class ConfigHandler {
    * @throws IllegalAccessException         the illegal access exception
    */
   public ConfigHandler(List<JsonObject> testObjectList, List<JsonObject> clientList)
-    throws KiteInsufficientValueException, IOException {
+      throws KiteInsufficientValueException, IOException {
     for (JsonObject client : clientList) {
       this.clientList.add(client.getString("browserName", null) != null
-        ? new Browser(client)
-        : new App(client));
+          ? new Browser(client)
+          : new App(client));
     }
     this.testList = new ArrayList<>();
     for (JsonObject object : testObjectList) {
       this.testList.add(new TestConfig(object));
     }
   }
-  
+
   /**
    * Gets browser list.
    *
@@ -77,11 +76,11 @@ public class ConfigHandler {
   public List<Client> getClientList() {
     return this.clientList;
   }
-  
+
   public void setClientList(List<Client> clientList) {
     this.clientList = clientList;
   }
-  
+
   /**
    * Gets test list.
    *

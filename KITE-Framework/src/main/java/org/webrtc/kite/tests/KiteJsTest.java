@@ -45,7 +45,7 @@ public class KiteJsTest extends KiteBaseTest {
   @Override
   protected void createTestRunners() {
     for (int index = 0; index < this.tuple.size(); index++) {
-      JsTestRunner runner = new JsTestRunner(this.reports, jsTestImpl, logger, index);
+      JsTestRunner runner = new JsTestRunner(this.reports, jsTestImpl, logger, reporter, index);
       runner.setNumberOfParticipant(tuple.size());
       runner.setReportPath(tempPath);
       this.add(runner);
@@ -61,6 +61,10 @@ public class KiteJsTest extends KiteBaseTest {
     super.payloadHandling();
     createDirs(JS_PATH + tempPath);
     printJsonTofile(this.payload.toString(), JS_PATH + tempPath + "/payload.json");
+    if (this.networkInstrumentation != null) {
+      printJsonTofile(this.networkInstrumentation.getJsonObject().toString(), 
+        JS_PATH + tempPath + "/networkInstrumentation.json");
+    }
     if (!this.multiThread) {
       logger.error("JavaScript test with KITE cannot be run sequentially at the moment.");
     }

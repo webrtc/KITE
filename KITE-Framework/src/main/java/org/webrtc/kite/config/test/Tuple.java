@@ -1,9 +1,9 @@
 package org.webrtc.kite.config.test;
 
+import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.webrtc.kite.config.KiteEntity;
 import org.webrtc.kite.config.client.App;
 import org.webrtc.kite.config.client.Browser;
 import org.webrtc.kite.config.client.Client;
@@ -180,4 +180,5 @@ public class Tuple extends KiteEntity implements JsonBuilder {
     return this.clients.size();
   }
   
+    
 }

@@ -4,11 +4,10 @@
 
 package org.webrtc.kite.config.media;
 
+import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.webrtc.kite.config.KiteEntity;
-import org.webrtc.kite.config.media.MediaFileType;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -41,7 +40,12 @@ public class MediaFile extends KiteEntity implements JsonBuilder {
   private MediaFileType type;
   
   /** The duration of the media. */
-  private String duration;
+  private String duration = "00:00:00";
+
+
+
+  /** The directory with the Videos and Audios folders are located. */
+  private String directory = "/home/ubuntu/";
   
   /**
    * Instantiates a new media file.
@@ -56,13 +60,15 @@ public class MediaFile extends KiteEntity implements JsonBuilder {
    * @param jsonObject the json object
    */
   public MediaFile(JsonObject jsonObject) {
-    this();
-    
+    this();    
     // Mandatory
     this.filename = jsonObject.getString("filename");
-    this.name = jsonObject.getString("name");
     this.type = MediaFileType.valueOf(jsonObject.getString("type"));
-    this.duration = jsonObject.getString("duration");
+    
+    // Optional
+    this.directory = jsonObject.getString("directory", directory);
+    this.name = jsonObject.getString("name", this.filename);
+    this.duration = jsonObject.getString("duration", duration);
   }
   
   /**
@@ -97,6 +103,17 @@ public class MediaFile extends KiteEntity implements JsonBuilder {
    */
   public String getFilename() {
     return filename;
+  }
+
+
+  /**
+   * Gets the filepath (directory + filename)
+   *
+   * @return the filepath
+   */
+  @Transient
+  public String getFilepath() {
+    return directory + filename;
   }
   
   /**
@@ -171,7 +188,7 @@ public class MediaFile extends KiteEntity implements JsonBuilder {
   @Override
   public JsonObjectBuilder buildJsonObjectBuilder() {
     return Json.createObjectBuilder().add("name", this.name).add("filename", this.filename)
-      .add("type", this.type.name()).add("duration", this.duration);
+      .add("type", this.type.name()).add("duration", this.duration).add("directory", this.directory);
   }
   
 }

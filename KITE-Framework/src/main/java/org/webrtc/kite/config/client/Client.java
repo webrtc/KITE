@@ -16,12 +16,12 @@
 
 package org.webrtc.kite.config.client;
 
+import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import io.cosmosoftware.kite.interfaces.SampleData;
 import io.cosmosoftware.kite.report.KiteLogger;
 import org.hibernate.annotations.GenericGenerator;
 import org.openqa.selenium.Platform;
-import org.webrtc.kite.config.KiteEntity;
 import org.webrtc.kite.config.paas.Paas;
 
 import javax.json.Json;
@@ -35,47 +35,29 @@ import java.util.Map;
 /**
  * The type End point.
  */
-@Entity (name = Client.TABLE_NAME)
-@Inheritance (
-  strategy = InheritanceType.SINGLE_TABLE
+@Entity(name = Client.TABLE_NAME)
+@Inheritance(
+    strategy = InheritanceType.SINGLE_TABLE
 )
 public abstract class Client extends KiteEntity implements JsonBuilder, SampleData {
-  /**
-   * The constant TABLE_NAME.
-   */
   final static String TABLE_NAME = "clients";
-  /**
-   * The KiteLogger.
-   */
   protected final KiteLogger logger = KiteLogger.getLogger(this.getClass().getName());
-  /**
-   * The Count.
-   */
   protected int count;
-  /**
-   * The Id.
-   */
   protected String id;
-  /**
-   * The Mobile.
-   */
   protected MobileSpecs mobile;
-  /**
-   * The Paas.
-   */
   protected Paas paas;
   private boolean exclude;
   private Map<String, String> extraCapabilities = new HashMap<>();
   private String gateway;
   private JsonObject jsonConfig;
   private int maxInstances;
-  
+
   /**
    * Instantiates a new End point.
    */
   public Client() {
   }
-  
+
   /**
    * Instantiates a new End point.
    *
@@ -87,23 +69,25 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
     this.gateway = client.getGateway();
     this.count = client.getCount();
     this.paas = client.getPaas();
+    this.mobile = client.getMobile();
     for (String capabilityName : client.getExtraCapabilities().keySet()) {
       this.addCapabilities(capabilityName, client.getExtraCapabilities().get(capabilityName));
     }
   }
-  
+
   /**
    * Constructs a new KiteConfigObject with the given remote address and JsonObject.
    *
    * @param jsonObject JsonObject
    */
   protected Client(JsonObject jsonObject) {
+
     this.jsonConfig = jsonObject;
     this.exclude = jsonObject.getBoolean("exclude", false);
     this.count = jsonObject.getInt("count", 1);
     JsonValue jsonValue = jsonObject.getOrDefault("extraCapabilities", null);
     this.gateway = jsonObject.getString("gateway", null);
-    
+    this.mobile = this.buildMobileSpecs(jsonObject);
     if (jsonValue != null) {
       JsonObject extraCapabilitiesArray = (JsonObject) jsonValue;
       for (String capabilityName : extraCapabilitiesArray.keySet()) {
@@ -111,7 +95,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
       }
     }
   }
-  
+
   /**
    * add new capability name/value pair to browser
    *
@@ -121,20 +105,21 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public void addCapabilities(String capabilityName, String capabilityValue) {
     this.extraCapabilities.put(capabilityName, capabilityValue);
   }
-  
+
   @Override
   public JsonObjectBuilder buildJsonObjectBuilder() {
     JsonObjectBuilder builder = Json.createObjectBuilder()
-      .add("exclude", this.exclude);
+        .add("exclude", this.exclude);
     if (this.mobile != null) {
       builder.add("mobile", this.mobile.buildJsonObjectBuilder());
     }
     if (this.paas != null) {
       builder.add("paas", this.paas.getType().name());
+      builder.add("remoteUrl", this.paas.getUrl());
     }
     return builder;
   }
-  
+
   /**
    * Gets count.
    *
@@ -143,7 +128,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public int getCount() {
     return count;
   }
-  
+
   /**
    * Sets count.
    *
@@ -152,7 +137,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public void setCount(int count) {
     this.count = count;
   }
-  
+
   /**
    * Gets extra capabilities.
    *
@@ -162,7 +147,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public Map<String, String> getExtraCapabilities() {
     return extraCapabilities;
   }
-  
+
   /**
    * Sets extra capabilities.
    *
@@ -171,7 +156,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public void setExtraCapabilities(Map<String, String> extraCapabilities) {
     this.extraCapabilities = extraCapabilities;
   }
-  
+
   /**
    * Gets gateway.
    *
@@ -180,7 +165,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public String getGateway() {
     return gateway;
   }
-  
+
   /**
    * Sets gateway.
    *
@@ -189,21 +174,21 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public void setGateway(String gateway) {
     this.gateway = gateway;
   }
-  
+
   /**
    * Gets id.
    *
    * @return the id
    */
   @Id
-  @GeneratedValue (generator = Client.TABLE_NAME)
-  @GenericGenerator (name = Client.TABLE_NAME, strategy = "io.cosmosoftware.kite.dao.KiteIdGenerator", parameters = {
-    @org.hibernate.annotations.Parameter (name = "prefix", value = "CLNT")
+  @GeneratedValue(generator = Client.TABLE_NAME)
+  @GenericGenerator(name = Client.TABLE_NAME, strategy = "io.cosmosoftware.kite.dao.KiteIdGenerator", parameters = {
+      @org.hibernate.annotations.Parameter(name = "prefix", value = "CLNT")
   })
   public String getId() {
     return this.id;
   }
-  
+
   /**
    * Sets id.
    *
@@ -212,7 +197,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public void setId(String id) {
     this.id = id;
   }
-  
+
   /**
    * Gets json config.
    *
@@ -222,7 +207,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public JsonObject getJsonConfig() {
     return jsonConfig;
   }
-  
+
   /**
    * Sets json config.
    *
@@ -232,7 +217,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public void setJsonConfig(JsonObject jsonConfig) {
     this.jsonConfig = jsonConfig;
   }
-  
+
   /**
    * Gets logger.
    *
@@ -242,7 +227,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public KiteLogger getLogger() {
     return logger;
   }
-  
+
   /**
    * Gets max instances.
    *
@@ -252,7 +237,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public int getMaxInstances() {
     return maxInstances;
   }
-  
+
   /**
    * Sets max instances.
    *
@@ -261,17 +246,17 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public void setMaxInstances(int maxInstances) {
     this.maxInstances = maxInstances;
   }
-  
+
   /**
    * Gets mobile.
    *
    * @return the mobile
    */
-  @OneToOne (cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   public MobileSpecs getMobile() {
     return this.mobile;
   }
-  
+
   /**
    * Sets mobile.
    *
@@ -280,17 +265,17 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public void setMobile(MobileSpecs mobile) {
     this.mobile = mobile;
   }
-  
+
   /**
    * Gets paas.
    *
    * @return the paas
    */
-  @OneToOne (cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   public Paas getPaas() {
     return this.paas;
   }
-  
+
   /**
    * Sets paas.
    *
@@ -299,13 +284,13 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public void setPaas(Paas paas) {
     this.paas = paas;
   }
-  
+
   @Override
   public int hashCode() {
     final int prime = 31;
     return prime + ((mobile == null) ? 0 : mobile.hashCode());
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -324,7 +309,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
       return mobile.equals(other.mobile);
     }
   }
-  
+
   /**
    * Is exclude boolean.
    *
@@ -333,7 +318,7 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public boolean isExclude() {
     return exclude;
   }
-  
+
   /**
    * Sets exclude.
    *
@@ -342,14 +327,16 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public void setExclude(boolean exclude) {
     this.exclude = exclude;
   }
-  
+
   /**
    * Retrieve platform platform.
    *
    * @return the platform
    */
   public abstract Platform retrievePlatform();
-  
+
+  public abstract MobileSpecs buildMobileSpecs(JsonObject jsonObject);
+
   @Override
   public String toString() {
     return buildJsonObjectBuilder().build().toString();

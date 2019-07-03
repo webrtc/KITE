@@ -256,7 +256,7 @@ protected void step() throws KiteTestException {
       String videoCheck = videoCheck(webDriver, 0); //check local video located at index 0, returns status of video
       if (!"video".equalsIgnoreCase(videoCheck)) {
         //add test failure status to report
-        Reporter.getInstance().textAttachment(report, "Sent Video", videoCheck, "plain");
+        reporter.textAttachment(report, "Sent Video", videoCheck, "plain");
         throw new KiteTestException("The first video is " + videoCheck, Status.FAILED);
       }
     } catch (KiteTestException e) {
@@ -310,7 +310,7 @@ public class SentVideoCheck extends TestStep { //notice it inherits from TestSte
       String videoCheck = videoCheck(webDriver, 0); // function from TestUtils
       if (!"video".equalsIgnoreCase(videoCheck)) {
         //add test failure status to report
-        Reporter.getInstance().textAttachment(report, "Sent Video", videoCheck, "plain");
+        reporter.textAttachment(report, "Sent Video", videoCheck, "plain");
         throw new KiteTestException("The first video is " + videoCheck, Status.FAILED);
       }
     } catch (KiteTestException e) {
@@ -399,7 +399,7 @@ protected void step() throws KiteTestException {
       }
       if (error) {
         //add test failure status to report
-        Reporter.getInstance().textAttachment(report, "Reveived Videos", videoCheck, "plain");
+        reporter.textAttachment(report, "Reveived Videos", videoCheck, "plain");
         throw new KiteTestException("Some videos are still or blank: " + videoCheck, Status.FAILED);
       }
     } catch (KiteTestException e) {
@@ -469,7 +469,7 @@ public class ReceivedVideosCheck extends TestStep { //Notice It inherits TestSte
       }
       if (error) {
         //add test failure status to report
-        Reporter.getInstance().textAttachment(report, "Reveived Videos", videoCheck, "plain");
+        reporter.textAttachment(report, "Reveived Videos", videoCheck, "plain");
         throw new KiteTestException("Some videos are still or blank: " + videoCheck, Status.FAILED);
       }
     } catch (KiteTestException e) {
@@ -544,8 +544,8 @@ protected void step() throws KiteTestException {
     ((JavascriptExecutor) webDriver).executeScript(mainPage.getPeerConnectionScript()); //1. execute javascript to get save peerConnections
     JsonObject rawStats = getPCStatOvertime(webDriver, getStatsConfig).get(0); //2. return statistics from peer connections
     JsonObject statsSummary = extractStats(rawStats, "both").build(); //3. return processed statistics
-    Reporter.getInstance().jsonAttachment(report, "getStatsRaw", rawStats); //4. attach raw stats to report
-    Reporter.getInstance().jsonAttachment(report, "getStatsSummary", statsSummary);//4. attach stats to report
+    reporter.jsonAttachment(report, "getStatsRaw", rawStats); //4. attach raw stats to report
+    reporter.jsonAttachment(report, "getStatsSummary", statsSummary);//4. attach stats to report
 }
 ```
 
@@ -586,8 +586,8 @@ public class GetStatsStep extends TestStep {
     ((JavascriptExecutor) webDriver).executeScript(mainPage.getPeerConnectionScript()); //1. execute javascript to get save peerConnections
     JsonObject rawStats = getPCStatOvertime(webDriver, getStatsConfig).get(0); //2. return statistics from peer connections
     JsonObject statsSummary = extractStats(rawStats, "both").build(); //3. return processed statistics
-    Reporter.getInstance().jsonAttachment(report, "getStatsRaw", rawStats); //4. attach raw stats to report
-    Reporter.getInstance().jsonAttachment(report, "getStatsSummary", statsSummary);//4. attach stats to report
+    reporter.jsonAttachment(report, "getStatsRaw", rawStats); //4. attach raw stats to report
+    reporter.jsonAttachment(report, "getStatsSummary", statsSummary);//4. attach stats to report
   }
 }
 ```

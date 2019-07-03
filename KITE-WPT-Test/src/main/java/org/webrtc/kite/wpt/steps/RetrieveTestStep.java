@@ -62,7 +62,7 @@ public class RetrieveTestStep extends TestStep {
       processTestStep(StepPhase.DEFAULT, new RetrieveTestStep(runner, 
         url + dirName, sercureURL + dirName, testUrlList), this.report);
     }
-    Reporter.getInstance().textAttachment(this.report, "List of tests", temp.toString(), "plain");
+    reporter.textAttachment(this.report, "List of tests", temp.toString(), "plain");
   }
   
   @Override

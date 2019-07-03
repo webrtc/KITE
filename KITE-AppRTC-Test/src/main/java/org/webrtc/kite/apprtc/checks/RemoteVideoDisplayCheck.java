@@ -40,7 +40,7 @@ public class RemoteVideoDisplayCheck extends TestCheck {
     logger.info("Looking for video object");
     String videoCheck = appRTCMeetingPage.remoteVideoCheck();
     if (!"video".equalsIgnoreCase(videoCheck)) {
-      Reporter.getInstance().textAttachment(report, "Remote Video", videoCheck, "plain");
+      reporter.textAttachment(report, "Remote Video", videoCheck, "plain");
       throw new KiteTestException("The first video is " + videoCheck, Status.FAILED);
     }
   }

@@ -3,6 +3,7 @@ package org.webrtc.kite.tests;
 import io.cosmosoftware.kite.entities.Stage;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.instrumentation.NetworkInstrumentation;
+import io.cosmosoftware.kite.instrumentation.NetworkProfile;
 import io.cosmosoftware.kite.instrumentation.Scenario;
 import io.cosmosoftware.kite.manager.RoomManager;
 import io.cosmosoftware.kite.report.*;
@@ -12,8 +13,10 @@ import io.cosmosoftware.kite.steps.TestStep;
 import io.cosmosoftware.kite.util.ReportUtils;
 import io.cosmosoftware.kite.util.TestUtils;
 import io.cosmosoftware.kite.util.WebDriverUtils;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.webrtc.kite.Utils;
 import org.webrtc.kite.WebDriverFactory;
 import org.webrtc.kite.config.client.App;
 import org.webrtc.kite.config.client.Browser;
@@ -24,6 +27,7 @@ import org.webrtc.kite.exception.KiteGridException;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
+import java.beans.Transient;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -37,8 +41,7 @@ import static io.cosmosoftware.kite.util.TestUtils.processTestStep;
 import static org.webrtc.kite.Utils.populateInfoFromNavigator;
 
 public abstract class KiteBaseTest extends ArrayList<TestRunner> implements StepSynchronizer {
-  
-  private static RoomManager roomManager = null;
+
   protected final LinkedHashMap<StepPhase, AllureTestReport> reports = new LinkedHashMap<>();
   protected final ArrayList<Scenario> scenarioArrayList = new ArrayList<>();
   protected final Map<WebDriver, Map<String, Object>> sessionData = new HashMap<WebDriver, Map<String, Object>>();
@@ -61,6 +64,8 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   protected Tuple tuple;
   protected int tupleSize;
   protected String url;
+  protected Reporter reporter;
+  protected RoomManager roomManager;
   private boolean closeWebDrivers = true;
   private boolean consoleLogs = true;
   private boolean csvReport = false;
@@ -72,20 +77,21 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   private List<StepPhase> phases = new ArrayList<>();
   private boolean takeScreenshotForEachTest = false; // false by default
   private int testTimeout = 60;
-  
+
   public KiteBaseTest() {
   }
-  
+
   /**
    * Creates the TestRunners and add them to the testRunners list.
    */
   protected void createTestRunners() {
     for (int index = 0; index < this.webDriverList.size(); index++) {
-      this.add(new TestRunner(this.webDriverList.get(index), this.reports, this.logger, index));
+      TestRunner runner = new TestRunner(this.webDriverList.get(index), this.reports, this.logger, this.reporter, index);
+      this.add(runner);
     }
     this.tupleSize = size();
   }
-  
+
   /**
    * Execute json object.
    *
@@ -94,7 +100,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public Object execute() {
     return execute(phases.get(0));
   }
-  
+
   /**
    * Execute json object.
    *
@@ -118,7 +124,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       this.reports.get(stepPhase).setStopTimestamp();
     } catch (Exception e) {
       // this is for the initiation mostly
-      Reporter.getInstance().processException(reports.get(stepPhase), e, false);
+      reporter.processException(reports.get(stepPhase), e, false);
     } finally {
       if (stepPhase.isLastPhase() || stepPhase.equals(StepPhase.LOADREACHED)) {
         terminate(stepPhase);
@@ -129,7 +135,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     }
     return resultObject;
   }
-  
+
   /**
    * Fast ramp up boolean.
    *
@@ -138,7 +144,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public boolean fastRampUp() {
     return fastRampUp;
   }
-  
+
   private void init(StepPhase stepPhase) throws KiteTestException {
     AllureStepReport initStep = new AllureStepReport("Creating webdrivers and preparing threads..");
     this.reports.get(stepPhase).addStepReport(initStep);
@@ -146,11 +152,11 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       initStep.setStartTimestamp();
       if (this.payload != null) {
         payloadHandling();
-        Reporter.getInstance().jsonAttachment(initStep, "Test payload", this.payload);
+        reporter.jsonAttachment(initStep, "Test payload", this.payload);
       } else {
         logger.warn("payload is null");
       }
-      Reporter.getInstance().setLogger(logger);
+      reporter.setLogger(logger);
       populateDrivers();
       Runtime.getRuntime().addShutdownHook(new Thread(() -> terminate(stepPhase)));
       getInfoFromNavigator();
@@ -158,13 +164,13 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       initStep.setStatus(Status.PASSED);
     } catch (KiteGridException e) {
       logger.error("Exception while populating web drivers, " +
-        "closing already created webdrivers...\r\n" + getStackTrace(e));
-      Reporter.getInstance().textAttachment(initStep, "KiteGridException", getStackTrace(e), "plain");
+          "closing already created webdrivers...\r\n" + getStackTrace(e));
+      reporter.textAttachment(initStep, "KiteGridException", getStackTrace(e), "plain");
       initStep.setStatus(Status.FAILED);
       throw new KiteTestException("Exception while populating web drivers", Status.FAILED);
     }
   }
-  
+
   private void terminate(StepPhase stepPhase) {
     if (!this.finished) {
       this.finished = true;
@@ -173,9 +179,9 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       if (closeWebDrivers) {
         WebDriverUtils.closeDrivers(this.webDriverList);
       }
-  
+
       terminateStep.setStopTimestamp();
-  
+
       // try to put stop time for all phase
       for (StepPhase phase : reports.keySet()) {
         AllureStepReport report = reports.get(phase);
@@ -188,7 +194,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       }
     }
   }
-  
+
   /**
    * /**
    * Executes the tests in parallel.
@@ -200,13 +206,13 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     expectedTestDuration = Math.max(expectedTestDuration, size() * 2);
     ExecutorService executorService = Executors.newFixedThreadPool(size());
     List<Future<Object>> futureList =
-      executorService.invokeAll(this, expectedTestDuration, TimeUnit.MINUTES);
+        executorService.invokeAll(this, expectedTestDuration, TimeUnit.MINUTES);
     executorService.shutdown();
     for (Future<Object> future : futureList) {
       future.get();
     }
   }
-  
+
   /**
    * Executes the tests sequentially.
    * Assuming that all the callables have the same number of steps
@@ -221,14 +227,15 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       }
     }
   }
-  
+
   /**
    * Fill out reports.get(stepPhase).
    */
   private void fillOutReport(StepPhase stepPhase) {
     String phaseReportName = (stepPhase.equals(StepPhase.DEFAULT)
-      ? "" : stepPhase.getShortName() + "_") + generateTestCaseName();
+        ? "" : stepPhase.getShortName() + "_") + generateTestCaseName();
     AllureTestReport phaseReport = new AllureTestReport(phaseReportName);
+    phaseReport.setReporter(this.reporter);
     phaseReport.setFullName(getClass().getName());
     phaseReport.addLabel("package", getClass().getPackage().toString());
     phaseReport.addLabel("testClass", getClass().toString());
@@ -238,10 +245,10 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     } catch (UnknownHostException e) {
       phaseReport.addLabel("host", "N/A");
     }
-    this.reports.put(stepPhase,phaseReport);
+    this.reports.put(stepPhase, phaseReport);
     logger.info("Finished filling out initial report for phase " + stepPhase.getName());
   }
-  
+
   /**
    * Generate test case name string.
    *
@@ -260,14 +267,14 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       } else {
         name.append("_").append(((App) client).retrieveDeviceName(), 0, 2);
       }
-      
+
       if (index < tuple.size() - 1) {
         name.append("-");
       }
     }
     return name.toString();
   }
-  
+
   /**
    * Gets config file path.
    *
@@ -276,7 +283,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public String getConfigFilePath() {
     return configFilePath;
   }
-  
+
   /**
    * Sets config file path.
    *
@@ -285,7 +292,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public void setConfigFilePath(String configFilePath) {
     this.configFilePath = configFilePath;
   }
-  
+
   /**
    * Gets expected test duration.
    *
@@ -294,7 +301,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public int getExpectedTestDuration() {
     return expectedTestDuration;
   }
-  
+
   /**
    * Sets the expected test duration (in minutes)
    *
@@ -303,7 +310,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public void setExpectedTestDuration(int expectedTestDuration) {
     this.expectedTestDuration = expectedTestDuration;
   }
-  
+
   /**
    * Retrieves the navigator.userAgent from all of the config objects and passes it to the the respective
    * Config object for processing.
@@ -315,11 +322,11 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       }
     }
   }
-  
+
   public String getKiteServerGridId() {
     return kiteServerGridId;
   }
-  
+
   /**
    * Gets max users per room.
    *
@@ -328,7 +335,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public int getMaxUsersPerRoom() {
     return maxUsersPerRoom;
   }
-  
+
   /**
    * Gets the Instrumentation object
    *
@@ -337,7 +344,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public NetworkInstrumentation getNetworkInstrumentation() {
     return this.networkInstrumentation;
   }
-  
+
   /**
    * Sets instrumentation.
    *
@@ -346,7 +353,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public void setNetworkInstrumentation(NetworkInstrumentation networkInstrumentation) {
     this.networkInstrumentation = networkInstrumentation;
   }
-  
+
   /**
    * Gets peerConnections
    *
@@ -354,9 +361,9 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
    */
   public JsonArray getPeerConnections() {
     return getStatsConfig != null && getStatsConfig.containsKey("peerConnections") ?
-      getStatsConfig.getJsonArray("peerConnections") : null;
+        getStatsConfig.getJsonArray("peerConnections") : null;
   }
-  
+
   /**
    * Gets report.
    *
@@ -365,16 +372,17 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public AllureTestReport getReport(StepPhase stepPhase) {
     return reports.get(stepPhase);
   }
-  
+
   /**
    * Gets room manager.
    *
    * @return the roomManager
    */
-  public static RoomManager getRoomManager() {
+  @Transient
+  protected RoomManager getRoomManager() {
     return roomManager;
   }
-  
+
   /**
    * Gets selected stats.
    *
@@ -382,9 +390,9 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
    */
   public JsonArray getSelectedStats() {
     return getStatsConfig != null && getStatsConfig.containsKey("selectedStats") ?
-      getStatsConfig.getJsonArray("selectedStats") : null;
+        getStatsConfig.getJsonArray("selectedStats") : null;
   }
-  
+
   /**
    * Gets stats.
    *
@@ -393,7 +401,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public boolean getStats() {
     return getStatsConfig != null && getStatsConfig.getBoolean("enabled", false);
   }
-  
+
   /**
    * Gets stats collection interval.
    *
@@ -420,7 +428,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public boolean getConsoleLogs() {
     return consoleLogs;
   }
-  
+
   /**
    * Gets web driver list.
    *
@@ -429,15 +437,15 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public List<WebDriver> getWebDriverList() {
     return webDriverList;
   }
-  
+
   public boolean isLoadTest() {
     return isLoadTest;
   }
-  
+
   public void setLoadTest(boolean loadTest) {
     isLoadTest = loadTest;
   }
-  
+
   /**
    * Restructuring the test according to options given in payload object from config file. This
    * function processes the parameters common to all load tests.
@@ -449,32 +457,19 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       port = payload.getInt("port", 30000);
       testTimeout = payload.getInt("testTimeout", testTimeout);
       takeScreenshotForEachTest =
-        payload.getBoolean("takeScreenshotForEachTest", false);
+          payload.getBoolean("takeScreenshotForEachTest", false);
       getStatsConfig = payload.getJsonObject("getStats");
       multiThread = payload.getBoolean("multiThread", true);
       expectedTestDuration = payload.getInt("expectedTestDuration", expectedTestDuration);
       meetingDuration = this.payload.getInt("meetingDuration", meetingDuration);
       setExpectedTestDuration(Math.max(getExpectedTestDuration(), (meetingDuration + 300) / 60));
       maxUsersPerRoom = payload.getInt("usersPerRoom", maxUsersPerRoom);
-      loopRooms = payload.getBoolean("loopRooms", loopRooms);
       csvReport = payload.getBoolean("csvReport", csvReport);
       consoleLogs = payload.getBoolean("consoleLogs", consoleLogs);
-      if (maxUsersPerRoom > 0) {
-        roomManager = RoomManager.getInstance(this.name, url, getMaxUsersPerRoom(), loopRooms);
-      }
-      String[] rooms;
-      if (payload.getJsonArray("rooms") != null && maxUsersPerRoom > 0) {
-        JsonArray roomArr = this.payload.getJsonArray("rooms");
-        rooms = new String[roomArr.size()];
-        for (int i = 0; i < roomArr.size(); i++) {
-          rooms[i] = roomArr.getString(i);
-          roomManager.setRoomNames(rooms);
-        }
-      }
       fastRampUp = payload.getBoolean("fastRampUp", fastRampUp);
       if (this.payload.containsKey("scenarios")) {
         JsonArray jsonArray2 = this.payload.getJsonArray("scenarios");
-        for (int i = 0; i < jsonArray2.size(); ++i) {
+        for (int i = 0; i < jsonArray2.size(); ++ i) {
           try {
             this.scenarioArrayList.add(new Scenario(jsonArray2.getJsonObject(i), logger, networkInstrumentation));
           } catch (Exception e) {
@@ -484,7 +479,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       }
     }
   }
-  
+
   /**
    * Constructs a list of web drivers against the number of provided config objects.
    *
@@ -494,30 +489,29 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   protected void populateDrivers() throws KiteGridException {
     for (Client client : this.tuple.getClients()) {
       try {
-        WebDriver webDriver = WebDriverFactory.createWebDriver(client, null, null);
+        WebDriver webDriver = WebDriverFactory.createWebDriver(client, null, null, client.getPaas().getGridId());
         this.webDriverList.add(webDriver);
         Map<String, Object> map = new HashMap<>();
         map.put("end_point", client);
         String node =
-          TestUtils.getNode(
-            client.getPaas().getUrl(),
-            ((RemoteWebDriver) webDriver).getSessionId().toString());
+            TestUtils.getNode(
+                client.getPaas().getUrl(),
+                ((RemoteWebDriver) webDriver).getSessionId().toString());
         if (node != null) {
           map.put("node_host", node);
         }
         this.sessionData.put(webDriver, map);
       } catch (Exception e) {
         throw new KiteGridException(
-          e.getClass().getSimpleName()
-            + " creating webdriver for \n"
-            // todo: change to other Json
-            //  + client.getJsonObject().toString()
-            + ":\n"
-            + e.getMessage());
+            e.getClass().getSimpleName()
+                + " creating webdriver for \n"
+                + client.toString()
+                + ":\n"
+                + e.getMessage());
       }
     }
   }
-  
+
   /**
    * Populate the testRunners.
    */
@@ -528,18 +522,18 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       runner.setCsv(csvReport);
     }
   }
-  
+
   /**
    * Abstract method to be overridden by the client to add steps to the TestRunner.
    *
    * @param runner the TestRunner
    */
   protected abstract void populateTestSteps(TestRunner runner);
-  
+
   public void setCloseWebDrivers(boolean closeWebDrivers) {
     this.closeWebDrivers = closeWebDrivers;
   }
-  
+
   /**
    * Sets description.
    *
@@ -564,7 +558,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public void setLogger(KiteLogger logger) {
     this.logger = logger;
   }
-  
+
   /**
    * Sets name.
    *
@@ -576,7 +570,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       this.reports.get(stepPhase).setName(stepPhase.getName() + name);
     }
   }
-  
+
   /**
    * Sets parent suite.
    *
@@ -588,7 +582,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       this.reports.get(stepPhase).addLabel("parentSuite", parentTestSuite);
     }
   }
-  
+
   /**
    * Sets payload.
    *
@@ -597,7 +591,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public void setPayload(JsonValue payload) {
     this.payload = (JsonObject) payload;
   }
-  
+
   /**
    * Sets the List of StepPhases.
    *
@@ -610,13 +604,13 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       fillOutReport(stepPhase);
     }
   }
-  
+
   private void setStepPhase(StepPhase stepPhase) {
     for (TestRunner runner : this) {
       runner.setStepPhase(stepPhase);
     }
   }
-  
+
   /**
    * Sets suite.
    *
@@ -628,7 +622,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       this.reports.get(stepPhase).addLabel("suite", suite.getName());
     }
   }
-  
+
   /**
    * Sets client list.
    *
@@ -638,7 +632,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     Tuple tuple = new Tuple(clientList);
     setTuple(tuple);
   }
-  
+
   /**
    * Sets client list.
    *
@@ -671,7 +665,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     }
     return true;
   }
-  
+
   /**
    * Take screenshot for each test boolean.
    *
@@ -681,5 +675,21 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     return takeScreenshotForEachTest;
   }
 
-  
+  /**
+   * Sets reporter.
+   *
+   * @param reporter the reporter
+   */
+  public void setReporter(Reporter reporter) {
+    this.reporter = reporter;
+  }
+
+  /**
+   * Sets room manager.
+   *
+   * @param roomManager the room manager
+   */
+  public void setRoomManager(RoomManager roomManager) {
+    this.roomManager = roomManager;
+  }
 }

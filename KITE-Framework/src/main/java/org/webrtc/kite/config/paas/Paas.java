@@ -4,11 +4,11 @@
 
 package org.webrtc.kite.config.paas;
 
+import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.exception.BadEntityException;
 import io.cosmosoftware.kite.interfaces.SampleData;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.webrtc.kite.config.KiteEntity;
 
 import javax.json.JsonObject;
 import javax.persistence.*;

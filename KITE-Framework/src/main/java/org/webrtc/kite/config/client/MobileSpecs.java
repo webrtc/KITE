@@ -16,11 +16,11 @@
 
 package org.webrtc.kite.config.client;
 
+import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.openqa.selenium.Platform;
-import org.webrtc.kite.config.KiteEntity;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -33,7 +33,7 @@ import javax.persistence.*;
  */
 @Entity (name = MobileSpecs.TABLE_NAME)
 public class MobileSpecs extends KiteEntity implements JsonBuilder {
-  
+
   /**
    * The constant DEFAULT_ORIENTATION.
    */
@@ -59,14 +59,14 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
    * The real device.
    */
   private boolean realDevice;
-  
+
   /**
    * Instantiates a new mobile.
    */
   public MobileSpecs() {
     super();
   }
-  
+
   /**
    * Instantiates a new mobile.
    *
@@ -74,17 +74,23 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
    */
   public MobileSpecs(JsonObject jsonObject) {
     this();
-    
+    if (jsonObject.get("mobile") != null) {
+      jsonObject = jsonObject.getJsonObject("mobile");
+    } else {
+      if (jsonObject.get("browserName") != null) {
+        return;
+      }
+    }
     // Mandatory
     this.deviceName = jsonObject.getString("deviceName");
     this.platformVersion = jsonObject.getString("platformVersion", DEFAULT_PLATFORM_VERSION);
     this.platformName = jsonObject.getString("platformName");
-    
+
     // Optional
     this.orientation = Orientation.valueOf(jsonObject.getString("orientation", DEFAULT_ORIENTATION));
     this.realDevice = jsonObject.getBoolean("realDevice", true);
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -92,10 +98,12 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
    */
   @Override
   public JsonObjectBuilder buildJsonObjectBuilder() {
-    return Json.createObjectBuilder().add("deviceName", this.deviceName)
-      .add("platformVersion", this.platformVersion).add("platformName", this.platformName);
+    return Json.createObjectBuilder()
+        .add("deviceName", this.deviceName == null ? "N/C" : this.deviceName)
+        .add("platformVersion", this.platformVersion == null ? "N/C" : this.platformVersion)
+        .add("platformName", this.platformName == null ? "N/C" : this.platformName);
   }
-  
+
   /**
    * Gets device name.
    *
@@ -104,7 +112,7 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
   public String getDeviceName() {
     return deviceName;
   }
-  
+
   /**
    * Sets device name.
    *
@@ -113,7 +121,7 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
   public void setDeviceName(String deviceName) {
     this.deviceName = deviceName;
   }
-  
+
   /**
    * Gets the id.
    *
@@ -122,12 +130,12 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
   @Id
   @GeneratedValue (generator = MobileSpecs.TABLE_NAME)
   @GenericGenerator (name = MobileSpecs.TABLE_NAME, strategy = "io.cosmosoftware.kite.dao.KiteIdGenerator", parameters = {
-    @Parameter (name = "prefix", value = "MCFG")
+      @Parameter (name = "prefix", value = "MCFG")
   })
   public String getId() {
     return this.id;
   }
-  
+
   /**
    * Sets the id.
    *
@@ -136,7 +144,7 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
   public void setId(String id) {
     this.id = id;
   }
-  
+
   /**
    * Gets the orientation.
    *
@@ -146,7 +154,7 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
   public Orientation getOrientation() {
     return this.orientation;
   }
-  
+
   /**
    * Sets orientation.
    *
@@ -155,7 +163,7 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
   public void setOrientation(Orientation orientation) {
     this.orientation = orientation;
   }
-  
+
   /**
    * Gets the platform name.
    *
@@ -165,7 +173,7 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
   public Platform getPlatformName() {
     return Platform.valueOf(this.platformName);
   }
-  
+
   /**
    * Sets platform name.
    *
@@ -174,7 +182,7 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
   public void setPlatformName(String platformName) {
     this.platformName = platformName;
   }
-  
+
   /**
    * Gets platform version.
    *
@@ -183,7 +191,7 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
   public String getPlatformVersion() {
     return platformVersion;
   }
-  
+
   /**
    * Sets platform version.
    *
@@ -192,7 +200,7 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
   public void setPlatformVersion(String platformVersion) {
     this.platformVersion = platformVersion;
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -207,7 +215,7 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
     result = prime * result + ((platformName == null) ? 0 : platformName.hashCode());
     return result;
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -216,18 +224,18 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    
+
     MobileSpecs mobile = (MobileSpecs) obj;
-    
-    if (! deviceName.equals(mobile.deviceName)) {
+
+    if (!deviceName.equals(mobile.deviceName)) {
       return false;
     }
-    if (! platformName.equals(mobile.platformName)) {
+    if (!platformName.equals(mobile.platformName)) {
       return false;
     }
     return platformVersion.equals(mobile.platformVersion);
   }
-  
+
   /**
    * Is real device boolean.
    *
@@ -236,7 +244,7 @@ public class MobileSpecs extends KiteEntity implements JsonBuilder {
   public boolean isRealDevice() {
     return realDevice;
   }
-  
+
   /**
    * Sets real device.
    *

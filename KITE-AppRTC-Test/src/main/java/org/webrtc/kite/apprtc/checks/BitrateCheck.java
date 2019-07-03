@@ -65,7 +65,7 @@ public class BitrateCheck extends TestCheck {
     double avgBitrate = computeBitrate(stats.getJsonArray("statsArray"), stat, mediaType);
     System.out.println("avgBitrate lah =>>>>>> " + avgBitrate);
     // Assuming that there's a 10% tolerance to the test result:
-    Reporter.getInstance().textAttachment(report, "Bitrate check",
+    reporter.textAttachment(report, "Bitrate check",
       "Expected : [" + 0.9*expectedBitrate + " -> " + 1.1*expectedBitrate + "], found " + avgBitrate  , "plain" );
     if (avgBitrate < 0.9*expectedBitrate || 1.1*expectedBitrate < avgBitrate) {
       throw new KiteTestException("Expected bitrate to be in [" + 0.9*expectedBitrate + "," + 1.1*expectedBitrate + "], found " + avgBitrate, Status.FAILED);

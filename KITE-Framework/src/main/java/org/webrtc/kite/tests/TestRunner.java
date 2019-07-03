@@ -3,6 +3,7 @@ package org.webrtc.kite.tests;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.AllureTestReport;
 import io.cosmosoftware.kite.report.KiteLogger;
+import io.cosmosoftware.kite.report.Reporter;
 import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.interfaces.Runner;
 import io.cosmosoftware.kite.steps.StepPhase;
@@ -27,6 +28,7 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   protected final LinkedHashMap<StepPhase, AllureTestReport> reports;
   protected final WebDriver webDriver;
   private final String resultPath;
+  protected final Reporter reporter;
   private final String uid = new SimpleDateFormat("yyyyMMdd_hhmmss").format(new Date());
   protected boolean csv = false;
   protected int id;
@@ -40,10 +42,12 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
    * @param reports   the test reports
    * @param id        the id
    */
-  public TestRunner(WebDriver webDriver, LinkedHashMap<StepPhase, AllureTestReport> reports, KiteLogger logger, int id) {
+  public TestRunner(WebDriver webDriver, LinkedHashMap<StepPhase, AllureTestReport> reports, 
+                    KiteLogger logger, Reporter reporter, int id) {
     this.webDriver = webDriver;
     this.reports = reports;
     this.logger = logger;
+    this.reporter = reporter;
     this.id = id;
     this.resultPath = "results/" + uid + "_" + reports.get(reports.keySet().toArray()[0]).getLabel("suite") + "/";
   }
@@ -113,7 +117,12 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   public StepPhase getStepPhase() {
     return stepPhase;
   }
-
+  
+  @Override
+  public Reporter getReporter() {
+    return reporter;
+  }
+  
   /**
    * Sets id.
    *
@@ -154,4 +163,5 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   public void setStepPhase(StepPhase stepPhase) {
     this.stepPhase = stepPhase;
   }
+  
 }

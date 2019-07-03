@@ -36,27 +36,26 @@ import java.util.List;
  * <p>
  * See README for possible values of platform.
  */
-@Entity (name = Client.TABLE_NAME)
+@Entity(name = Client.TABLE_NAME)
 public class Browser extends Client {
-  
+
   private final String DEFAULT_WINDOW_SIZE = "1920,1200";
   private List<String> flags = new ArrayList<>();
   private boolean headless = false;
-  private String pathToBinary;
   private BrowserSpecs specs;
   private boolean technologyPreview = false;
   private boolean useFakeMedia = true;
   private String windowSize = DEFAULT_WINDOW_SIZE;
   private MediaFile audio;
   private MediaFile video;
-  
+
   /**
    * Instantiates a new Browser.
    */
   public Browser() {
     super();
   }
-  
+
   /**
    * Constructs a new Browser with the given remote address and JsonObject.
    *
@@ -68,9 +67,16 @@ public class Browser extends Client {
     this.headless = jsonObject.getBoolean("headless", headless);
     this.useFakeMedia = jsonObject.getBoolean("useFakeMedia", useFakeMedia);
     this.technologyPreview = jsonObject.getBoolean("technologyPreview", technologyPreview);
-    this.pathToBinary = jsonObject.getString("pathToBinary", "");
     this.windowSize = jsonObject.getString("windowSize", windowSize);
     JsonValue jsonValue = jsonObject.getOrDefault("flags", null);
+    JsonObject jObject = jsonObject.getJsonObject("video");
+    if (jObject != null) {
+      this.video = new MediaFile(jObject);
+    }
+    jObject = jsonObject.getJsonObject("audio");
+    if (jObject != null) {
+      this.audio = new MediaFile(jObject);
+    }
     if (jsonValue != null) {
       JsonArray flagArray = (JsonArray) jsonValue;
       for (int i = 0; i < flagArray.size(); i++) {
@@ -78,7 +84,7 @@ public class Browser extends Client {
       }
     }
   }
-  
+
   /**
    * Constructs a new Browser with the a Browser.
    *
@@ -90,11 +96,12 @@ public class Browser extends Client {
     this.headless = browser.isHeadless();
     this.useFakeMedia = browser.useFakeMedia();
     this.technologyPreview = browser.isTechnologyPreview();
-    this.pathToBinary = browser.getPathToBinary();
     this.windowSize = this.getWindowSize();
     this.flags = browser.getFlags();
+    this.video = browser.getVideo();
+    this.audio = browser.getAudio();
   }
-  
+
   /**
    * Adds one flag to the flag list.
    *
@@ -103,7 +110,7 @@ public class Browser extends Client {
   public void addFlag(String flag) {
     this.flags.add(flag);
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -112,21 +119,21 @@ public class Browser extends Client {
   @Override
   public JsonObjectBuilder buildJsonObjectBuilder() {
     JsonObjectBuilder builder = super.buildJsonObjectBuilder()
-      .add("browserName", this.getBrowserName())
-      .add("version", this.getVersion())
-      .add("platform", this.retrievePlatform().name())
-      .add("headless", this.headless)
-      .add("technologyPreview", this.technologyPreview);
+        .add("browserName", this.getBrowserName())
+        .add("version", this.getVersion())
+        .add("platform", this.retrievePlatform().name())
+        .add("headless", this.headless)
+        .add("technologyPreview", this.technologyPreview);
     if (this.getRemoteVersion() != null) {
       builder.add("remoteVersion", this.getRemoteVersion());
     }
     if (this.getRemotePlatform() != null) {
       builder.add("remotePlatform", this.getRemotePlatform());
     }
-    
+
     return builder;
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -139,7 +146,7 @@ public class Browser extends Client {
     result = prime * result + ((specs == null) ? 0 : specs.hashCode());
     return result;
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -147,7 +154,7 @@ public class Browser extends Client {
    */
   @Override
   public boolean equals(Object obj) {
-    if (! super.equals(obj)) {
+    if (!super.equals(obj)) {
       return false;
     }
     Browser other = (Browser) obj;
@@ -157,13 +164,22 @@ public class Browser extends Client {
       return specs.equals(other.specs);
     }
   }
-  
+
   @Transient
   @Override
   public Platform retrievePlatform() {
     return this.specs.getPlatform();
   }
-  
+
+  @Override
+  public MobileSpecs buildMobileSpecs(JsonObject jsonObject) {
+    if (jsonObject.get("mobile") == null) {
+      return null;
+    } else {
+      return new MobileSpecs(jsonObject.getJsonObject("mobile"));
+    }
+  }
+
   /**
    * Gets browser name.
    *
@@ -173,7 +189,7 @@ public class Browser extends Client {
   public String getBrowserName() {
     return this.specs.getBrowserName();
   }
-  
+
   /**
    * Sets browser name.
    *
@@ -182,18 +198,18 @@ public class Browser extends Client {
   public void setBrowserName(String browserName) {
     this.specs.setBrowserName(browserName);
   }
-  
+
   /**
    * Gets flags.
    *
    * @return the flags
    */
   @Column
-  @ElementCollection (fetch = FetchType.EAGER)
+  @ElementCollection(fetch = FetchType.EAGER)
   public List<String> getFlags() {
     return this.flags;
   }
-  
+
   /**
    * Sets flags.
    *
@@ -202,25 +218,7 @@ public class Browser extends Client {
   public void setFlags(List<String> flags) {
     this.flags = flags;
   }
-  
-  /**
-   * Gets path to binary.
-   *
-   * @return the path to binary
-   */
-  public String getPathToBinary() {
-    return this.pathToBinary;
-  }
-  
-  /**
-   * Sets path to binary.
-   *
-   * @param pathToBinary the path to binary
-   */
-  public void setPathToBinary(String pathToBinary) {
-    this.pathToBinary = pathToBinary;
-  }
-  
+
   /**
    * Gets remote platform.
    *
@@ -230,7 +228,7 @@ public class Browser extends Client {
   public String getRemotePlatform() {
     return this.specs.getRemotePlatform();
   }
-  
+
   /**
    * Sets remote platform.
    *
@@ -239,7 +237,7 @@ public class Browser extends Client {
   public void setRemotePlatform(String remotePlatform) {
     this.specs.setRemotePlatform(remotePlatform);
   }
-  
+
   /**
    * Gets remote version.
    *
@@ -249,7 +247,7 @@ public class Browser extends Client {
   public String getRemoteVersion() {
     return this.specs.getRemoteVersion();
   }
-  
+
   /**
    * Sets remote version.
    *
@@ -258,17 +256,17 @@ public class Browser extends Client {
   public void setRemoteVersion(String remoteVersion) {
     this.specs.setRemoteVersion(remoteVersion);
   }
-  
+
   /**
    * Gets specs.
    *
    * @return the specs
    */
-  @OneToOne (cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   public BrowserSpecs getSpecs() {
     return this.specs;
   }
-  
+
   /**
    * Sets specs.
    *
@@ -277,7 +275,7 @@ public class Browser extends Client {
   public void setSpecs(BrowserSpecs specs) {
     this.specs = specs;
   }
-  
+
   /**
    * Gets use fake media.
    *
@@ -286,7 +284,7 @@ public class Browser extends Client {
   public boolean getUseFakeMedia() {
     return useFakeMedia;
   }
-  
+
   /**
    * Sets use fake media.
    *
@@ -295,7 +293,7 @@ public class Browser extends Client {
   public void setUseFakeMedia(boolean useFakeMedia) {
     this.useFakeMedia = useFakeMedia;
   }
-  
+
   /**
    * Gets version.
    *
@@ -305,7 +303,7 @@ public class Browser extends Client {
   public String getVersion() {
     return this.specs.getVersion();
   }
-  
+
   /**
    * Sets version.
    *
@@ -314,7 +312,7 @@ public class Browser extends Client {
   public void setVersion(String version) {
     this.specs.setVersion(version);
   }
-  
+
   /**
    * Gets the window size
    *
@@ -328,7 +326,7 @@ public class Browser extends Client {
 //  public boolean getExclude() {
 //    return this.exclude;
 //  }
-  
+
   /**
    * Sets window size.
    *
@@ -337,7 +335,7 @@ public class Browser extends Client {
   public void setWindowSize(String windowSize) {
     this.windowSize = windowSize;
   }
-  
+
   /**
    * Is headless boolean.
    *
@@ -346,7 +344,7 @@ public class Browser extends Client {
   public boolean isHeadless() {
     return headless;
   }
-  
+
   /**
    * Sets headless.
    *
@@ -355,7 +353,7 @@ public class Browser extends Client {
   public void setHeadless(boolean headless) {
     this.headless = headless;
   }
-  
+
   /**
    * Is technologyPreview boolean.
    *
@@ -364,7 +362,7 @@ public class Browser extends Client {
   public boolean isTechnologyPreview() {
     return technologyPreview;
   }
-  
+
   /**
    * Sets technology preview.
    *
@@ -373,7 +371,7 @@ public class Browser extends Client {
   public void setTechnologyPreview(boolean technologyPreview) {
     this.technologyPreview = technologyPreview;
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -384,7 +382,7 @@ public class Browser extends Client {
     this.specs = (BrowserSpecs) new BrowserSpecs().makeSampleData();
     return this;
   }
-  
+
   /**
    * Retrieve family or platform platform.
    *
@@ -394,7 +392,7 @@ public class Browser extends Client {
     Platform platform = this.retrievePlatform();
     return platform.family() == null ? platform : platform.family();
   }
-  
+
   /**
    * Sets platform.
    *
@@ -403,7 +401,7 @@ public class Browser extends Client {
   public void setPlatform(Platform platform) {
     this.specs.setPlatform(platform);
   }
-  
+
   /**
    * Parses the user agent string using user-agent-RCutils and retrieve the browser version and the
    * platform details. If the operating system is 'mac' then further parses using Woothie to get the
@@ -426,7 +424,7 @@ public class Browser extends Client {
 //      this.userAgentPlatform = this.userAgentPlatform + " " + map.get("os_version");
 //    }
   }
-  
+
   /**
    * Checks whether it is required to get navigator.userAgent from the browser.
    *
@@ -435,7 +433,7 @@ public class Browser extends Client {
   public boolean shouldGetUserAgent() {
     return false;
   }
-  
+
   /**
    * Use fake media boolean.
    *
@@ -444,17 +442,17 @@ public class Browser extends Client {
   public boolean useFakeMedia() {
     return useFakeMedia;
   }
-  
+
   /**
    * Gets video.
    *
    * @return the video
    */
-  @OneToOne (cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   public MediaFile getVideo() {
     return video;
   }
-  
+
   /**
    * Sets video.
    *
@@ -463,17 +461,17 @@ public class Browser extends Client {
   public void setVideo(MediaFile video) {
     this.video = video;
   }
-  
+
   /**
    * Gets audio.
    *
    * @return the audio
    */
-  @OneToOne (cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   public MediaFile getAudio() {
     return audio;
   }
-  
+
   /**
    * Sets audio.
    *
@@ -482,14 +480,13 @@ public class Browser extends Client {
   public void setAudio(MediaFile audio) {
     this.audio = audio;
   }
-  
-  
+
+
   /**
    * Fetch media path string.
    *
    * @param media       the media
    * @param browserName the browser name
-   *
    * @return the string
    */
   public String fetchMediaPath(MediaFile media, String browserName) {
@@ -503,6 +500,6 @@ public class Browser extends Client {
     } else {
       extension = ".wav";
     }
-    return "/home/ubuntu/" + media.getFilename() + extension;
+    return media.getFilepath() + extension;
   }
 }

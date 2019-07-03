@@ -4,12 +4,12 @@
 
 package org.webrtc.kite.config.client;
 
+import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.interfaces.CommandMaker;
 import io.cosmosoftware.kite.interfaces.SampleData;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.openqa.selenium.Platform;
-import org.webrtc.kite.config.KiteEntity;
 
 import javax.json.JsonObject;
 import javax.persistence.*;
@@ -19,46 +19,66 @@ import static org.webrtc.kite.Utils.getSystemPlatform;
 /**
  * Entity implementation class for Entity: BrowserSpecs.
  */
-@Entity (name = BrowserSpecs.TABLE_NAME)
+@Entity(name = BrowserSpecs.TABLE_NAME)
 public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData {
-  
-  /** The Constant TABLE_NAME. */
+
+  /**
+   * The Constant TABLE_NAME.
+   */
   final static String TABLE_NAME = "browserspecs";
-  
-  /** The Constant serialVersionUID. */
+
+  /**
+   * The Constant serialVersionUID.
+   */
   private static final long serialVersionUID = 1L;
-  
-  /** The id. */
+
+  /**
+   * The id.
+   */
   private String id;
-  
-  /** The browser name. */
+
+  /**
+   * The browser name.
+   */
   private String browserName;
-  
-  /** The version. */
+
+  /**
+   * The version.
+   */
   private String version;
-  
-  /** The remote version. */
+
+  /**
+   * The remote version.
+   */
   private String remoteVersion;
-  
-  /** The platform. */
+
+  /**
+   * The platform.
+   */
   private Platform platform;
-  
-  /** The remote platform. */
+
+  /**
+   * The remote platform.
+   */
   private String remotePlatform;
-  
-  /** The path to binary. */
+
+  /**
+   * The path to binary.
+   */
   private String pathToBinary;
-  
-  /** The path to binary. */
+
+  /**
+   * The path to binary.
+   */
   private String pathToDriver;
-  
+
   /**
    * Instantiates a new browser specs.
    */
   public BrowserSpecs() {
     super();
   }
-  
+
   /**
    * Instantiates a new browser specs.
    *
@@ -66,7 +86,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
    */
   public BrowserSpecs(JsonObject jsonObject) {
     this();
-    
+
     // Mandatory
     this.browserName = jsonObject.getString("browserName");
     this.version = jsonObject.getString("version", null);
@@ -78,9 +98,9 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
     // Optional
     this.pathToBinary = jsonObject.getString("pathToBinary", this.pathToBinary);
     this.pathToDriver = jsonObject.getString("pathToDriver", this.pathToDriver);
-  
+
   }
-  
+
   /**
    * Instantiates a new browser specs.
    *
@@ -94,21 +114,21 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
     this.pathToBinary = browserSpecs.getPathToBinary();
     this.pathToDriver = browserSpecs.getPathToDriver();
   }
-  
+
   /**
    * Gets the id.
    *
    * @return the id
    */
   @Id
-  @GeneratedValue (generator = BrowserSpecs.TABLE_NAME)
-  @GenericGenerator (name = BrowserSpecs.TABLE_NAME, strategy = "io.cosmosoftware.kite.dao.KiteIdGenerator", parameters = {
-    @Parameter (name = "prefix", value = "BROS")
+  @GeneratedValue(generator = BrowserSpecs.TABLE_NAME)
+  @GenericGenerator(name = BrowserSpecs.TABLE_NAME, strategy = "io.cosmosoftware.kite.dao.KiteIdGenerator", parameters = {
+      @Parameter(name = "prefix", value = "BROS")
   })
   public String getId() {
     return this.id;
   }
-  
+
   /**
    * Sets the id.
    *
@@ -117,7 +137,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public void setId(String id) {
     this.id = id;
   }
-  
+
   /**
    * Gets the browser name.
    *
@@ -126,7 +146,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public String getBrowserName() {
     return this.browserName;
   }
-  
+
   /**
    * Sets the browser name.
    *
@@ -135,7 +155,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public void setBrowserName(String browserName) {
     this.browserName = browserName;
   }
-  
+
   /**
    * Gets the version.
    *
@@ -144,7 +164,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public String getVersion() {
     return this.version;
   }
-  
+
   /**
    * Sets the version.
    *
@@ -153,7 +173,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public void setVersion(String version) {
     this.version = version;
   }
-  
+
   /**
    * Gets the remote version.
    *
@@ -162,7 +182,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public String getRemoteVersion() {
     return this.remoteVersion;
   }
-  
+
   /**
    * Sets the remote version.
    *
@@ -171,17 +191,17 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public void setRemoteVersion(String remoteVersion) {
     this.remoteVersion = remoteVersion;
   }
-  
+
   /**
    * Gets the platform.
    *
    * @return the platform
    */
-  @Enumerated (EnumType.STRING)
+  @Enumerated(EnumType.STRING)
   public Platform getPlatform() {
     return this.platform;
   }
-  
+
   /**
    * Sets the platform.
    *
@@ -190,7 +210,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public void setPlatform(Platform platform) {
     this.platform = platform;
   }
-  
+
   /**
    * Gets the remote platform.
    *
@@ -199,7 +219,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public String getRemotePlatform() {
     return this.remotePlatform;
   }
-  
+
   /**
    * Sets the remote platform.
    *
@@ -208,7 +228,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public void setRemotePlatform(String remotePlatform) {
     this.remotePlatform = remotePlatform;
   }
-  
+
   /**
    * Gets the path to binary.
    *
@@ -217,7 +237,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public String getPathToBinary() {
     return this.pathToBinary;
   }
-  
+
   /**
    * Sets the path to binary.
    *
@@ -226,7 +246,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public void setPathToBinary(String pathToBinary) {
     this.pathToBinary = pathToBinary;
   }
-  
+
   /**
    * Gets the path to driver.
    *
@@ -235,7 +255,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public String getPathToDriver() {
     return this.pathToDriver;
   }
-  
+
   /**
    * Sets the path to binary.
    *
@@ -244,7 +264,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public void setPathToDriver(String pathToDriver) {
     this.pathToDriver = pathToDriver;
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -259,7 +279,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
     result = prime * result + ((version == null) ? 0 : version.hashCode());
     return result;
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -281,7 +301,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
       if (other.browserName != null) {
         return false;
       }
-    } else if (! browserName.equals(other.browserName)) {
+    } else if (!browserName.equals(other.browserName)) {
       return false;
     }
     if (platform != other.platform) {
@@ -293,7 +313,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
       return version.equals(other.version);
     }
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -302,10 +322,10 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   @Override
   public String makeCommand(boolean isHub, boolean isWindows) {
     return isHub ? ""
-      : String.format("browserName=%s,version=%s,platform=%s", this.browserName, this.version,
+        : String.format("browserName=%s,version=%s,platform=%s", this.browserName, this.version,
         this.platform.name());
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -317,8 +337,8 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
     this.version = "73";
     this.platform = Platform.LINUX;
     this.pathToDriver = "./chromedriver";
-    
+
     return this;
   }
-  
+
 }

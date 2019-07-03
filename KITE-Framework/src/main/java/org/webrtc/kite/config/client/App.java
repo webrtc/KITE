@@ -31,22 +31,23 @@ import javax.persistence.Entity;
  * }
  * <p>
  */
-@Entity (name = Client.TABLE_NAME)
+@Entity(name = Client.TABLE_NAME)
 public class App extends Client {
-  
+
   // Mandatory
   private String app;
   private String appActivity;
   private String appPackage;
   private boolean fullReset;
-  
+
+
   /**
    * Instantiates a new App.
    */
   public App() {
     super();
   }
-  
+
   /**
    * Constructs a new App with the given remote address and JsonObject.
    *
@@ -58,10 +59,10 @@ public class App extends Client {
     this.appPackage = jsonObject.getString("appPackage", null);
     this.appActivity = jsonObject.getString("appActivity", null);
     this.fullReset = jsonObject.getString("reset", "fullReset")
-      .equalsIgnoreCase("fullReset");
+        .equalsIgnoreCase("fullReset");
   }
-  
-  
+
+
   /**
    * Constructs a new App with a given App.
    *
@@ -74,22 +75,27 @@ public class App extends Client {
     this.appActivity = app.getAppActivity();
     this.fullReset = app.isFullReset();
   }
-  
+
   @Override
   public JsonObjectBuilder buildJsonObjectBuilder() {
     JsonObjectBuilder builder = super.buildJsonObjectBuilder()
-      .add("app", app)
-      .add("appPackage", appPackage)
-      .add("appActivity", appActivity)
-      .add("fullReset", fullReset);
+        .add("app", app)
+        .add("appPackage", appPackage == null ? "NC" : appPackage)
+        .add("appActivity", appActivity == null ? "NC" : appActivity)
+        .add("fullReset", fullReset);
     return builder;
   }
-  
+
   @Override
   public Platform retrievePlatform() {
     return this.mobile.getPlatformName();
   }
-  
+
+  @Override
+  public MobileSpecs buildMobileSpecs(JsonObject jsonObject) {
+    return new MobileSpecs(jsonObject);
+  }
+
   /**
    * returns app's path to app package
    *
@@ -98,7 +104,7 @@ public class App extends Client {
   public String getApp() {
     return app;
   }
-  
+
   /**
    * Sets app.
    *
@@ -107,7 +113,7 @@ public class App extends Client {
   public void setApp(String app) {
     this.app = app;
   }
-  
+
   /**
    * returns app's starting Activity
    *
@@ -116,7 +122,7 @@ public class App extends Client {
   public String getAppActivity() {
     return appActivity;
   }
-  
+
   /**
    * Sets app's starting Activity
    *
@@ -125,7 +131,7 @@ public class App extends Client {
   public void setAppActivity(String appActivity) {
     this.appActivity = appActivity;
   }
-  
+
   /**
    * returns app's package
    *
@@ -134,7 +140,7 @@ public class App extends Client {
   public String getAppPackage() {
     return appPackage == null ? "" : appPackage;
   }
-  
+
   /**
    * Sets app's package
    *
@@ -143,7 +149,7 @@ public class App extends Client {
   public void setAppPackage(String appPackage) {
     this.appPackage = appPackage;
   }
-  
+
   /**
    * Is full reset boolean.
    *
@@ -152,7 +158,7 @@ public class App extends Client {
   public boolean isFullReset() {
     return fullReset;
   }
-  
+
   /**
    * Sets full reset.
    *
@@ -161,22 +167,22 @@ public class App extends Client {
   public void setFullReset(boolean fullReset) {
     this.fullReset = fullReset;
   }
-  
+
   @Override
   public SampleData makeSampleData() {
     // todo
     return null;
   }
-  
+
   /**
    * returns app's DeviceName
    *
    * @return String device name
    */
   public String retrieveDeviceName() {
-    return mobile.getDeviceName();
+    return this.mobile.getDeviceName();
   }
-  
+
   /**
    * Retrieve platform version string.
    *
@@ -185,5 +191,5 @@ public class App extends Client {
   public String retrievePlatformVersion() {
     return this.mobile.getPlatformVersion();
   }
-  
+
 }
