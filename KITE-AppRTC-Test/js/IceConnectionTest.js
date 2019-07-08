@@ -1,25 +1,18 @@
 const {TestUtils, WebDriverFactory, KiteBaseTest} = require('kite-common');
-
 // Steps & checks
 const {OpenAppUrlStep, ConnectToAppRoomStep, GetStatsStep} = require('./steps');
 const {PeerConnectionCheck, RemoteVideoDisplayCheck} = require('./checks');
-
 // Pages
 const {AppRTCJoinPage, AppRTCMeetingPage} = require('./pages');
 
-// KiteBaseTest config
-const globalVariables = TestUtils.getGlobalVariables(process);
-const capabilities = require(globalVariables.capabilitiesPath);
-const payload = require(globalVariables.payloadPath);
-
 class IceConnectionTest extends KiteBaseTest {
-  constructor(name, globalVariables, capabilities, payload) {
-    super(name, globalVariables, capabilities, payload);
+  constructor(name, kiteConfig) {
+    super(name, kiteConfig);
   }
 
   async testScript() {
     try {
-      this.driver = await WebDriverFactory.getDriver(capabilities, capabilities.remoteAddress);
+      this.driver = await WebDriverFactory.getDriver(this.capabilities, this.remoteUrl);
       this.page = new AppRTCJoinPage(this.driver);
 
       let openAppUrlStep = new OpenAppUrlStep(this);
@@ -39,7 +32,7 @@ class IceConnectionTest extends KiteBaseTest {
         await getStatsStep.execute(this);
       }
 
-      await super.waitAllSteps();
+      await this.waitAllSteps();
     } catch (error) {
       console.log(error);
     } finally {
@@ -50,5 +43,8 @@ class IceConnectionTest extends KiteBaseTest {
 
 module.exports = IceConnectionTest;
 
-var test = new IceConnectionTest('IceConnection Test', globalVariables, capabilities, payload);
-test.run();
+(async () => {
+  const kiteConfig = await TestUtils.getKiteConfig(__dirname);
+  let test = new IceConnectionTest('IceConnection Test', kiteConfig);
+  await test.run();
+})();

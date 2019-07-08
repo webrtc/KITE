@@ -120,10 +120,12 @@ public class Browser extends Client {
   public JsonObjectBuilder buildJsonObjectBuilder() {
     JsonObjectBuilder builder = super.buildJsonObjectBuilder()
         .add("browserName", this.getBrowserName())
-        .add("version", this.getVersion())
         .add("platform", this.retrievePlatform().name())
         .add("headless", this.headless)
         .add("technologyPreview", this.technologyPreview);
+    if (this.getVersion() != null) {
+      builder.add("version", this.getVersion());
+    }
     if (this.getRemoteVersion() != null) {
       builder.add("remoteVersion", this.getRemoteVersion());
     }

@@ -23,18 +23,19 @@ import java.util.Map;
 /**
  * Represent RTCRTPStreamStats, outbound and inbound, sent and received.
  */
-public class RTCRTPStreamStats extends RTCStatObject {
+public class RTCRTPStreamStats extends RTCSingleStatObject {
   private final String codecId;
-  private final boolean inbound;
   private final String mediaType;
   private final String nackCount;
   private final String ssrc;
-  private final Map<Object, Object> statObject;
-  private final String timestamp;
+  private final Map statObject;
   private final String trackId;
   private final String transportId;
+  private InboundStats inboundStats;
+  private OutboundStats outboundStats;
+  private RTCMediaStreamTrackStats track;
   
-  public RTCRTPStreamStats(Map<Object, Object> statObject, boolean inbound) {
+  public RTCRTPStreamStats(Map statObject, boolean inbound) {
     this.setId(getStatByName(statObject, "id"));
     this.ssrc = getStatByName(statObject, "ssrc");
     this.mediaType = getStatByName(statObject, "mediaType");
@@ -43,8 +44,68 @@ public class RTCRTPStreamStats extends RTCStatObject {
     this.nackCount = getStatByName(statObject, "nackCount");
     this.codecId = getStatByName(statObject, "codecId");
     this.timestamp = getStatByName(statObject, "timestamp");
-    this.inbound = inbound;
+    if (inbound) {
+      this.inboundStats = new InboundStats(statObject);
+    } else {
+      this.outboundStats = new OutboundStats(statObject);
+    }
     this.statObject = statObject;
+  }
+  
+  public InboundStats getInboundStats() {
+    return inboundStats;
+  }
+  
+  public OutboundStats getOutboundStats() {
+    return outboundStats;
+  }
+  
+  public String getCodecId() {
+    return codecId;
+  }
+
+  public String getMediaType() {
+    return mediaType;
+  }
+  
+  public String getNackCount() {
+    return nackCount;
+  }
+  
+  public String getSsrc() {
+    return ssrc;
+  }
+  
+  public Map getStatObject() {
+    return statObject;
+  }
+  
+  public String getTrackId() {
+    return trackId;
+  }
+  
+  public String getTransportId() {
+    return transportId;
+  }
+  
+  public RTCMediaStreamTrackStats getTrack() {
+    return track;
+  }
+  
+  public void setTrack(RTCMediaStreamTrackStats track) {
+    this.track = track;
+  }
+  
+  public boolean isAudio() {
+    return this.mediaType.equals("audio");
+  }
+  
+  public boolean isVideo() {
+    return this.mediaType.equals("video");
+  }
+  
+  public boolean isInbound() {
+    return this.inboundStats != null;
   }
   
   @Override
@@ -58,23 +119,25 @@ public class RTCRTPStreamStats extends RTCStatObject {
         .add("nackCount", this.nackCount)
         .add("codecId", this.codecId)
         .add("timestamp", this.timestamp);
-    if (this.inbound) {
-      jsonObjectBuilder
-          .add("packetsReceived", getStatByName(this.statObject, "packetsReceived"))
-          .add("bytesReceived", getStatByName(this.statObject, "bytesReceived"))
-          .add("packetsLost", getStatByName(this.statObject, "packetsLost"))
-          .add("packetsDiscarded", getStatByName(this.statObject, "packetsDiscarded"))
-          .add("jitter", getStatByName(this.statObject, "jitter"))
-          .add("remoteId", getStatByName(this.statObject, "remoteId"))
-          .add("framesDecoded", getStatByName(this.statObject, "framesDecoded"));
-    } else {
-      jsonObjectBuilder
-          .add("packetsSent", getStatByName(this.statObject, "packetsSent"))
-          .add("bytesSent", getStatByName(this.statObject, "bytesSent"))
-          .add("remoteId", getStatByName(this.statObject, "remoteId"))
-          .add("framesSent", getStatByName(this.statObject, "framesSent"));
-      }
+    if (this.inboundStats != null)
+      jsonObjectBuilder.add("packetsReceived", getStatByName(this.statObject, "packetsReceived"))
+        .add("bytesReceived", getStatByName(this.statObject, "bytesReceived"))
+        .add("packetsLost", getStatByName(this.statObject, "packetsLost"))
+        .add("packetsDiscarded", getStatByName(this.statObject, "packetsDiscarded"))
+        .add("jitter", getStatByName(this.statObject, "jitter"))
+        .add("remoteId", getStatByName(this.statObject, "remoteId"))
+        .add("framesDecoded", getStatByName(this.statObject, "framesDecoded"));
+    else
+      jsonObjectBuilder.add("packetsSent", getStatByName(this.statObject, "packetsSent"))
+        .add("bytesSent", getStatByName(this.statObject, "bytesSent"))
+        .add("remoteId", getStatByName(this.statObject, "remoteId"))
+        .add("framesDecoded", getStatByName(this.statObject, "framesDecoded"));
     
     return jsonObjectBuilder;
   }
+  
+  public boolean isEmpty() {
+    return this.codecId == null || this.codecId.length() == 0 || "NA".equalsIgnoreCase(this.codecId);
+  }
+  
 }

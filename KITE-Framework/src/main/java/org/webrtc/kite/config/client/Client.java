@@ -110,6 +110,9 @@ public abstract class Client extends KiteEntity implements JsonBuilder, SampleDa
   public JsonObjectBuilder buildJsonObjectBuilder() {
     JsonObjectBuilder builder = Json.createObjectBuilder()
         .add("exclude", this.exclude);
+    if (this.gateway != null) {
+      builder.add("gateway", this.gateway);
+    }
     if (this.mobile != null) {
       builder.add("mobile", this.mobile.buildJsonObjectBuilder());
     }

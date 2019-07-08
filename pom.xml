@@ -19,12 +19,14 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- KITE dependency version-->
     <kite.version>2.0.5</kite.version>
     <kite.apprtc.version>2.0.1</kite.apprtc.version>
-    <kite.extras.version>0.1.30</kite.extras.version>
-    <kite.framework.version>1.0.6</kite.framework.version>
-    <kite.log4j.version>1.2.17</kite.log4j.version>
+    <kite.extras.version>0.1.32</kite.extras.version>
+    <kite.framework.version>1.0.8</kite.framework.version>
+
     <!-- Core dependencies -->
+    <kite.log4j.version>1.2.17</kite.log4j.version>
     <kite.mvn.compiler.version>3.6.1</kite.mvn.compiler.version>
     <kite.java.version>1.8</kite.java.version>
     <kite.guava.version>25.1-jre</kite.guava.version>

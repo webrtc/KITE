@@ -16,20 +16,16 @@
 package org.webrtc.kite.apprtc.checks;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
-import io.cosmosoftware.kite.report.Reporter;
-import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.interfaces.Runner;
+import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestCheck;
-import org.openqa.selenium.WebDriver;
-import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
+import org.webrtc.kite.stats.RTCStatList;
+import org.webrtc.kite.stats.RTCStats;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import java.util.List;
 
-import static io.cosmosoftware.kite.entities.Timeouts.FIVE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
-import static org.webrtc.kite.stats.StatsUtils.getStatOvertime;
+import static org.webrtc.kite.stats.StatsUtils.getPCStatOvertime;
 
 public class BitrateCheck extends TestCheck {
   private int expectedBitrate = -1;
@@ -54,16 +50,13 @@ public class BitrateCheck extends TestCheck {
   
   @Override
   protected void step() throws KiteTestException {
-    String stat = direction.equalsIgnoreCase("sending") ? "inbound-rtp" : "outbound-rtp";
-    JsonArray selectedStat =
-      Json.createArrayBuilder()
-        .add(stat)
-        .build();
     // Get a stats array of the selected stat for 5 seconds
-    JsonObject stats = getStatOvertime(
-      webDriver, FIVE_SECOND_INTERVAL, ONE_SECOND_INTERVAL, selectedStat).build();
-    double avgBitrate = computeBitrate(stats.getJsonArray("statsArray"), stat, mediaType);
-    System.out.println("avgBitrate lah =>>>>>> " + avgBitrate);
+    int duration = 5;
+    RTCStatList stats = getPCStatOvertime(
+      webDriver,"", 5 * ONE_SECOND_INTERVAL, ONE_SECOND_INTERVAL);
+    double startingTotalByteCount = stats.get(0).getTotalBytesByMedia(direction, mediaType);
+    double endingTotalByteCount = stats.get(duration - 1).getTotalBytesByMedia(direction, mediaType);
+    double avgBitrate = (endingTotalByteCount - startingTotalByteCount)/duration;
     // Assuming that there's a 10% tolerance to the test result:
     reporter.textAttachment(report, "Bitrate check",
       "Expected : [" + 0.9*expectedBitrate + " -> " + 1.1*expectedBitrate + "], found " + avgBitrate  , "plain" );
@@ -71,7 +64,7 @@ public class BitrateCheck extends TestCheck {
       throw new KiteTestException("Expected bitrate to be in [" + 0.9*expectedBitrate + "," + 1.1*expectedBitrate + "], found " + avgBitrate, Status.FAILED);
     }
   }
-  
+
   public void setExpectedBitrate(int expectedBitrate) {
     this.expectedBitrate = expectedBitrate;
     updateReport();
@@ -79,43 +72,9 @@ public class BitrateCheck extends TestCheck {
   
   public void setOption(String option) {
     this.mediaType = option.startsWith("a")? "audio" : "video";
-    this.direction = option.contains("s")? "sending" : "receiving";
+    this.direction = option.endsWith("s")? "outbound" : "inbound";
     updateReport();
   }
   
-  private double computeBitrate(JsonArray stats, String statName, String mediaType) throws KiteTestException {
-    int totalBytes = 0;
-    int totalDuration = 0;
-    try {
-      JsonObject firstMediaStat =
-        getMediaObject(stats.getJsonObject(0).getJsonObject(statName), mediaType);
-      JsonObject lastMediaStat =
-        getMediaObject(stats.getJsonObject(stats.size() - 1).getJsonObject(statName), mediaType);
-  
-      String byteType = statName.contains("inbound") ? "bytesReceived" : "bytesSent";
-  
-      totalBytes = Integer.parseInt(lastMediaStat.getString(byteType))
-        - Integer.parseInt(firstMediaStat.getString(byteType));
-      System.out.println("totalBytes->" + totalBytes);
-      totalDuration=  (int) (Long.parseLong(lastMediaStat.getString("timestamp"))
-        - Long.parseLong(firstMediaStat.getString("timestamp"))) / ONE_SECOND_INTERVAL;
-  
-    } catch (Exception e) {
-      throw new KiteTestException("Null point exception detected, please check if the stats are correct", Status.BROKEN, e.getCause());
-    }
-    if (totalDuration == 0) {
-      throw new KiteTestException("Total duration seems to be zero, please check the algorithm", Status.BROKEN);
-    }
-    return totalBytes / totalDuration;
-  }
-  
-  private JsonObject getMediaObject(JsonObject statObject, String mediaType) {
-    for (String key: statObject.keySet()) {
-      JsonObject mediaObject = statObject.getJsonObject(key);
-      if (mediaObject.getString("mediaType").equalsIgnoreCase(mediaType)) {
-        return mediaObject;
-      }
-    }
-    return null;
-  }
+
 }

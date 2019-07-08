@@ -16,8 +16,8 @@
 package org.webrtc.kite.apprtc.checks;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
-import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.interfaces.Runner;
+import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestCheck;
 import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
 

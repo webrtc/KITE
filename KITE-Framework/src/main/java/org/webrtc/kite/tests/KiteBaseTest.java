@@ -77,6 +77,8 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   private List<StepPhase> phases = new ArrayList<>();
   private boolean takeScreenshotForEachTest = false; // false by default
   private int testTimeout = 60;
+  protected int windowWidth = 0;
+  protected int windowHeight = 0;
 
   public KiteBaseTest() {
   }
@@ -147,6 +149,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
 
   private void init(StepPhase stepPhase) throws KiteTestException {
     AllureStepReport initStep = new AllureStepReport("Creating webdrivers and preparing threads..");
+    initStep.setPhase(stepPhase);
     this.reports.get(stepPhase).addStepReport(initStep);
     try {
       initStep.setStartTimestamp();
@@ -281,7 +284,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
    * @return the config file path
    */
   public String getConfigFilePath() {
-    return configFilePath;
+    return this.configFilePath;
   }
 
   /**
@@ -467,6 +470,11 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       csvReport = payload.getBoolean("csvReport", csvReport);
       consoleLogs = payload.getBoolean("consoleLogs", consoleLogs);
       fastRampUp = payload.getBoolean("fastRampUp", fastRampUp);
+      if (payload.containsKey("windowSize") && payload.getString("windowSize").contains("x")) {
+        StringTokenizer st = new StringTokenizer(payload.getString("windowSize"), "x");
+        windowWidth = Integer.parseInt(st.nextToken());
+        windowHeight = Integer.parseInt(st.nextToken());
+      }
       if (this.payload.containsKey("scenarios")) {
         JsonArray jsonArray2 = this.payload.getJsonArray("scenarios");
         for (int i = 0; i < jsonArray2.size(); ++ i) {
@@ -519,7 +527,6 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     createTestRunners();
     for (TestRunner runner : this) {
       populateTestSteps(runner);
-      runner.setCsv(csvReport);
     }
   }
 

@@ -16,16 +16,19 @@
 package org.webrtc.kite.apprtc.steps;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
-import io.cosmosoftware.kite.report.Reporter;
-import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.interfaces.Runner;
+import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestStep;
 import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
+import org.webrtc.kite.stats.RTCStatList;
+import org.webrtc.kite.stats.RTCStatMap;
+import org.webrtc.kite.stats.RTCStats;
 
 import javax.json.JsonObject;
+import java.util.List;
 
 import static org.webrtc.kite.Utils.getStackTrace;
-import static org.webrtc.kite.stats.StatsUtils.getPCStatOvertime;
+import static org.webrtc.kite.stats.StatsUtils.*;
 
 public class GetStatsStep extends TestStep {
   
@@ -47,10 +50,10 @@ public class GetStatsStep extends TestStep {
   @Override
   protected void step() throws KiteTestException {
     try {
-      JsonObject stats = getPCStatOvertime(webDriver, getStatsConfig).get(0);
-      JsonObject statsSummary = appRTCMeetingPage.buildstatSummary(stats, getStatsConfig.getJsonArray("selectedStats"));
-      reporter.jsonAttachment(report, "getStatsRaw", stats);
-      reporter.jsonAttachment(this.report, "Stats Summary", statsSummary);
+      RTCStatMap statsOverTime =  getPCStatOvertime(webDriver, getStatsConfig);
+      RTCStatList localPcStats = statsOverTime.getLocalPcStats();
+      reporter.jsonAttachment(this.report, "Stats (Raw)", transformToJson(localPcStats));
+      reporter.jsonAttachment(this.report, "Stats Summary", buildStatSummary(localPcStats));
     } catch (Exception e) {
       logger.error(getStackTrace(e));
       throw new KiteTestException("Failed to getStats", Status.BROKEN, e);

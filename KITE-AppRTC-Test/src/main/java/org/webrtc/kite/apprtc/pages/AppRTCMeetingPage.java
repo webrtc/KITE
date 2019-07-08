@@ -16,23 +16,17 @@
 package org.webrtc.kite.apprtc.pages;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
-import io.cosmosoftware.kite.pages.BasePage;
-import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.interfaces.Runner;
-import org.openqa.selenium.WebDriver;
+import io.cosmosoftware.kite.pages.BasePage;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.webrtc.kite.stats.StatsUtils;
 
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.entities.Timeouts.TEN_SECOND_INTERVAL_IN_SECONDS;
@@ -160,21 +154,5 @@ public class AppRTCMeetingPage extends BasePage {
   private String getStashedResolutionScript() {
     return "return JSON.stringify(window.resolution);";
   }
-  
-  public List<JsonObject> getPCStatOvertime(WebDriver webDriver, JsonObject getStatsConfig)
-    throws KiteTestException {
-    return StatsUtils.getPCStatOvertime(webDriver, getStatsConfig);
-  }
-  
-  
-  public JsonObject buildstatSummary(JsonObject rawData, JsonArray selectedStats)
-    throws KiteTestException {
-    return StatsUtils.buildstatSummary(rawData, selectedStats);
-  }
-  
-  public LinkedHashMap<String, String> statsHashMap(JsonObject statsSummary)
-    throws KiteTestException {
-    return StatsUtils.statsHashMap(statsSummary);
-  }
-  
+
 }

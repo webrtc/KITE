@@ -25,7 +25,7 @@ This tutorial will guide you step-by-step in writing your first KITE Test. The s
 4. Adding the __Checks__ :
     * Sent Video Check
     * Received Videos Check
-5. Adding the more __Steps__: 
+5. Adding more __Steps__: 
     * Collect WebRTC Stats
     * Taking a Screenshot
 
@@ -66,11 +66,9 @@ __TestUtils__ contains a set of common functions that are used by all KITE Tests
 __WebDriverFactory__ allows the creation of the WebDriver.
 __KiteBaseTest__ this is the parent class of the test, it will enable the generation of the Allure Report.
 
-The following codes gets the *capabilities* required to create the webdrivers and the *payload* which is the test specific configuration passed to the test by the KITE Engine. We can pass any kind of information to the test via this *payload* object in the config file.
+The following code gets the *capabilities* required to create the webdrivers and the *payload* which is the test specific configuration passed to the test by the KITE Engine. We can pass any kind of information to the test via this *payload* object in the config file. It can also get the command line arguments.
 ```
-const globalVariables = TestUtils.getGlobalVariables(process);
-const capabilities = require(globalVariables.capabilitiesPath);
-const payload = require(globalVariables.payloadPath);
+const kiteConfig = await TestUtils.getKiteConfig(__dirname);
 ```
 
 #### Folders
@@ -92,7 +90,7 @@ The KITE config file of our javascript test can be found at  `KITE-JitsiTutorial
 This file contains all the information for the tests.
 
 __name__: name of the configuration file.
-__remotes__: the address of the selenium hub.
+__grids__: the address and the type of the selenium hub.
 __tests__: a array containing all the tests to be run. Each test contains all the necessary information for its progress.
 In each test we can find:
 - __name__: name of the test
@@ -101,7 +99,7 @@ In each test we can find:
 - __testImpl__: name of the JS test file
 - __payload__ contains _name:values_ pairs to be used in the test.
 
-__browsers__: List of all the browsers that will be tested. This list will be used to create tuples (with provided tupleSize). Each tuple will be used to run in one test case.
+__clients__: List of all the browsers that will be tested. This list will be used to create tuples (with provided tupleSize). Each tuple will be used to run in one test case.
 
 #### Running the test
 Once done, we can already run the test with:
@@ -230,7 +228,7 @@ First, we'll declare our variables:
         stepInfo.numberOfParticipant = parseInt(stepInfo.numberOfParticipant) + 1; // To add the first video      
     }
 ```    
-Then we'll wait for all the videos. So, we're going to use `TestUtils.waitVideos()` from kite-common.
+Then we'll wait for all the videos. So, we're going to use `TestUtils.waitForVideos()` from kite-common.
 ```  
     async videoCheck(stepInfo, index) {
         let checked; // Result of the verification
@@ -238,7 +236,7 @@ Then we'll wait for all the videos. So, we're going to use `TestUtils.waitVideos
         let timeout = stepInfo.timeout;
         stepInfo.numberOfParticipant = parseInt(stepInfo.numberOfParticipant) + 1; // To add the first video
         // Waiting for all the videos
-        await TestUtils.waitVideos(stepInfo, videos);
+        await TestUtils.waitForVideos(stepInfo, videos);
         stepInfo.numberOfParticipant --; // To delete the first video
     }
 ```
@@ -253,31 +251,33 @@ Next we'll check that the video is actually playing, meaning that it isn't blank
         stepInfo.numberOfParticipant = parseInt(stepInfo.numberOfParticipant) + 1; // To add the first video
         
         // Waiting for all the videos
-        await TestUtils.waitVideos(stepInfo, videos);
+        await TestUtils.waitForVideos(stepInfo, videos);
         stepInfo.numberOfParticipant --; // To delete the first video
 
         // Check the status of the video
         // checked.result = 'blank' || 'still' || 'video'
         i = 0;
         checked = await TestUtils.verifyVideoDisplayByIndex(stepInfo.driver, index + 1);
-            while(checked.result === 'blank' || checked.result === undefined && i < timeout) {
+            while(checked.result === 'blank' || typeof checked.result === "undefined" && i < timeout) {
             checked = await TestUtils.verifyVideoDisplayByIndex(stepInfo.driver, index + 1);
             i++;
-            await waitAround(1000);
+            await TestUtils.waitAround(1000);
         }
 
         i = 0;
         while(i < 3 && checked.result != 'video') {
             checked = await TestUtils.verifyVideoDisplayByIndex(stepInfo.driver, index + 1);
             i++;
-            await waitAround(3 * 1000); // waiting 3s after each iteration
+            await TestUtils.waitAround(3 * 1000); // waiting 3s after each iteration
         }
         return checked.result;
     }
 ```
 
 We need to add `index` __`+ 1`__ to skip the large video in our .
-    
+
+The asynchronous function `TestUtils.waitAround()` allows to wait for a given time.
+
 To make the check robust to poor connections, we decided to repeat it 3 times at 3 seconds interval. We could make the checks much stricter by doing it only once, which would cause it to fail more easily in case of low framerate.
 
 Now that we completed the implementation in `pages/MainPage.js`, we're going to edit `checks/SentVideoCheck.js`.  
@@ -338,7 +338,7 @@ At the top of the file, we import the class
 
 And add the check to the __testScript()__ function:
 ```
-    this.driver = await WebDriverFactory.getDriver(capabilities, capabilities.remoteAddress);
+    this.driver = await WebDriverFactory.getDriver(this.capabilities, this.remoteUrl);
     this.page = new MainPage(this.driver);
     let openUrlStep = new OpenUrlStep(this);
     await openUrlStep.execute(this);
@@ -442,7 +442,7 @@ by
 
 and add in __testScript()__:
 ```
-    this.driver = await WebDriverFactory.getDriver(capabilities, capabilities.remoteAddress);
+    this.driver = await WebDriverFactory.getDriver(this.capabilities, this.remoteUrl);
     this.page = new MainPage(this.driver);
     let openUrlStep = new OpenUrlStep(this);
     await openUrlStep.execute(this);
@@ -470,7 +470,7 @@ So, in `payload`, we add :
         "enabled": true,
         "statsCollectionTime": 2,
         "statsCollectionInterval": 1,
-        "peerConnections": ["window.pc[0]"],
+        "peerConnections": ["window.peerConnections[0]"],
         "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair"]
     }
 ```
@@ -482,7 +482,7 @@ To obtain:
             "enabled": true,
             "statsCollectionTime": 2,
             "statsCollectionInterval": 1,
-            "peerConnections": ["window.pc[0]"],
+            "peerConnections": ["window.peerConnections[0]"],
             "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair"]`
         }
     }
@@ -537,8 +537,8 @@ Then the __step()__:
             let rawStats = await this.page.getStats(this);
             let summaryStats = TestUtils.extractJson(rawStats, 'both');
             // // Data
-            this.testReporter.textAttachment(this.report, 'GetStatsRaw', JSON.stringify(rawStats), "json");
-            this.testReporter.textAttachment(this.report, 'GetStatsSummary', JSON.stringify(summaryStats), "json");
+            this.testReporter.textAttachment(this.report, 'GetStatsRaw', JSON.stringify(rawStats, null, 4), "json");
+            this.testReporter.textAttachment(this.report, 'GetStatsSummary', JSON.stringify(summaryStats, null, 4), "json");
         } catch (error) {
             console.log(error);
             throw new KiteTestError(Status.BROKEN, "Failed to getStats");
@@ -552,7 +552,7 @@ See [GetStatsStep.js](https://github.com/CoSMoSoftware/KITE-JitsiTutorial-Test/b
 The __this.page.getStats()__ allows to get stats. We are going to create it right after in MainPage();
 The __TestUtils.extractJson()__ allows to make a summary of the data collected.
 
-Now, we are going to create __getSats()__.
+Now, we are going to create __getStats()__.
 Open the file __/pages/MainPage.js__.
 
 First, we need a script to get the peer connection.
@@ -595,7 +595,7 @@ by
 
 and add in __testScript()__:
 ```
-    this.driver = await WebDriverFactory.getDriver(capabilities, capabilities.remoteAddress);
+    this.driver = await WebDriverFactory.getDriver(this.capabilities, this.remoteUrl);
     this.page = new MainPage(this.driver);
     let openUrlStep = new OpenUrlStep(this);
     await openUrlStep.execute(this);
@@ -620,59 +620,22 @@ We can run the test again like mentioned above and the updated report should be 
 *****
 ### 6. Step: take a screenshot 
 
-Now, we're going to create a new step (__Steps__ in `steps/` folder).
+Now, we're going to create a new step to take a screenshot. This step is already created in kite-common in `steps/` folder.
 
-We're goind to create a file named `steps/ScreenshotStep.js`.
-Once the file has been created, we'll again add a reference to `steps/index.js`.
+To use it, simply add the following in our main JS file:
+- Modify:
+`const {TestUtils, TestStep, KiteTestError, Status} = require('kite-common');`
+by 
+`const {TestUtils, TestStep, KiteTestError, Status, ScreenshotStep} = require('kite-common');`
 
-____ steps/index.js ____
-`exports.ScreenshotStep = require('./ScreenshotStep');`
-
-Open the file `steps/ScreenshotStep.js`.
-
-At the top of the file, we add the following require:
-`const {TestUtils, TestStep} = require('kite-common');`
-
-Then, in this file, we implement the ScreenshotStep class and its constructor:
+- Add the step:
 ```
-class ScreenshotStep extends TestStep {
-    constructor(kiteBaseTest) {
-        super();
-        this.driver = kiteBaseTest.driver;
+    let screenshotStep = new ScreenshotStep(this);
+    await screenshotStep.execute(this);
+```
+in __testScript()__:
 
-        // Test reporter if you want to add attachment(s)
-        this.testReporter = kiteBaseTest.reporter;
-    }
-}
-```  
-Update the __stepDescription()__:
-
-    stepDescription() {
-        return 'Get a screenshot';
-    }
-
-Then the __step()__:
-
-    async step() {
-        let screenshot = await TestUtils.takeScreenshot(this.driver);
-        this.testReporter.screenshotAttachment(this.report, "Screenshot step", screenshot);
-    }
-
-Do not forget, at the end of this file, add:
-`module.exports = ScreenshotStep;`
-See [ScreenshotStep.js](https://github.com/CoSMoSoftware/KITE-JitsiTutorial-Test/blob/master/js/steps/ScreenshotStep.js).
-
-The __TestUtils.takeScreenshot()__ allows to take a screenthot.
-
-Finally, we add this step to __JitsiTutorial.js__.
-We modify:
-`const {OpenUrlStep, GetStatsStep} = require('./steps');`
-by
-`const {OpenUrlStep, GetStatsStep, ScreenshotStep} = require('./steps');`
-
-and add in __testScript()__:
-
-    this.driver = await WebDriverFactory.getDriver(capabilities, capabilities.remoteAddress);
+    this.driver = await WebDriverFactory.getDriver(this.capabilities, this.remoteUrl);
     this.page = new MainPage(this.driver);
     let openUrlStep = new OpenUrlStep(this);
     await openUrlStep.execute(this);
@@ -687,6 +650,13 @@ and add in __testScript()__:
     // New step
     let screenshotStep = new ScreenshotStep(this);
     await screenshotStep.execute(this);
+
+This step uses the asynchronous function __TestUtils.takeScreenshot()__ from kite-common, to take a screenshot.
+
+Useful information:
+Sometimes, a browser can perform the steps faster than others, that's why the asynchronous function __waitAllSteps()__
+allows to synchronize your browsers. You can use it in __testScript()__ like this:
+`await this.waitAllSteps()`
 
 See:
 [JitsiTutorial.js](https://github.com/CoSMoSoftware/KITE-JitsiTutorial-Test/blob/master/js/JitsiTutorial.js).

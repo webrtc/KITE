@@ -26,14 +26,14 @@ import java.util.Map;
  * RTCCertificateStats, with attributes fingerprint,
  * fingerprintAlgorithm, base64Certificate, issuerCertificateId
  */
-public class RTCCertificateStats extends RTCStatObject {
+public class RTCCertificateStats extends RTCSingleStatObject {
 
   private final String base64Certificate;
   private final String fingerprint;
   private final String fingerprintAlgorithm;
   private final String issuerCertificateId;
 
-  public RTCCertificateStats(Map<Object, Object> statObject) {
+  public RTCCertificateStats(Map statObject) {
     this.setId(getStatByName(statObject, "id"));
     this.fingerprint = getStatByName(statObject, "fingerprint");
     this.fingerprintAlgorithm = getStatByName(statObject, "fingerprintAlgorithm");
@@ -41,7 +41,23 @@ public class RTCCertificateStats extends RTCStatObject {
     this.issuerCertificateId = getStatByName(statObject, "issuerCertificateId");
 
   }
-
+  
+  public String getBase64Certificate() {
+    return base64Certificate;
+  }
+  
+  public String getFingerprint() {
+    return fingerprint;
+  }
+  
+  public String getFingerprintAlgorithm() {
+    return fingerprintAlgorithm;
+  }
+  
+  public String getIssuerCertificateId() {
+    return issuerCertificateId;
+  }
+  
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder()

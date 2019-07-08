@@ -26,7 +26,7 @@ import java.util.Map;
  * ended, detached, frameWidth, frameHeight, framesPerSecond, framesSent, framesReceived,
  * framesDecoded, framesDropped, framesCorrupted, audioLevel
  */
-public class RTCMediaStreamTrackStats extends RTCStatObject {
+public class RTCMediaStreamTrackStats extends RTCSingleStatObject {
   private final String audioLevel;
   private final String detached;
   private final String ended;
@@ -39,10 +39,10 @@ public class RTCMediaStreamTrackStats extends RTCStatObject {
   private final String framesReceived;
   private final String framesSent;
   private final String remoteSource;
-  private final String timestamp;
+
   private final String trackIdentifier;
 
-  public RTCMediaStreamTrackStats(Map<Object, Object> statObject) {
+  public RTCMediaStreamTrackStats(Map statObject) {
     this.setId(getStatByName(statObject, "id"));
     this.trackIdentifier = getStatByName(statObject, "trackIdentifier");
     this.remoteSource = getStatByName(statObject, "remoteSource");
@@ -58,9 +58,64 @@ public class RTCMediaStreamTrackStats extends RTCStatObject {
     this.framesCorrupted = getStatByName(statObject, "framesCorrupted");
     this.audioLevel = getStatByName(statObject, "audioLevel");
     this.timestamp = getStatByName(statObject, "timestamp");
-
   }
-
+  
+  public Double getAudioLevel() {
+    return parseDouble(audioLevel);
+  }
+  
+  public String getDetached() {
+    return detached;
+  }
+  
+  public String getEnded() {
+    return ended;
+  }
+  
+  public double getFrameHeight() {
+    return parseDouble(frameHeight);
+  }
+  
+  public double getFrameWidth() {
+    return parseDouble(frameWidth);
+  }
+  
+  public double getFramesCorrupted() {
+    return parseDouble(framesCorrupted);
+  }
+  
+  public double getFramesDecoded() {
+    return parseDouble(framesDecoded);
+  }
+  
+  public double getFramesDropped() {
+    return parseDouble(framesDropped);
+  }
+  
+  public double getFramesPerSecond() {
+    return parseDouble(framesPerSecond);
+  }
+  
+  public double getFramesReceived() {
+    return parseDouble(framesReceived);
+  }
+  
+  public double getFramesSent() {
+    return parseDouble(framesSent);
+  }
+  
+  public String getRemoteSource() {
+    return remoteSource;
+  }
+  
+  public String getTrackIdentifier() {
+    return trackIdentifier;
+  }
+  
+  public boolean isAudio() {
+    return !this.audioLevel.equals("NA");
+  }
+  
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder()

@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * RTCCodecStats, with attributes payloadType, codec, clockRate, channels, sdpFmtpLine
  */
-public class RTCCodecStats extends RTCStatObject {
+public class RTCCodecStats extends RTCSingleStatObject {
 
   private final String channels;
   private final String clockRate;
@@ -33,7 +33,7 @@ public class RTCCodecStats extends RTCStatObject {
   private final String sdpFmtpLine;
 
 
-  public RTCCodecStats(Map<Object, Object> statObject) {
+  public RTCCodecStats(Map statObject) {
     this.setId(getStatByName(statObject, "id"));
     this.payloadType = getStatByName(statObject, "payloadType");
     this.clockRate = getStatByName(statObject, "clockRate");
@@ -41,7 +41,27 @@ public class RTCCodecStats extends RTCStatObject {
     this.codec = getStatByName(statObject, "codec");
     this.sdpFmtpLine = getStatByName(statObject, "sdpFmtpLine");
   }
-
+  
+  public String getChannels() {
+    return channels;
+  }
+  
+  public String getClockRate() {
+    return clockRate;
+  }
+  
+  public String getCodec() {
+    return codec;
+  }
+  
+  public String getPayloadType() {
+    return payloadType;
+  }
+  
+  public String getSdpFmtpLine() {
+    return sdpFmtpLine;
+  }
+  
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder()

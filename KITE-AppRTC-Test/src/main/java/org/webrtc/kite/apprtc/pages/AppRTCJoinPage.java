@@ -16,10 +16,8 @@
 package org.webrtc.kite.apprtc.pages;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
-import io.cosmosoftware.kite.pages.BasePage;
-import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.interfaces.Runner;
-import org.openqa.selenium.WebDriver;
+import io.cosmosoftware.kite.pages.BasePage;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.webrtc.kite.apprtc.tests.AppRTCTest;

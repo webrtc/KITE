@@ -25,12 +25,12 @@ import java.util.Map;
  * RTCCertificateStats, with attributes fingerprint,
  * fingerprintAlgorithm, base64Certificate, issuerCertificateId
  */
-public class SDP extends RTCStatObject {
+public class SDP extends RTCSingleStatObject {
 
   private final String sdp;
   private final String type;
 
-  public SDP(Map<Object, Object> statObject) {
+  public SDP(Map statObject) {
     this.type = getStatByName(statObject, "type");
     this.sdp = getStatByName(statObject, "sdp");
   }

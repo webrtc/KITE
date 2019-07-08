@@ -3,22 +3,14 @@ const {GoogleSearchStep} = require('./steps');
 const {GoogleFirstResultCheck} = require('./checks');
 const {GoogleResultPage, GoogleSearchPage} = require('./pages');
 
-const globalVariables = TestUtils.getGlobalVariables(process);
-
-// KiteBaseTest config
-const capabilities = require(globalVariables.capabilitiesPath);
-const payload = require(globalVariables.payloadPath);
-
-
-
 class Example extends KiteBaseTest{
-  constructor(name, globalVariables, capabilities, payload) {
-    super(name, globalVariables, capabilities, payload);
+  constructor(name, kiteConfig) {
+    super(name, kiteConfig);
   }
 
   async testScript() {
     try {
-      this.driver = await WebDriverFactory.getDriver(this.capabilities, this.capabilities.remoteAddress);
+      this.driver = await WebDriverFactory.getDriver(this.capabilities, this.remoteUrl);
       this.page = new GoogleSearchPage(this.driver);
 
       let googleSearchStep = new GoogleSearchStep(this, "https://google.com");
@@ -31,12 +23,15 @@ class Example extends KiteBaseTest{
     } catch (e) {
       console.log(e);
     } finally {
-      this.driver.quit();
+      await this.driver.quit();
     }
   }
 }
 
 module.exports = Example;
 
-let test = new Example('Example test', globalVariables, capabilities, payload); 
-test.run();
+(async () => {
+  const kiteConfig = await TestUtils.getKiteConfig(__dirname);
+  let test = new Example('Example test', kiteConfig); 
+  await test.run();
+})();

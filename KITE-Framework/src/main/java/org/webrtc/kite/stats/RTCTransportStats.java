@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * RTCTransportStats, with attributes bytesSent, bytesReceived, rtcpTransportStatsId, selectedCan
  */
-public class RTCTransportStats extends RTCStatObject {
+public class RTCTransportStats extends RTCSingleStatObject {
 
   private final String bytesReceived;
   private final String bytesSent;
@@ -32,9 +32,9 @@ public class RTCTransportStats extends RTCStatObject {
   private final String remoteCertificateId;
   private final String rtcpTransportStatsId;
   private final String selectedCandidatePairId;
-  private final String timestamp;
 
-  public RTCTransportStats(Map<Object, Object> statObject) {
+
+  public RTCTransportStats(Map statObject) {
     this.setId(getStatByName(statObject, "id"));
     this.rtcpTransportStatsId = getStatByName(statObject, "rtcpTransportStatsId");
     this.selectedCandidatePairId = getStatByName(statObject, "selectedCandidatePairId");
@@ -44,7 +44,31 @@ public class RTCTransportStats extends RTCStatObject {
     this.bytesReceived = getStatByName(statObject, "bytesReceived");
     this.timestamp = getStatByName(statObject, "timestamp");
   }
-
+  
+  public String getBytesReceived() {
+    return bytesReceived;
+  }
+  
+  public String getBytesSent() {
+    return bytesSent;
+  }
+  
+  public String getLocalCertificateId() {
+    return localCertificateId;
+  }
+  
+  public String getRemoteCertificateId() {
+    return remoteCertificateId;
+  }
+  
+  public String getRtcpTransportStatsId() {
+    return rtcpTransportStatsId;
+  }
+  
+  public String getSelectedCandidatePairId() {
+    return selectedCandidatePairId;
+  }
+  
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder()
