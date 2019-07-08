@@ -27,7 +27,7 @@
       }
     }
   ],
-  "browsers": [
+  "clients": [
     {
       "browserName": "chrome",
       "version": "74",

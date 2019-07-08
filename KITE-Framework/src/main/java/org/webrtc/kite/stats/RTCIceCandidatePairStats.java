@@ -25,7 +25,7 @@ import java.util.Map;
  * RTCIceCandidatePairStats, with attributes transportId, localCandidateId, remoteCandidateId, state, priority, nominated, bytesSent,
  * bytesReceived, totalRoundTripTime, currentRoundTripTime
  */
-public class RTCIceCandidatePairStats extends RTCStatObject {
+public class RTCIceCandidatePairStats extends RTCSingleStatObject {
 
   private final String bytesReceived;
   private final String bytesSent;
@@ -35,11 +35,11 @@ public class RTCIceCandidatePairStats extends RTCStatObject {
   private final String priority;
   private final String remoteCandidateId;
   private final String state;
-  private final String timestamp;
+
   private final String totalRoundTripTime;
   private final String transportId;
 
-  public RTCIceCandidatePairStats(Map<Object, Object> statObject) {
+  public RTCIceCandidatePairStats(Map statObject) {
     this.setId(getStatByName(statObject, "id"));
     this.transportId = getStatByName(statObject, "transportId");
     this.localCandidateId = getStatByName(statObject, "localCandidateId");
@@ -53,7 +53,47 @@ public class RTCIceCandidatePairStats extends RTCStatObject {
     this.currentRoundTripTime = getStatByName(statObject, "currentRoundTripTime");
     this.timestamp = getStatByName(statObject, "timestamp");
   }
-
+  
+  public double getBytesReceived() {
+    return parseDouble(bytesReceived);
+  }
+  
+  public double getBytesSent() {
+    return parseDouble(bytesSent);
+  }
+  
+  public double getCurrentRoundTripTime() {
+    return 1000*parseDouble(currentRoundTripTime);
+  }
+  
+  public String getLocalCandidateId() {
+    return localCandidateId;
+  }
+  
+  public String getNominated() {
+    return nominated;
+  }
+  
+  public String getPriority() {
+    return priority;
+  }
+  
+  public String getRemoteCandidateId() {
+    return remoteCandidateId;
+  }
+  
+  public String getState() {
+    return state;
+  }
+  
+  public double getTotalRoundTripTime() {
+    return 1000*parseDouble(totalRoundTripTime);
+  }
+  
+  public String getTransportId() {
+    return transportId;
+  }
+  
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder()

@@ -20,8 +20,10 @@ import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
+import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.TestUtils;
+import io.cosmosoftware.kite.util.WebDriverUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeOptions;
@@ -196,22 +198,19 @@ public class WebDriverFactory {
    * @throws WebDriverException    the web driver exception
    */
   public static WebDriver createWebDriver(Client client, String testName, String id, String... kiteServerGridId)
-      throws MalformedURLException, WebDriverException {
+          throws MalformedURLException, WebDriverException, KiteTestException {
 
     URL url = new URL(client.getPaas().getUrl());
 
     if (client instanceof Browser) {
-
       WebDriver webDriver = new RemoteWebDriver(url, WebDriverFactory.createCapabilities(client, testName, id));
-      String hub = new URL(client.getPaas().getUrl()).getHost();
-      String sessionId = ((RemoteWebDriver) webDriver).getSessionId().toString();
-      String nodeIp = TestUtils.getPrivateIp(hub, sessionId, "4444");
       if (((Browser) client).getBrowserName().equalsIgnoreCase("firefox")) {
         if (((Browser) client).useFakeMedia()) {
           if (((Browser) client).getVideo() != null || ((Browser) client).getAudio() != null) {
+            String nodePublicIp = WebDriverUtils.getPublicIp(webDriver);
             String gridId = kiteServerGridId.length > 0 ? kiteServerGridId[0] : "null";
             String command = writeCommand((Browser) client);
-            Utils.makeCommand(gridId, nodeIp, command);
+            Utils.makeCommand(gridId, nodePublicIp, command);
           }
         }
       }
@@ -238,7 +237,7 @@ public class WebDriverFactory {
    * @throws WebDriverException    the web driver exception
    */
   public static WebDriver getWebDriverForClient(String testName, Client client, String id)
-      throws MalformedURLException, WebDriverException {
+          throws MalformedURLException, WebDriverException, KiteTestException {
     return createWebDriver(client, testName, id);
   }
 
@@ -252,7 +251,7 @@ public class WebDriverFactory {
    * @throws WebDriverException    the web driver exception
    */
   public static WebDriver getWebDriverForClient(String testName, Client client)
-      throws MalformedURLException, WebDriverException {
+          throws MalformedURLException, WebDriverException, KiteTestException {
     return createWebDriver(client, testName, "");
   }
 
@@ -347,6 +346,8 @@ public class WebDriverFactory {
     if (browser.useFakeMedia()) {
       if (browser.getAudio() == null && browser.getVideo() == null) {
         firefoxProfile.setPreference("media.navigator.streams.fake", browser.useFakeMedia());
+      } else {
+        firefoxProfile.setPreference("media.navigator.permission.disabled", true);
       }
     }
     FirefoxOptions firefoxOptions = new FirefoxOptions();
@@ -364,10 +365,10 @@ public class WebDriverFactory {
   }
 
   private static String writeCommand(Browser browser) {
-    String command = "play ";
+    String command = "play%20";
     if (browser.getVideo() != null && browser.getAudio() != null) {
       command += browser.fetchMediaPath(browser.getVideo(), browser.getBrowserName())
-          + " " + browser.fetchMediaPath(browser.getAudio(), browser.getBrowserName());
+          + "%20" + browser.fetchMediaPath(browser.getAudio(), browser.getBrowserName());
     } else if (browser.getVideo() != null && browser.getAudio() == null) {
       command += browser.fetchMediaPath(browser.getVideo(), browser.getBrowserName());
     } else if (browser.getVideo() == null && browser.getAudio() != null) {
@@ -375,6 +376,6 @@ public class WebDriverFactory {
     } else {
       logger.info("No file provided.");
     }
-    return command;
+    return command + "%20&";
   }
 }

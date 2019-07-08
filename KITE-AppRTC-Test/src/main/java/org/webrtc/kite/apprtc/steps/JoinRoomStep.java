@@ -16,8 +16,8 @@
 package org.webrtc.kite.apprtc.steps;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
-import io.cosmosoftware.kite.steps.TestStep;
 import io.cosmosoftware.kite.interfaces.Runner;
+import io.cosmosoftware.kite.steps.TestStep;
 import org.webrtc.kite.apprtc.pages.AppRTCJoinPage;
 
 public class JoinRoomStep extends TestStep {

@@ -21,7 +21,6 @@ io.on('connection', function(socket) {
   })
 
   socket.on("done", (id) => {
-    console.log("Test done for " + id);
     doneArray.push(id);
   })
   

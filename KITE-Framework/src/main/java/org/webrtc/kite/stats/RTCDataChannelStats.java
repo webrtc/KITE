@@ -25,7 +25,7 @@ import java.util.Map;
  * RTCDataChannelStats, with attributes label, protocol, datachannelId, state, messagesSent, bytesSent,
  * messagesReceived, bytesReceived
  */
-public class RTCDataChannelStats extends RTCStatObject {
+public class RTCDataChannelStats extends RTCSingleStatObject {
 
   private final String bytesReceived;
   private final String bytesSent;
@@ -35,10 +35,10 @@ public class RTCDataChannelStats extends RTCStatObject {
   private final String messagesSent;
   private final String protocol;
   private final String state;
-  private final String timestamp;
 
 
-  public RTCDataChannelStats(Map<Object, Object> statObject) {
+
+  public RTCDataChannelStats(Map statObject) {
     this.setId(getStatByName(statObject, "id"));
     this.label = getStatByName(statObject, "label");
     this.protocol = getStatByName(statObject, "protocol");
@@ -50,7 +50,39 @@ public class RTCDataChannelStats extends RTCStatObject {
     this.bytesReceived = getStatByName(statObject, "bytesReceived");
     this.timestamp = getStatByName(statObject, "timestamp");
   }
-
+  
+  public double getBytesReceived() {
+    return parseDouble(bytesReceived);
+  }
+  
+  public double getBytesSent() {
+    return parseDouble(bytesSent);
+  }
+  
+  public String getDatachannelId() {
+    return datachannelId;
+  }
+  
+  public String getLabel() {
+    return label;
+  }
+  
+  public String getMessagesReceived() {
+    return messagesReceived;
+  }
+  
+  public String getMessagesSent() {
+    return messagesSent;
+  }
+  
+  public String getProtocol() {
+    return protocol;
+  }
+  
+  public String getState() {
+    return state;
+  }
+  
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder()

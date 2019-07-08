@@ -115,9 +115,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    */
   public TestConfig(JsonObject jsonObject) throws KiteInsufficientValueException, IOException {
     this.testJsonConfig = jsonObject;
-    this.reporter = new Reporter();
-    this.payload = jsonObject.getJsonObject("payload").toString();
-    this.initRoomManagerFromPayload();
+
   
     // Mandatory
     this.type = TestType.valueOf(jsonObject.getString("type", "interop"));
@@ -129,6 +127,11 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     
     this.implJar = jsonObject.getString("implJar", null);
     this.description = jsonObject.getString("description", DEFAULT_DESC);
+  
+    this.reporter = new Reporter(this.name);
+    this.reporter.setCsvReport(jsonObject.getBoolean("csvReport", false));
+    this.payload = jsonObject.getJsonObject("payload").toString();
+    this.initRoomManagerFromPayload();
     
     // Override the global value with the local value
     this.callbackUrl = jsonObject.getString("callbackurl", null);
@@ -180,7 +183,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   
   public void setReportPath(String reportPath) {
     if (this.reporter == null) {
-      this.reporter = new Reporter();
+      this.reporter = new Reporter(this.name);
     }
     System.out.println("trying to set report path : " + reportPath);
     this.reporter.setReportPath(reportPath);

@@ -24,16 +24,24 @@ import java.util.Map;
 /**
  * RTCMediaStreamStats, with attributes streamIdentifer, trackIds
  */
-public class RTCMediaStreamStats extends RTCStatObject {
+public class RTCMediaStreamStats extends RTCSingleStatObject {
   private final String streamIdentifer;
   private final String trackIds;
 
-  public RTCMediaStreamStats(Map<Object, Object> statObject) {
+  public RTCMediaStreamStats(Map statObject) {
     this.setId(getStatByName(statObject, "id"));
     this.streamIdentifer = getStatByName(statObject, "streamIdentifer");
     this.trackIds = getStatByName(statObject, "trackIds");
   }
-
+  
+  public String getStreamIdentifer() {
+    return streamIdentifer;
+  }
+  
+  public String getTrackIds() {
+    return trackIds;
+  }
+  
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder()
