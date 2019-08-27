@@ -19,7 +19,6 @@ package org.webrtc.kite;
 import io.cosmosoftware.kite.report.KiteLogger;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.client.Client;
-import org.webrtc.kite.config.client.MobileSpecs;
 import org.webrtc.kite.config.paas.Paas;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
@@ -102,10 +101,9 @@ public class Engine {
     Configurator configurator = new Configurator();
     buildConfig(configurator, args[0]);
 
-
     for (TestConfig testConfig : configurator.getConfigHandler().getTestList()) {
       List<Tuple> tupleList = new ArrayList<>();
-      List<List<Integer>> matrix = testConfig.getMatrix();
+      List<List<Integer>> matrix = configurator.getMatrix();
       if (matrix != null && !matrix.isEmpty()) {
         for (List<Integer> indexList: matrix ) {
           Tuple tuple = new Tuple();

@@ -4,8 +4,6 @@ import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.webrtc.kite.config.client.App;
-import org.webrtc.kite.config.client.Browser;
 import org.webrtc.kite.config.client.Client;
 
 import javax.json.Json;
@@ -64,9 +62,7 @@ public class Tuple extends KiteEntity implements JsonBuilder {
   public Tuple(Client client, int size) {
     super();
     for (int count = 0; count < size; count++) {
-      this.clients.add(client instanceof Browser
-        ? new Browser((Browser) client)
-        : new App((App) client));
+      this.clients.add(client);
     }
   }
   
@@ -80,7 +76,7 @@ public class Tuple extends KiteEntity implements JsonBuilder {
   }
   
   @Override
-  public JsonObjectBuilder buildJsonObjectBuilder() {
+  public JsonObjectBuilder buildJsonObjectBuilder() throws NullPointerException {
     return Json.createObjectBuilder().add("clients", this.getClientArrayBuilder());
   }
   

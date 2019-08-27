@@ -1,9 +1,9 @@
 package org.webrtc.kite.wpt.pages;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
+import io.cosmosoftware.kite.interfaces.Runner;
 import io.cosmosoftware.kite.pages.BasePage;
 import io.cosmosoftware.kite.report.Status;
-import io.cosmosoftware.kite.interfaces.Runner;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;

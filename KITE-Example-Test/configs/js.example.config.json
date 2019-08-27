@@ -21,13 +21,13 @@
   "clients": [
     {
       "browserName": "chrome",
-      "version": "74",
+      "version": "76",
       "platform": "localhost",
       "flags": []
     },
     {
       "browserName": "firefox",
-      "version": "66",
+      "version": "68",
       "platform": "localhost",
       "flags": []
     }

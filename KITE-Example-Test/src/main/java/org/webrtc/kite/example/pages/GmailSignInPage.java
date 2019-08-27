@@ -1,8 +1,8 @@
 package org.webrtc.kite.example.pages;
 
 import io.cosmosoftware.kite.exception.KiteInteractionException;
-import io.cosmosoftware.kite.pages.BasePage;
 import io.cosmosoftware.kite.interfaces.Runner;
+import io.cosmosoftware.kite.pages.BasePage;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 

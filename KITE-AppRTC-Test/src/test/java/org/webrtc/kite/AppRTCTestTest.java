@@ -18,7 +18,6 @@ package org.webrtc.kite;
 
 import junit.framework.TestCase;
 import org.webrtc.kite.apprtc.tests.HDTest;
-import org.webrtc.kite.config.client.Browser;
 import org.webrtc.kite.config.client.Client;
 
 import javax.json.Json;
@@ -40,7 +39,7 @@ public class AppRTCTestTest extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
 
-    final Browser browser = new Browser(/*
+    final Client browser = new Client(/*
             "chrome",
             "74",
       getSystemPlatform());

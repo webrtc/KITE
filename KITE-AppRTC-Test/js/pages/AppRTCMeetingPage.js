@@ -52,7 +52,7 @@ class AppRTCMeetingPage {
     let timeout = stepInfo.timeout / 1000;
 
     // Waiting for all the videos
-    await TestUtils.waitVideos(stepInfo, videos);
+    await TestUtils.waitForVideos(stepInfo, videos);
 
     // Check the status of the video
     // checked.result = 'blank' || 'still' || 'video'

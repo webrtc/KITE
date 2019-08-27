@@ -44,5 +44,10 @@
       <artifactId>hibernate-jpa-2.1-api</artifactId>
       <version>${org.hibernate.javax.persistence.version}</version>
     </dependency>
+    <dependency>
+      <artifactId>javax.json</artifactId>
+      <groupId>org.glassfish</groupId>
+      <version>${kite.json.version}</version>
+    </dependency>
   </dependencies>
 </project>

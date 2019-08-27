@@ -23,13 +23,9 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
 import javax.json.*;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
-import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
 import static io.cosmosoftware.kite.util.TestUtils.executeJsScript;
 import static io.cosmosoftware.kite.util.TestUtils.waitAround;
@@ -66,21 +62,26 @@ public class StatsUtils {
    * @throws KiteTestException the KITE test exception
    */
   public static RTCStats getPCStatOnce(WebDriver webDriver, String peerConnection, JsonArray selectedStats) throws KiteTestException {
-    String stashStatsScript = "const getStatsValues = () =>" +
-      peerConnection + "  .getStats()" +
-      "    .then(data => {" +
-      "      return [...data.values()];" +
-      "    });" +
-      "const stashStats = async () => {" +
-      "  window.KITEStats = await getStatsValues();" +
-      "  return 0;" +
-      "};" +
-      "stashStats();";
-    String getStashedStatsScript = "return window.KITEStats;";
-    
-    executeJsScript(webDriver, stashStatsScript);
-    waitAround(Timeouts.ONE_SECOND_INTERVAL);
-    return new RTCStats(peerConnection, (List<Map>) executeJsScript(webDriver, getStashedStatsScript), selectedStats);
+    try {
+      String stashStatsScript = "const getStatsValues = () =>" +
+          peerConnection + "  .getStats()" +
+          "    .then(data => {" +
+          "      return [...data.values()];" +
+          "    });" +
+          "const stashStats = async () => {" +
+          "  window.KITEStats = await getStatsValues();" +
+          "  return 0;" +
+          "};" +
+          "stashStats();";
+      String getStashedStatsScript = "return window.KITEStats;";
+
+      executeJsScript(webDriver, stashStatsScript);
+      waitAround(Timeouts.ONE_SECOND_INTERVAL);
+      return new RTCStats(peerConnection,
+          (List<Map>) executeJsScript(webDriver, getStashedStatsScript), selectedStats);
+    } catch (Exception e) {
+      throw new KiteTestException("Could not get stats from peer connection", Status.BROKEN ,e);
+    }
   }
   
   /**

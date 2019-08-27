@@ -11,7 +11,7 @@
   "callback": null,
   "tests": [
     {
-      "name": "Web Platform Test",
+      "name": "Web Platform Test %ts",
       "tupleSize": 1,
       "noOfThreads": 5,
       "testImpl": "org.webrtc.kite.wpt.WPTTest",
@@ -31,32 +31,32 @@
     {
       "browserName": "chrome",
       "platform": "LINUX",
-      "version": "74"
+      "version": "76"
     },
     {
       "browserName": "chrome",
       "platform": "MAC",
-      "version": "74"
+      "version": "76"
     },
     {
       "browserName": "chrome",
       "platform": "WINDOWS",
-      "version": "74"
+      "version": "76"
     },
     {
       "browserName": "firefox",
       "platform": "LINUX",
-      "version": "66"
+      "version": "68"
     },
     {
       "browserName": "firefox",
       "platform": "MAC",
-      "version": "66"
+      "version": "68"
     },
     {
       "browserName": "firefox",
       "platform": "WINDOWS",
-      "version": "66"
+      "version": "68"
     },
     {
       "browserName": "safari",

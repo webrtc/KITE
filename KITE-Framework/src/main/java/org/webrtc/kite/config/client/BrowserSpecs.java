@@ -48,19 +48,19 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   private String version;
 
   /**
-   * The remote version.
-   */
-  private String remoteVersion;
-
-  /**
    * The platform.
    */
   private Platform platform;
 
   /**
-   * The remote platform.
+   * The platform version.
    */
-  private String remotePlatform;
+  private String platformVersion;
+
+  /**
+   * The device name.
+   */
+  private String deviceName = "unknown";
 
   /**
    * The path to binary.
@@ -71,6 +71,14 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
    * The path to binary.
    */
   private String pathToDriver;
+  /**
+   * The profile (for firefox mostly).
+   */
+  private String profile;
+  /**
+   * The extension (for chrome mostly).
+   */
+  private String extension;
 
   /**
    * Instantiates a new browser specs.
@@ -84,13 +92,22 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
    *
    * @param jsonObject the json object
    */
-  public BrowserSpecs(JsonObject jsonObject) {
+  public BrowserSpecs(JsonObject jsonObject){
     this();
 
     // Mandatory
-    this.browserName = jsonObject.getString("browserName");
     this.version = jsonObject.getString("version", null);
-    String platform = jsonObject.getString("platform", "localhost");
+    String platform = jsonObject.getString("platform", "localhost").toUpperCase();
+    // appium requires device name, but any is fine
+    this.deviceName = jsonObject.getString("deviceName", "unknown");
+    this.browserName = jsonObject.getString("browserName", "Browser");
+//    if (this.deviceName.equals("unknown")) {
+//      // will throw exception in case the client is not an app
+//      this.browserName = jsonObject.getString("browserName");
+//    } else {
+//      this.browserName = platform.toLowerCase().contains("android") ? "APK" : "IPA";
+//    }
+    this.platformVersion = jsonObject.getString("platformVersion", null);
     if (platform.equalsIgnoreCase("localhost")) {
       platform = getSystemPlatform();
     }
@@ -98,6 +115,8 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
     // Optional
     this.pathToBinary = jsonObject.getString("pathToBinary", this.pathToBinary);
     this.pathToDriver = jsonObject.getString("pathToDriver", this.pathToDriver);
+    this.profile = jsonObject.getString("profile", "");
+    this.extension = jsonObject.getString("extension", "");
 
   }
 
@@ -111,8 +130,11 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
     this.browserName = browserSpecs.getBrowserName();
     this.version = browserSpecs.getVersion();
     this.platform = browserSpecs.getPlatform();
+    this.deviceName = browserSpecs.getDeviceName();
     this.pathToBinary = browserSpecs.getPathToBinary();
     this.pathToDriver = browserSpecs.getPathToDriver();
+    this.profile = browserSpecs.getProfile();
+    this.extension = browserSpecs.getExtension();
   }
 
   /**
@@ -175,24 +197,6 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   }
 
   /**
-   * Gets the remote version.
-   *
-   * @return the remote version
-   */
-  public String getRemoteVersion() {
-    return this.remoteVersion;
-  }
-
-  /**
-   * Sets the remote version.
-   *
-   * @param remoteVersion the new remote version
-   */
-  public void setRemoteVersion(String remoteVersion) {
-    this.remoteVersion = remoteVersion;
-  }
-
-  /**
    * Gets the platform.
    *
    * @return the platform
@@ -209,24 +213,6 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
    */
   public void setPlatform(Platform platform) {
     this.platform = platform;
-  }
-
-  /**
-   * Gets the remote platform.
-   *
-   * @return the remote platform
-   */
-  public String getRemotePlatform() {
-    return this.remotePlatform;
-  }
-
-  /**
-   * Sets the remote platform.
-   *
-   * @param remotePlatform the new remote platform
-   */
-  public void setRemotePlatform(String remotePlatform) {
-    this.remotePlatform = remotePlatform;
   }
 
   /**
@@ -263,6 +249,42 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
    */
   public void setPathToDriver(String pathToDriver) {
     this.pathToDriver = pathToDriver;
+  }
+
+  /**
+   * Gets device name.
+   *
+   * @return the device name
+   */
+  public String getDeviceName() {
+    return deviceName;
+  }
+
+  /**
+   * Sets device name.
+   *
+   * @param deviceName the device name
+   */
+  public void setDeviceName(String deviceName) {
+    this.deviceName = deviceName;
+  }
+
+  /**
+   * Gets platform version.
+   *
+   * @return the platform version
+   */
+  public String getPlatformVersion() {
+    return platformVersion;
+  }
+
+  /**
+   * Sets platform version.
+   *
+   * @param platformVersion the platform version
+   */
+  public void setPlatformVersion(String platformVersion) {
+    this.platformVersion = platformVersion;
   }
 
   /*
@@ -323,7 +345,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public String makeCommand(boolean isHub, boolean isWindows) {
     return isHub ? ""
         : String.format("browserName=%s,version=%s,platform=%s", this.browserName, this.version,
-        this.platform.name());
+            this.platform.name());
   }
 
   /*
@@ -341,4 +363,19 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
     return this;
   }
 
+  public void setExtension(String extension) {
+    this.extension = extension;
+  }
+
+  public void setProfile(String profile) {
+    this.profile = profile;
+  }
+
+  public String getExtension() {
+    return extension;
+  }
+
+  public String getProfile() {
+    return profile;
+  }
 }

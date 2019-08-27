@@ -23,6 +23,7 @@ import io.cosmosoftware.kite.interfaces.SampleData;
 import io.cosmosoftware.kite.manager.RoomManager;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.report.Reporter;
+import io.cosmosoftware.kite.usrmgmt.EmailSender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
@@ -35,19 +36,14 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.persistence.*;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
-import static io.cosmosoftware.kite.util.TestUtils.readJsonStream;
 import static io.cosmosoftware.kite.util.TestUtils.readJsonString;
 import static org.webrtc.kite.Utils.getIntFromJsonObject;
+import static org.webrtc.kite.Utils.getStackTrace;
 
 /**
  * The type TestConfig.
@@ -61,30 +57,32 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   final static String TABLE_NAME = "testconfigs";
   private final String DEFAULT_DESC = "No description was provided fot this test.";
   private String callbackUrl;
-  private boolean closeWebDrivers = true;
-  private long delayForClosing;
-  private String description;
-  private String id;
-  private String implJar;
-  private int increment;
-  private int interval;
+  private String firefoxProfile;
+  private String chromeExtension;
+  private Boolean closeBrowsers = true;
+  private Long delayForClosing = (long)0;
+  private String description = "";
+  private String id = "";
+  private String implJar = "";
+  private Integer increment = 1;
+  private Integer interval = 1;
   private KiteLogger logger;
-  private List<List<Integer>> matrix = new ArrayList<>();
-  private boolean matrixOnly = false;
-  private int maxRetryCount;
-  private String name;
-  private String kiteRequestId;
-  private int noOfThreads;
-  private String payload;
-  private boolean permute;
-  private boolean regression;
-  private String testImpl;
+  private Integer maxRetryCount = 1;
+  private String name = "";
+  private String kiteRequestId = "";
+  private Integer noOfThreads = 1;
+  private String payload = "";
+  private Boolean permute = false;
+  private Boolean regression = false;
+  private String testImpl = "";
   private JsonObject testJsonConfig;
-  private int tupleSize;
+  private Integer tupleSize = 2;
   private TestType type;
   private Reporter reporter;
   private RoomManager roomManager;
   private NetworkInstrumentation networkInstrumentation = null;
+
+  private EmailSender emailSender = null;
   
   /**
    * Instantiates a new test config.
@@ -119,9 +117,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   
     // Mandatory
     this.type = TestType.valueOf(jsonObject.getString("type", "interop"));
-    this.name = jsonObject.getString("name").contains("%ts")
-      ? jsonObject.getString("name").replaceAll("%ts", "") + " (" + timestamp() + ")"
-      : jsonObject.getString("name");
+    this.name = jsonObject.getString("name");
     this.testImpl = jsonObject.getString("testImpl")
       + (System.getProperty("testName") == null ? "" : System.getProperty("testName"));
     
@@ -144,21 +140,8 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     
     this.regression = jsonObject.getBoolean("regression", false);
     this.permute = jsonObject.getBoolean("permute", true);
-    this.closeWebDrivers = jsonObject.getBoolean("closeWebDrivers", true);
-    this.matrixOnly = jsonObject.getBoolean("matrixOnly", false);
-  
-    
-    JsonArray jsonArray = jsonObject.getJsonArray("matrix");
-    if (jsonArray != null) {
-      for (int i = 0; i < jsonArray.size(); i++) {
-        JsonArray jArray = jsonArray.getJsonArray(i);
-        List<Integer> tuple = new ArrayList<>();
-        for (int j = 0; j < jArray.size(); j++) {
-          tuple.add(jArray.getInt(j));
-        }
-        this.matrix.add(tuple);
-      }
-    }
+    this.closeBrowsers = jsonObject.getBoolean("closeBrowsers", true);
+
     this.logger = createTestLogger();
   }
   
@@ -195,7 +178,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    * @see io.cosmosoftware.kite.dao.JsonBuilder#buildJsonObjectBuilder()
    */
   @Override
-  public JsonObjectBuilder buildJsonObjectBuilder() {
+  public JsonObjectBuilder buildJsonObjectBuilder() throws NullPointerException {
     return Json.createObjectBuilder()
       .add("type", this.type.name())
       .add("name", this.name)
@@ -205,9 +188,8 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
       .add("noOfThreads", this.noOfThreads)
       .add("maxRetryCount", this.maxRetryCount)
       .add("delayForClosing", this.delayForClosing)
-      .add("closeWebDrivers", this.closeWebDrivers)
-      .add("permute", this.permute)
-      .add("matrixOnly", this.matrixOnly);
+      .add("closeBrowsers", this.closeBrowsers)
+      .add("permute", this.permute);
   }
   
   /**
@@ -249,17 +231,19 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @return the web drivers
    */
-  public boolean getCloseWebDrivers() {
-    return closeWebDrivers;
+  @Column(name = "closeBrowsers", columnDefinition = "boolean default true", nullable = false)
+  public Boolean getCloseBrowsers() {
+    return closeBrowsers;
   }
   
   /**
    * Sets web drivers.
    *
-   * @param closeWebDrivers the close web drivers
+   * @param closeBrowsers the close web drivers
    */
-  public void setcloseWebDrivers(boolean closeWebDrivers) {
-    this.closeWebDrivers = closeWebDrivers;
+  public void setCloseBrowsers(Boolean closeBrowsers) {
+//    this.closeBrowsers = closeBrowsers != null ? closeBrowsers : true;
+    this.closeBrowsers = closeBrowsers;
   }
   
   /**
@@ -267,7 +251,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @return the delay for closing
    */
-  public long getDelayForClosing() {
+  public Long getDelayForClosing() {
     return delayForClosing;
   }
   
@@ -276,9 +260,30 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @param delayForClosing the delay for closing
    */
-  public void setDelayForClosing(long delayForClosing) {
+  public void setDelayForClosing(Long delayForClosing) {
     this.delayForClosing = delayForClosing;
   }
+
+  /**
+   * Gets the Sets the sendMailSMTP
+   * 
+   * @return sendMailSMTP
+   */
+  @Transient
+  public EmailSender getEmailSender() {
+    return emailSender;
+  }
+
+  /**
+   * Sets the sendMailSMTP
+   * 
+   * @param emailSender
+   */
+  @Transient
+  public void setEmailSender(EmailSender emailSender) {
+    this.emailSender = emailSender;
+  }
+  
   
   /**
    * Gets description.
@@ -343,7 +348,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @return the increment
    */
-  public int getIncrement() {
+  public Integer getIncrement() {
     return increment;
   }
   
@@ -352,7 +357,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @param increment the increment
    */
-  public void setIncrement(int increment) {
+  public void setIncrement(Integer increment) {
     this.increment = increment;
   }
   
@@ -361,7 +366,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @return the interval
    */
-  public int getInterval() {
+  public Integer getInterval() {
     return interval;
   }
   
@@ -370,7 +375,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @param interval the interval
    */
-  public void setInterval(int interval) {
+  public void setInterval(Integer interval) {
     this.interval = interval;
   }
   
@@ -397,36 +402,13 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   public void setLogger(KiteLogger logger) {
     this.logger = logger;
   }
-  
-  /**
-   * Gets matrix.
-   *
-   * @return the matrix
-   */
-  @Transient
-  public List<List<Integer>> getMatrix() {
-    return matrix;
-  }
-  
-  /**
-   * Sets matrix.
-   *
-   * @param matrix the matrix
-   */
-  public void setMatrix(List<List<Integer>> matrix) {
-    this.matrix = matrix;
-  }
 
-//  public boolean iscloseWebDrivers() {
-//    return closeWebDrivers;
-//  }
-  
   /**
    * Gets max retry count.
    *
    * @return the max retry count
    */
-  public int getMaxRetryCount() {
+  public Integer getMaxRetryCount() {
     return maxRetryCount;
   }
   
@@ -435,7 +417,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @param maxRetryCount the max retry count
    */
-  public void setMaxRetryCount(int maxRetryCount) {
+  public void setMaxRetryCount(Integer maxRetryCount) {
     this.maxRetryCount = maxRetryCount;
   }
   
@@ -456,13 +438,30 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   public void setName(String name) {
     this.name = name;
   }
+
+  @Transient
+  public String getNameWithTS() {
+    return processName(this.name);
+  }
+
+  /**
+   * Process the %ts in the name
+   * 
+   * @param s
+   * @return
+   */
+  private String processName(String s) {
+    return s.contains("%ts")
+      ? s.replaceAll("%ts", "") + " (" + timestamp() + ")"
+      : "" + s;
+  }
   
   /**
    * Gets no of threads.
    *
    * @return the no of threads
    */
-  public int getNoOfThreads() {
+  public Integer getNoOfThreads() {
     return noOfThreads;
   }
   
@@ -471,7 +470,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @param noOfThreads the no of threads
    */
-  public void setNoOfThreads(int noOfThreads) {
+  public void setNoOfThreads(Integer noOfThreads) {
     this.noOfThreads = noOfThreads;
   }
   
@@ -481,6 +480,9 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    * @return the payload
    */
   public String getPayload() {
+    if (this.payload != null && this.payload.isEmpty()) {
+      this.payload = "{}";
+    }
     return this.payload;
   }
   
@@ -549,7 +551,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @return the tuple size
    */
-  public int getTupleSize() {
+  public Integer getTupleSize() {
     return tupleSize;
   }
   
@@ -558,7 +560,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @param tupleSize the tuple size
    */
-  public void setTupleSize(int tupleSize) {
+  public void setTupleSize(Integer tupleSize) {
     this.tupleSize = tupleSize;
   }
   
@@ -587,7 +589,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    * @return the boolean
    */
   @Transient
-  public boolean isJavascript() {
+  public Boolean isJavascript() {
     return testImpl.endsWith("js");
   }
   
@@ -597,34 +599,16 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    * @return the boolean
    */
   @Transient
-  public boolean isLoadTest() {
+  public Boolean isLoadTest() {
     return this.type.equals(TestType.load);
   }
-  
-  /**
-   * Is matrix only boolean.
-   *
-   * @return the boolean
-   */
-  public boolean isMatrixOnly() {
-    return matrixOnly;
-  }
-  
-  /**
-   * Sets matrix only.
-   *
-   * @param matrixOnly the matrix only
-   */
-  public void setMatrixOnly(boolean matrixOnly) {
-    this.matrixOnly = matrixOnly;
-  }
-  
-  /**
+
+   /**
    * Is permute boolean.
    *
    * @return the boolean
    */
-  public boolean isPermute() {
+  public Boolean isPermute() {
     return permute;
   }
   
@@ -633,16 +617,16 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @param permute the permute
    */
-  public void setPermute(boolean permute) {
-    this.permute = permute;
+  public void setPermute(Boolean permute) {
+    this.permute = permute != null ? permute : false;
   }
   
   /**
-   * Is regression boolean.
+   * Is regression Boolean.
    *
    * @return true if this is a regression test
    */
-  public boolean isRegression() {
+  public Boolean isRegression() {
     return regression;
   }
   
@@ -668,6 +652,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   public void setNetworkInstrumentation(NetworkInstrumentation networkInstrumentation) {
     this.networkInstrumentation = networkInstrumentation;
   }
+  
   @Transient
   public NetworkInstrumentation getNetworkInstrumentation() {
     return networkInstrumentation;
@@ -686,7 +671,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @param regression the regression
    */
-  public void setRegression(boolean regression) {
+  public void setRegression(Boolean regression) {
     this.regression = regression;
   }
   
@@ -705,7 +690,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
         this.tupleSize = 2;
         this.noOfThreads = 2;
         this.maxRetryCount = 1;
-        this.delayForClosing = 0;
+        this.delayForClosing = Long.valueOf(0);
         break;
       case load:
         this.name = "MyLoadTest";
@@ -724,7 +709,26 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   
   @Override
   public String toString() {
-    return buildJsonObjectBuilder().build().toString();
+    try {
+      return buildJsonObjectBuilder().build().toString();
+    } catch (NullPointerException e) {
+      return getStackTrace(e);
+    }
   }
-  
+
+  public void setChromeExtension(String chromeExtension) {
+    this.chromeExtension = chromeExtension;
+  }
+
+  public void setFirefoxProfile(String firefoxProfile) {
+    this.firefoxProfile = firefoxProfile;
+  }
+
+  public String getChromeExtension() {
+    return chromeExtension;
+  }
+
+  public String getFirefoxProfile() {
+    return firefoxProfile;
+  }
 }

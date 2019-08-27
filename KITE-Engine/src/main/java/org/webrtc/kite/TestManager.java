@@ -16,9 +16,7 @@
 
 package org.webrtc.kite;
 
-import io.cosmosoftware.kite.instrumentation.Scenario;
 import io.cosmosoftware.kite.report.Container;
-import io.cosmosoftware.kite.report.Reporter;
 import io.cosmosoftware.kite.steps.StepPhase;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
@@ -39,6 +37,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import static io.cosmosoftware.kite.report.CSVHelper.jsonToString;
 import static io.cosmosoftware.kite.util.TestUtils.getDir;
 
 /**
@@ -82,16 +81,16 @@ public class TestManager implements Callable<Object> {
   }
 
   private KiteBaseTest buildTest() throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
+    String testJar = testConfig.getImplJar() == null ? null : JAR_DOWNLOAD_PATH + testConfig.getName() + ".jar";
     KiteBaseTest test = testConfig.isJavascript()
-        ? new KiteJsTest(testConfig.getTestImpl())
-        : (KiteBaseTest) instantiate(testConfig.getTestImpl(),
-        testConfig.getImplJar() == null
-            ? null : JAR_DOWNLOAD_PATH + testConfig.getName() + ".jar");
+        ? new KiteJsTest(testConfig.getTestImpl(), testConfig.getImplJar())
+        : (KiteBaseTest) instantiate(testConfig.getTestImpl(), testJar);
 
+    test.setTestJar(testJar);
     test.setLogger(testConfig.getLogger());
     test.setReporter(this.testConfig.getReporter());
     test.setTuple(tuple);
-    test.setCloseWebDrivers(testConfig.getCloseWebDrivers());
+    test.setCloseWebDrivers(testConfig.getCloseBrowsers());
     phases = getPhases(testConfig.isLoadTest());
     test.setPhases(phases);
     test.setNetworkInstrumentation(testConfig.getNetworkInstrumentation());
@@ -149,6 +148,11 @@ public class TestManager implements Callable<Object> {
     // todo: Update allure report for on-going status
 
     endTimestamp = System.currentTimeMillis();
+    if (testConfig.getEmailSender() != null) {
+      String emailText = "\r\n";
+      emailText += jsonToString(jsonTestResult);
+      testConfig.getEmailSender().send(emailText);
+    }
     return jsonTestResult;
   }
 
@@ -196,9 +200,10 @@ public class TestManager implements Callable<Object> {
     if (jarFile == null) {
       object = Class.forName(className).newInstance();
     } else {
-      object = URLClassLoader
-          .newInstance(new URL[]{new File(jarFile).toURI().toURL()}, TestManager.class.getClassLoader())
-          .loadClass(className).newInstance();
+      URLClassLoader classLoader =  URLClassLoader
+          .newInstance(new URL[]{new File(jarFile).toURI().toURL()}, TestManager.class.getClassLoader());
+      Thread.currentThread().setContextClassLoader(classLoader);
+      object = classLoader.loadClass(className).newInstance();     
     }
     return object;
   }

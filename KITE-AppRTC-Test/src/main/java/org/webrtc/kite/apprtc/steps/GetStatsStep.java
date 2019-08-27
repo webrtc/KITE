@@ -22,10 +22,8 @@ import io.cosmosoftware.kite.steps.TestStep;
 import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
 import org.webrtc.kite.stats.RTCStatList;
 import org.webrtc.kite.stats.RTCStatMap;
-import org.webrtc.kite.stats.RTCStats;
 
 import javax.json.JsonObject;
-import java.util.List;
 
 import static org.webrtc.kite.Utils.getStackTrace;
 import static org.webrtc.kite.stats.StatsUtils.*;

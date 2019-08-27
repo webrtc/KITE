@@ -140,7 +140,7 @@ function confirmHubCapacity() {
 function runTest() {
 	if [ ! -z $2 ]
 	then
-    java -Dkite.custom.config="$mypath/config.json" -Dkite.firefox.profile="$KITE_HOME/third_party/" -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:$1/target/*" org.webrtc.kite.Engine "$1/configs/local.config.json"
+    java -Dkite.custom.config="$mypath/config.json" -Dkite.firefox.profile="$KITE_HOME/third_party/firefox-h264-profiles/" -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:$1/target/*" org.webrtc.kite.Engine "$1/configs/local.config.json"
 	else
 		read -p "Do you want to run $1 with custom config [y/n]? " yn
 		case $yn in
@@ -148,8 +148,8 @@ function runTest() {
 			echo "Skipped running $1!"
 			;;
 		* )
-		#  echo "java -Dkite.custom.config=$mypath/config.json -Dkite.firefox.profile=$KITE_HOME/third_party/ -cp $KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:$1/target/* org.webrtc.kite.Engine $1/configs/local.config.json"
-		  java -Dkite.custom.config="$mypath/config.json" -Dkite.firefox.profile="$KITE_HOME/third_party/" -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:$1/target/*" org.webrtc.kite.Engine "$1/configs/local.config.json"
+		#  echo "java -Dkite.custom.config=$mypath/config.json -Dkite.firefox.profile=$KITE_HOME/third_party/firefox-h264-profiles/ -cp $KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:$1/target/* org.webrtc.kite.Engine $1/configs/local.config.json"
+		  java -Dkite.custom.config="$mypath/config.json" -Dkite.firefox.profile="$KITE_HOME/third_party/firefox-h264-profiles/" -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:$1/target/*" org.webrtc.kite.Engine "$1/configs/local.config.json"
 			;;
 		esac
 	fi

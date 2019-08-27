@@ -6,7 +6,7 @@ package org.webrtc.kite.config.paas;
 
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.BrowserType;
-import org.webrtc.kite.config.client.Browser;
+import org.webrtc.kite.config.client.Client;
 
 import javax.json.JsonObject;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class BrowserStackPaasHandler extends PaasHandler {
     
     /* might be not necessary, depending on data format it DB */
     for (JsonObject jsonObject : availableConfigList) {
-      Browser browser = new Browser();
+      Client browser = new Client();
       browser.setVersion(jsonObject.getString("browser_version", ""));
       
       String browserName = jsonObject.getString("browser", "");

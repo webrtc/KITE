@@ -19,12 +19,16 @@ import java.util.concurrent.Future;
  * The Class PaasManager.
  */
 public class PaasManager {
-  
+
+  /**
+   * The path to DB.
+   */
+  private static final String pathToDB = "KITE.db";
   /**
    * The Constant logger.
    */
   private static final KiteLogger logger = KiteLogger.getLogger(PaasManager.class.getName());
-  
+
   /**
    * The paas handler list.
    */
@@ -42,14 +46,15 @@ public class PaasManager {
   /**
    * Assign paas.
    *
-   * @param pathToDB   the path to DB
    * @param clientList the client list
    * @param paasList   the paas list
    */
-  public static void assignPaas(String pathToDB, List<Client> clientList, List<Paas> paasList) {
+  public static void assignPaas(List<Client> clientList, List<Paas> paasList) {
     
     List<PaasHandler> paasHandlerList = new ArrayList<>();
+    logger.info("localPass");
     for (Paas paas : paasList) {
+      logger.info("paas = " + paas);
       PaasHandler paasHandler = paas.makePaasHandler(pathToDB);
       if (paasHandler != null)
         paasHandlerList.add(paasHandler);
@@ -58,9 +63,18 @@ public class PaasManager {
     if (paasHandlerList.size() <= 0) {
       logger.info("All Paas are appeared to be local");
       CircularLinkedList<Paas> localPass = new CircularLinkedList(paasList);
+      logger.info("localPass");
+      for (Paas p:localPass) {
+        logger.info("p = " + p);
+      }
       for (Client client : clientList) {
         if (client.getPaas() == null) {
-          client.setPaas(localPass.get());
+          if (localPass.size() > 0) {
+            client.setPaas(localPass.get());
+          } else {
+            logger.error("localPass list is null");
+            throw new NullPointerException();
+          }
         }
       }
     } else {
@@ -70,10 +84,15 @@ public class PaasManager {
       for (Client client : clientList) {
         if (client.getPaas() == null) {
           Paas paas = paasManager.findAppropriatePaas(client);
-          if (paas != null)
+          if (paas != null) {
             client.setPaas(paas);
+          }
         }
       }
+    }
+    logger.info("client.getPaas()");
+    for (Client client : clientList) {
+      logger.info("client.getPass= " + client.getPaas());
     }
   }
   
@@ -121,5 +140,4 @@ public class PaasManager {
     }
     return null;
   }
-  
 }

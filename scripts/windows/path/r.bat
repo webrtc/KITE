@@ -26,8 +26,8 @@ echo %1 | FINDSTR /C:"configs\\" >nul & if errorlevel 1 (
 
 
 if exist "%KITE_JAR%" (
-  echo java %2 -Dkite.firefox.profile="%KITE_HOME%/third_party/" -cp "%KITE_JAR%;target/*" org.webrtc.kite.Engine %CONFIG%
-  java %2 -Dkite.firefox.profile="%KITE_HOME%"/third_party/ -cp "%KITE_JAR%;target/*" org.webrtc.kite.Engine %CONFIG%
+  echo java %2 -Dkite.firefox.profile="%KITE_HOME%/third_party/firefox-h264-profiles/" -cp "%KITE_JAR%;target/*" org.webrtc.kite.Engine %CONFIG%
+  java %2 -Dkite.firefox.profile="%KITE_HOME%/third_party/firefox-h264-profiles/" -cp "%KITE_JAR%;target/*" org.webrtc.kite.Engine %CONFIG%
 ) else (
   echo "File not found: %KITE_JAR%"
   echo "Please edit this file and set KITE_JAR to the correct path."

@@ -7,7 +7,6 @@ package org.webrtc.kite.config.paas;
 import io.cosmosoftware.kite.report.KiteLogger;
 import org.openqa.selenium.Platform;
 import org.webrtc.kite.Utils;
-import org.webrtc.kite.config.client.Browser;
 import org.webrtc.kite.config.client.Client;
 
 import javax.json.Json;
@@ -274,13 +273,10 @@ public abstract class PaasHandler implements Callable<Object> {
     try {
       ps = c.prepareStatement(sql);
       for (Client client : clientList) {
-        if (client instanceof Browser) {
-          Browser browser = (Browser) client;
-          ps.setString(1, browser.getBrowserName());
-          ps.setString(2, browser.getVersion());
-          ps.setString(3, browser.retrievePlatform().name());
-          ps.setString(4, browser.retrieveFamilyOrPlatform().name());
-        }
+        ps.setString(1, client.getBrowserName());
+        ps.setString(2, client.getVersion());
+        ps.setString(3, client.getPlatform().name());
+        ps.setString(4, client.retrieveFamilyOrPlatform().name());      
         ps.setLong(5, System.currentTimeMillis());
         ps.executeUpdate();
       }
@@ -330,11 +326,10 @@ public abstract class PaasHandler implements Callable<Object> {
    */
   public boolean search(Client client) throws SQLException {
     boolean result = false;
-    if (client instanceof Browser) {
-      Browser browser = (Browser) client;
-      String browserName = browser.getBrowserName();
-      String version = browser.getVersion().split("\\.")[0].trim();
-      Platform platform = client.retrievePlatform();
+    if (!client.isApp()) {
+      String browserName = client.getBrowserName();
+      String version = client.getVersion().split("\\.")[0].trim();
+      Platform platform = client.getPlatform();
       
       String sql = "SELECT * FROM " + this.paas.getType().name() + " WHERE BROWSER = '" + browserName + "'";
       if (version != null && !version.isEmpty())
