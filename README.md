@@ -181,7 +181,7 @@ source .bash_profile
     __Note:__ Please input only the major (i.e. 76 or 68) for the browser versions, but the full version with the minor (i.e. 76.0.3809.126 or v0.24.0) for the driver versions.   
    More details are available in the [local grid setup guide](scripts/README.md).
     
-    __2. Safari__  
+    __3. Safari__  
     Safari is installed by default on MacOS, there is no need to download anything. You will only need to enable the 'Allow Remote Automation' option in Safari's Developer menu so it can be automated by KITE for testing.
     
     
