@@ -1,7 +1,6 @@
 package org.webrtc.kite.stats;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 
 public class RTCStatMap extends LinkedHashMap<String, RTCStatList> {
   

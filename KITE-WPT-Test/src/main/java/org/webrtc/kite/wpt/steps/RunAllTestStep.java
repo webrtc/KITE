@@ -1,9 +1,8 @@
 package org.webrtc.kite.wpt.steps;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
-import io.cosmosoftware.kite.report.Reporter;
-import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.interfaces.Runner;
+import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.steps.TestStep;
 import org.webrtc.kite.wpt.RunInfo;

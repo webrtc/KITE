@@ -21,34 +21,46 @@ import static io.cosmosoftware.kite.util.TestUtils.readJsonFile;
 import static io.cosmosoftware.kite.util.TestUtils.waitAround;
 
 public class JsTestRunner extends TestRunner {
-  // todo set WORKING_DIR
-  private final String WORKING_DIR = "js/";
+  
+  //public static as it is being set by KITEServer 
+  public static String WORKING_DIR = "js/";
+  
   private final String jsTestImpl;
+  private final String implJar;
   private int numberOfParticipant;
   private String reportPath;
   
   public JsTestRunner(LinkedHashMap<StepPhase, AllureTestReport> testReport, String jsTestImpl, 
-                      KiteLogger logger, Reporter reporter, int id) {
+                      KiteLogger logger, Reporter reporter, int id, String implJar) {
     super(null, testReport, logger, reporter, id);
     this.jsTestImpl = jsTestImpl;
+    this.implJar = implJar;
   }
   
   @Override
   public Object call() {
     // todo: run the js test with a unique id (self-generated)
     // todo: test completion check (by file existence maybe)
-    // todo: retrieve result from file and create allure report
-    // todo: NOTE: result from JS does not need to be in Allure report format (yet)
-    String resultPath = WORKING_DIR + this.reportPath + "/" + id + "/result.json";
+
+    String dir = WORKING_DIR;
+    
+    if (!"".equals(implJar)) {
+      File file = new File(dir + File.separator + implJar);
+      if (file.exists()) {
+        dir += File.separator + implJar;
+      }
+    }
+    logger.info("JsTestRunner will execute in " + dir);
+    String resultPath = dir + this.reportPath + "/" + id + "/result.json";
     try {
       String uuid = this.reports.get(this.stepPhase).getUuid();
       List<String> command = java.util.Arrays.asList("node", jsTestImpl,
-        "" + numberOfParticipant, "" + id, uuid, reportPath);
+        "" + numberOfParticipant, "" + id, uuid, "." + reportPath);
       logger.info("Executing command: " + "node " + jsTestImpl + " " + numberOfParticipant
-        + " " + id + " " + uuid + " " + reportPath);
-      TestUtils.executeCommand(WORKING_DIR, command, logger, jsTestImpl + "_" + id);
+        + " " + id + " " + uuid + " " + "." + reportPath);
+      TestUtils.executeCommand(dir, command, logger, jsTestImpl + "_" + id);
       waitForResultFile(resultPath);
-      processResult(readJsonFile(resultPath));
+      processResult(dir, readJsonFile(resultPath));
     } catch (Exception e) {
       logger.error(getStackTrace(e));
     }
@@ -56,8 +68,8 @@ public class JsTestRunner extends TestRunner {
   }
   
   // Retrieves data from the result file generated in JavaScript
-  private AllureStepReport processResult(JsonObject result) throws KiteTestException {
-    String path = WORKING_DIR + this.reportPath + "/" + id + "/";
+  private AllureStepReport processResult(String workingDir, JsonObject result) throws KiteTestException {
+    String path = workingDir + this.reportPath + "/" + id + "/";
     if (result != null) {
       String status = result.getString("status", "passed");
       this.reports.get(this.stepPhase).setStatus(Status.fromValue(status));
@@ -94,7 +106,7 @@ public class JsTestRunner extends TestRunner {
         JsonArray childSteps = idx.getJsonArray("steps");
         for (int k = 0; k < childSteps.size(); k++) {
           JsonObject child = (JsonObject) childSteps.get(k);
-          stepReport.addStepReport(processResult(child));
+          stepReport.addStepReport(processResult(workingDir, child));
         }
         this.reports.get(this.stepPhase).addStepReport(stepReport);
       }
@@ -102,18 +114,20 @@ public class JsTestRunner extends TestRunner {
     }
     throw new KiteTestException("There's a null value in the report", Status.BROKEN);
   }
-  
+
   public void setNumberOfParticipant(int numberOfParticipant) {
     this.numberOfParticipant = numberOfParticipant;
   }
   
   public void setReportPath(String reportPath) {
-    this.reportPath = "./" + reportPath;
+    this.reportPath = "/" + reportPath;
   }
   
   private void waitForResultFile(String filePath) throws KiteTestException {
+    logger.info("JsTestRunner filePath = " + filePath);
     for (int wait = 0; wait < TEN_SECOND_INTERVAL; wait += ONE_SECOND_INTERVAL) {
       File resultFile = new File(filePath);
+      logger.info("resultFile = " + resultFile.getAbsolutePath());
       if (resultFile.exists()) {
         return;
       }

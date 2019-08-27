@@ -29,5 +29,15 @@ public class KiteGridException extends Exception {
   public KiteGridException(String message) {
     super(message);
   }
+
+  /**
+   * Constructs a KiteGridException with the specified detailed message and Exception cause
+   *
+   * @param message message
+   * @param cause cause
+   */
+  public KiteGridException(String message, Throwable cause) {
+    super(message, cause);
+  }
   
 }

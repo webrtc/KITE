@@ -1,7 +1,7 @@
 package org.webrtc.kite.wpt.pages;
 
-import io.cosmosoftware.kite.pages.BasePage;
 import io.cosmosoftware.kite.interfaces.Runner;
+import io.cosmosoftware.kite.pages.BasePage;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 

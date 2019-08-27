@@ -16,8 +16,6 @@
 
 package org.webrtc.kite.config;
 
-import org.webrtc.kite.config.client.App;
-import org.webrtc.kite.config.client.Browser;
 import org.webrtc.kite.config.client.Client;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
@@ -58,9 +56,7 @@ public class ConfigHandler {
   public ConfigHandler(List<JsonObject> testObjectList, List<JsonObject> clientList)
       throws KiteInsufficientValueException, IOException {
     for (JsonObject client : clientList) {
-      this.clientList.add(client.getString("browserName", null) != null
-          ? new Browser(client)
-          : new App(client));
+      this.clientList.add(new Client(client));
     }
     this.testList = new ArrayList<>();
     for (JsonObject object : testObjectList) {

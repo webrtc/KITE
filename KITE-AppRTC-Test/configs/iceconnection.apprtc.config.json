@@ -19,8 +19,8 @@
         "takeScreenshotForEachTest": true,
         "getStats" : {
           "enabled": true,
-          "statsCollectionTime": 5,
-          "statsCollectionInterval": 1,
+          "statsCollectionTime": 2000,
+          "statsCollectionInterval": 2000,
           "peerConnections": ["appController.call_.pcClient_.pc_"],
           "selectedStats" : ["inbound-rtp", "outbound-rtp", "candidate-pair", "track"]
         }
@@ -30,7 +30,7 @@
   "clients": [
     {
       "browserName": "chrome",
-      "version": "74",
+      "version": "76",
       "platform": "localhost",
       "headless": true,
       "flags": []

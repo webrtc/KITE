@@ -1,11 +1,9 @@
 package org.webrtc.kite.example.pages;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
-import io.cosmosoftware.kite.pages.BasePage;
-import io.cosmosoftware.kite.report.KiteLogger;
-import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.interfaces.Runner;
-import org.openqa.selenium.WebDriver;
+import io.cosmosoftware.kite.pages.BasePage;
+import io.cosmosoftware.kite.report.Status;
 
 import static io.cosmosoftware.kite.entities.Timeouts.THREE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.util.TestUtils.waitAround;

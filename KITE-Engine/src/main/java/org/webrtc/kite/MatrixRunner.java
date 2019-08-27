@@ -18,6 +18,7 @@ package org.webrtc.kite;
 
 import io.cosmosoftware.kite.report.Container;
 import io.cosmosoftware.kite.report.KiteLogger;
+import org.webrtc.kite.config.client.Client;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
 
@@ -51,7 +52,21 @@ public class MatrixRunner {
   public MatrixRunner(TestConfig testConfig, List<Tuple> listOfTuples, String parentSuiteName) {
     this.testConfig = testConfig;
     this.tupleList.addAll(listOfTuples);
-    testSuite = new Container(testConfig.getName());
+    for (Tuple tuple : this.tupleList) {
+      for (Client client : tuple.getClients()) {
+        if (client.getBrowserName().equals("firefox")) {
+          if (client.getProfile() == null || client.getProfile().isEmpty()) {
+            client.setProfile(testConfig.getFirefoxProfile());
+          }
+        }
+        if (client.getBrowserName().equals("chrome") && !client.getVersion().contains("electron")) {
+          if (client.getExtension() == null || client.getExtension().isEmpty()) {
+            client.setExtension(testConfig.getChromeExtension());
+          }
+        }
+      }
+    }
+    testSuite = new Container(testConfig.getNameWithTS());
     testSuite.setParentSuite(parentSuiteName);
     testSuite.setReporter(testConfig.getReporter());
 
@@ -119,6 +134,7 @@ public class MatrixRunner {
    */
   public List<Future<Object>> run() {
     int totalTestCases = this.tupleList.size();
+    long start = System.currentTimeMillis();
     if (totalTestCases < 1) {
       return null;
     }
@@ -133,14 +149,19 @@ public class MatrixRunner {
       for (int index = 0; index < this.tupleList.size(); index++) {
         TestManager manager = new TestManager(this.testConfig, this.tupleList.get(index));
         manager.setTestSuite(testSuite);
-        if (testConfig.isLoadTest()) {
-          manager.setId("iteration " + (index + 1));
-        }
+        manager.setId(testConfig.isLoadTest() ? "iteration " : "" + (index + 1));
         testManagerList.add(manager);
       }
 
       List<Future<Object>> tempFutureList;
+
       while (testManagerList.size() > 0) {
+        int percentage = 100 - 100*testManagerList.size()/tupleList.size();
+        long runtime = System.currentTimeMillis() - start;
+        if (percentage%6 < 3&& percentage > 0) {
+          logger.info("PROGRESS =========================================");
+          logger.info("Currently finished: " + percentage + "%, ETA: " + (runtime/percentage)/600 + " minutes");
+        }
         tempFutureList = multiExecutorService.invokeAll(testManagerList);
         testManagerList = (List<TestManager>) this.getSubList(tempFutureList, TestManager.class);
         futureList.addAll(this.getExclusiveSubList(tempFutureList, TestManager.class));

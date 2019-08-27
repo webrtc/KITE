@@ -41,11 +41,17 @@ See [LICENSE](LICENSE) for licensing.
 
 ## A. Install prerequisite software  
 
-You will need Git, JDK 8 and Maven. Here's where you can find them:
+You will need Git, JDK 8 and Maven. 
 
-* [Git](https://git-scm.com/downloads)  
-* [JDK 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  
-* [Maven](https://maven.apache.org/download.cgi?Preferred=ftp://mirror.reverse.net/pub/apache/)  
+#### Git
+
+You can download it from:  
+[Git](https://git-scm.com/downloads)  
+
+#### Java Development Kit 8
+
+You can download it from:  
+[JDK 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  
 
 ##### Maven installation
 
@@ -55,11 +61,16 @@ If you are not familiar with Maven and/or new to the concept of PATH and environ
  If you would like to use our script to install Maven, you can skip it for now and install it after cloning the git repo
  (following the instructions at B.2.).
  
+If you are familiar with setting up Maven and configuring the PATH and environment variables, you can download [Maven](https://maven.apache.org/download.cgi?Preferred=ftp://mirror.reverse.net/pub/apache/) from  
+https://maven.apache.org/download.cgi
+   
+
  
 Alternatively, you can always install Maven manually and the following guides could help you with this:
 * On Windows: https://www.mkyong.com/maven/how-to-install-maven-in-windows/
 * On Ubuntu: https://www.mkyong.com/maven/how-to-install-maven-in-ubuntu/
 * On Mac: https://www.mkyong.com/maven/install-maven-on-mac-osx/
+
 
 
 To verify your setup, in a new command prompt or shell terminal, type:
@@ -156,19 +167,23 @@ source .bash_profile
     * http://chromedriver.chromium.org/downloads
     * https://github.com/mozilla/geckodriver/releases  
  
-    By default, the local grid setup script is configured for __Chrome__ version __74__ and __Firefox__ version __66__. 
+    By default, the local grid setup script is configured for __Chrome__ version __76__ and __Firefox__ version __68__. 
     If these are the versions installed on your computer, you can safely use the default settings.
     Otherwise, you will need to edit the following settings when prompt to do so:  
     
     ```
-    CHROME_VERSION=74
-    FIREFOX_VERSION=66
-    CHROMEDRIVER_VERSION=74.0.3729.6
+    CHROME_VERSION=76
+    FIREFOX_VERSION=68
+    CHROMEDRIVER_VERSION=76.0.3809.126
     GECKO_VERSION=v0.24.0
     ```
     
-    __Note:__ Please input only the major (i.e. 74 or 66) for the browser versions, but the full version with the minor (i.e. 74.0.3729.6 or v0.24.0) for the driver versions.   
+    __Note:__ Please input only the major (i.e. 76 or 68) for the browser versions, but the full version with the minor (i.e. 76.0.3809.126 or v0.24.0) for the driver versions.   
    More details are available in the [local grid setup guide](scripts/README.md).
+    
+    __2. Safari__  
+    Safari is installed by default on MacOS, there is no need to download anything. You will only need to enable the 'Allow Remote Automation' option in Safari's Developer menu so it can be automated by KITE for testing.
+    
     
 4. Compile 
 
@@ -219,25 +234,36 @@ by following [local grid setup guide](scripts/README.md).
 __Note:__ You will need to have your [local grid](scripts/README.md) running before you can execute any test.  
 You can check if your local grid is running and the browser versions installed by 
 opening the [Grid Console](http://localhost:4444/grid/console).
-In the following example, we are assuming __Chrome__ version __74__ and __Firefox__ version __66__.
+In the following example, we are assuming __Chrome__ version __76__ and __Firefox__ version __68__.
 
 
 ### Edit the test config file
 
-If your Grid is running on localhost and with __Chrome__ version __74__ and __Firefox__ version __66__ you can skip this step.
+If your Grid is running on localhost and with __Chrome__ version __76__ and __Firefox__ version __68__ you can skip this step.
 
-Edit the file `./KITE-Example-Test/configs/search.local.config.json` with your favorite text editor.  
-You will need to change __`version`__ and __`platform`__ according to what is installed on your local grid.
-For example, if your local grid is windows and the latest stable version of __Chrome__ is __74__, you should set: 
+Edit the file `./KITE-Example-Test/configs/search.local.config.json` with your favorite text editor. 
+
+#### Version 
+You will need to change __`version`__ according to what is installed on your local grid.
+For example, if the latest stable version of __Chrome__ is __76__, you should set: 
 ```json
-      "version": "74",
-      "platform": "WINDOWS",
+      "browserName": "chrome",
+      "version": "76",
+      "platform": "localhost",
 ```
 
-If you're using Linux or Mac, change "WINDOWS" to "LINUX" or "MAC". 
-Alternatively, you can use `localhost` as the platform name if the grid is running on your localhost, KITE will automatically set it according to your OS.  
+#### Platform 
+When KITE is running on the same computer as the Grid, it will detect the OS and interpret the plaform "localhost" and translate it to WINDOWS, LINUX or MAC.  
+If you want to run KITE against a Grid that is running on a different computer, you will need to change the platform according to what's available on your Grid
+ and you will need to change the platform to "WINDOWS" to "LINUX" or "MAC". 
+ 
+Example for Windows:  
 
-
+```json
+      "browserName": "chrome",
+      "version": "76",
+      "platform": "WINDOWS",
+```
 You can find more information about the Basic Configuration File [here](#basic-configuration-file).
 
 
@@ -280,11 +306,11 @@ Alternatively, you can launch the test with the full command.
 
 __On Windows:__    
 ```
-java -Dkite.firefox.profile="%KITE_HOME%"/third_party/ -cp "%KITE_HOME%/KITE-Engine/target/kite-jar-with-dependencies.jar;target/*" org.webrtc.kite.Engine configs/iceconnection.apprtc.config.json
+java -Dkite.firefox.profile="%KITE_HOME%"/third_party/firefox-h264-profiles/ -cp "%KITE_HOME%/KITE-Engine/target/kite-jar-with-dependencies.jar;target/*" org.webrtc.kite.Engine configs/iceconnection.apprtc.config.json
 ```
 __On Linux/Mac:__  
 ```
-java -Dkite.firefox.profile="$KITE_HOME"/third_party/ -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:target/*" org.webrtc.kite.Engine configs/iceconnection.apprtc.config.json
+java -Dkite.firefox.profile="$KITE_HOME"/third_party/firefox-h264-profiles/ -cp "$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar:target/*" org.webrtc.kite.Engine configs/iceconnection.apprtc.config.json
 ```
 
 ### Open the dashboard
@@ -349,13 +375,13 @@ The example search.local.config.json file is almost the simplest config file you
   "clients": [
     {
       "browserName": "chrome",
-      "version": "74",
+      "version": "76",
       "platform": "WINDOWS",
       "flags": []
     },
     {
       "browserName": "firefox",
-      "version": "66",
+      "version": "68",
       "platform": "WINDOWS",
       "flags": []
     }
@@ -398,13 +424,13 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
   "clients": [
     {
       "browserName": "chrome",
-      "version": "74",
+      "version": "76",
       "platform": "LINUX",
       "flags": []
     },
     {
       "browserName": "firefox",
-      "version": "66",
+      "version": "68",
       "platform": "MAC",
       "flags": []
     }

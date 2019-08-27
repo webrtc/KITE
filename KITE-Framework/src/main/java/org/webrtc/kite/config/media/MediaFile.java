@@ -186,7 +186,7 @@ public class MediaFile extends KiteEntity implements JsonBuilder {
    * @see com.cosmo.kite.interfaces.JsonBuilder#buildJsonObjectBuilder()
    */
   @Override
-  public JsonObjectBuilder buildJsonObjectBuilder() {
+  public JsonObjectBuilder buildJsonObjectBuilder() throws NullPointerException {
     return Json.createObjectBuilder().add("name", this.name).add("filename", this.filename)
       .add("type", this.type.name()).add("duration", this.duration).add("directory", this.directory);
   }

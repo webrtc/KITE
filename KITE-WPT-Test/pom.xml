@@ -35,5 +35,10 @@
       <artifactId>kite-framework</artifactId>
       <version>${kite.framework.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.blueconic</groupId>
+      <artifactId>browscap-java</artifactId>
+      <version>1.2.9</version>
+    </dependency>
   </dependencies>
 </project>

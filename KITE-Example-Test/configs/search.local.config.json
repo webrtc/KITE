@@ -3,7 +3,8 @@
   "grids": [
     {
       "type": "local",
-      "url": "http://localhost:4444/wd/hub"
+      "_url": "http://localhost:4444/wd/hub",
+      "url": "http://34.237.124.21:4444/wd/hub"
     }
   ],
   "tests": [
@@ -21,9 +22,9 @@
   "clients": [
     {
       "browserName": "chrome",
-      "version": "74",
-      "platform": "localhost",
-      "flags": []
+      "platform": "android",
+      "platformVersion": "7",
+      "deviceName": "Android"
     }
   ]
 }

@@ -20,9 +20,6 @@ import io.cosmosoftware.kite.interfaces.Runner;
 import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestCheck;
 import org.webrtc.kite.stats.RTCStatList;
-import org.webrtc.kite.stats.RTCStats;
-
-import java.util.List;
 
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
 import static org.webrtc.kite.stats.StatsUtils.getPCStatOvertime;

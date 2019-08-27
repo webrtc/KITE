@@ -22,7 +22,6 @@ import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.KiteLogger;
-import io.cosmosoftware.kite.util.TestUtils;
 import io.cosmosoftware.kite.util.WebDriverUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -34,10 +33,7 @@ import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariOptions;
-import org.webrtc.kite.config.client.App;
-import org.webrtc.kite.config.client.Browser;
 import org.webrtc.kite.config.client.Client;
-import org.webrtc.kite.config.client.MobileSpecs;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -56,26 +52,34 @@ public class WebDriverFactory {
   /**
    * Build capabilities for app appium driver
    *
-   * @param app the App client object
+   * @param app the Client object
    * @return capabilities appium driver
    */
-  private static MutableCapabilities buildAppCapabilities(App app) {
+  private static MutableCapabilities buildAppCapabilities(Client app) {
     MutableCapabilities capabilities = new MutableCapabilities();
     // The absolute local path or remote http URL to an .ipa or .apk file, or a .zip containing one of these.
     // Appium will attempt to install this app binary on the appropriate device first.
 
-    capabilities.setCapability("app", app.getApp());
-    capabilities.setCapability("deviceName", app.retrieveDeviceName());
-    capabilities.setCapability("platformName", app.retrievePlatform());
-    capabilities.setCapability("platformVersion", app.retrievePlatformVersion());
-    if (app.retrievePlatform().name().equalsIgnoreCase("iOS")) {
+    if (app.getVersion() != null) {
+      capabilities.setCapability(CapabilityType.VERSION, app.getVersion());
+    }
+    capabilities.setCapability("app", app.getAppName());
+    capabilities.setCapability("deviceName", app.getDeviceName());
+    capabilities.setCapability("platformName", app.getPlatform());
+    if (app.getPlatformVersion() != null) {
+      capabilities.setCapability("platformVersion", app.getPlatformVersion());
+    }
+    if (app.getPlatform().name().equalsIgnoreCase("iOS")) {
       capabilities.setCapability("automationName", "XCUITest");
     } else {
       capabilities.setCapability("autoGrantPermissions", true);
       capabilities.setCapability("fullReset", app.isFullReset());
     }
+    if (app.getApp().getAppWorkingDir() != null) {
+      capabilities.setCapability("appWorkingDir", app.getApp().getAppWorkingDir());
+    }
     if (app.getAppPackage() == null || app.getAppActivity() == null) {
-      logger.warn("Using [" + app.getApp() + "]: Some mobile applications may require appPackage and appActivity " +
+      logger.warn("Using [" + app.getAppName() + "]: Some mobile applications may require appPackage and appActivity " +
           "to setStartTimestamp properly ..");
       if (app.getAppPackage() != null) {
         capabilities.setCapability("appPackage", app.getAppPackage());
@@ -91,31 +95,31 @@ public class WebDriverFactory {
   }
 
   /**
-   * Build capabilities for browser web driver
+   * Build capabilities for client web driver
    *
-   * @param browser the Browser client object
+   * @param client the Client object
    * @return capabilities appium driver
    */
-  private static MutableCapabilities buildBrowserCapabilities(Browser browser) {
+  private static MutableCapabilities buildBrowserCapabilities(Client client) {
     MutableCapabilities capabilities = new MutableCapabilities();
-    if (browser.getVersion() != null) {
-      capabilities.setCapability(CapabilityType.VERSION, browser.getVersion());
+    if (client.getVersion() != null) {
+      capabilities.setCapability(CapabilityType.VERSION, client.getVersion());
     }
-    if (browser.retrievePlatform() != null) {
-      capabilities.setCapability(CapabilityType.PLATFORM_NAME, browser.retrievePlatform());
-    }
-
-    if (browser.getGateway() != null) {
-      capabilities.setCapability("gateway", browser.getGateway());
+    if (client.getPlatform() != null) {
+      capabilities.setCapability(CapabilityType.PLATFORM_NAME, client.getPlatform());
     }
 
-    // Only consider next code block if this is a browser.
-    switch (browser.getBrowserName()) {
+    if (client.getGateway() != null && !"none".equalsIgnoreCase(client.getGateway())) {
+      capabilities.setCapability("gateway", client.getGateway());
+    }
+
+    // Only consider next code block if this is a client.
+    switch (client.getBrowserName()) {
       case "chrome":
-        capabilities.setCapability(ChromeOptions.CAPABILITY, setCommonChromeOptions(browser));
+        capabilities.setCapability(ChromeOptions.CAPABILITY, setCommonChromeOptions(client));
         break;
       case "firefox":
-        capabilities.merge(setCommonFirefoxOptions(browser));
+        capabilities.merge(setCommonFirefoxOptions(client));
         break;
       case "MicrosoftEdge":
         EdgeOptions MicrosoftEdgeOptions = new EdgeOptions();
@@ -124,8 +128,11 @@ public class WebDriverFactory {
         break;
       case "safari":
         SafariOptions options = new SafariOptions();
-        options.setUseTechnologyPreview(browser.isTechnologyPreview());
+        options.setUseTechnologyPreview(client.isTechnologyPreview());
         capabilities.setCapability(SafariOptions.CAPABILITY, options);
+        break;
+      default:
+        capabilities.setCapability(CapabilityType.BROWSER_NAME, client.getBrowserName());
         break;
     }
     // Add log preference to webdriver
@@ -133,17 +140,15 @@ public class WebDriverFactory {
     LoggingPreferences logPrefs = new LoggingPreferences();
     logPrefs.enable(LogType.BROWSER, Level.ALL);
     capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
-    // Capabilities for mobile browser/app
-    MobileSpecs mobile = browser.getMobile();
-    if (mobile != null) {
+    // Capabilities for mobile client/app
+    if (client.getDeviceName() != null && !client.getDeviceName().equals("unknown")) {
       // deviceName:
       // On iOS, this should be one of the valid devices returned by instruments with instruments -s devices.
       // On Android this capability is currently ignored, though it remains required.
-      capabilities.setCapability("deviceName", mobile.getDeviceName());
-      capabilities.setCapability("platformName", mobile.getPlatformName());
-      capabilities.setCapability("platformVersion", mobile.getPlatformVersion());
-
-      if (mobile.getPlatformName().name().equalsIgnoreCase("iOS")) {
+      capabilities.setCapability("deviceName", client.getDeviceName());
+      capabilities.setCapability("platformName", client.getPlatform());
+      capabilities.setCapability("platformVersion", client.getPlatformVersion());
+      if (client.getPlatform().name().equalsIgnoreCase("iOS")) {
         capabilities.setCapability("automationName", "XCUITest");
       } else {
         capabilities.setCapability("autoGrantPermissions", true);
@@ -165,11 +170,10 @@ public class WebDriverFactory {
   private static Capabilities createCapabilities(Client client, String testName, String id) {
 
     MutableCapabilities capabilities;
-    if (client instanceof Browser) {
-      capabilities = buildBrowserCapabilities((Browser) client);
-
+    if (!client.isApp()) {
+      capabilities = buildBrowserCapabilities(client);
     } else {
-      capabilities = buildAppCapabilities((App) client);
+      capabilities = buildAppCapabilities(client);
     }
     // Remote test identifier
     if (testName != null) {
@@ -179,14 +183,15 @@ public class WebDriverFactory {
       capabilities.setCapability("id", id);
     }
     for (String capabilityName : client.getExtraCapabilities().keySet()) {
-      logger.info("extraCapabilites : " + capabilityName + ": " + client.getExtraCapabilities().get(capabilityName));
+      logger.debug("extraCapabilites : " + capabilityName + ": " + client.getExtraCapabilities().get(capabilityName));
       capabilities.setCapability(capabilityName, client.getExtraCapabilities().get(capabilityName));
     }
+    logger.debug("Capabilites for " + client.toString() + " = \r\n" + capabilities);
     return capabilities;
   }
 
   /**
-   * Creates a web driver based on the given Browser object.
+   * Creates a web driver based on the given Client object.
    *
    * @param client           Client
    * @param testName         the test name
@@ -199,26 +204,26 @@ public class WebDriverFactory {
    */
   public static WebDriver createWebDriver(Client client, String testName, String id, String... kiteServerGridId)
           throws MalformedURLException, WebDriverException, KiteTestException {
-
-    URL url = new URL(client.getPaas().getUrl());
-
-    if (client instanceof Browser) {
+    String urlStr = client.getPaas().getUrl();
+    logger.debug("createWebDriver on " + urlStr + " for " + client);
+    URL url = new URL(urlStr);
+    if (!client.isApp()) {
       WebDriver webDriver = new RemoteWebDriver(url, WebDriverFactory.createCapabilities(client, testName, id));
-      if (((Browser) client).getBrowserName().equalsIgnoreCase("firefox")) {
-        if (((Browser) client).useFakeMedia()) {
-          if (((Browser) client).getVideo() != null || ((Browser) client).getAudio() != null) {
+      if (client.getBrowserName().equalsIgnoreCase("firefox")) {
+        if (client.useFakeMedia()) {
+          if (client.getVideo() != null || client.getAudio() != null) {
             String nodePublicIp = WebDriverUtils.getPublicIp(webDriver);
             String gridId = kiteServerGridId.length > 0 ? kiteServerGridId[0] : "null";
-            String command = writeCommand((Browser) client);
+            String command = writeCommand(client);
             Utils.makeCommand(gridId, nodePublicIp, command);
           }
         }
       }
       return webDriver;
     } else {
-      if (client.retrievePlatform().name().equalsIgnoreCase("android")) {
+      if (client.getPlatform().name().equalsIgnoreCase("android")) {
         return new AndroidDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
-      } else if (client.retrievePlatform().name().equalsIgnoreCase("ios")) {
+      } else if (client.getPlatform().name().equalsIgnoreCase("ios")) {
         return new IOSDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
       } else {
         return new AppiumDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
@@ -258,25 +263,27 @@ public class WebDriverFactory {
   /**
    * Create common chrome option to create chrome web driver
    *
-   * @param browser the Browser client object
+   * @param client the Client object
    * @return the chrome option
    */
-  private static ChromeOptions setCommonChromeOptions(Browser browser) {
+  private static ChromeOptions setCommonChromeOptions(Client client) {
     ChromeOptions chromeOptions = new ChromeOptions();
-    if (browser.useFakeMedia()) {
+    if (client.useFakeMedia()) {
       // We use fake media or mediafile as webcam/microphone
       chromeOptions.addArguments("use-fake-ui-for-media-stream");
       chromeOptions.addArguments("use-fake-device-for-media-stream");
-      // If we use mediafile
-      if (browser.getVideo() != null || browser.getAudio() != null) {
-        chromeOptions.addArguments("allow-file-access-from-files");
-        if (browser.getVideo() != null) {
-          chromeOptions.addArguments("use-file-for-fake-video-capture="
-              + browser.fetchMediaPath(browser.getVideo(), browser.getBrowserName()));
-        }
-        if (browser.getAudio() != null) {
-          chromeOptions.addArguments("use-file-for-fake-audio-capture="
-              + browser.fetchMediaPath(browser.getAudio(), browser.getBrowserName()));
+      // If we use mediafile (only if not on android)
+      if (!client.getPlatform().equals(Platform.ANDROID)) {
+        if (client.getVideo() != null || client.getAudio() != null) {
+          chromeOptions.addArguments("allow-file-access-from-files");
+          if (client.getVideo() != null) {
+            chromeOptions.addArguments("use-file-for-fake-video-capture="
+                + client.fetchMediaPath(client.getVideo(), client.getBrowserName()));
+          }
+          if (client.getAudio() != null) {
+            chromeOptions.addArguments("use-file-for-fake-audio-capture="
+                + client.fetchMediaPath(client.getAudio(), client.getBrowserName()));
+          }
         }
       }
     } else {
@@ -287,25 +294,31 @@ public class WebDriverFactory {
       prefs.put("profile.default_content_setting_values.media_stream_mic", 1);
       chromeOptions.setExperimentalOption("prefs", prefs);
     }
+
+    if (client.getPlatform().equals(Platform.ANDROID)) {
+      return chromeOptions;
+    }
+
     chromeOptions.addArguments("auto-select-desktop-capture-source=Entire screen");
-    if (! "electron".equals(browser.getVersion())) {
+    if (! "electron".equals(client.getVersion())) {
       // CHROME ONLY
       String extension = System.getProperty("kite.chrome.extension");
-      if (extension != null) {
+      extension = extension == null ? client.getExtension() : extension;
+      if (extension != null && !extension.isEmpty()) {
         chromeOptions.addExtensions(new File(extension));
       }
     }
     /*
-     * if (browser.getVersion().toLowerCase().contains("electron")) {
-     * chromeOptions.setBinary(browser.getSpecs().getPathToBinary()); }
+     * if (client.getVersion().toLowerCase().contains("electron")) {
+     * chromeOptions.setBinary(client.getSpecs().getPathToBinary()); }
      */
-    if (browser.isHeadless()) {
+    if (client.isHeadless()) {
       chromeOptions.addArguments("headless");
     }
-    if (browser.getWindowSize() != null) {
-      chromeOptions.addArguments("window-size=" + browser.getWindowSize());
+    if (client.getWindowSize() != null && client.getWindowSize().trim().length() > 0) {
+      chromeOptions.addArguments("window-size=" + client.getWindowSize());
     }
-    for (String flag : browser.getFlags()) {
+    for (String flag : client.getFlags()) {
       chromeOptions.addArguments(flag);
       // Examples:
       /*
@@ -320,22 +333,23 @@ public class WebDriverFactory {
   /**
    * Create common firefox option to create firefox web driver
    *
-   * @param browser the Browser client object
+   * @param client the Client object
    * @return the firefox option
    */
-  private static FirefoxOptions setCommonFirefoxOptions(Browser browser) {
+  private static FirefoxOptions setCommonFirefoxOptions(Client client) {
     FirefoxProfile firefoxProfile = null;
-    String profile = System.getProperty("kite.firefox.profile");
-    if (profile != null) {
-      switch (browser.retrievePlatform().name().toUpperCase()) {
+    String profile = System.getProperty("kite.firefox.profile")  ;
+    profile = profile == null ? client.getProfile() : profile;
+    if (profile != null && !profile.isEmpty()) {
+      switch (client.getPlatform().name().toUpperCase()) {
         case "WINDOWS":
-          profile += "firefox-h264-profiles/h264-windows";
+          profile += "windows";
           break;
         case "MAC":
-          profile += "firefox-h264-profiles/h264-mac";
+          profile += "mac";
           break;
         case "LINUX":
-          profile += "firefox-h264-profiles/h264-linux";
+          profile += "linux";
           break;
       }
       firefoxProfile = new FirefoxProfile(new File(profile));
@@ -343,36 +357,35 @@ public class WebDriverFactory {
       logger.warn("FIREFOX: Some tests require specific profile for firefox to work properly.");
       firefoxProfile = new FirefoxProfile();
     }
-    if (browser.useFakeMedia()) {
-      if (browser.getAudio() == null && browser.getVideo() == null) {
-        firefoxProfile.setPreference("media.navigator.streams.fake", browser.useFakeMedia());
-      } else {
-        firefoxProfile.setPreference("media.navigator.permission.disabled", true);
+    firefoxProfile.setPreference("media.navigator.permission.disabled", true);
+    if (client.useFakeMedia()) {
+      if (client.getAudio() == null && client.getVideo() == null) {
+        firefoxProfile.setPreference("media.navigator.streams.fake", client.useFakeMedia());
       }
     }
     FirefoxOptions firefoxOptions = new FirefoxOptions();
     firefoxOptions.setProfile(firefoxProfile);
-    if (browser.isHeadless()) {
+    if (client.isHeadless()) {
       firefoxOptions.addArguments("-headless");
     }
-    if (browser.getWindowSize() != null) {
-      firefoxOptions.addArguments("-window-size " + browser.getWindowSize());
+    if (client.getWindowSize() != null) {
+      firefoxOptions.addArguments("-window-size " + client.getWindowSize());
     }
-    for (String flag : browser.getFlags()) {
+    for (String flag : client.getFlags()) {
       firefoxOptions.addArguments(flag);
     }
     return firefoxOptions;
   }
 
-  private static String writeCommand(Browser browser) {
+  private static String writeCommand(Client client) {
     String command = "play%20";
-    if (browser.getVideo() != null && browser.getAudio() != null) {
-      command += browser.fetchMediaPath(browser.getVideo(), browser.getBrowserName())
-          + "%20" + browser.fetchMediaPath(browser.getAudio(), browser.getBrowserName());
-    } else if (browser.getVideo() != null && browser.getAudio() == null) {
-      command += browser.fetchMediaPath(browser.getVideo(), browser.getBrowserName());
-    } else if (browser.getVideo() == null && browser.getAudio() != null) {
-      command += browser.fetchMediaPath(browser.getAudio(), browser.getBrowserName());
+    if (client.getVideo() != null && client.getAudio() != null) {
+      command += client.fetchMediaPath(client.getVideo(), client.getBrowserName())
+          + "%20" + client.fetchMediaPath(client.getAudio(), client.getBrowserName());
+    } else if (client.getVideo() != null && client.getAudio() == null) {
+      command += client.fetchMediaPath(client.getVideo(), client.getBrowserName());
+    } else if (client.getVideo() == null && client.getAudio() != null) {
+      command += client.fetchMediaPath(client.getAudio(), client.getBrowserName());
     } else {
       logger.info("No file provided.");
     }

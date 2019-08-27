@@ -18,9 +18,9 @@ package org.webrtc.kite.config;
 
 import io.cosmosoftware.kite.exception.BadEntityException;
 import io.cosmosoftware.kite.instrumentation.NetworkInstrumentation;
-import io.cosmosoftware.kite.instrumentation.NetworkProfile;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.CircularLinkedList;
+import io.cosmosoftware.kite.usrmgmt.EmailSender;
 import org.webrtc.kite.config.client.Client;
 import org.webrtc.kite.config.paas.Paas;
 import org.webrtc.kite.config.test.TestConfig;
@@ -29,7 +29,6 @@ import org.webrtc.kite.exception.KiteInsufficientValueException;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import javax.json.JsonStructure;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,12 +60,12 @@ public class Configurator {
   private String configFilePath;
   private String reportPath;
   private ConfigHandler configHandler;
-  private List<JsonObject> customMatrix;
   private CircularLinkedList<Paas> gridList = new CircularLinkedList<>();
   private JsonObject jsonConfigObject;
   private String name;
   private boolean skipSame = false;
   private List<JsonObject> testObjectList;
+  private List<List<Integer>> matrix = new ArrayList<>();
   private long timeStamp = System.currentTimeMillis();
 
   public Configurator() {
@@ -95,6 +94,18 @@ public class Configurator {
 
     String callbackURL = jsonConfigObject.getString("callback", null);
 
+    JsonArray jsonArray = jsonConfigObject.getJsonArray("matrix");
+    if (jsonArray != null) {
+      for (int i = 0; i < jsonArray.size(); i++) {
+        JsonArray jArray = jsonArray.getJsonArray(i);
+        List<Integer> tuple = new ArrayList<>();
+        for (int j = 0; j < jArray.size(); j++) {
+          tuple.add(jArray.getInt(j));
+        }
+        this.matrix.add(tuple);
+      }
+    }
+
     this.testObjectList = (List<JsonObject>)
         throwNoKeyOrBadValueException(jsonConfigObject, "tests", JsonArray.class, false);
 
@@ -117,9 +128,6 @@ public class Configurator {
       if (size < 1) {
         throw new KiteInsufficientValueException("Less than one browser or app object.");
       }
-
-      this.customMatrix = (List<JsonObject>)
-          throwNoKeyOrBadValueException(jsonConfigObject, "matrix", JsonArray.class, true);
 
       if (clientList != null) {
         clientList = new ArrayList<>(new LinkedHashSet<>(clientList));
@@ -157,6 +165,19 @@ public class Configurator {
         logger.error(getStackTrace(e));
       }
     }
+    
+    if (jsonConfigObject.containsKey("email")) {
+      try {
+        EmailSender sendEmailSMTP = new EmailSender(jsonConfigObject.get("email"));
+        logger.info(sendEmailSMTP.toString());
+        for (TestConfig testConfig: configHandler.getTestList()) {
+          testConfig.setEmailSender(sendEmailSMTP);
+        }
+      } catch (Exception e){
+        logger.error(getStackTrace(e));
+      }
+    }
+    
     skipSame = jsonConfigObject.getBoolean("skipSame", skipSame);
     logger.info("Finished reading the configuration file");
   }
@@ -188,18 +209,6 @@ public class Configurator {
       // only add 1 placeholder tuple
       listOfTuples.add(new Tuple());
     } else {
-      if (this.customMatrix != null) {
-        List<Tuple> customBrowserMatrix = new ArrayList<>();
-        for (JsonStructure structure : this.customMatrix) {
-          JsonArray jsonArray = (JsonArray) structure;
-          Tuple tuple = new Tuple();
-          for (int i = 0; i < jsonArray.size(); i++) {
-            tuple.add(this.configHandler.getClientList().get(jsonArray.getInt(i)));
-          }
-          customBrowserMatrix.add(tuple);
-        }
-        return customBrowserMatrix;
-      }
 
       List<Client> clientList = this.configHandler.getClientList();
 
@@ -352,5 +361,14 @@ public class Configurator {
    */
   public JsonObject getJsonConfigObject() {
     return jsonConfigObject;
+  }
+
+  /**
+   * Gets matrix.
+   *
+   * @return the matrix
+   */
+  public List<List<Integer>> getMatrix() {
+    return matrix;
   }
 }

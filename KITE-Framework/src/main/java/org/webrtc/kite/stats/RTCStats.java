@@ -7,9 +7,11 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import java.util.ArrayList;
-import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+
+import static org.webrtc.kite.Utils.getStackTrace;
 
 public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> implements JsonBuilder {
   
@@ -108,7 +110,11 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
   }
   
   public JsonObject toJson() {
-    return buildJsonObjectBuilder().build();
+    try {
+      return buildJsonObjectBuilder().build();
+    } catch (NullPointerException e) {
+      return Json.createObjectBuilder().add("NullPointerException", getStackTrace(e)).build();
+    }
   }
   
   public RTCSingleStatObject getSuccessfulCandidate() {
@@ -185,7 +191,7 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
   }
   
   @Override
-  public JsonObjectBuilder buildJsonObjectBuilder() {
+  public JsonObjectBuilder buildJsonObjectBuilder() throws NullPointerException {
     JsonObjectBuilder builder = Json.createObjectBuilder();
     for (String key : this.keySet()) {
       JsonObjectBuilder tmp = Json.createObjectBuilder();

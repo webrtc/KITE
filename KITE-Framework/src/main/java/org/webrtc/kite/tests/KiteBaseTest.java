@@ -3,7 +3,6 @@ package org.webrtc.kite.tests;
 import io.cosmosoftware.kite.entities.Stage;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.instrumentation.NetworkInstrumentation;
-import io.cosmosoftware.kite.instrumentation.NetworkProfile;
 import io.cosmosoftware.kite.instrumentation.Scenario;
 import io.cosmosoftware.kite.manager.RoomManager;
 import io.cosmosoftware.kite.report.*;
@@ -13,13 +12,9 @@ import io.cosmosoftware.kite.steps.TestStep;
 import io.cosmosoftware.kite.util.ReportUtils;
 import io.cosmosoftware.kite.util.TestUtils;
 import io.cosmosoftware.kite.util.WebDriverUtils;
-import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.webrtc.kite.Utils;
 import org.webrtc.kite.WebDriverFactory;
-import org.webrtc.kite.config.client.App;
-import org.webrtc.kite.config.client.Browser;
 import org.webrtc.kite.config.client.Client;
 import org.webrtc.kite.config.test.Tuple;
 import org.webrtc.kite.exception.KiteGridException;
@@ -37,6 +32,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
+import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
 import static io.cosmosoftware.kite.util.TestUtils.processTestStep;
 import static org.webrtc.kite.Utils.populateInfoFromNavigator;
 
@@ -79,9 +75,9 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   private int testTimeout = 60;
   protected int windowWidth = 0;
   protected int windowHeight = 0;
+  private String testJar = null;
 
-  public KiteBaseTest() {
-  }
+  public KiteBaseTest() {}
 
   /**
    * Creates the TestRunners and add them to the testRunners list.
@@ -103,6 +99,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     return execute(phases.get(0));
   }
 
+  
   /**
    * Execute json object.
    *
@@ -113,7 +110,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public Object execute(StepPhase stepPhase) {
     try {
       this.reports.get(stepPhase).setStartTimestamp();
-      logger.info("execute(" + stepPhase + ")");
+      logger.info("execute(" + stepPhase + ") for: " + this.generateTestCaseName());
       if (!stepPhase.equals(StepPhase.LOADREACHED)) {
         init(stepPhase);
       }
@@ -128,6 +125,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       // this is for the initiation mostly
       reporter.processException(reports.get(stepPhase), e, false);
     } finally {
+      logger.info("execute(" + stepPhase + ") completed.");
       if (stepPhase.isLastPhase() || stepPhase.equals(StepPhase.LOADREACHED)) {
         terminate(stepPhase);
       }
@@ -170,7 +168,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
           "closing already created webdrivers...\r\n" + getStackTrace(e));
       reporter.textAttachment(initStep, "KiteGridException", getStackTrace(e), "plain");
       initStep.setStatus(Status.FAILED);
-      throw new KiteTestException("Exception while populating web drivers", Status.FAILED);
+      throw new KiteTestException("Exception while populating web drivers", Status.BROKEN);
     }
   }
 
@@ -261,21 +259,21 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     StringBuilder name = new StringBuilder();
     for (int index = 0; index < tuple.size(); index++) {
       Client client = tuple.get(index);
-      name.append(client.retrievePlatform().name(), 0, 3);
-      if (client instanceof Browser) {
-        name.append("_").append(((Browser) client).getBrowserName(), 0, 2);
-        if (((Browser) client).getVersion() != null) {
-          name.append("_").append(((Browser) client).getVersion());
+      name.append(client.getPlatform().name(), 0, 3);
+      if (!client.isApp()) {
+        name.append("_").append(client.getBrowserName(), 0, 2);
+        if (client.getVersion() != null) {
+          name.append("_").append(client.getVersion());
         }
       } else {
-        name.append("_").append(((App) client).retrieveDeviceName(), 0, 2);
+        name.append("_").append(client.getDeviceName(), 0, 2);
       }
 
       if (index < tuple.size() - 1) {
         name.append("-");
       }
     }
-    return name.toString();
+    return name.toString() + " (" +timestamp() + ")";
   }
 
   /**
@@ -320,8 +318,8 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
    */
   protected void getInfoFromNavigator() {
     for (int i = 0; i < tuple.size(); i++) {
-      if (this.tuple.get(i) instanceof Browser) {
-        populateInfoFromNavigator(this.webDriverList.get(i), (Browser) this.tuple.get(i));
+      if (!this.tuple.get(i).isApp()) {
+        populateInfoFromNavigator(this.webDriverList.get(i), this.tuple.get(i));
       }
     }
   }
@@ -492,7 +490,6 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
    * Constructs a list of web drivers against the number of provided config objects.
    *
    * @throws KiteGridException the kite grid exception
-   * @throws KiteTestException the kite test exception
    */
   protected void populateDrivers() throws KiteGridException {
     for (Client client : this.tuple.getClients()) {
@@ -510,12 +507,13 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
         }
         this.sessionData.put(webDriver, map);
       } catch (Exception e) {
+        logger.error(getStackTrace(e));
         throw new KiteGridException(
             e.getClass().getSimpleName()
                 + " creating webdriver for \n"
                 + client.toString()
                 + ":\n"
-                + e.getMessage());
+                + e.getMessage(), e);
       }
     }
   }
@@ -699,4 +697,26 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public void setRoomManager(RoomManager roomManager) {
     this.roomManager = roomManager;
   }
+
+
+  /**
+   * Gets the jar file
+   * 
+   * @return the jar file
+   */
+  public String getTestJar() {
+    return testJar;
+  }
+
+  /**
+   * Sets the jar file
+   * 
+   * @param testJar the jar file
+   */
+  public void setTestJar(String testJar) {
+    this.testJar = testJar;
+  }
+
+
+
 }

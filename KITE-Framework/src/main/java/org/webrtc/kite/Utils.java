@@ -16,14 +16,11 @@
 
 package org.webrtc.kite;
 
-import io.cosmosoftware.kite.instrumentation.NetworkInstrumentation;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.WebDriverUtils;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.webrtc.kite.config.client.App;
-import org.webrtc.kite.config.client.Browser;
-import org.webrtc.kite.config.media.MediaFile;
+import org.webrtc.kite.config.client.Client;
 import org.webrtc.kite.config.test.Tuple;
 import org.webrtc.kite.exception.KiteBadValueException;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
@@ -39,7 +36,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-import static io.cosmosoftware.kite.util.TestUtils.getPrivateIp;
 import static io.cosmosoftware.kite.util.TestUtils.readJsonFile;
 
 /**
@@ -117,7 +113,7 @@ public class Utils {
    *
    * @param configFile the kite test config file
    *
-   * @return the list of Browser from the config file.
+   * @return the list of Tuple from the config file.
    */
   public static Tuple getFirstTuple(String configFile) {
     Tuple tuple = new Tuple();
@@ -133,10 +129,7 @@ public class Utils {
       
       for (JsonObject object : clientObjectList) {
         for (int i = 0; i < tupleSize; i++) {
-          tuple.add(
-            object.get("browserName") != null
-              ? new Browser(object)
-              : new App(object));
+          tuple.add(new Client(object));
         }
       }
     } catch (Exception e) {
@@ -247,7 +240,7 @@ public class Utils {
   }
   
   /**
-   * The OS Name without the version, meant for Browser.setPlatform(String platform) (Windows, Linux or Mac).
+   * The OS Name without the version, meant for Client.setPlatform(String platform) (Windows, Linux or Mac).
    * It will return System.getProperty("os.name") if it's not a standard Linux, Windows or Mac OS name.
    *
    * @return OS Name without the version(Windows, Linux or Mac)
@@ -272,7 +265,7 @@ public class Utils {
    * @param webDriver the web driver
    * @param browser   the browser
    */
-  public static void populateInfoFromNavigator(WebDriver webDriver, Browser browser) {
+  public static void populateInfoFromNavigator(WebDriver webDriver, Client browser) {
     
     String userAgentScript = "var nav = '';" + "try { var myNavigator = {};"
       + "for (var i in navigator) myNavigator[i] = navigator[i];"
@@ -284,11 +277,11 @@ public class Utils {
     
     webDriver.get("http://www.google.com");
     Object resultObject = ((JavascriptExecutor) webDriver).executeScript(userAgentScript);
-    logger.info("Browser platform and userAgent for: " + browser.toString() + "->" + resultObject);
+    logger.info("Client platform and userAgent for: " + browser.toString() + "->" + resultObject);
     
     if (resultObject instanceof String) {
       String resultOfScript = (String) resultObject;
-      browser.setUserAgentVersionAndPlatform(resultOfScript);
+//      browser.setUserAgentVersionAndPlatform(resultOfScript);
     }
   }
   
@@ -347,9 +340,9 @@ public class Utils {
       URLConnection connection = new URL(url).openConnection();
       connection.setRequestProperty("Accept-Charset", "UTF-8");
       InputStream response = connection.getInputStream();
-      System.out.println("SUCCEEDED and got response: " + response);
+      logger.info("SUCCEEDED and got response: " + response);
     } catch (IOException e) {
-      System.out.println("ERROR: " + e.getLocalizedMessage());
+      logger.error(getStackTrace(e));
     }
   }
 }
