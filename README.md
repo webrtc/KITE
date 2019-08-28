@@ -61,12 +61,10 @@ If you are not familiar with Maven and/or new to the concept of PATH and environ
  If you would like to use our script to install Maven, you can skip it for now and install it after cloning the git repo
  (following the instructions at B.2.).
  
-If you are familiar with setting up Maven and configuring the PATH and environment variables, you can download [Maven](https://maven.apache.org/download.cgi?Preferred=ftp://mirror.reverse.net/pub/apache/) from  
+Alternatively, if you are familiar with setting up Maven and configuring the PATH and environment variables, you can download [Maven](https://maven.apache.org/download.cgi?Preferred=ftp://mirror.reverse.net/pub/apache/) from  
 https://maven.apache.org/download.cgi
-   
 
- 
-Alternatively, you can always install Maven manually and the following guides could help you with this:
+The following guides could help you:
 * On Windows: https://www.mkyong.com/maven/how-to-install-maven-in-windows/
 * On Ubuntu: https://www.mkyong.com/maven/how-to-install-maven-in-ubuntu/
 * On Mac: https://www.mkyong.com/maven/install-maven-on-mac-osx/
@@ -181,7 +179,7 @@ source .bash_profile
     __Note:__ Please input only the major (i.e. 76 or 68) for the browser versions, but the full version with the minor (i.e. 76.0.3809.126 or v0.24.0) for the driver versions.   
    More details are available in the [local grid setup guide](scripts/README.md).
     
-    __2. Safari__  
+    __3. Safari__  
     Safari is installed by default on MacOS, there is no need to download anything. You will only need to enable the 'Allow Remote Automation' option in Safari's Developer menu so it can be automated by KITE for testing.
     
     
