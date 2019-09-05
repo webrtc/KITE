@@ -2,8 +2,10 @@ package org.webrtc.kite.config.test;
 
 import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
+import io.cosmosoftware.kite.report.KiteLogger;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.config.client.Client;
 
 import javax.json.Json;
@@ -12,6 +14,8 @@ import javax.json.JsonObjectBuilder;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 
 /**
  * Entity implementation class for Entity: Tuple.
@@ -25,6 +29,9 @@ public class Tuple extends KiteEntity implements JsonBuilder {
   private List<Client> clients = new ArrayList<Client>();
   private String id;
   private String resultId;
+  private List<WebDriver> webDrivers;
+
+  protected KiteLogger logger = KiteLogger.getLogger(this.getClass().getName());
   
   /**
    * Instantiates a new Tuple.
@@ -39,8 +46,9 @@ public class Tuple extends KiteEntity implements JsonBuilder {
    * @param clients the clients
    */
   public Tuple(List<Client> clients) {
-    this();
-    this.clients = clients;
+    for (Client c: clients) {
+      add(c);
+    }
   }
   
   /**
@@ -49,8 +57,9 @@ public class Tuple extends KiteEntity implements JsonBuilder {
    * @param tuple the tuple
    */
   public Tuple(Tuple tuple) {
-    this();
-    this.clients = tuple.getClients();
+    for (Client c: tuple.getClients()) {
+      add(c);
+    }
   }
   
   /**
@@ -62,7 +71,7 @@ public class Tuple extends KiteEntity implements JsonBuilder {
   public Tuple(Client client, int size) {
     super();
     for (int count = 0; count < size; count++) {
-      this.clients.add(client);
+      add(client);
     }
   }
   
@@ -72,7 +81,8 @@ public class Tuple extends KiteEntity implements JsonBuilder {
    * @param client the client
    */
   public void add(Client client) {
-    this.clients.add(client);
+    //dereference the clients so each can have their own webDriver.
+    this.clients.add(new Client(client));
   }
   
   @Override
@@ -156,7 +166,23 @@ public class Tuple extends KiteEntity implements JsonBuilder {
   public String getResultId() {
     return resultId;
   }
-  
+
+  @Transient
+  public List<WebDriver> getWebDrivers() {
+    try {
+      if (this.webDrivers == null) {
+        webDrivers = new ArrayList<>();
+        for (Client c : this.clients) {
+          webDrivers.add(c.getWebDriver());
+        }
+      }
+    } catch (Exception e) {
+      logger.error(getStackTrace(e));
+    } finally {
+      return webDrivers;
+    }
+  }
+
   /**
    * Sets result id.
    *

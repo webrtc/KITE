@@ -14,7 +14,6 @@ import io.cosmosoftware.kite.util.TestUtils;
 import io.cosmosoftware.kite.util.WebDriverUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.webrtc.kite.WebDriverFactory;
 import org.webrtc.kite.config.client.Client;
 import org.webrtc.kite.config.test.Tuple;
 import org.webrtc.kite.exception.KiteGridException;
@@ -41,7 +40,6 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   protected final LinkedHashMap<StepPhase, AllureTestReport> reports = new LinkedHashMap<>();
   protected final ArrayList<Scenario> scenarioArrayList = new ArrayList<>();
   protected final Map<WebDriver, Map<String, Object>> sessionData = new HashMap<WebDriver, Map<String, Object>>();
-  protected final List<WebDriver> webDriverList = new ArrayList<>();
   protected String configFilePath;
   protected String description;
   protected JsonObject getStatsConfig = null;
@@ -82,10 +80,12 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   /**
    * Creates the TestRunners and add them to the testRunners list.
    */
-  protected void createTestRunners() {
-    for (int index = 0; index < this.webDriverList.size(); index++) {
-      TestRunner runner = new TestRunner(this.webDriverList.get(index), this.reports, this.logger, this.reporter, index);
+  protected void createTestRunners() throws KiteGridException {
+    for (int index = 0; index < this.tuple.size(); index++) {
+      Client client = this.tuple.get(index);
+      TestRunner runner = new TestRunner(client, this.reports, this.logger, this.reporter, index);
       this.add(runner);
+      addToSessionMap(client);
     }
     this.tupleSize = size();
   }
@@ -158,10 +158,9 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
         logger.warn("payload is null");
       }
       reporter.setLogger(logger);
-      populateDrivers();
+      populateTestRunners();
       Runtime.getRuntime().addShutdownHook(new Thread(() -> terminate(stepPhase)));
       getInfoFromNavigator();
-      populateTestRunners();
       initStep.setStatus(Status.PASSED);
     } catch (KiteGridException e) {
       logger.error("Exception while populating web drivers, " +
@@ -172,13 +171,13 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     }
   }
 
-  private void terminate(StepPhase stepPhase) {
+  public void terminate(StepPhase stepPhase) {
     if (!this.finished) {
       this.finished = true;
       AllureStepReport terminateStep = new AllureStepReport("Cleaning up and finishing the test");
       terminateStep.setStartTimestamp();
       if (closeWebDrivers) {
-        WebDriverUtils.closeDrivers(this.webDriverList);
+        WebDriverUtils.closeDrivers(this.tuple.getWebDrivers());
       }
 
       terminateStep.setStopTimestamp();
@@ -316,10 +315,10 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
    * Retrieves the navigator.userAgent from all of the config objects and passes it to the the respective
    * Config object for processing.
    */
-  protected void getInfoFromNavigator() {
+  protected void getInfoFromNavigator() throws KiteGridException {
     for (int i = 0; i < tuple.size(); i++) {
       if (!this.tuple.get(i).isApp()) {
-        populateInfoFromNavigator(this.webDriverList.get(i), this.tuple.get(i));
+        populateInfoFromNavigator(this.tuple.get(i).getWebDriver(), this.tuple.get(i));
       }
     }
   }
@@ -429,16 +428,6 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public boolean getConsoleLogs() {
     return consoleLogs;
   }
-
-  /**
-   * Gets web driver list.
-   *
-   * @return the web driver list
-   */
-  public List<WebDriver> getWebDriverList() {
-    return webDriverList;
-  }
-
   public boolean isLoadTest() {
     return isLoadTest;
   }
@@ -487,47 +476,30 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   }
 
   /**
-   * Constructs a list of web drivers against the number of provided config objects.
-   *
-   * @throws KiteGridException the kite grid exception
-   */
-  protected void populateDrivers() throws KiteGridException {
-    for (Client client : this.tuple.getClients()) {
-      try {
-        WebDriver webDriver = WebDriverFactory.createWebDriver(client, null, null, client.getPaas().getGridId());
-        this.webDriverList.add(webDriver);
-        Map<String, Object> map = new HashMap<>();
-        map.put("end_point", client);
-        String node =
-            TestUtils.getNode(
-                client.getPaas().getUrl(),
-                ((RemoteWebDriver) webDriver).getSessionId().toString());
-        if (node != null) {
-          map.put("node_host", node);
-        }
-        this.sessionData.put(webDriver, map);
-      } catch (Exception e) {
-        logger.error(getStackTrace(e));
-        throw new KiteGridException(
-            e.getClass().getSimpleName()
-                + " creating webdriver for \n"
-                + client.toString()
-                + ":\n"
-                + e.getMessage(), e);
-      }
-    }
-  }
-
-  /**
    * Populate the testRunners.
    */
-  protected void populateTestRunners() {
+  protected void populateTestRunners() throws KiteGridException {
     createTestRunners();
     for (TestRunner runner : this) {
       populateTestSteps(runner);
     }
   }
 
+  /**
+   * 
+   */
+   private void addToSessionMap(Client client) throws KiteGridException {
+     Map<String, Object> map = new HashMap<>();
+     map.put("end_point", client);
+     String node =
+       TestUtils.getNode(
+         client.getPaas().getUrl(),
+         ((RemoteWebDriver) client.getWebDriver()).getSessionId().toString());
+     if (node != null) {
+       map.put("node_host", node);
+     }
+     this.sessionData.put(client.getWebDriver(), map);
+   }
   /**
    * Abstract method to be overridden by the client to add steps to the TestRunner.
    *

@@ -20,11 +20,17 @@ import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import io.cosmosoftware.kite.interfaces.SampleData;
 import io.cosmosoftware.kite.report.KiteLogger;
+import io.cosmosoftware.kite.util.ReportUtils;
+import io.cosmosoftware.kite.util.TestUtils;
 import org.hibernate.annotations.GenericGenerator;
 import org.openqa.selenium.Platform;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.webrtc.kite.WebDriverFactory;
 import org.webrtc.kite.config.media.MediaFile;
 import org.webrtc.kite.config.media.MediaFileType;
 import org.webrtc.kite.config.paas.Paas;
+import org.webrtc.kite.exception.KiteGridException;
 
 import javax.json.*;
 import javax.persistence.*;
@@ -62,7 +68,7 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
    */
   protected BrowserSpecs specs;
 
-  private String name;
+  private String name = "";
   protected Paas paas;
   private Boolean exclude = false;
   private Map<String, String> extraCapabilities = new HashMap<>();
@@ -83,6 +89,7 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
   private String windowSize = DEFAULT_WINDOW_SIZE;
   private MediaFile audio;
   private MediaFile video;
+  private WebDriver webDriver;
 
 
   /**
@@ -131,6 +138,7 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
     this.jsonConfig = jsonObject;
     this.exclude = jsonObject.getBoolean("exclude", false);
     this.specs = new BrowserSpecs(jsonObject);
+    this.name = jsonObject.getString("name", null);
     this.count = jsonObject.getInt("count", 1);
     JsonValue jsonValue = jsonObject.getOrDefault("extraCapabilities", null);
     this.gateway = jsonObject.getString("gateway", null);
@@ -218,6 +226,18 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
     return extraCapabilities;
   }
 
+  /**
+   * Gets the webDriver
+   *
+   * @return the webDriver
+   */
+  @Transient
+  public WebDriver getWebDriver() throws KiteGridException {
+    if (webDriver == null) {
+      createWebDriver();
+    }
+    return webDriver;
+  }
   /**
    * Sets extra capabilities.
    *
@@ -880,5 +900,23 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
   }
 
 
+  /**
+   * Constructs a the webdriver.
+   *
+   * @throws KiteGridException the kite grid exception
+   */
+  private void createWebDriver() throws KiteGridException {
+    try {
+      this.webDriver = WebDriverFactory.createWebDriver(this, null, null, this.getPaas().getGridId());
+    } catch (Exception e) {
+      logger.error(ReportUtils.getStackTrace(e));
+      throw new KiteGridException(
+        e.getClass().getSimpleName()
+          + " creating webdriver for \n"
+          + this.toString()
+          + ":\n"
+          + e.getMessage(), e);
+    }
+  }
 
 }

@@ -4,10 +4,10 @@
 
 package org.webrtc.kite.tests;
 
-import io.cosmosoftware.kite.instrumentation.NetworkInstrumentation;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.steps.StepPhase;
 import org.webrtc.kite.config.client.Client;
+import org.webrtc.kite.exception.KiteGridException;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,12 +57,15 @@ public class KiteJsTest extends KiteBaseTest {
   }
   
   @Override
-  protected void createTestRunners() {
+  protected void createTestRunners() throws KiteGridException {
     for (int index = 0; index < this.tuple.size(); index++) {
       JsTestRunner runner = new JsTestRunner(this.reports, jsTestImpl, logger, reporter, index, implJar);
       runner.setNumberOfParticipant(tuple.size());
       runner.setReportPath(tempPath);
       this.add(runner);
+      Client client = this.tuple.get(index);
+      createDirs(JS_PATH + pathUpdater + tempPath + "/" + index + "/screenshots");
+      printJsonTofile(client.toString(), JS_PATH + pathUpdater + tempPath + "/" + index + "/capabilities.json");
     }
   }
   
@@ -76,8 +79,8 @@ public class KiteJsTest extends KiteBaseTest {
     createDirs(JS_PATH + pathUpdater + tempPath);
     printJsonTofile(this.payload.toString(), JS_PATH + pathUpdater + tempPath + "/payload.json");
     try {
-      if (this.networkInstrumentation != null && this.networkInstrumentation.getJsonObject() != null) {
-        printJsonTofile(this.networkInstrumentation.getJsonObject().toString(),
+      if (this.networkInstrumentation != null) {
+        printJsonTofile(this.networkInstrumentation.toString(),
             JS_PATH + pathUpdater +  tempPath + "/networkInstrumentation.json");
       }
     } catch (Exception e) {
@@ -85,17 +88,6 @@ public class KiteJsTest extends KiteBaseTest {
     }
     if (!this.multiThread) {
       logger.error("JavaScript test with KITE cannot be run sequentially at the moment.");
-    }
-  }
-
-
-  @Override
-  protected void populateDrivers() {
-    // not creating webdriver but write capabilities to temp dirs
-    for (int index = 0; index < this.tuple.size(); index++) {
-      Client client = this.tuple.get(index);
-      createDirs(JS_PATH + pathUpdater + tempPath + "/" + index + "/screenshots");
-      printJsonTofile(client.toString(), JS_PATH + pathUpdater + tempPath + "/" + index + "/capabilities.json");
     }
   }
   
@@ -134,7 +126,7 @@ public class KiteJsTest extends KiteBaseTest {
   private void stopNodeServer() {
     logger.info("Stopping server on " + this.port + "...");
     nodeServerRunnable.stopThread();
-    process.destroyForcibly();
+    logger.info("Server on " + this.port + " stopped.");
   }
 
   public class NodeServerRunnable implements Runnable {
@@ -174,10 +166,22 @@ public class KiteJsTest extends KiteBaseTest {
         text.append("\n");
         logger.info("[nodejs console " + logHeader + " " + this.port + " ] " + line);
       }
+      logger.info("Server on " + this.port + " thread is completed.");
     }
 
     public void stopThread() {
       this.running = false;
+      try {
+        int i = 0;
+        while (process.isAlive() && i < 10) {
+          process.destroyForcibly();
+          i++;
+          Thread.sleep(1000);
+        }
+        logger.info("Server on " + this.port + " process stopped.");
+      }catch (InterruptedException e) {
+        logger.error(getStackTrace(e));
+      }
     }
   }
 }

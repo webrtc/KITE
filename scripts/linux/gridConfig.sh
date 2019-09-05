@@ -19,13 +19,12 @@ export USE_CAPABILITY_MATCHER=FALSE
 # Set to TRUE if this is a full desktop environment, FALSE if it's without any display
 export DESKTOP_ENVIRONMENT=TRUE
 
-
 # Set to TRUE to use localhost or FALSE to use the host's IP address
 export LOCALHOST=TRUE
 
 # ChromeDriver and GeckoDriver versions
 export GECKO_VERSION=v0.24.0
-export CHROMEDRIVER_VERSION=76.0.3729.6
+export CHROMEDRIVER_VERSION=76.0.3809.126
 
 # Selenium version
 export SELENIUM_VERSION_SHORT=3.141
