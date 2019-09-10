@@ -486,17 +486,19 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   }
 
   /**
-   * 
+   *
    */
    private void addToSessionMap(Client client) throws KiteGridException {
      Map<String, Object> map = new HashMap<>();
      map.put("end_point", client);
-     String node =
-       TestUtils.getNode(
-         client.getPaas().getUrl(),
-         ((RemoteWebDriver) client.getWebDriver()).getSessionId().toString());
-     if (node != null) {
-       map.put("node_host", node);
+    if (!client.isApp()) {
+      String node =
+          TestUtils.getNode(
+              client.getPaas().getUrl(),
+              ((RemoteWebDriver) client.getWebDriver()).getSessionId().toString());
+      if (node != null) {
+        map.put("node_host", node);
+      }
      }
      this.sessionData.put(client.getWebDriver(), map);
    }

@@ -206,6 +206,7 @@ public class MatrixRunner {
       this.multiExecutorService.shutdownNow();
       this.multiExecutorService = null;
     }
+    logger.info("shutdownExecutors() done.");
   }
 
 }
