@@ -60,7 +60,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   private String firefoxProfile;
   private String chromeExtension;
   private Boolean closeBrowsers = true;
-  private Long delayForClosing = (long)0;
+  private Long delayForClosing = 0L;
   private String description = "";
   private String id = "";
   private String implJar = "";
@@ -388,10 +388,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    */
   @Transient
   public KiteLogger getLogger() throws IOException {
-    if (logger == null) {
-      logger = createTestLogger();
-    }
-    return logger;
+    return logger = createTestLogger();
   }
   
   /**

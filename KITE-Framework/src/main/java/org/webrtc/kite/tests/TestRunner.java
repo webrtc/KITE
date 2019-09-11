@@ -9,6 +9,8 @@ import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.steps.TestStep;
 import org.openqa.selenium.WebDriver;
+import org.webrtc.kite.config.client.Client;
+import org.webrtc.kite.exception.KiteGridException;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -24,6 +26,7 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   protected final KiteLogger logger;
   protected final LinkedHashMap<StepPhase, AllureTestReport> reports;
   protected final WebDriver webDriver;
+  protected final Client client;
   protected final Reporter reporter;
   protected int id;
   
@@ -32,13 +35,14 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   /**
    * Instantiates a new Test runner.
    *
-   * @param webDriver the web driver
+   * @param client the web driver
    * @param reports   the test reports
    * @param id        the id
    */
-  public TestRunner(WebDriver webDriver, LinkedHashMap<StepPhase, AllureTestReport> reports, 
-                    KiteLogger logger, Reporter reporter, int id) {
-    this.webDriver = webDriver;
+  public TestRunner(Client client, LinkedHashMap<StepPhase, AllureTestReport> reports, 
+                    KiteLogger logger, Reporter reporter, int id) throws KiteGridException {
+    this.client = client;
+    this.webDriver = client != null ? client.getWebDriver() : null; //client is null for JsTestRunner since it's created in JS.
     this.reports = reports;
     this.logger = logger;
     this.reporter = reporter;
@@ -97,11 +101,17 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   public StepPhase getStepPhase() {
     return stepPhase;
   }
-  
+
   @Override
   public Reporter getReporter() {
     return reporter;
   }
+
+  @Override
+  public String getClientName() {
+    return client.getName();
+  }
+    
   
   /**
    * Sets id.

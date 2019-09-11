@@ -16,17 +16,6 @@
 
 package org.webrtc.kite;
 
-import io.cosmosoftware.kite.report.KiteLogger;
-import org.webrtc.kite.config.Configurator;
-import org.webrtc.kite.config.client.Client;
-import org.webrtc.kite.config.paas.Paas;
-import org.webrtc.kite.config.test.TestConfig;
-import org.webrtc.kite.config.test.Tuple;
-import org.webrtc.kite.exception.KiteBadValueException;
-import org.webrtc.kite.exception.KiteInsufficientValueException;
-import org.webrtc.kite.exception.KiteNoKeyException;
-
-import javax.json.JsonException;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,48 +25,73 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import javax.json.JsonException;
+import org.webrtc.kite.config.Configurator;
+import org.webrtc.kite.config.client.Client;
+import org.webrtc.kite.config.paas.Paas;
+import org.webrtc.kite.config.test.TestConfig;
+import org.webrtc.kite.config.test.Tuple;
+import org.webrtc.kite.exception.KiteBadValueException;
+import org.webrtc.kite.exception.KiteInsufficientValueException;
+import org.webrtc.kite.exception.KiteNoKeyException;
+import io.cosmosoftware.kite.report.KiteLogger;
 
 /**
- * Entry point of the program
+ * Entry point of the program.
  */
 public class Engine {
+
+  /** The run thread. */
+  public static TestRunThread runThread;
 
   static {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HHmmss");
     System.setProperty("current.date", dateFormat.format(new Date()));
   }
 
+  /** The Constant logger. */
   private static final KiteLogger logger = KiteLogger.getLogger(Engine.class.getName());
-  
+
+  /**
+   * Builds the config.
+   *
+   * @param configurator the configurator
+   * @param pathToConfigFile the path to config file
+   */
   public static void buildConfig(Configurator configurator, String pathToConfigFile) {
     try {
       configurator.setConfigFilePath(pathToConfigFile);
       configurator.buildConfig();
       configurator.setTimeStamp();
     } catch (FileNotFoundException e) {
-      logger
-        .fatal("Error [File Not Found]: '" + pathToConfigFile + "' either doesn't exist or is not a file.",
-          e);
+      logger.fatal("Error [File Not Found]: '" + pathToConfigFile
+          + "' either doesn't exist or is not a file.", e);
     } catch (JsonException | IllegalStateException e) {
       logger.fatal("Error [Config Parsing]: Unable to parse the provided configuration "
-        + "file with the following error: " + e.getLocalizedMessage(), e);
+          + "file with the following error: " + e.getLocalizedMessage(), e);
     } catch (KiteNoKeyException e) {
       logger.fatal("Error [Config Parsing]: '" + e.getKey()
-        + "' is not found in the configuration file or is null.", e);
+          + "' is not found in the configuration file or is null.", e);
     } catch (KiteBadValueException e) {
       logger.fatal("Error [Config Parsing]: '" + e.getKey()
-        + "' has an inappropriate value in the configuration file.", e);
+          + "' has an inappropriate value in the configuration file.", e);
     } catch (KiteInsufficientValueException e) {
       logger.fatal("Error [Config Parsing]: " + e.getLocalizedMessage(), e);
     } catch (Exception e) {
       logger.fatal("FATAL Error: KITE has failed to start execution", e);
     }
   }
-  
+
+  /**
+   * Distribute remote.
+   *
+   * @param configurator the configurator
+   * @param tupleList the tuple list
+   */
   public static void distributeRemote(Configurator configurator, List<Tuple> tupleList) {
     // setting remote hub address to client, using circular linked list
     // each tuple will be prioritised to be in the same hub
-    //need to handle mobile == null
+    // need to handle mobile == null
     for (Tuple tuple : tupleList) {
       Paas paas = configurator.getRemoteList().get();
       for (Client client : tuple.getClients()) {
@@ -87,9 +101,9 @@ public class Engine {
       }
     }
   }
-  
+
   /**
-   * main method
+   * main method.
    *
    * @param args relative or absolute path of the configuration file.
    */
@@ -105,16 +119,16 @@ public class Engine {
       List<Tuple> tupleList = new ArrayList<>();
       List<List<Integer>> matrix = configurator.getMatrix();
       if (matrix != null && !matrix.isEmpty()) {
-        for (List<Integer> indexList: matrix ) {
+        for (List<Integer> indexList : matrix) {
           Tuple tuple = new Tuple();
-          for (int index: indexList) {
+          for (int index : indexList) {
             tuple.add(configurator.getConfigHandler().getClientList().get(index));
           }
           tupleList.add(tuple);
         }
       } else {
-        tupleList = configurator
-          .buildTuples(testConfig.getTupleSize(), testConfig.isPermute(), testConfig.isRegression());
+        tupleList = configurator.buildTuples(testConfig.getTupleSize(), testConfig.isPermute(),
+            testConfig.isRegression());
       }
       distributeRemote(configurator, tupleList);
       testConfig.setReportPath(configurator.getReportPath());
@@ -128,11 +142,36 @@ public class Engine {
       }
     }
   }
-  
-  
-  public static List<Future<Object>> runInterop(ExecutorService service, String testSuiteName, TestConfig testConfig, List<Tuple> tupleList) throws ExecutionException, InterruptedException {
-    TestRunThread runThread = new TestRunThread(testConfig, tupleList);
+
+
+  /**
+   * Run interop.
+   *
+   * @param service the service
+   * @param testSuiteName the test suite name
+   * @param testConfig the test config
+   * @param tupleList the tuple list
+   * @return the list
+   * @throws ExecutionException the execution exception
+   * @throws InterruptedException the interrupted exception
+   */
+  public static List<Future<Object>> runInterop(ExecutorService service, String testSuiteName,
+      TestConfig testConfig, List<Tuple> tupleList)
+      throws ExecutionException, InterruptedException {
+    runThread = new TestRunThread(testConfig, tupleList);
     runThread.setName(testSuiteName);
-    return service.submit(runThread).get();
+    List<Future<Object>> futureObjectList = service.submit(runThread).get();
+    runThread = null;
+    return futureObjectList;
   }
+
+  /**
+   * Stop interop.
+   */
+  public static void stopInterop() {
+    if (Engine.runThread != null) {
+      Engine.runThread.interrupt();
+    }
+  }
+
 }

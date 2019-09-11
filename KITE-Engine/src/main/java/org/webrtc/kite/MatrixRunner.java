@@ -16,38 +16,52 @@
 
 package org.webrtc.kite;
 
-import io.cosmosoftware.kite.report.Container;
-import io.cosmosoftware.kite.report.KiteLogger;
-import org.webrtc.kite.config.client.Client;
-import org.webrtc.kite.config.test.TestConfig;
-import org.webrtc.kite.config.test.Tuple;
-
+import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.webrtc.kite.config.client.Client;
+import org.webrtc.kite.config.test.TestConfig;
+import org.webrtc.kite.config.test.Tuple;
+import io.cosmosoftware.kite.report.Container;
+import io.cosmosoftware.kite.report.KiteLogger;
 
-import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
-
+// TODO: Auto-generated Javadoc
 /**
  * A class to manage the asynchronous execution of TestManager objects.
  */
 public class MatrixRunner {
 
+  /** The logger. */
   private final KiteLogger logger = KiteLogger.getLogger(MatrixRunner.class.getName());
+
+  /** The test config. */
   private final TestConfig testConfig;
+
+  /** The interrupted. */
   private boolean interrupted;
+
+  /** The multi executor service. */
   private ExecutorService multiExecutorService;
+
+  /** The tuple list. */
   private List<Tuple> tupleList = new ArrayList<>();
-  Container testSuite;
+
+  /** The test suite. */
+  private Container testSuite;
+
+  /** The test manager list. */
+  private List<TestManager> testManagerList = new ArrayList<>();
 
   /**
    * Constructs a new MatrixRunner with the given TestConfig and List<Tuple>.
    *
-   * @param testConfig   TestConfig
+   * @param testConfig TestConfig
    * @param listOfTuples a list of tuples (containing 1 or multiples kite config objects).
+   * @param parentSuiteName the parent suite name
    */
   public MatrixRunner(TestConfig testConfig, List<Tuple> listOfTuples, String parentSuiteName) {
     this.testConfig = testConfig;
@@ -59,7 +73,7 @@ public class MatrixRunner {
             client.setProfile(testConfig.getFirefoxProfile());
           }
         }
-        if (client.getBrowserName().equals("chrome") && !client.getVersion().contains("electron")) {
+        if (client.getBrowserName().equals("chrome") && client.getVersion() != null && !client.getVersion().contains("electron")) {
           if (client.getExtension() == null || client.getExtension().isEmpty()) {
             client.setExtension(testConfig.getChromeExtension());
           }
@@ -76,13 +90,13 @@ public class MatrixRunner {
    * Returns a sublist of the given futureList exclusive of the type of objects specified by the
    * objectClass.
    *
-   * @param futureList  List of Future<Object>
+   * @param futureList List of Future<Object>
    * @param objectClass The class for the undesired required object.
    * @return A sublist of the given futureList exclusive of the type of objects specified by the
-   * objectClass.
+   *         objectClass.
    */
   private List<Future<Object>> getExclusiveSubList(List<Future<Object>> futureList,
-                                                   Class<?> objectClass) {
+      Class<?> objectClass) {
     List<Future<Object>> listOfFutureObjects = new ArrayList<Future<Object>>();
     for (Future<Object> future : futureList) {
       try {
@@ -100,7 +114,7 @@ public class MatrixRunner {
   /**
    * Returns a sublist from the given list of the type of objects specified by the objectClass.
    *
-   * @param futureList  List of Future<Object>
+   * @param futureList List of Future<Object>
    * @param objectClass The class for the desired required object list.
    * @return A sublist from the given list of the type of objects specified by the objectClass.
    */
@@ -141,10 +155,10 @@ public class MatrixRunner {
 
     List<TestManager> testManagerList = new ArrayList<>();
     List<Future<Object>> futureList = new ArrayList<>();
-    this.multiExecutorService =
-        Executors.newFixedThreadPool(this.testConfig.getNoOfThreads());
+    this.multiExecutorService = Executors.newFixedThreadPool(this.testConfig.getNoOfThreads());
 
-    logger.info("Executing " + this.testConfig + " for " + totalTestCases + " browser tuples with size :" + tupleList.get(0).size());
+    logger.info("Executing " + this.testConfig + " for " + totalTestCases
+        + " browser tuples with size :" + tupleList.get(0).size());
     try {
       for (int index = 0; index < this.tupleList.size(); index++) {
         TestManager manager = new TestManager(this.testConfig, this.tupleList.get(index));
@@ -156,11 +170,12 @@ public class MatrixRunner {
       List<Future<Object>> tempFutureList;
 
       while (testManagerList.size() > 0) {
-        int percentage = 100 - 100*testManagerList.size()/tupleList.size();
+        int percentage = 100 - 100 * testManagerList.size() / tupleList.size();
         long runtime = System.currentTimeMillis() - start;
-        if (percentage%6 < 3&& percentage > 0) {
+        if (percentage % 6 < 3 && percentage > 0) {
           logger.info("PROGRESS =========================================");
-          logger.info("Currently finished: " + percentage + "%, ETA: " + (runtime/percentage)/600 + " minutes");
+          logger.info("Currently finished: " + percentage + "%, ETA: "
+              + (runtime / percentage) / 600 + " minutes");
         }
         tempFutureList = multiExecutorService.invokeAll(testManagerList);
         testManagerList = (List<TestManager>) this.getSubList(tempFutureList, TestManager.class);
@@ -185,9 +200,13 @@ public class MatrixRunner {
    */
   synchronized private void shutdownExecutors() {
     if (this.multiExecutorService != null && !this.multiExecutorService.isShutdown()) {
+      for (TestManager manager : this.testManagerList) {
+        manager.terminate();
+      }
       this.multiExecutorService.shutdownNow();
       this.multiExecutorService = null;
     }
+    logger.info("shutdownExecutors() done.");
   }
 
 }

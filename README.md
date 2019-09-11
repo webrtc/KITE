@@ -363,7 +363,7 @@ The example search.local.config.json file is almost the simplest config file you
       "name": "KiteExampleSearchTest",
       "tupleSize": 1,
       "description": "This example test opens google and searches for Cosmo Software Consulting and verify the first result",
-      "testImpl": "KiteExampleSearchTest",
+      "testImpl": "org.webrtc.kite.example.KiteExampleSearchTest",
       "payload" : {
         "test1": "ONE",
         "test2": "TWO"
@@ -405,7 +405,7 @@ It registers IceConnectionTest class as a test (this class is implemented in KIT
       "name": "KiteExampleSearchTest",
       "tupleSize": 1,
       "description": "This example test opens google and searches for Cosmo Software Consulting and verify the first result",
-      "testImpl": "KiteExampleSearchTest",
+      "testImpl": "org.webrtc.kite.example.KiteExampleSearchTest",
       "payload" : {
         "test1": "ONE",
         "test2": "TWO"

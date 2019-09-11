@@ -26,7 +26,7 @@ fi
 sed -i 's,/'"$KITE_HOME"'.*$,'"$NEW_PATH"',g' ~/.bashrc
 echo export PATH="$NEW_PATH" >> ~/.bashrc
 
-function skipchoice(){
+skipchoice(){
 read -p "Do you want to  install the local grid now? (y/n) " yn
 case $yn in
     [Yy]* )

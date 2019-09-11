@@ -16,16 +16,8 @@
 
 package org.webrtc.kite;
 
-import io.cosmosoftware.kite.report.Container;
-import io.cosmosoftware.kite.steps.StepPhase;
-import org.webrtc.kite.config.test.TestConfig;
-import org.webrtc.kite.config.test.Tuple;
-import org.webrtc.kite.tests.KiteBaseTest;
-import org.webrtc.kite.tests.KiteJsTest;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import static io.cosmosoftware.kite.report.CSVHelper.jsonToString;
+import static io.cosmosoftware.kite.util.TestUtils.getDir;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -36,42 +28,66 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-
-import static io.cosmosoftware.kite.report.CSVHelper.jsonToString;
-import static io.cosmosoftware.kite.util.TestUtils.getDir;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import org.webrtc.kite.config.test.TestConfig;
+import org.webrtc.kite.config.test.Tuple;
+import org.webrtc.kite.tests.KiteBaseTest;
+import org.webrtc.kite.tests.KiteJsTest;
+import io.cosmosoftware.kite.report.Container;
+import io.cosmosoftware.kite.steps.StepPhase;
 
 /**
  * A thread to step an implementation of KiteTest.
  * <p>
- * The algorithm of the thread is as follows:
- * 1) Instantiate the WebDriver objects.
- * 2) Instantiate KiteBaseTest implementation.
- * 3) Set the client list to the implementation.
- * 4) Execute the test.
- * 5) Retrieve, parse and populate from userAgent.
- * 6) Get the stack trace of an exception if it occurs during the execution.
- * 7) Quit all WebDrivers.
- * 8) Develop result json.
- * 9) Post the result to the callback url
+ * The algorithm of the thread is as follows: 1) Instantiate the WebDriver objects. 2) Instantiate
+ * KiteBaseTest implementation. 3) Set the client list to the implementation. 4) Execute the test.
+ * 5) Retrieve, parse and populate from userAgent. 6) Get the stack trace of an exception if it
+ * occurs during the execution. 7) Quit all WebDrivers. 8) Develop result json. 9) Post the result
+ * to the callback url
  * </p>
  */
 public class TestManager implements Callable<Object> {
+
+  /** The jar download path. */
   final String JAR_DOWNLOAD_PATH = getDir("java.io.tmpdir");
+
+  /** The enable callback. */
   private final boolean ENABLE_CALLBACK = true;
+
+  /** The retry. */
   private final int retry;
+
+  /** The start timestamp. */
   private long startTimestamp = System.currentTimeMillis();
+
+  /** The end timestamp. */
   private long endTimestamp = 0;
+
+  /** The test config. */
   private final TestConfig testConfig;
+
+  /** The tuple. */
   private final Tuple tuple;
+
+  /** The id. */
   private String id;
+
+  /** The phases. */
   private List<StepPhase> phases;
+
+  /** The test suite. */
   private Container testSuite;
+
+  /** The test. */
+  private KiteBaseTest test;
 
   /**
    * Constructs a new TestManager with the given TestConfig and List<Client>.
    *
    * @param testConfig test configuration object
-   * @param tuple      tuple of client for this test
+   * @param tuple tuple of client for this test
    */
   public TestManager(TestConfig testConfig, Tuple tuple) {
     this.testConfig = testConfig;
@@ -80,8 +96,19 @@ public class TestManager implements Callable<Object> {
 
   }
 
-  private KiteBaseTest buildTest() throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
-    String testJar = testConfig.getImplJar() == null ? null : JAR_DOWNLOAD_PATH + testConfig.getName() + ".jar";
+  /**
+   * Builds the test.
+   *
+   * @return the kite base test
+   * @throws ClassNotFoundException the class not found exception
+   * @throws IllegalAccessException the illegal access exception
+   * @throws InstantiationException the instantiation exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private KiteBaseTest buildTest()
+      throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
+    String testJar =
+        testConfig.getImplJar() == null ? null : JAR_DOWNLOAD_PATH + testConfig.getName() + ".jar";
     KiteBaseTest test = testConfig.isJavascript()
         ? new KiteJsTest(testConfig.getTestImpl(), testConfig.getImplJar())
         : (KiteBaseTest) instantiate(testConfig.getTestImpl(), testJar);
@@ -99,7 +126,8 @@ public class TestManager implements Callable<Object> {
     test.setDescription(testConfig.getDescription());
     test.setRoomManager(testConfig.getRoomManager());
     if (testConfig.getPayload() != null) {
-      JsonObject payload = (JsonObject) Json.createReader(new ByteArrayInputStream(testConfig.getPayload().getBytes())).read();
+      JsonObject payload = (JsonObject) Json
+          .createReader(new ByteArrayInputStream(testConfig.getPayload().getBytes())).read();
       test.setPayload(payload);
     }
 
@@ -117,16 +145,22 @@ public class TestManager implements Callable<Object> {
     return test;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.concurrent.Callable#call()
+   */
   @Override
   public Object call() throws Exception {
     startTimestamp = System.currentTimeMillis();
-    KiteBaseTest test = buildTest();
+    test = buildTest();
     JsonObjectBuilder builder = Json.createObjectBuilder();
     for (StepPhase phase : phases) {
       testSuite.addChild(test.getReport(phase).getUuid());
       Object phaseResult = test.execute(phase);
       builder.add(phase.getName(), (JsonObject) phaseResult);
     }
+    test = null;
     JsonObject testResult = builder.build();
     // todo: need some retry mechanism here
 
@@ -137,11 +171,11 @@ public class TestManager implements Callable<Object> {
         CallbackThread callbackThread =
             new CallbackThread(this.testConfig.getCallbackUrl(), jsonTestResult);
         // todo: to be advised
-//        if (testResult.getString("meta", null) == null) {
-//          callbackThread.start();
-//        } else {
-//          callbackThread.postResult();
-//        }
+        // if (testResult.getString("meta", null) == null) {
+        // callbackThread.start();
+        // } else {
+        // callbackThread.postResult();
+        // }
       }
     }
 
@@ -156,22 +190,32 @@ public class TestManager implements Callable<Object> {
     return jsonTestResult;
   }
 
+  /**
+   * Develop result.
+   *
+   * @param object the object
+   * @return the json object
+   */
   private JsonObject developResult(Object object) {
     if (endTimestamp == 0) {
       endTimestamp = System.currentTimeMillis();
     }
     return Json.createObjectBuilder()
-        .add("resultId", tuple.getResultId() == null
-            ? UUID.randomUUID().toString()
-            : tuple.getResultId())
+        .add("resultId",
+            tuple.getResultId() == null ? UUID.randomUUID().toString() : tuple.getResultId())
         .add("startTimestamp", "" + startTimestamp)
-        .add("endTimestamp", "" +
-            (endTimestamp == 0 ? System.currentTimeMillis() : endTimestamp))
-        .add("result", object instanceof Exception
-            ? ((Exception) object).getMessage()
-            : object.toString()).build();
+        .add("endTimestamp", "" + (endTimestamp == 0 ? System.currentTimeMillis() : endTimestamp))
+        .add("result",
+            object instanceof Exception ? ((Exception) object).getMessage() : object.toString())
+        .build();
   }
 
+  /**
+   * Gets the phases.
+   *
+   * @param isLoad the is load
+   * @return the phases
+   */
   private ArrayList<StepPhase> getPhases(boolean isLoad) {
     ArrayList<StepPhase> phases = new ArrayList<>();
     if (isLoad) {
@@ -187,29 +231,29 @@ public class TestManager implements Callable<Object> {
    * Instantiate.
    *
    * @param className the class name
-   * @param jarFile   the jar file
+   * @param jarFile the jar file
    * @return the object
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
    * @throws ClassNotFoundException the class not found exception
-   * @throws MalformedURLException  the malformed URL exception
+   * @throws MalformedURLException the malformed URL exception
    */
-  private Object instantiate(String className, String jarFile)
-      throws InstantiationException, IllegalAccessException, ClassNotFoundException, MalformedURLException {
+  private Object instantiate(String className, String jarFile) throws InstantiationException,
+      IllegalAccessException, ClassNotFoundException, MalformedURLException {
     Object object = null;
     if (jarFile == null) {
       object = Class.forName(className).newInstance();
     } else {
-      URLClassLoader classLoader =  URLClassLoader
-          .newInstance(new URL[]{new File(jarFile).toURI().toURL()}, TestManager.class.getClassLoader());
+      URLClassLoader classLoader = URLClassLoader.newInstance(
+          new URL[] {new File(jarFile).toURI().toURL()}, TestManager.class.getClassLoader());
       Thread.currentThread().setContextClassLoader(classLoader);
-      object = classLoader.loadClass(className).newInstance();     
+      object = classLoader.loadClass(className).newInstance();
     }
     return object;
   }
 
   /**
-   * Set the id, or test case id, for report purpose
+   * Set the id, or test case id, for report purpose.
    *
    * @param id case id
    */
@@ -218,11 +262,23 @@ public class TestManager implements Callable<Object> {
   }
 
   /**
-   * Set the container for the test's parent suite, for report purpose
+   * Set the container for the test's parent suite, for report purpose.
    *
    * @param testSuite test's parent suite
    */
   public void setTestSuite(Container testSuite) {
     this.testSuite = testSuite;
   }
+
+  /**
+   * Terminate.
+   */
+  public void terminate() {
+    if (this.test != null) {
+      for (StepPhase stepPhase : this.phases) {
+        this.test.terminate(stepPhase);
+      }
+    }
+  }
+
 }

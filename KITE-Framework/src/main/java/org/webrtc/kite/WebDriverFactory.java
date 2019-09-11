@@ -63,15 +63,17 @@ public class WebDriverFactory {
     if (app.getVersion() != null) {
       capabilities.setCapability(CapabilityType.VERSION, app.getVersion());
     }
+    capabilities.setCapability("browserName", "app");
     capabilities.setCapability("app", app.getAppName());
     capabilities.setCapability("deviceName", app.getDeviceName());
     capabilities.setCapability("platformName", app.getPlatform());
     if (app.getPlatformVersion() != null) {
       capabilities.setCapability("platformVersion", app.getPlatformVersion());
     }
-    if (app.getPlatform().name().equalsIgnoreCase("iOS")) {
+    if (app.getPlatform().name().toLowerCase().equalsIgnoreCase("ios")) {
       capabilities.setCapability("automationName", "XCUITest");
-    } else {
+    }
+    if (app.getPlatform().name().toLowerCase().equalsIgnoreCase("android")) {
       capabilities.setCapability("autoGrantPermissions", true);
       capabilities.setCapability("fullReset", app.isFullReset());
     }
@@ -176,10 +178,10 @@ public class WebDriverFactory {
       capabilities = buildAppCapabilities(client);
     }
     // Remote test identifier
-    if (testName != null) {
+    if (testName != null && !testName.isEmpty()) {
       capabilities.setCapability("name", testName);
     }
-    if (id != null) {
+    if (id != null && !id.isEmpty()) {
       capabilities.setCapability("id", id);
     }
     for (String capabilityName : client.getExtraCapabilities().keySet()) {
@@ -226,7 +228,7 @@ public class WebDriverFactory {
       } else if (client.getPlatform().name().equalsIgnoreCase("ios")) {
         return new IOSDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
       } else {
-        return new AppiumDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
+        return new RemoteWebDriver(url, WebDriverFactory.createCapabilities(client, testName, id));
       }
     }
   }
