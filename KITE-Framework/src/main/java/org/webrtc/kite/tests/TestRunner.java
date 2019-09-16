@@ -42,7 +42,7 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   public TestRunner(Client client, LinkedHashMap<StepPhase, AllureTestReport> reports, 
                     KiteLogger logger, Reporter reporter, int id) throws KiteGridException {
     this.client = client;
-    this.webDriver = client.getWebDriver();
+    this.webDriver = client != null ? client.getWebDriver() : null; //client is null for JsTestRunner since it's created in JS.
     this.reports = reports;
     this.logger = logger;
     this.reporter = reporter;

@@ -67,6 +67,7 @@ public class KiteJsTest extends KiteBaseTest {
       createDirs(JS_PATH + pathUpdater + tempPath + "/" + index + "/screenshots");
       printJsonTofile(client.toString(), JS_PATH + pathUpdater + tempPath + "/" + index + "/capabilities.json");
     }
+    this.setCloseWebDrivers(false);//Java should not try closing driver opened by JS.
   }
   
   @Override
@@ -164,7 +165,7 @@ public class KiteJsTest extends KiteBaseTest {
         String line = s.nextLine();
         text.append(line);
         text.append("\n");
-        logger.info("[nodejs console " + logHeader + " " + this.port + " ] " + line);
+        logger.info("[" + logHeader + " " + this.port + " ] " + line);
       }
       logger.info("Server on " + this.port + " thread is completed.");
     }

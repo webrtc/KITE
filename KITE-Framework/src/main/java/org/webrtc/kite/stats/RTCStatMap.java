@@ -14,7 +14,8 @@ public class RTCStatMap extends LinkedHashMap<String, RTCStatList> {
    * @return
    */
   public RTCStatList get(int index) {
-    return this.get(keySet().toArray()[index]);
+    String pcName = keySet().toArray()[index].toString();
+    return new RTCStatList(pcName, this.get(keySet().toArray()[index])) ;
   }
   
   /**

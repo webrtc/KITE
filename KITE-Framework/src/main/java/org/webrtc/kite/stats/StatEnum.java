@@ -21,9 +21,9 @@ public enum StatEnum {
   TOTAL_INBOUND_BYTES_RECEIVED("Total Inbound Bytes Received (Bytes)"),
   TOTAL_INBOUND_AUDIO_BYTES_RECEIVED("Total Inbound Audio Bytes Received (Bytes)"),
   TOTAL_INBOUND_VIDEO_BYTES_RECEIVED("Total Inbound Video Bytes Received (Bytes)"),
-  TOTAL_OUTBOUND_BYTES_RECEIVED("Total Outbound Bytes Received (Bytes)"),
-  TOTAL_OUTBOUND_AUDIO_BYTES_RECEIVED("Total Outbound Audio Bytes Received (Bytes)"),
-  TOTAL_OUTBOUND_VIDEO_BYTES_RECEIVED("Total Outbound Video Bytes Received (Bytes)"),
+  TOTAL_OUTBOUND_BYTES_SENT("Total Outbound Bytes Sent (Bytes)"),
+  TOTAL_OUTBOUND_AUDIO_BYTES_SENT("Total Outbound Audio Bytes Sent (Bytes)"),
+  TOTAL_OUTBOUND_VIDEO_BYTES_SENT("Total Outbound Video Bytes Sent (Bytes)"),
   TOTAL_BYTES_RECEIVED("Total Bytes Received (Bytes)"),
   
   SENT_BITRATE("Average Sent Bitrate (bps)"),
