@@ -229,9 +229,9 @@ public class StatsUtils {
    *     "Total Inbound Bytes Received (Bytes)": 642114,
    *     "Total Inbound Audio Bytes Received (Bytes)": 114190,
    *     "Total Inbound Video Bytes Received (Bytes)": 527924,
-   *     "Total Outbound Bytes Received (Bytes)": 644136,
-   *     "Total Outbound Audio Bytes Received (Bytes)": 114371,
-   *     "Total Outbound Video Bytes Received (Bytes)": 529765,
+   *     "Total Outbound Bytes Sent (Bytes)": 644136,
+   *     "Total Outbound Audio Bytes Sent (Bytes)": 114371,
+   *     "Total Outbound Video Bytes Sent (Bytes)": 529765,
    *     "Total Round Trip Time (ms)": 0.0,
    *     "Average Current Round Trip Time (ms)": 0.0,
    *     "inbound": {
@@ -286,9 +286,9 @@ public class StatsUtils {
     }
     if (lastRtcStats.get("outbound-rtp") != null) {
       builder
-        .add(StatEnum.TOTAL_OUTBOUND_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytes("outbound"))
-        .add(StatEnum.TOTAL_OUTBOUND_AUDIO_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytesByMedia("outbound", "audio"))
-        .add(StatEnum.TOTAL_OUTBOUND_VIDEO_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytesByMedia("outbound", "video"));
+        .add(StatEnum.TOTAL_OUTBOUND_BYTES_SENT.toString(), lastRtcStats.getTotalBytes("outbound"))
+        .add(StatEnum.TOTAL_OUTBOUND_AUDIO_BYTES_SENT.toString(), lastRtcStats.getTotalBytesByMedia("outbound", "audio"))
+        .add(StatEnum.TOTAL_OUTBOUND_VIDEO_BYTES_SENT.toString(), lastRtcStats.getTotalBytesByMedia("outbound", "video"));
     }
     
     for (int index = 0; index < statArray.size(); index++) {
