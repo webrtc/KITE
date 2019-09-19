@@ -59,7 +59,6 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   private String callbackUrl;
   private String firefoxProfile;
   private String chromeExtension;
-  private Boolean closeBrowsers = true;
   private Long delayForClosing = 0L;
   private String description = "";
   private String id = "";
@@ -136,11 +135,10 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.noOfThreads = getIntFromJsonObject(jsonObject, "noOfThreads", 1);
     this.maxRetryCount = getIntFromJsonObject(jsonObject, "maxRetryCount", 0);
     this.increment = getIntFromJsonObject(jsonObject, "increment", 1);
-    this.interval = getIntFromJsonObject(jsonObject, "interval", 5);
+    this.interval = getIntFromJsonObject(jsonObject, "interval", 0);
     
     this.regression = jsonObject.getBoolean("regression", false);
     this.permute = jsonObject.getBoolean("permute", true);
-    this.closeBrowsers = jsonObject.getBoolean("closeBrowsers", true);
 
     this.logger = createTestLogger();
   }
@@ -188,7 +186,6 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
       .add("noOfThreads", this.noOfThreads)
       .add("maxRetryCount", this.maxRetryCount)
       .add("delayForClosing", this.delayForClosing)
-      .add("closeBrowsers", this.closeBrowsers)
       .add("permute", this.permute);
   }
   
@@ -226,25 +223,6 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.callbackUrl = callbackUrl;
   }
   
-  /**
-   * Gets web drivers.
-   *
-   * @return the web drivers
-   */
-  @Column(name = "closeBrowsers", columnDefinition = "boolean default true", nullable = false)
-  public Boolean getCloseBrowsers() {
-    return closeBrowsers;
-  }
-  
-  /**
-   * Sets web drivers.
-   *
-   * @param closeBrowsers the close web drivers
-   */
-  public void setCloseBrowsers(Boolean closeBrowsers) {
-//    this.closeBrowsers = closeBrowsers != null ? closeBrowsers : true;
-    this.closeBrowsers = closeBrowsers;
-  }
   
   /**
    * Gets delay for closing.
@@ -252,7 +230,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    * @return the delay for closing
    */
   public Long getDelayForClosing() {
-    return delayForClosing;
+    return delayForClosing != null ? delayForClosing : 0;
   }
   
   /**

@@ -143,15 +143,17 @@ public class WebDriverFactory {
     logPrefs.enable(LogType.BROWSER, Level.ALL);
     capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
     // Capabilities for mobile client/app
-    if (client.getDeviceName() != null && !client.getDeviceName().equals("unknown")) {
+    if (client.getPlatform().toString().equalsIgnoreCase("android")
+      ||client.getPlatform().toString().equalsIgnoreCase("ios")) {
       // deviceName:
       // On iOS, this should be one of the valid devices returned by instruments with instruments -s devices.
       // On Android this capability is currently ignored, though it remains required.
       capabilities.setCapability("deviceName", client.getDeviceName());
       capabilities.setCapability("platformName", client.getPlatform());
       capabilities.setCapability("platformVersion", client.getPlatformVersion());
-      if (client.getPlatform().name().equalsIgnoreCase("iOS")) {
+      if (client.getPlatform().name().equalsIgnoreCase("ios")) {
         capabilities.setCapability("automationName", "XCUITest");
+        capabilities.setCapability("autoAcceptAlerts", true);
       } else {
         capabilities.setCapability("autoGrantPermissions", true);
         capabilities.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 300);

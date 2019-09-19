@@ -10,13 +10,16 @@ import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.steps.TestStep;
 import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.config.client.Client;
+import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.exception.KiteGridException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.concurrent.Callable;
 
 import static io.cosmosoftware.kite.util.TestUtils.processTestStep;
+import static io.cosmosoftware.kite.util.TestUtils.waitAround;
 
 /**
  * The type Test runner.
@@ -28,7 +31,9 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   protected final WebDriver webDriver;
   protected final Client client;
   protected final Reporter reporter;
+  protected final TestConfig testConfig;
   protected int id;
+  protected int interval = 0;
   
   protected StepPhase stepPhase = StepPhase.DEFAULT;
   
@@ -39,14 +44,16 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
    * @param reports   the test reports
    * @param id        the id
    */
-  public TestRunner(Client client, LinkedHashMap<StepPhase, AllureTestReport> reports, 
-                    KiteLogger logger, Reporter reporter, int id) throws KiteGridException {
+  public TestRunner(Client client, LinkedHashMap<StepPhase, AllureTestReport> reports,
+                    TestConfig testConfig, int id) throws KiteGridException, IOException {
     this.client = client;
     this.webDriver = client != null ? client.getWebDriver() : null; //client is null for JsTestRunner since it's created in JS.
     this.reports = reports;
-    this.logger = logger;
-    this.reporter = reporter;
+    this.testConfig = testConfig;
+    this.logger = testConfig.getLogger();
+    this.reporter = testConfig.getReporter();
     this.id = id;
+    setInterval(id % testConfig.getIncrement() * testConfig.getInterval());
   }
   
   public boolean addStep(TestStep step) {
@@ -55,6 +62,10 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   
   @Override
   public Object call() {
+    if (interval > 0) {
+      logger.info("Waiting " + interval + "s before executing the TestRunner id " + id);
+      waitAround(interval * 1000);
+    }
     for (TestStep step : this) {
       processTestStep(stepPhase, step, reports.get(stepPhase));
     }
@@ -111,8 +122,8 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   public String getClientName() {
     return client.getName();
   }
-    
-  
+
+
   /**
    * Sets id.
    *
@@ -122,6 +133,16 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
     this.id = id;
   }
   
+
+  /**
+   * Sets interval.
+   *
+   * @param interval the interval
+   */
+  public void setInterval(int interval) {
+    this.interval = interval;
+  }
+
   /**
    * Gets last step.
    *

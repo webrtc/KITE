@@ -4,6 +4,7 @@ import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.*;
 import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.util.TestUtils;
+import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.exception.KiteGridException;
 
 import javax.json.JsonArray;
@@ -31,9 +32,9 @@ public class JsTestRunner extends TestRunner {
   private int numberOfParticipant;
   private String reportPath;
   
-  public JsTestRunner(LinkedHashMap<StepPhase, AllureTestReport> testReport, String jsTestImpl, 
-                      KiteLogger logger, Reporter reporter, int id, String implJar) throws KiteGridException {
-    super(null, testReport, logger, reporter, id);
+  public JsTestRunner(LinkedHashMap<StepPhase, AllureTestReport> testReport, String jsTestImpl,
+                      TestConfig testConfig, int id, String implJar) throws KiteGridException, IOException {
+    super(null, testReport, testConfig, id);
     this.jsTestImpl = jsTestImpl;
     this.implJar = implJar;
   }

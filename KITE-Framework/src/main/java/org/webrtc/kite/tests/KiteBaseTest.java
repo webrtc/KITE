@@ -15,6 +15,7 @@ import io.cosmosoftware.kite.util.WebDriverUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.webrtc.kite.config.client.Client;
+import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
 import org.webrtc.kite.exception.KiteGridException;
 
@@ -22,6 +23,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import java.beans.Transient;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -33,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
 import static io.cosmosoftware.kite.util.TestUtils.processTestStep;
+import static io.cosmosoftware.kite.util.TestUtils.waitAround;
 import static org.webrtc.kite.Utils.populateInfoFromNavigator;
 
 public abstract class KiteBaseTest extends ArrayList<TestRunner> implements StepSynchronizer {
@@ -60,7 +63,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   protected String url;
   protected Reporter reporter;
   protected RoomManager roomManager;
-  private boolean closeWebDrivers = true;
+  private int delayForClosing = 0;
   private boolean consoleLogs = true;
   private boolean csvReport = false;
   private int expectedTestDuration = 60; //in minutes
@@ -74,16 +77,20 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   protected int windowWidth = 0;
   protected int windowHeight = 0;
   private String testJar = null;
+  protected boolean jsTest = false;
+  
+  protected TestConfig testConfig;
 
   public KiteBaseTest() {}
 
   /**
    * Creates the TestRunners and add them to the testRunners list.
    */
-  protected void createTestRunners() throws KiteGridException {
+  protected void createTestRunners() throws KiteGridException, IOException {
     for (int index = 0; index < this.tuple.size(); index++) {
       Client client = this.tuple.get(index);
-      TestRunner runner = new TestRunner(client, this.reports, this.logger, this.reporter, index);
+      //todo: refactor by passing the testConfig to running instead of individual objects
+      TestRunner runner = new TestRunner(client, this.reports, this.testConfig, index);
       this.add(runner);
       addToSessionMap(client);
     }
@@ -158,16 +165,22 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
         logger.warn("payload is null");
       }
       reporter.setLogger(logger);
+      addExtraCategories();
       populateTestRunners();
       Runtime.getRuntime().addShutdownHook(new Thread(() -> terminate(stepPhase)));
       getInfoFromNavigator();
       initStep.setStatus(Status.PASSED);
     } catch (KiteGridException e) {
       logger.error("Exception while populating web drivers, " +
-          "closing already created webdrivers...\r\n" + getStackTrace(e));
+        "closing already created webdrivers...\r\n" + getStackTrace(e));
       reporter.textAttachment(initStep, "KiteGridException", getStackTrace(e), "plain");
       initStep.setStatus(Status.FAILED);
-      throw new KiteTestException("Exception while populating web drivers", Status.BROKEN);
+      throw new KiteTestException("Exception while populating web drivers", Status.BROKEN, e);
+    } catch (IOException e) {
+      logger.error(getStackTrace(e));
+      reporter.textAttachment(initStep, "IOException", getStackTrace(e), "plain");
+      initStep.setStatus(Status.FAILED);
+      throw new KiteTestException("IOException", Status.BROKEN, e);
     }
   }
 
@@ -176,7 +189,11 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       this.finished = true;
       AllureStepReport terminateStep = new AllureStepReport("Cleaning up and finishing the test");
       terminateStep.setStartTimestamp();
-      if (closeWebDrivers) {
+      if (stepPhase.isLastPhase() && !jsTest) {
+        if (delayForClosing > 0) {
+          logger.info("Waiting for + " + delayForClosing + "s before closing the webdrivers and terminating the test.");
+          waitAround(delayForClosing * 1000);
+        }
         WebDriverUtils.closeDrivers(this.tuple.getWebDrivers());
       }
 
@@ -262,7 +279,8 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       if (!client.isApp()) {
         name.append("_").append(client.getBrowserName(), 0, 2);
         if (client.getVersion() != null) {
-          name.append("_").append(client.getVersion());
+          String version = client.getVersion().split(" ").length > 1 ? client.getVersion().split(" ")[1] : client.getVersion();
+          name.append("_").append(version);
         }
       } else {
         name.append("_").append(client.getDeviceName(), 0, 2);
@@ -478,7 +496,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   /**
    * Populate the testRunners.
    */
-  protected void populateTestRunners() throws KiteGridException {
+  protected void populateTestRunners() throws KiteGridException, IOException {
     createTestRunners();
     for (TestRunner runner : this) {
       populateTestSteps(runner);
@@ -509,8 +527,8 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
    */
   protected abstract void populateTestSteps(TestRunner runner);
 
-  public void setCloseWebDrivers(boolean closeWebDrivers) {
-    this.closeWebDrivers = closeWebDrivers;
+  public void setDelayForClosing(int delayForClosing) {
+    this.delayForClosing = delayForClosing;
   }
 
   /**
@@ -538,6 +556,11 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     this.logger = logger;
   }
 
+  public void setTestConfig(TestConfig testConfig) {
+    this.testConfig = testConfig;
+  }
+  
+  
   /**
    * Sets name.
    *
@@ -691,6 +714,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     this.testJar = testJar;
   }
 
-
+  protected void addExtraCategories() {
+  }
 
 }

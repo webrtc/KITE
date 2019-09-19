@@ -114,17 +114,24 @@ public class TestManager implements Callable<Object> {
         : (KiteBaseTest) instantiate(testConfig.getTestImpl(), testJar);
 
     test.setTestJar(testJar);
+    
+    test.setTestConfig(testConfig);
+    
     test.setLogger(testConfig.getLogger());
     test.setReporter(this.testConfig.getReporter());
+    
+    test.setDelayForClosing(testConfig.getDelayForClosing().intValue());
+    test.setNetworkInstrumentation(testConfig.getNetworkInstrumentation());
+    test.setDescription(testConfig.getDescription());
+    test.setRoomManager(testConfig.getRoomManager());    
+    
     test.setTuple(tuple);
-    test.setCloseWebDrivers(testConfig.getCloseBrowsers());
+    
     phases = getPhases(testConfig.isLoadTest());
     test.setPhases(phases);
-    test.setNetworkInstrumentation(testConfig.getNetworkInstrumentation());
     test.setParentSuite(testSuite.getParentSuite());
     test.setSuite(testSuite);
-    test.setDescription(testConfig.getDescription());
-    test.setRoomManager(testConfig.getRoomManager());
+    
     if (testConfig.getPayload() != null) {
       JsonObject payload = (JsonObject) Json
           .createReader(new ByteArrayInputStream(testConfig.getPayload().getBytes())).read();
