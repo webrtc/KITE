@@ -30,15 +30,11 @@
   "clients": [
     {
       "browserName": "chrome",
-      "version": "76",
-      "platform": "localhost",
-      "flags": []
+      "platform": "localhost"
     },
     {
       "browserName": "firefox",
-      "version": "68",
-      "platform": "localhost",
-      "flags": []
+      "platform": "localhost"
     }
   ]
 }

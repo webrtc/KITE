@@ -116,13 +116,13 @@ source .bash_profile
 
     On Linux, open a terminal and enter the following commands:
     ```
-    chmod -R +x /scripts/linux
+    chmod -R +x scripts/linux
     scripts/linux/installMaven.sh
     ```     
     
     2.3 On Mac, open a terminal and enter the following commands:
     ```
-    chmod -R +x /scripts/mac
+    chmod -R +x scripts/mac
     scripts/mac/installMaven.sh
     ```
     
@@ -165,18 +165,19 @@ source .bash_profile
     * http://chromedriver.chromium.org/downloads
     * https://github.com/mozilla/geckodriver/releases  
  
-    By default, the local grid setup script is configured for __Chrome__ version __76__ and __Firefox__ version __68__. 
+    By default, the local grid setup script is configured for __Chrome__ version __77__ and __Firefox__ version __68__. 
     If these are the versions installed on your computer, you can safely use the default settings.
     Otherwise, you will need to edit the following settings when prompt to do so:  
     
     ```
-    CHROME_VERSION=76
+    CHROME_VERSION=77
     FIREFOX_VERSION=68
-    CHROMEDRIVER_VERSION=76.0.3809.126
+    CHROMEDRIVER_VERSION=77.0.3865.40
     GECKO_VERSION=v0.24.0
     ```
     
-    __Note:__ Please input only the major (i.e. 76 or 68) for the browser versions, but the full version with the minor (i.e. 76.0.3809.126 or v0.24.0) for the driver versions.   
+    __Note:__ Please input only the major (i.e. 77 or 68) for the browser versions, but the full version with the minor (i.e. 77.0.3865.40 or v0.24.0) for the driver versions.     
+   The latest version of ChromeDriver is available at: https://chromedriver.storage.googleapis.com/LATEST_RELEASE
    More details are available in the [local grid setup guide](scripts/README.md).
     
     __3. Safari__  
@@ -232,21 +233,21 @@ by following [local grid setup guide](scripts/README.md).
 __Note:__ You will need to have your [local grid](scripts/README.md) running before you can execute any test.  
 You can check if your local grid is running and the browser versions installed by 
 opening the [Grid Console](http://localhost:4444/grid/console).
-In the following example, we are assuming __Chrome__ version __76__ and __Firefox__ version __68__.
+In the following example, we are assuming __Chrome__ version __77__ and __Firefox__ version __68__.
 
 
 ### Edit the test config file
 
-If your Grid is running on localhost and with __Chrome__ version __76__ and __Firefox__ version __68__ you can skip this step.
+If your Grid is running on localhost and with __Chrome__ version __77__ and __Firefox__ version __68__ you can skip this step.
 
 Edit the file `./KITE-Example-Test/configs/search.local.config.json` with your favorite text editor. 
 
 #### Version 
 You will need to change __`version`__ according to what is installed on your local grid.
-For example, if the latest stable version of __Chrome__ is __76__, you should set: 
+For example, if the latest stable version of __Chrome__ is __77__, you should set: 
 ```json
       "browserName": "chrome",
-      "version": "76",
+      "version": "77",
       "platform": "localhost",
 ```
 
@@ -259,7 +260,7 @@ Example for Windows:
 
 ```json
       "browserName": "chrome",
-      "version": "76",
+      "version": "77",
       "platform": "WINDOWS",
 ```
 You can find more information about the Basic Configuration File [here](#basic-configuration-file).
@@ -373,7 +374,7 @@ The example search.local.config.json file is almost the simplest config file you
   "clients": [
     {
       "browserName": "chrome",
-      "version": "76",
+      "version": "77",
       "platform": "WINDOWS",
       "flags": []
     },
@@ -422,7 +423,7 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
   "clients": [
     {
       "browserName": "chrome",
-      "version": "76",
+      "version": "77",
       "platform": "LINUX",
       "flags": []
     },

@@ -30,10 +30,7 @@
   "clients": [
     {
       "browserName": "chrome",
-      "version": "76",
-      "platform": "localhost",
-      "headless": true,
-      "flags": []
+      "platform": "localhost"
     }
   ]
 }

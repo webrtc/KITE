@@ -69,12 +69,12 @@ public class MatrixRunner {
     for (Tuple tuple : this.tupleList) {
       for (Client client : tuple.getClients()) {
         if (client.getBrowserName().equals("firefox")) {
-          if (client.getProfile() == null || client.getProfile().isEmpty()) {
+          if (client.getProfile() != null && !client.getProfile().isEmpty()) {
             client.setProfile(testConfig.getFirefoxProfile());
           }
         }
         if (client.getBrowserName().equals("chrome") && client.getVersion() != null && !client.getVersion().contains("electron")) {
-          if (client.getExtension() == null || client.getExtension().isEmpty()) {
+          if (client.getExtension() != null && !client.getExtension().isEmpty()) {
             client.setExtension(testConfig.getChromeExtension());
           }
         }

@@ -117,7 +117,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public Object execute(StepPhase stepPhase) {
     try {
       this.reports.get(stepPhase).setStartTimestamp();
-      logger.info("execute(" + stepPhase + ") for: " + this.generateTestCaseName());
+      logger.info("execute(" + stepPhase + ") for the test case: " + this.generateTestCaseName());
       if (!stepPhase.equals(StepPhase.LOADREACHED)) {
         init(stepPhase);
       }
