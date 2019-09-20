@@ -4,17 +4,14 @@ import com.blueconic.browscap.Capabilities;
 import com.blueconic.browscap.ParseException;
 import com.blueconic.browscap.UserAgentParser;
 import com.blueconic.browscap.UserAgentService;
+import java.io.IOException;
+import javax.json.Json;
+import javax.json.JsonObject;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import java.io.IOException;
-
-/**
- * The type Run info.
- */
+/** The type Run info. */
 public class RunInfo {
   private final String revision;
   private int bits = 64;
@@ -22,7 +19,7 @@ public class RunInfo {
   private String os = "n/a";
   private String osVersion = "n/a";
   private String product = "n/a";
-  
+
   /**
    * Instantiates a new Run info.
    *
@@ -31,13 +28,20 @@ public class RunInfo {
   public RunInfo(String revision) {
     this.revision = revision;
   }
-  
+
+  private static final String userAgentScript() {
+    return "var nav = '';"
+        + "try { var myNavigator = {};"
+        + "for (var i in navigator) myNavigator[i] = navigator[i];"
+        + "nav = myNavigator.userAgent; } catch (exception) { nav = exception.message; }"
+        + "return nav;";
+  }
+
   /**
    * Gets info from user agent.
    *
    * @param userAgentString the user agent string
-   *
-   * @throws IOException    the io exception
+   * @throws IOException the io exception
    * @throws ParseException the parse exception
    */
   private void getInfoFromUserAgent(String userAgentString) throws IOException, ParseException {
@@ -46,12 +50,11 @@ public class RunInfo {
     this.os = capabilities.getPlatform();
     this.osVersion = capabilities.getPlatformVersion();
   }
-  
+
   /**
    * Gets info from web driver.
    *
    * @param webDriver the web driver
-   *
    * @throws IOException the io exception
    */
   public void getInfoFromWebDriver(WebDriver webDriver) throws IOException, ParseException {
@@ -60,10 +63,11 @@ public class RunInfo {
     setBrowserVersion(cap.getVersion());
 
     webDriver.get("http://www.google.com");
-    String userAgentString = (String) ((JavascriptExecutor) webDriver).executeScript(userAgentScript());
+    String userAgentString =
+        (String) ((JavascriptExecutor) webDriver).executeScript(userAgentScript());
     getInfoFromUserAgent(userAgentString);
   }
-  
+
   /**
    * Gets json.
    *
@@ -71,14 +75,15 @@ public class RunInfo {
    */
   public JsonObject getJson() {
     return Json.createObjectBuilder()
-      .add("revision", revision)
-      .add("product", product)
-      .add("browserVersion", browserVersion)
-      .add("bits", bits)
-      .add("os", os)
-      .add("osVersion", osVersion).build();
+        .add("revision", revision)
+        .add("product", product)
+        .add("browserVersion", browserVersion)
+        .add("bits", bits)
+        .add("os", os)
+        .add("osVersion", osVersion)
+        .build();
   }
-  
+
   /**
    * Gets revision.
    *
@@ -87,7 +92,7 @@ public class RunInfo {
   public String getRevision() {
     return revision;
   }
-  
+
   /**
    * Put the product name, version and os into a String as a summarized name of the run
    *
@@ -96,7 +101,7 @@ public class RunInfo {
   public String getSummarizedName() {
     return this.product + "_" + this.browserVersion + "_" + this.os;
   }
-  
+
   /**
    * Sets bits.
    *
@@ -105,7 +110,7 @@ public class RunInfo {
   public void setBits(int bits) {
     this.bits = bits;
   }
-  
+
   /**
    * Sets browser version.
    *
@@ -114,7 +119,7 @@ public class RunInfo {
   public void setBrowserVersion(String browserVersion) {
     this.browserVersion = browserVersion;
   }
-  
+
   /**
    * Sets os.
    *
@@ -123,7 +128,7 @@ public class RunInfo {
   public void setOs(String os) {
     this.os = os;
   }
-  
+
   /**
    * Sets os version.
    *
@@ -132,7 +137,7 @@ public class RunInfo {
   public void setOsVersion(String osVersion) {
     this.osVersion = osVersion;
   }
-  
+
   /**
    * Sets product.
    *
@@ -141,16 +146,9 @@ public class RunInfo {
   public void setProduct(String product) {
     this.product = product;
   }
-  
+
   @Override
   public String toString() {
     return getJson().toString();
-  }
-  
-  private final static String userAgentScript() {
-    return "var nav = '';" + "try { var myNavigator = {};"
-      + "for (var i in navigator) myNavigator[i] = navigator[i];"
-      + "nav = myNavigator.userAgent; } catch (exception) { nav = exception.message; }"
-      + "return nav;";
   }
 }

@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-
-  <parent>
-    <groupId>org.webrtc.kite</groupId>
-    <artifactId>kite-base</artifactId>
-    <version>2.0.5</version>
-  </parent>
-
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <artifactId>wpt-test</artifactId>
-  <name>wpt-test</name>
-  <version>0.2.2</version>
+
 
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>${kite.test.mvn.compiler.version}</version>
         <configuration>
           <source>${kite.java.version}</source>
           <target>${kite.java.version}</target>
         </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <version>${kite.test.mvn.compiler.version}</version>
       </plugin>
     </plugins>
   </build>
 
   <dependencies>
     <dependency>
-      <groupId>org.webrtc.kite</groupId>
       <artifactId>kite-framework</artifactId>
+      <groupId>org.webrtc.kite</groupId>
       <version>${kite.framework.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.blueconic</groupId>
       <artifactId>browscap-java</artifactId>
+      <groupId>com.blueconic</groupId>
       <version>1.2.9</version>
     </dependency>
   </dependencies>
+  <modelVersion>4.0.0</modelVersion>
+  <name>wpt-test</name>
+
+  <parent>
+    <artifactId>kite-base</artifactId>
+    <groupId>org.webrtc.kite</groupId>
+    <version>2.0.5</version>
+  </parent>
+
+  <version>0.2.2</version>
 </project>

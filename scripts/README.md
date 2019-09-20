@@ -26,7 +26,7 @@ Open Firefox, top right menu, then select Help, then About Firefox. You can also
  at [www.mozilla.org/en-US/firefox/releases/](https://www.mozilla.org/en-US/firefox/releases/).
 
 
-By default, the local grid setup script is configured for __Chrome__ version __76__ and __Firefox__ version __68__.  
+By default, the local grid setup script is configured for __Chrome__ version __77__ and __Firefox__ version __68__.  
 If these are the versions already installed on your computer, you can skip __Step 2: configure the script__ and
  jump directly to __Step 3: install the local grid.__ 
 
@@ -58,10 +58,10 @@ open -a TextEdit gridConfig.sh
 
 
 Scroll down to the end of the file and edit the following parameters with the versions corresponding to the latest stable releases versions.
- Please only input the major (only 76 and not 76.0.3809.126).
+ Please only input the major (only 77 and not 77.0.3865.40).
 ```
 rem Browser versions
-set CHROME_VERSION=76
+set CHROME_VERSION=77
 set FIREFOX_VERSION=68
 ```
 
@@ -70,10 +70,10 @@ You will need to find out what are the corresponding driver version. Please visi
 * http://chromedriver.chromium.org/downloads
 * https://github.com/mozilla/geckodriver/releases
  
- And edit the following values in gridConfig.bat accordingly. This time, please input the full version with the minor (76.0.3809.126 and not 76).
+ And edit the following values in gridConfig.bat accordingly. This time, please input the full version with the minor (77.0.3865.40 and not 77).
 ```
 rem ChromeDriver and GeckoDriver versions
-set CHROMEDRIVER_VERSION=76.0.3809.126
+set CHROMEDRIVER_VERSION=77.0.3865.40
 set GECKO_VERSION=v0.24.0
 ```
 

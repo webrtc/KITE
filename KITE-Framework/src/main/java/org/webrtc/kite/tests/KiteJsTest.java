@@ -54,12 +54,13 @@ public class KiteJsTest extends KiteBaseTest {
     this.implJar = implJarName;
     this.tempPath = "temp/" + jsTestImpl + "_" + timestamp() + "_" + UUID.randomUUID().toString().substring(0, 5);
     this.pathUpdater = (implJarName.equals("") ? "" : implJarName + "/");
+    this.jsTest = true;
   }
   
   @Override
-  protected void createTestRunners() throws KiteGridException {
+  protected void createTestRunners() throws KiteGridException, IOException {
     for (int index = 0; index < this.tuple.size(); index++) {
-      JsTestRunner runner = new JsTestRunner(this.reports, jsTestImpl, logger, reporter, index, implJar);
+      JsTestRunner runner = new JsTestRunner(this.reports, jsTestImpl, testConfig, index, implJar);
       runner.setNumberOfParticipant(tuple.size());
       runner.setReportPath(tempPath);
       this.add(runner);
@@ -67,7 +68,6 @@ public class KiteJsTest extends KiteBaseTest {
       createDirs(JS_PATH + pathUpdater + tempPath + "/" + index + "/screenshots");
       printJsonTofile(client.toString(), JS_PATH + pathUpdater + tempPath + "/" + index + "/capabilities.json");
     }
-    this.setCloseWebDrivers(false);//Java should not try closing driver opened by JS.
   }
   
   @Override

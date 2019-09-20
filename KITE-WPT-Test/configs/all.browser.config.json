@@ -1,11 +1,10 @@
 {
-  "name": "Web Platform Test 1",
-  "reportFolder": "/home/nam/workSpace/BackEnd/KITEs/KITE.example/",
+  "name": "Web Platform Test",
   "callable": true,
   "grids": [
     {
       "type": "local",
-      "remoteAddress": "http://localhost:4444/wd/hub"
+      "url": "http://localhost:4444/wd/hub"
     }
   ],
   "callback": null,
@@ -17,72 +16,90 @@
       "testImpl": "org.webrtc.kite.wpt.WPTTest",
       "payload": {
         "report": true,
-        "revision": "ada93cd97824c94f5166e13452be401d8941d819",
+        "revision": "aab8bf00bd40f392c06b88f8afd03a8b03691099",
+        "reportStyle": 2,
         "securedURL": "https://w3c-test.org/",
         "nonSecuredURL": "http://w3c-test.org/",
         "tests": [
           "webrtc",
-          "mediacapture-streams"
+          "webrtc-identity",
+          "webrtc-quic",
+          "webrtc-stats",
+          "webrtc-svc",
+          "media-capabilities",
+          "media-playback-quality",
+          "media-source",
+          "mediacapture-depth",
+          "mediacapture-fromelement",
+          "mediacapture-image",
+          "mediacapture-record",
+          "mediacapture-streams",
+          "mediasession"
         ]
       }
     }
   ],
-  "browsers": [
+  "clients": [
     {
       "browserName": "chrome",
-      "platform": "LINUX",
-      "version": "76"
+      "platform": "WINDOWS",
+      "version": "77"
     },
     {
       "browserName": "chrome",
       "platform": "MAC",
-      "version": "76"
+      "version": "77"
     },
     {
       "browserName": "chrome",
       "platform": "WINDOWS",
-      "version": "76"
+      "version": "79"
     },
     {
-      "browserName": "firefox",
-      "platform": "LINUX",
-      "version": "68"
+      "browserName": "chrome",
+      "platform": "MAC",
+      "version": "79"
     },
     {
       "browserName": "firefox",
       "platform": "MAC",
-      "version": "68"
+      "version": "71"
     },
     {
       "browserName": "firefox",
       "platform": "WINDOWS",
-      "version": "68"
+      "version": "71"
+    },
+    {
+      "browserName": "firefox",
+      "platform": "MAC",
+      "version": "69"
+    },
+    {
+      "browserName": "firefox",
+      "platform": "WINDOWS",
+      "version": "69"
     },
     {
       "browserName": "safari",
       "platform": "MAC",
-      "version": "12.0"
-    },
-    {
-      "browserName": "safari",
-      "platform": "MAC",
-      "version": "12.2",
-      "technologyPreview": true
-    },
-    {
-      "browserName": "edge",
-      "platform": "WINDOWS",
-      "version": "44.17763"
+      "version": "12"
     },
     {
       "browserName": "chrome",
-      "version": "ANDROID 72",
+      "version": "ANDROID 77",
       "platform": "ANDROID",
-      "mobile": {
-        "deviceName": "AndroidPhone",
-        "platformName": "Android",
-        "platformVersion": "8"
-      }
+      "headless": false,
+      "exclude": true
+    },
+    {
+      "browserName": "safari",
+      "version": "12",
+      "platform": "IOS",
+      "platformName": "iOS",
+      "platformVersion": "12.4.1",
+      "headless": false,
+      "exclude": false
     }
   ]
 }
