@@ -170,13 +170,6 @@ public class MatrixRunner {
       List<Future<Object>> tempFutureList;
 
       while (testManagerList.size() > 0) {
-        int percentage = 100 - 100 * testManagerList.size() / tupleList.size();
-        long runtime = System.currentTimeMillis() - start;
-        if (percentage % 6 < 3 && percentage > 0) {
-          logger.info("PROGRESS =========================================");
-          logger.info("Currently finished: " + percentage + "%, ETA: "
-              + (runtime / percentage) / 600 + " minutes");
-        }
         tempFutureList = multiExecutorService.invokeAll(testManagerList);
         testManagerList = (List<TestManager>) this.getSubList(tempFutureList, TestManager.class);
         futureList.addAll(this.getExclusiveSubList(tempFutureList, TestManager.class));
