@@ -365,8 +365,8 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    * @throws IOException the io exception
    */
   @Transient
-  public KiteLogger getLogger() throws IOException {
-    return logger = createTestLogger();
+  public KiteLogger getLogger(boolean create) throws IOException {
+    return this.logger == null || create ? logger = createTestLogger() : this.logger;
   }
   
   /**

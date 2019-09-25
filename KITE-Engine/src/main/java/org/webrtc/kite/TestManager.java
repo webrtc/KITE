@@ -18,6 +18,8 @@ package org.webrtc.kite;
 
 import static io.cosmosoftware.kite.report.CSVHelper.jsonToString;
 import static io.cosmosoftware.kite.util.TestUtils.getDir;
+
+import io.cosmosoftware.kite.report.KiteLogger;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -49,6 +51,8 @@ import io.cosmosoftware.kite.steps.StepPhase;
  * </p>
  */
 public class TestManager implements Callable<Object> {
+
+  private final KiteLogger logger = KiteLogger.getLogger(TestManager.class.getName());
 
   /** The jar download path. */
   final String JAR_DOWNLOAD_PATH = getDir("java.io.tmpdir");
@@ -117,7 +121,7 @@ public class TestManager implements Callable<Object> {
     
     test.setTestConfig(testConfig);
     
-    test.setLogger(testConfig.getLogger());
+    test.setLogger(testConfig.getLogger(true));
     test.setReporter(this.testConfig.getReporter());
     
     test.setDelayForClosing(testConfig.getDelayForClosing().intValue());
@@ -162,6 +166,7 @@ public class TestManager implements Callable<Object> {
     startTimestamp = System.currentTimeMillis();
     test = buildTest();
     JsonObjectBuilder builder = Json.createObjectBuilder();
+    logger.info("Running test case with ID: " + this.id);
     for (StepPhase phase : phases) {
       testSuite.addChild(test.getReport(phase).getUuid());
       Object phaseResult = test.execute(phase);
