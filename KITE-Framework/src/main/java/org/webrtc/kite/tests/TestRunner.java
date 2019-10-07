@@ -50,7 +50,7 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
     this.webDriver = client != null ? client.getWebDriver() : null; //client is null for JsTestRunner since it's created in JS.
     this.reports = reports;
     this.testConfig = testConfig;
-    this.logger = testConfig.getLogger(false);
+    this.logger = testConfig.getLogger();
     this.reporter = testConfig.getReporter();
     this.id = id;
     setInterval(id % testConfig.getIncrement() * testConfig.getInterval());

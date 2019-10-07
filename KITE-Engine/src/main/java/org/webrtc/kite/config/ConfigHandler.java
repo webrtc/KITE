@@ -55,8 +55,10 @@ public class ConfigHandler {
    */
   public ConfigHandler(List<JsonObject> testObjectList, List<JsonObject> clientList)
       throws KiteInsufficientValueException, IOException {
-    for (JsonObject client : clientList) {
-      this.clientList.add(new Client(client));
+    for (int i = 0; i < clientList.size(); i ++) {
+      Client client = new Client(clientList.get(i));
+      client.setClientIndex(i);
+      this.clientList.add(client);
     }
     this.testList = new ArrayList<>();
     for (JsonObject object : testObjectList) {

@@ -22,6 +22,7 @@ import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.KiteLogger;
+import io.cosmosoftware.kite.util.TestUtils;
 import io.cosmosoftware.kite.util.WebDriverUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -48,7 +49,10 @@ import java.util.logging.Level;
 public class WebDriverFactory {
 
   private static final KiteLogger logger = KiteLogger.getLogger(WebDriverFactory.class.getName());
-
+  
+  //this will be updated by Tomcat during context init according to the actual server settings.
+  public static String kiteServerUrl = "http://localhost:8080/KITEServer";
+  
   /**
    * Build capabilities for app appium driver
    *
@@ -212,14 +216,15 @@ public class WebDriverFactory {
     logger.debug("createWebDriver on " + urlStr + " for " + client);
     URL url = new URL(urlStr);
     if (!client.isApp()) {
-      WebDriver webDriver = new RemoteWebDriver(url, WebDriverFactory.createCapabilities(client, testName, id));
+      RemoteWebDriver webDriver = new RemoteWebDriver(url, WebDriverFactory.createCapabilities(client, testName, id));
       if (client.getBrowserName().equalsIgnoreCase("firefox")) {
         if (client.useFakeMedia()) {
           if (client.getVideo() != null || client.getAudio() != null) {
-            String nodePublicIp = WebDriverUtils.getPublicIp(webDriver);
+            String nodePublicIp = new URL(TestUtils.getNode(urlStr, webDriver.getSessionId().toString())).getHost();
             String gridId = kiteServerGridId.length > 0 ? kiteServerGridId[0] : "null";
             String command = writeCommand(client);
-            Utils.makeCommand(gridId, nodePublicIp, command);
+            String uri = "/command?id=" + gridId + "&ip=" + nodePublicIp + "&cmd=" + command;
+            logger.debug("kiteServerCommand response:\r\n" + TestUtils.kiteServerCommand(kiteServerUrl, uri));
           }
         }
       }
@@ -289,6 +294,8 @@ public class WebDriverFactory {
                 + client.fetchMediaPath(client.getAudio(), client.getBrowserName()));
           }
         }
+      } else {
+        chromeOptions.setExperimentalOption("w3c", false);
       }
     } else {
       // Create an Hashmap to edit user profile

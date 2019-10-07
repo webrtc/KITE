@@ -129,7 +129,9 @@ public class Utils {
       
       for (JsonObject object : clientObjectList) {
         for (int i = 0; i < tupleSize; i++) {
-          tuple.add(new Client(object));
+          Client client = new Client(object);
+          client.setClientIndex(i);
+          tuple.add(client);
         }
       }
     } catch (Exception e) {
@@ -328,21 +330,5 @@ public class Utils {
       throw new KiteBadValueException(key);
     }
   }
-
-
-  static void makeCommand(String gridId, String nodeIp, String command){
-    logger.info(gridId + " GRID ID");
-    logger.info(nodeIp + " Node IP ");
-    logger.info(command + " command");
-
-    String url = "http://localhost:8080/KITEServer" + "/command?id=" + gridId + "&ip=" + nodeIp + "&cmd=" + command;
-    try {
-      URLConnection connection = new URL(url).openConnection();
-      connection.setRequestProperty("Accept-Charset", "UTF-8");
-      InputStream response = connection.getInputStream();
-      logger.info("SUCCEEDED and got response: " + response);
-    } catch (IOException e) {
-      logger.error(getStackTrace(e));
-    }
-  }
+  
 }

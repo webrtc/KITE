@@ -74,6 +74,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   private Boolean permute = false;
   private Boolean regression = false;
   private String testImpl = "";
+  private String pathToConfigFile = "";
   private JsonObject testJsonConfig;
   private Integer tupleSize = 2;
   private TestType type;
@@ -139,8 +140,6 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     
     this.regression = jsonObject.getBoolean("regression", false);
     this.permute = jsonObject.getBoolean("permute", true);
-
-    this.logger = createTestLogger();
   }
   
   /**
@@ -166,8 +165,9 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     if (this.reporter == null) {
       this.reporter = new Reporter(this.name);
     }
-    System.out.println("trying to set report path : " + reportPath);
     this.reporter.setReportPath(reportPath);
+    this.reporter.setConfigFilePath(this.pathToConfigFile);
+    this.reporter.setTestConfig(this.testJsonConfig);
   }
 
   /*
@@ -187,22 +187,6 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
       .add("maxRetryCount", this.maxRetryCount)
       .add("delayForClosing", this.delayForClosing)
       .add("permute", this.permute);
-  }
-  
-  /**
-   * Create a common test logger for all test cases of a given test
-   *
-   * @return the logger for tests
-   * @throws IOException if the FileAppender fails
-   */
-  private KiteLogger createTestLogger() throws IOException {
-    KiteLogger testLogger = KiteLogger.getLogger(new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(new Date()));
-    FileAppender fileAppender = new FileAppender(new PatternLayout("%d %-5p - %m%n")
-      , "logs/" + ((kiteRequestId == null || kiteRequestId.equals("null")) ? "" : (kiteRequestId + "_"))
-      + getTestClassName() + "/test_" + testLogger.getName() + ".log", false);
-    fileAppender.setThreshold(Level.INFO);
-    testLogger.addAppender(fileAppender);
-    return testLogger;
   }
   
   /**
@@ -365,8 +349,8 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    * @throws IOException the io exception
    */
   @Transient
-  public KiteLogger getLogger(boolean create) throws IOException {
-    return this.logger == null || create ? logger = createTestLogger() : this.logger;
+  public KiteLogger getLogger() throws IOException {
+    return this.logger;
   }
   
   /**
@@ -673,12 +657,6 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
         this.implJar = "http://localhost:8080/KITEServer/getfile?name=jar";
         break;
     }
-    
-    try {
-      this.logger = createTestLogger();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
     return this;
   }
   
@@ -702,8 +680,22 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   public String getChromeExtension() {
     return chromeExtension;
   }
-
+  
   public String getFirefoxProfile() {
     return firefoxProfile;
+  }
+
+  @Transient
+  public String getKiteRequestId() {
+    return kiteRequestId;
+  }
+
+  @Transient
+  public String getPathToConfigFile() {
+    return pathToConfigFile;
+  }
+
+  public void setPathToConfigFile(String pathToConfigFile) {
+    this.pathToConfigFile = pathToConfigFile;
   }
 }
