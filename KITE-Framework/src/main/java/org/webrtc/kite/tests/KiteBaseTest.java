@@ -89,6 +89,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   protected void createTestRunners() throws KiteGridException, IOException {
     for (int index = 0; index < this.tuple.size(); index++) {
       Client client = this.tuple.get(index);
+      client.createWebDriver();
       //todo: refactor by passing the testConfig to running instead of individual objects
       TestRunner runner = new TestRunner(client, this.reports, this.testConfig, index);
       this.add(runner);
@@ -257,6 +258,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     phaseReport.addLabel("package", getClass().getPackage().toString());
     phaseReport.addLabel("testClass", getClass().toString());
     phaseReport.addLabel("testMethod", "execute");
+    phaseReport.setTestClientMatrix(tuple.getMatrix());
     try {
       phaseReport.addLabel("host", InetAddress.getLocalHost().getHostName());
     } catch (UnknownHostException e) {

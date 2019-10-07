@@ -201,6 +201,14 @@ public class Tuple extends KiteEntity implements JsonBuilder {
   public int size() {
     return this.clients.size();
   }
-  
+
+  @Transient
+  public List<Integer> getMatrix() {
+    List<Integer> res = new ArrayList<>();
+    for (int i = 0; i < this.clients.size(); i++) {
+      res.add(this.clients.get(i).getClientIndex());
+    }
+    return res;
+  }
     
 }

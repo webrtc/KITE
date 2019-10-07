@@ -17,12 +17,20 @@
 package org.webrtc.kite;
 
 import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.PatternLayout;
 import org.webrtc.kite.config.client.Client;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
@@ -159,11 +167,13 @@ public class MatrixRunner {
 
     logger.info("Executing " + this.testConfig + " for " + totalTestCases
         + " browser tuples with size :" + tupleList.get(0).size());
+    testConfig.setLogger(createTestLogger(testConfig.getKiteRequestId(), testConfig.getTestClassName()));
     try {
       for (int index = 0; index < this.tupleList.size(); index++) {
         TestManager manager = new TestManager(this.testConfig, this.tupleList.get(index));
         manager.setTestSuite(testSuite);
-        manager.setId(testConfig.isLoadTest() ? "iteration " : "" + (index + 1));
+        manager.setId((index + 1));
+        manager.setTotal(this.tupleList.size());
         testManagerList.add(manager);
       }
 
@@ -202,4 +212,25 @@ public class MatrixRunner {
     logger.info("shutdownExecutors() done.");
   }
 
+
+  /**
+   * Create a common test logger for all test cases of a given test
+   *
+   * @return the logger for tests
+   * @throws IOException if the FileAppender fails
+   */
+  private KiteLogger createTestLogger(String kiteRequestId, String testName) {
+    KiteLogger testLogger = KiteLogger.getLogger(new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(new Date()));
+    String logFileName = ((kiteRequestId == null || kiteRequestId.equals("null")) ? 
+      "" : (kiteRequestId + "_")) + testName + "/test_" + testLogger.getName() + ".log";
+    try {
+      FileAppender fileAppender = new FileAppender(
+        new PatternLayout("%d %-5p - %m%n"), "logs/" + logFileName, false);    
+      fileAppender.setThreshold(Level.INFO);
+      testLogger.addAppender(fileAppender);
+    } catch (IOException e) {
+      logger.error(getStackTrace(e));
+    }
+    return testLogger;
+  }
 }

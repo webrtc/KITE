@@ -131,6 +131,7 @@ public class Engine {
             testConfig.isRegression());
       }
       distributeRemote(configurator, tupleList);
+      testConfig.setPathToConfigFile(configurator.getConfigFilePath());
       testConfig.setReportPath(configurator.getReportPath());
       ExecutorService service = Executors.newSingleThreadExecutor();
       try {

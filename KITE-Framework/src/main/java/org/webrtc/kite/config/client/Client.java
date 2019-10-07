@@ -21,11 +21,9 @@ import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import io.cosmosoftware.kite.interfaces.SampleData;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.ReportUtils;
-import io.cosmosoftware.kite.util.TestUtils;
 import org.hibernate.annotations.GenericGenerator;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.webrtc.kite.WebDriverFactory;
 import org.webrtc.kite.config.media.MediaFile;
 import org.webrtc.kite.config.media.MediaFileType;
@@ -47,27 +45,12 @@ import static org.webrtc.kite.Utils.getStackTrace;
 @Entity(name = Client.TABLE_NAME)
 public class Client extends KiteEntity implements JsonBuilder, SampleData {
 
-  /**
-   * The constant TABLE_NAME.
-   */
   final static String TABLE_NAME = "clients";
-  /**
-   * The Logger.
-   */
   protected final KiteLogger logger = KiteLogger.getLogger(this.getClass().getName());
-  /**
-   * The Count.
-   */
   protected Integer count;
-  /**
-   * The Id.
-   */
+  protected Integer clientIndex = -1; // in the config file
   protected String id;
-  /**
-   * The Specs.
-   */
   protected BrowserSpecs specs;
-
   private String name = "";
   protected Paas paas;
   private Boolean exclude = false;
@@ -76,11 +59,7 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
   private JsonObject jsonConfig;
   private Integer maxInstances;
   protected String kind;
-
-
   private App app;
-
-
   private final String DEFAULT_WINDOW_SIZE = "1920,1200";
   private List<String> flags = new ArrayList<>();
   private Boolean headless = false;
@@ -110,6 +89,7 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
     this.count = client.getCount();
     this.paas = client.getPaas();
     this.specs = client.getSpecs();
+    this.clientIndex = client.getClientIndex();
     for (String capabilityName : client.getExtraCapabilities().keySet()) {
       this.addCapabilities(capabilityName, client.getExtraCapabilities().get(capabilityName));
     }
@@ -233,9 +213,6 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
    */
   @Transient
   public WebDriver getWebDriver() throws KiteGridException {
-    if (webDriver == null) {
-      createWebDriver();
-    }
     return webDriver;
   }
   /**
@@ -905,7 +882,11 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @throws KiteGridException the kite grid exception
    */
-  private void createWebDriver() throws KiteGridException {
+  public void createWebDriver() throws KiteGridException {
+    if (this.webDriver != null) {
+      logger.warn("createWebDriver() webdriver already exists, skipping.");
+      return;
+    }
     try {
       this.webDriver = WebDriverFactory.createWebDriver(this, null, null, this.getPaas().getGridId());
     } catch (Exception e) {
@@ -919,4 +900,12 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
     }
   }
 
+  public void setClientIndex(int clientIndex) {
+    this.clientIndex = clientIndex;
+  }
+
+  @Transient
+  public int getClientIndex() {
+    return clientIndex;
+  }
 }

@@ -64,7 +64,7 @@ public class TestManager implements Callable<Object> {
   private final int retry;
 
   /** The start timestamp. */
-  private long startTimestamp = System.currentTimeMillis();
+  private long startTime = System.currentTimeMillis();
 
   /** The end timestamp. */
   private long endTimestamp = 0;
@@ -76,7 +76,9 @@ public class TestManager implements Callable<Object> {
   private final Tuple tuple;
 
   /** The id. */
-  private String id;
+  private int id;
+
+  private int total = 0;
 
   /** The phases. */
   private List<StepPhase> phases;
@@ -86,7 +88,7 @@ public class TestManager implements Callable<Object> {
 
   /** The test. */
   private KiteBaseTest test;
-
+  
   /**
    * Constructs a new TestManager with the given TestConfig and List<Client>.
    *
@@ -121,7 +123,8 @@ public class TestManager implements Callable<Object> {
     
     test.setTestConfig(testConfig);
     
-    test.setLogger(testConfig.getLogger(true));
+    test.setLogger(testConfig.getLogger());
+    
     test.setReporter(this.testConfig.getReporter());
     
     test.setDelayForClosing(testConfig.getDelayForClosing().intValue());
@@ -150,7 +153,7 @@ public class TestManager implements Callable<Object> {
       } catch (Exception e) {
         simpleHubId = tuple.get(0).getPaas().getUrl();
       }
-      test.setName(simpleHubId + (id == null ? "" : " " + id));
+      test.setName(simpleHubId + (id == 0 ? "" : " " + id));
     }
 
     return test;
@@ -163,10 +166,28 @@ public class TestManager implements Callable<Object> {
    */
   @Override
   public Object call() throws Exception {
-    startTimestamp = System.currentTimeMillis();
+    startTime = System.currentTimeMillis();
+    if (this.id == 1) {
+      this.testConfig.getReporter().setStartTime(startTime);
+    }
     test = buildTest();
     JsonObjectBuilder builder = Json.createObjectBuilder();
-    logger.info("Running test case with ID: " + this.id);
+    String ETA = "Estimating..";
+    long elapsedSecond = (int)(System.currentTimeMillis() - testConfig.getReporter().getStartTime())/1000;
+    int currentTestCount = testConfig.getReporter().numberOfRegisteredTest();
+    long avgTimeForOneTest = currentTestCount == 1 ? 0 : elapsedSecond/(currentTestCount - 1);
+    if (avgTimeForOneTest != 0) {
+      long ETASeconds = avgTimeForOneTest*(total - id + 1);
+      ETA = ETASeconds/60 + "m" + ETASeconds%60 + "s";
+    }
+    logger.info("\n"
+        + "           |--------------------------------------------------\n"
+        + "           | Number of registered tests: " + currentTestCount + "\n"
+        + "           | Elapsed time: " + elapsedSecond/60 + "m" + (elapsedSecond%60)  + "s (avg:"
+                      + avgTimeForOneTest/60 + "m" + avgTimeForOneTest%60 + "s" + ")\n"
+        + "           | Running test case with ID: " + this.id + "/" + (total == 0 ? "N/A" : total) + "\n"
+        + "           | ETA (for " + this.testConfig.getName() + "): " + ETA + "\n"
+        + "           |--------------------------------------------------");
     for (StepPhase phase : phases) {
       testSuite.addChild(test.getReport(phase).getUuid());
       Object phaseResult = test.execute(phase);
@@ -215,7 +236,7 @@ public class TestManager implements Callable<Object> {
     return Json.createObjectBuilder()
         .add("resultId",
             tuple.getResultId() == null ? UUID.randomUUID().toString() : tuple.getResultId())
-        .add("startTimestamp", "" + startTimestamp)
+        .add("startTime", "" + startTime)
         .add("endTimestamp", "" + (endTimestamp == 0 ? System.currentTimeMillis() : endTimestamp))
         .add("result",
             object instanceof Exception ? ((Exception) object).getMessage() : object.toString())
@@ -269,7 +290,7 @@ public class TestManager implements Callable<Object> {
    *
    * @param id case id
    */
-  public void setId(String id) {
+  public void setId(int id) {
     this.id = id;
   }
 
@@ -282,6 +303,8 @@ public class TestManager implements Callable<Object> {
     this.testSuite = testSuite;
   }
 
+  
+  
   /**
    * Terminate.
    */
@@ -293,4 +316,7 @@ public class TestManager implements Callable<Object> {
     }
   }
 
+  public void setTotal(int total) {
+    this.total = total;
+  }
 }
