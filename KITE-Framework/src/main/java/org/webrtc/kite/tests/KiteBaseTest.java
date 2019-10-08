@@ -89,6 +89,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   protected void createTestRunners() throws KiteGridException, IOException {
     for (int index = 0; index < this.tuple.size(); index++) {
       Client client = this.tuple.get(index);
+      logger.info("Creating webdriver for " + client);
       client.createWebDriver();
       //todo: refactor by passing the testConfig to running instead of individual objects
       TestRunner runner = new TestRunner(client, this.reports, this.testConfig, index);
