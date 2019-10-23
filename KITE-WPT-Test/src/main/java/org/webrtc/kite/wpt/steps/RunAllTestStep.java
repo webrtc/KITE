@@ -1,22 +1,18 @@
 package org.webrtc.kite.wpt.steps;
 
-import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
-import static io.cosmosoftware.kite.util.TestUtils.processTestStep;
-
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.interfaces.Runner;
-import io.cosmosoftware.kite.report.AllureStepReport;
-import io.cosmosoftware.kite.report.AllureTestReport;
-import io.cosmosoftware.kite.report.Container;
-import io.cosmosoftware.kite.report.Status;
-import io.cosmosoftware.kite.report.StatusDetails;
+import io.cosmosoftware.kite.report.*;
 import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.steps.TestStep;
-import java.util.List;
 import org.webrtc.kite.wpt.Result;
 import org.webrtc.kite.wpt.RunInfo;
 import org.webrtc.kite.wpt.SubTest;
 import org.webrtc.kite.wpt.TestSummary;
+
+import java.util.List;
+
+import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
 
 public class RunAllTestStep extends TestStep {
   private final String revision;
@@ -82,7 +78,7 @@ public class RunAllTestStep extends TestStep {
       RunOneTestStep runOneTestStep =
           new RunOneTestStep(runner, url, "[" + (index + 1) + "/" + urlList.size() + "]");
       long start = System.currentTimeMillis();
-      processTestStep(StepPhase.DEFAULT, runOneTestStep, this.report);
+      runOneTestStep.processTestStep(StepPhase.DEFAULT, report, false);
       long stop = System.currentTimeMillis();
       Result result = runOneTestStep.getTestResult();
       total += result.size();
@@ -181,4 +177,6 @@ public class RunAllTestStep extends TestStep {
   public String stepDescription() {
     return "Running " + urlList.size() + " found test(s)";
   }
+  
+  
 }

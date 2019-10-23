@@ -32,9 +32,8 @@ public class JsTestRunner extends TestRunner {
   private int numberOfParticipant;
   private String reportPath;
   
-  public JsTestRunner(LinkedHashMap<StepPhase, AllureTestReport> testReport, String jsTestImpl,
-                      TestConfig testConfig, int id, String implJar) throws KiteGridException, IOException {
-    super(null, testReport, testConfig, id);
+  public JsTestRunner(KiteBaseTest test, String jsTestImpl, int id, String implJar) throws KiteGridException, IOException {
+    super(test, id);
     this.jsTestImpl = jsTestImpl;
     this.implJar = implJar;
   }
