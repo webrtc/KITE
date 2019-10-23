@@ -1,14 +1,14 @@
 package org.webrtc.kite.wpt.steps;
 
-import static io.cosmosoftware.kite.util.TestUtils.processTestStep;
-import static io.cosmosoftware.kite.util.TestUtils.verifyPathFormat;
-
 import io.cosmosoftware.kite.interfaces.Runner;
 import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.steps.TestStep;
+import org.webrtc.kite.wpt.pages.WPTDirPage;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.webrtc.kite.wpt.pages.WPTDirPage;
+
+import static io.cosmosoftware.kite.util.TestUtils.verifyPathFormat;
 
 public class RetrieveTestStep extends TestStep {
   private final String sercureURL;
@@ -56,10 +56,8 @@ public class RetrieveTestStep extends TestStep {
     logger.info("Found : " + temp.size() + " test(s) in :" + url);
     logger.info("Total is now: " + testUrlList.size() + " test(s)");
     for (String dirName : wptDirPage.getDirNameList()) {
-      processTestStep(
-          StepPhase.DEFAULT,
-          new RetrieveTestStep(runner, url + dirName, sercureURL + dirName, testUrlList),
-          this.report);
+      RetrieveTestStep retrieveTestStep = new RetrieveTestStep(runner, url + dirName, sercureURL + dirName, testUrlList);
+      retrieveTestStep.processTestStep(StepPhase.DEFAULT, report, false);
     }
     reporter.textAttachment(this.report, "List of tests", temp.toString(), "plain");
   }

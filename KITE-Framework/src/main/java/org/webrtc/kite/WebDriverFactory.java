@@ -146,6 +146,7 @@ public class WebDriverFactory {
     LoggingPreferences logPrefs = new LoggingPreferences();
     logPrefs.enable(LogType.BROWSER, Level.ALL);
     capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
+//    capabilities.setCapability("goog:loggingPrefs", logPrefs);
     // Capabilities for mobile client/app
     if (client.getPlatform().toString().equalsIgnoreCase("android")
       ||client.getPlatform().toString().equalsIgnoreCase("ios")) {

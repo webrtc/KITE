@@ -16,9 +16,9 @@ import org.webrtc.kite.exception.KiteGridException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static io.cosmosoftware.kite.util.TestUtils.processTestStep;
 import static io.cosmosoftware.kite.util.TestUtils.waitAround;
 
 /**
@@ -34,6 +34,8 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   protected final TestConfig testConfig;
   protected int id;
   protected int interval = 0;
+  private final KiteBaseTest test;
+  protected final Map<WebDriver, Map<String, Object>> sessionData;
   
   protected StepPhase stepPhase = StepPhase.DEFAULT;
   
@@ -41,16 +43,40 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
    * Instantiates a new Test runner.
    *
    * @param client the web driver
-   * @param reports   the test reports
+   * @param test   the test 
    * @param id        the id
    */
-  public TestRunner(Client client, LinkedHashMap<StepPhase, AllureTestReport> reports,
-                    TestConfig testConfig, int id) throws KiteGridException, IOException {
+  public TestRunner(Client client, KiteBaseTest test, int id) throws KiteGridException, IOException {
     this.client = client;
-    this.webDriver = client != null ? client.getWebDriver() : null; //client is null for JsTestRunner since it's created in JS.
-    this.reports = reports;
-    this.testConfig = testConfig;
+    this.test = test;
+    this.testConfig = test.testConfig;
     this.logger = testConfig.getLogger();
+    this.sessionData = test.sessionData;
+    logger.info("Creating webdriver for " + client);
+    client.createWebDriver(sessionData);
+    this.webDriver = client != null ? client.getWebDriver() : null; //client is null for JsTestRunner since it's created in JS.
+    this.reports = test.reports;
+    this.reporter = testConfig.getReporter();
+    this.id = id;
+    setInterval(id % testConfig.getIncrement() * testConfig.getInterval());
+  }
+
+
+  /**
+   * Super constructor for JsTestRunner, which does not create the webdriver,
+   * since it's done by the js script
+   *
+   * @param test   the test 
+   * @param id        the id
+   */
+  protected TestRunner(KiteBaseTest test, int id) throws KiteGridException, IOException {
+    this.client = null;
+    this.sessionData = null;
+    this.test = test;
+    this.testConfig = test.testConfig;
+    this.logger = testConfig.getLogger();
+    this.webDriver = null; 
+    this.reports = test.reports;
     this.reporter = testConfig.getReporter();
     this.id = id;
     setInterval(id % testConfig.getIncrement() * testConfig.getInterval());
@@ -61,13 +87,12 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   }
   
   @Override
-  public Object call() {
-    if (interval > 0) {
-      logger.info("Waiting " + interval + "s before executing the TestRunner id " + id);
-      waitAround(interval * 1000);
-    }
+  public Object call() throws KiteGridException {
+    interval = interval < 200 ? 200 : interval;
+    logger.info("Start processing the TestRunner id " + id + " in " + interval + "ms");
+    waitAround(interval);
     for (TestStep step : this) {
-      processTestStep(stepPhase, step, reports.get(stepPhase));
+      step.processTestStep(stepPhase, reports.get(stepPhase), testConfig.isLoadTest());
     }
     return null;
   }
@@ -122,7 +147,6 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   public String getClientName() {
     return client.getName();
   }
-
 
   /**
    * Sets id.

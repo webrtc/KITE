@@ -34,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 
 import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
-import static io.cosmosoftware.kite.util.TestUtils.processTestStep;
 import static io.cosmosoftware.kite.util.TestUtils.waitAround;
 import static org.webrtc.kite.Utils.populateInfoFromNavigator;
 
@@ -42,7 +41,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
 
   protected final LinkedHashMap<StepPhase, AllureTestReport> reports = new LinkedHashMap<>();
   protected final ArrayList<Scenario> scenarioArrayList = new ArrayList<>();
-  protected final Map<WebDriver, Map<String, Object>> sessionData = new HashMap<WebDriver, Map<String, Object>>();
+  protected final Map<WebDriver, Map<String, Object>> sessionData = new HashMap<>();
   protected String configFilePath;
   protected String description;
   protected JsonObject getStatsConfig = null;
@@ -88,15 +87,12 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
    */
   protected void createTestRunners() throws KiteGridException, IOException {
     for (int index = 0; index < this.tuple.size(); index++) {
-      Client client = this.tuple.get(index);
-      logger.info("Creating webdriver for " + client);
-      client.createWebDriver();
-      //todo: refactor by passing the testConfig to running instead of individual objects
-      TestRunner runner = new TestRunner(client, this.reports, this.testConfig, index);
-      this.add(runner);
-      addToSessionMap(client);
+      this.add(new TestRunner(this.tuple.get(index), this, index));
     }
     this.tupleSize = size();
+    for (TestRunner runner : this) {
+      populateTestSteps(runner);
+    }
   }
 
   /**
@@ -124,6 +120,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
         init(stepPhase);
       }
       setStepPhase(stepPhase);
+      
       if (multiThread) {
         testInParallel(stepPhase);
       } else {
@@ -168,7 +165,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       }
       reporter.setLogger(logger);
       addExtraCategories();
-      populateTestRunners();
+      createTestRunners();
       Runtime.getRuntime().addShutdownHook(new Thread(() -> terminate(stepPhase)));
       getInfoFromNavigator();
       initStep.setStatus(Status.PASSED);
@@ -237,12 +234,13 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
    * Assuming that all the callables have the same number of steps
    * If not, overwrite this function with appropriate order.
    */
-  protected void testSequentially(StepPhase stepPhase) {
+  protected void testSequentially(StepPhase stepPhase) throws KiteGridException {
     logger.info("Starting the execution of the test runners sequentially " + stepPhase.getName());
+    
     for (int i = 0; i < get(0).size(); i++) {
       for (TestRunner runner : this) {
         TestStep step = runner.get(i);
-        processTestStep(stepPhase, step, reports.get(stepPhase));
+        step.processTestStep(stepPhase, reports.get(stepPhase), isLoadTest());
       }
     }
   }
@@ -496,33 +494,6 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
     }
   }
 
-  /**
-   * Populate the testRunners.
-   */
-  protected void populateTestRunners() throws KiteGridException, IOException {
-    createTestRunners();
-    for (TestRunner runner : this) {
-      populateTestSteps(runner);
-    }
-  }
-
-  /**
-   *
-   */
-   private void addToSessionMap(Client client) throws KiteGridException {
-     Map<String, Object> map = new HashMap<>();
-     map.put("end_point", client);
-    if (!client.isApp()) {
-      String node =
-          TestUtils.getNode(
-              client.getPaas().getUrl(),
-              ((RemoteWebDriver) client.getWebDriver()).getSessionId().toString());
-      if (node != null) {
-        map.put("node_host", node);
-      }
-     }
-     this.sessionData.put(client.getWebDriver(), map);
-   }
   /**
    * Abstract method to be overridden by the client to add steps to the TestRunner.
    *
