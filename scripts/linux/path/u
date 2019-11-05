@@ -1,0 +1,31 @@
+echo off
+KITE_JAR=$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar
+
+if [ -z $KITE_HOME ]
+then
+  echo KITE_HOME is not defined. Please run configure.bat or manually add KITE_HOME to your environment variables.
+  exit 0
+fi
+
+if [ [$2] = [] ]
+then
+  echo Usage (with absolute path):
+  echo :
+  echo u old-allure-report-folder new-allure-report-folder
+  echo :
+  exit 0
+fi
+
+OLD_REPORT = $1
+NEW_REPORT = $2
+
+
+
+if [ -f "$KITE_JAR" ]
+then
+  echo java -cp "$KITE_JAR" org.webrtc.kite.ReportMerger $OLD_REPORT $NEW_REPORT
+  java -cp "$KITE_JAR*" org.webrtc.kite.ReportMerger $OLD_REPORT $NEW_REPORT
+else
+  echo "File not found: $KITE_JAR"
+  echo "Please edit this file and set KITE_JAR to the correct path."
+fi
