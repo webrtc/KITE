@@ -60,7 +60,7 @@ public class KiteJsTest extends KiteBaseTest {
   @Override
   protected void createTestRunners() throws KiteGridException, IOException {
     for (int index = 0; index < this.tuple.size(); index++) {
-      JsTestRunner runner = new JsTestRunner(this.reports, jsTestImpl, testConfig, index, implJar);
+      JsTestRunner runner = new JsTestRunner(this, jsTestImpl, index, implJar);
       runner.setNumberOfParticipant(tuple.size());
       runner.setReportPath(tempPath);
       this.add(runner);

@@ -22,7 +22,7 @@
     <!-- KITE dependency version-->
     <kite.version>2.0.5</kite.version>
     <kite.apprtc.version>2.0.1</kite.apprtc.version>
-    <kite.extras.version>0.1.52</kite.extras.version>
+    <kite.extras.version>0.1.58</kite.extras.version>
     <kite.framework.version>1.0.13</kite.framework.version>
     <!-- Core dependencies -->
     <kite.log4j.version>1.2.17</kite.log4j.version>
@@ -48,7 +48,7 @@
     <!-- Utility dependencies -->
     <kite.sqlite.jdbc.version>3.23.1</kite.sqlite.jdbc.version>
     <kite.common-io.version>2.6</kite.common-io.version>
-    <kite.jcraft.version>0.1.54</kite.jcraft.version>
+    <kite.jcraft.version>0.1.55</kite.jcraft.version>
     <kite.tess4j.version>4.0.2</kite.tess4j.version>
     <kite.quartz.version>2.3.0</kite.quartz.version>
     <kite.jaxb.version>2.2.11</kite.jaxb.version>

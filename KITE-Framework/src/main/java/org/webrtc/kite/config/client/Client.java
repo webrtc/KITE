@@ -21,9 +21,11 @@ import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import io.cosmosoftware.kite.interfaces.SampleData;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.ReportUtils;
+import io.cosmosoftware.kite.util.TestUtils;
 import org.hibernate.annotations.GenericGenerator;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.webrtc.kite.WebDriverFactory;
 import org.webrtc.kite.config.media.MediaFile;
 import org.webrtc.kite.config.media.MediaFileType;
@@ -882,13 +884,14 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @throws KiteGridException the kite grid exception
    */
-  public void createWebDriver() throws KiteGridException {
+  public void createWebDriver(Map<WebDriver, Map<String, Object>> sessionData) throws KiteGridException {
     if (this.webDriver != null) {
       logger.warn("createWebDriver() webdriver already exists, skipping.");
       return;
     }
     try {
       this.webDriver = WebDriverFactory.createWebDriver(this, null, null, this.getPaas().getGridId());
+      addToSessionMap(sessionData);
     } catch (Exception e) {
       logger.error(ReportUtils.getStackTrace(e));
       throw new KiteGridException(
@@ -908,4 +911,27 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
   public int getClientIndex() {
     return clientIndex;
   }
+
+
+  /**
+   * Adds the webdriver to the sessionData map.
+   * 
+   * @param sessionData
+   * @throws KiteGridException
+   */
+  private void addToSessionMap(Map<WebDriver, Map<String, Object>> sessionData) throws KiteGridException {
+    Map<String, Object> map = new HashMap<>();
+    map.put("end_point", this);
+    if (!this.isApp()) {
+      String node = TestUtils.getNode(
+        this.getPaas().getUrl(),
+        ((RemoteWebDriver) this.getWebDriver()).getSessionId().toString());
+      if (node != null) {
+        map.put("node_host", node);
+      }
+    }
+    sessionData.put(this.getWebDriver(), map);
+  }
+  
+  
 }

@@ -370,7 +370,7 @@ public class StatsUtils {
       objectBuilder.add(inbound
           ? StatEnum.RECEIVED_BITRATE.toString()
           : StatEnum.SENT_BITRATE.toString()
-        , checkNegativeValue(getDiffEndToStart(bytes)/durationInSeconds));
+        , checkNegativeValue(8 * getDiffEndToStart(bytes)/durationInSeconds));
   
       List<Double> packets = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.PACKETS, fullyDetailed);
       objectBuilder.add(inbound
