@@ -33,6 +33,9 @@ import java.util.concurrent.Callable;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+
+import io.cosmosoftware.kite.report.Status;
+import io.cosmosoftware.kite.usrmgmt.EmailSender;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
 import org.webrtc.kite.tests.KiteBaseTest;
@@ -193,12 +196,8 @@ public class TestManager implements Callable<Object> {
       Object phaseResult = test.execute(phase);
       builder.add(phase.getName(), (JsonObject) phaseResult);
     }
-    test = null;
-    JsonObject testResult = builder.build();
     // todo: need some retry mechanism here
-
-    JsonObject jsonTestResult = developResult(testResult);
-
+    JsonObject jsonTestResult = developResult(builder.build());
     if (ENABLE_CALLBACK) {
       if (this.testConfig.getCallbackUrl() != null) {
         CallbackThread callbackThread =
@@ -211,18 +210,35 @@ public class TestManager implements Callable<Object> {
         // }
       }
     }
-
-    // todo: Update allure report for on-going status
-
-    endTimestamp = System.currentTimeMillis();
-    if (testConfig.getEmailSender() != null) {
-      String emailText = "\r\n";
-      emailText += jsonToString(jsonTestResult);
-      testConfig.getEmailSender().send(emailText);
-    }
+    sendEmail(jsonTestResult);
+    test = null;
     return jsonTestResult;
   }
 
+  private void sendEmail(JsonObject jsonTestResult) {
+    // check if the test passed or failed
+    boolean testFailed = false;
+    for (StepPhase phase : phases) {
+      Status status = test.getReport(phase).getActualStatus();
+      if (status.equals(Status.FAILED) || status.equals(Status.BROKEN)) {
+        testFailed = true;
+      }
+    }
+    endTimestamp = System.currentTimeMillis();
+    EmailSender emailSender = testConfig.getEmailSender();
+    logger.info("Test " + (testFailed ? "FAILED" : "PASSED"));
+    if (emailSender != null
+      && ((emailSender.sendOnlyOnFailure() && testFailed) || !emailSender.sendOnlyOnFailure())) {
+      if (emailSender.sendJsonResults()) {
+        String emailText = "\r\n";
+        emailText += jsonToString(jsonTestResult);
+        emailSender.send(emailText);
+      } else {
+        emailSender.send();
+      }
+    }
+  }
+  
   /**
    * Develop result.
    *

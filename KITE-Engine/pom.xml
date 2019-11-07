@@ -74,6 +74,7 @@
             <!-- add Main-Class to manifest file -->
             <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
               <mainClass>org.webrtc.kite.Engine</mainClass>
+              <mainClass>org.webrtc.kite.ReportMerger</mainClass>
             </transformer>
           </transformers>
         </configuration>

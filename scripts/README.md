@@ -58,7 +58,7 @@ open -a TextEdit gridConfig.sh
 
 
 Scroll down to the end of the file and edit the following parameters with the versions corresponding to the latest stable releases versions.
- Please only input the major (only 77 and not 77.0.3865.40).
+ Please only input the major (only 77 and not 78.0.3904.70).
 ```
 rem Browser versions
 set CHROME_VERSION=77
@@ -70,11 +70,11 @@ You will need to find out what are the corresponding driver version. Please visi
 * http://chromedriver.chromium.org/downloads
 * https://github.com/mozilla/geckodriver/releases
  
- And edit the following values in gridConfig.bat accordingly. This time, please input the full version with the minor (77.0.3865.40 and not 77).
+ And edit the following values in gridConfig.bat accordingly. This time, please input the full version with the minor (78.0.3904.70 and not 77).
 ```
 rem ChromeDriver and GeckoDriver versions
-set CHROMEDRIVER_VERSION=77.0.3865.40
-set GECKO_VERSION=v0.24.0
+set CHROMEDRIVER_VERSION=78.0.3904.70
+set GECKO_VERSION=v0.26.0
 ```
 
 You might also want to check the __Selenium Standalone Server__ version. At the time of writing this, the latest version was 3.141.59 and was compatible with
