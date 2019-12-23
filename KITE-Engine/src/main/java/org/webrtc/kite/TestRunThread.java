@@ -14,13 +14,15 @@
 
 package org.webrtc.kite;
 
+import io.cosmosoftware.kite.report.KiteLogger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
-import io.cosmosoftware.kite.report.KiteLogger;
+
+import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 
 /**
  * The Class TestRunThread.
@@ -39,6 +41,8 @@ public class TestRunThread implements Callable<List<Future<Object>>> {
   /** The name. */
   private String name;
 
+  private int currentIteration = 0;
+
   /** The matrix runner. */
   private MatrixRunner matrixRunner;
 
@@ -51,6 +55,13 @@ public class TestRunThread implements Callable<List<Future<Object>>> {
   public TestRunThread(TestConfig testConfig, List<Tuple> tupleList) {
     this.testConfig = testConfig;
     this.tupleList = tupleList;
+  }
+
+  public TestRunThread (String name, List<TestManager> testManagers) {
+    this.testConfig = testManagers.get(0).getTestConfig();
+    this.tupleList = null;
+    this.name = name;
+    this.matrixRunner = new MatrixRunner(testManagers, this.name);
   }
 
   /**
@@ -71,14 +82,18 @@ public class TestRunThread implements Callable<List<Future<Object>>> {
   public List<Future<Object>> call() {
     List<Future<Object>> listOfResults = null;
     try {
-      logger.info("Running " + testConfig + " ...");
-      this.matrixRunner = new MatrixRunner(testConfig, tupleList, this.name);
+      if (this.matrixRunner == null) {
+        logger.info("Running " + testConfig + " ...");
+        this.matrixRunner = new MatrixRunner(testConfig, tupleList, this.name);
+        this.matrixRunner.setCurrentIteration(this.currentIteration);
+      } else {
+        logger.info("Running LOADREACHED phase for " + testConfig);
+      }
       listOfResults = this.matrixRunner.run();
     } catch (Exception e) {
       logger.fatal("Error [Interruption]: The execution has been interrupted with the "
           + "following error: " + e.getLocalizedMessage(), e);
     }
-
     StringBuilder testResults =
         new StringBuilder("The following are results for " + testConfig + ":\n");
 
@@ -86,9 +101,13 @@ public class TestRunThread implements Callable<List<Future<Object>>> {
       List<Future<Object>> temp = new ArrayList<>(listOfResults);
       for (Future<Object> future : temp) {
         try {
-          testResults.append("\r\n").append(future.get().toString());
+          if (future.get() instanceof  TestManager) {
+            logger.info("End of first phase (RAMUP), waiting for next phase");
+          } else {
+            testResults.append("\r\n").append(future.get().toString());
+          }
         } catch (Exception e) {
-          logger.error("Exception while test execution", e);
+          logger.error("Exception during test execution:\n" + getStackTrace(e));
         }
       }
       testResults.append("\r\nEND OF RESULTS\r\n");
@@ -104,5 +123,9 @@ public class TestRunThread implements Callable<List<Future<Object>>> {
    */
   public void interrupt() {
     this.matrixRunner.interrupt();
+  }
+
+  public void setCurrentIteration(int currentIteration) {
+    this.currentIteration = currentIteration;
   }
 }

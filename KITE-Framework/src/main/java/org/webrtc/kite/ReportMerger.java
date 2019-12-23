@@ -77,23 +77,27 @@ public class ReportMerger {
 
   private static String findOtherCaseInNewReports(String pathToFailedCase, String pathToNewReports) {
     JsonObject result = readJsonFile(pathToFailedCase);
-    boolean webdriverIssue = result.getJsonObject("statusDetails").getString("message").contains("Exception while populating web drivers");
+    boolean webdriverIssue = result.getJsonObject("statusDetails").getString("message").contains("populating web drivers");
     String testCaseName = result.getString("name").split(Pattern.quote("("))[0];
     String fullName = result.getString("fullName");
     List<String> testCasesInNewReports = findTestCasesInReports(pathToNewReports, testCaseName);
     for (String testCasePath : testCasesInNewReports) {
       JsonObject testCase = readJsonFile(testCasePath);
       if (testCase.getString("fullName").equals(fullName)) {
-        if (result.getString("status").equals("BROKEN") || webdriverIssue) {
-          if (testCase.getString("status").equals("PASSED") || testCase.getString("status").equals("FAILED")) {
-            return testCasePath;
-          }
-        } else { // FAILED
-          if (testCase.getString("status").equals("PASSED")) {
-            return testCasePath;
+        if (webdriverIssue) {
+          return testCasePath;
+        } else {
+          if (result.getString("status").equals("BROKEN")) {
+            if (testCase.getString("status").equals("PASSED")
+                || testCase.getString("status").equals("FAILED")) {
+              return testCasePath;
+            }
+          } else { // FAILED
+            if (testCase.getString("status").equals("PASSED")) {
+              return testCasePath;
+            }
           }
         }
-
       }
     }
     return "";

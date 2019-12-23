@@ -83,7 +83,7 @@ public class Configurator {
 
     this.jsonConfigObject = readJsonFile(configFilePath);
 
-    this.name = jsonConfigObject.getString("name", "");
+    this.name = jsonConfigObject.getString("name", "")  + " [" + timestamp() + "]" ;
     this.name = name.contains("%ts") ? name.replaceAll("%ts", "") + " (" + timestamp() + ")" : name;
     this.reportPath = jsonConfigObject.getString("reportFolder", null);
 

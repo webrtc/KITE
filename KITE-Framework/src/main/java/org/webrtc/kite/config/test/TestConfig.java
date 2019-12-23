@@ -16,6 +16,11 @@
 
 package org.webrtc.kite.config.test;
 
+import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
+import static io.cosmosoftware.kite.util.TestUtils.readJsonString;
+import static org.webrtc.kite.Utils.getIntFromJsonObject;
+import static org.webrtc.kite.Utils.getStackTrace;
+
 import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.instrumentation.NetworkInstrumentation;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
@@ -24,26 +29,20 @@ import io.cosmosoftware.kite.manager.RoomManager;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.report.Reporter;
 import io.cosmosoftware.kite.usrmgmt.EmailSender;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.PatternLayout;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-import org.webrtc.kite.exception.KiteInsufficientValueException;
-
+import java.io.IOException;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.persistence.*;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
-import static io.cosmosoftware.kite.util.TestUtils.readJsonString;
-import static org.webrtc.kite.Utils.getIntFromJsonObject;
-import static org.webrtc.kite.Utils.getStackTrace;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+import org.webrtc.kite.exception.KiteInsufficientValueException;
 
 /**
  * The type TestConfig.
@@ -137,7 +136,8 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.maxRetryCount = getIntFromJsonObject(jsonObject, "maxRetryCount", 0);
     this.increment = getIntFromJsonObject(jsonObject, "increment", 1);
     this.interval = getIntFromJsonObject(jsonObject, "interval", 0);
-    
+    this.delayForClosing = (long)getIntFromJsonObject(jsonObject, "delayForClosing", 0);
+
     this.regression = jsonObject.getBoolean("regression", false);
     this.permute = jsonObject.getBoolean("permute", true);
   }

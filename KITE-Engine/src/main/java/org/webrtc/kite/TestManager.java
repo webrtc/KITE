@@ -17,9 +17,14 @@
 package org.webrtc.kite;
 
 import static io.cosmosoftware.kite.report.CSVHelper.jsonToString;
+import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 import static io.cosmosoftware.kite.util.TestUtils.getDir;
 
+import io.cosmosoftware.kite.report.Container;
 import io.cosmosoftware.kite.report.KiteLogger;
+import io.cosmosoftware.kite.report.Status;
+import io.cosmosoftware.kite.steps.StepPhase;
+import io.cosmosoftware.kite.usrmgmt.EmailSender;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -33,15 +38,11 @@ import java.util.concurrent.Callable;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-
-import io.cosmosoftware.kite.report.Status;
-import io.cosmosoftware.kite.usrmgmt.EmailSender;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
 import org.webrtc.kite.tests.KiteBaseTest;
 import org.webrtc.kite.tests.KiteJsTest;
-import io.cosmosoftware.kite.report.Container;
-import io.cosmosoftware.kite.steps.StepPhase;
+import org.webrtc.kite.tests.TestRunner;
 
 /**
  * A thread to step an implementation of KiteTest.
@@ -91,7 +92,10 @@ public class TestManager implements Callable<Object> {
 
   /** The test. */
   private KiteBaseTest test;
-  
+
+  private StepPhase currentPhase;
+
+  private boolean finished = false;
   /**
    * Constructs a new TestManager with the given TestConfig and List<Client>.
    *
@@ -102,7 +106,7 @@ public class TestManager implements Callable<Object> {
     this.testConfig = testConfig;
     this.tuple = tuple;
     this.retry = testConfig.getMaxRetryCount();
-
+    this.phases = getPhases(testConfig.isLoadTest());
   }
 
   /**
@@ -130,24 +134,26 @@ public class TestManager implements Callable<Object> {
     
     test.setReporter(this.testConfig.getReporter());
     
-    test.setDelayForClosing(testConfig.getDelayForClosing().intValue());
     test.setNetworkInstrumentation(testConfig.getNetworkInstrumentation());
     test.setDescription(testConfig.getDescription());
     test.setRoomManager(testConfig.getRoomManager());    
     
     test.setTuple(tuple);
-    
-    phases = getPhases(testConfig.isLoadTest());
-    test.setPhases(phases);
+    test.setCurrentIteration(this.id);
+    test.setDelayForClosing(testConfig.getDelayForClosing());
+
+    test.setPhases(this.phases);
+
     test.setParentSuite(testSuite.getParentSuite());
     test.setSuite(testSuite);
-    
+
     if (testConfig.getPayload() != null) {
       JsonObject payload = (JsonObject) Json
           .createReader(new ByteArrayInputStream(testConfig.getPayload().getBytes())).read();
       test.setPayload(payload);
     }
 
+    // todo : to be advised
     if (testConfig.isLoadTest()) {
       test.setLoadTest(true);
       String simpleHubId = "";
@@ -169,73 +175,116 @@ public class TestManager implements Callable<Object> {
    */
   @Override
   public Object call() throws Exception {
-    startTime = System.currentTimeMillis();
-    if (this.id == 1) {
-      this.testConfig.getReporter().setStartTime(startTime);
-    }
-    test = buildTest();
     JsonObjectBuilder builder = Json.createObjectBuilder();
-    String ETA = "Estimating..";
-    long elapsedSecond = (int)(System.currentTimeMillis() - testConfig.getReporter().getStartTime())/1000;
-    int currentTestCount = testConfig.getReporter().numberOfRegisteredTest();
-    long avgTimeForOneTest = currentTestCount == 1 ? 0 : elapsedSecond/(currentTestCount - 1);
-    if (avgTimeForOneTest != 0) {
-      long ETASeconds = avgTimeForOneTest*(total - id + 1);
-      ETA = ETASeconds/60 + "m" + ETASeconds%60 + "s";
+    if (!currentPhase.equals(StepPhase.LOADREACHED)) {
+      startTime = System.currentTimeMillis();
+      if (this.id == 1) { // not zero ?
+        this.testConfig.getReporter().setStartTime(startTime);
+      }
+      test = buildTest();
     }
-    logger.info("\n"
-        + "           |--------------------------------------------------\n"
-        + "           | Number of registered tests: " + currentTestCount + "\n"
-        + "           | Elapsed time: " + elapsedSecond/60 + "m" + (elapsedSecond%60)  + "s (avg:"
-                      + avgTimeForOneTest/60 + "m" + avgTimeForOneTest%60 + "s" + ")\n"
-        + "           | Running test case with ID: " + this.id + "/" + (total == 0 ? "N/A" : total) + "\n"
-        + "           | ETA (for " + this.testConfig.getName() + "): " + ETA + "\n"
-        + "           |--------------------------------------------------");
-    for (StepPhase phase : phases) {
-      testSuite.addChild(test.getReport(phase).getUuid());
-      Object phaseResult = test.execute(phase);
-      builder.add(phase.getName(), (JsonObject) phaseResult);
+    Object phaseResult;
+    if (!testConfig.isLoadTest()) {
+      String ETA = "Estimating..";
+      long elapsedSecond = (int)(System.currentTimeMillis() - testConfig.getReporter().getStartTime())/1000;
+      int currentTestCount = testConfig.getReporter().numberOfRegisteredTest();
+      long avgTimeForOneTest = currentTestCount == 1 ? 0 : elapsedSecond/(currentTestCount - 1);
+      if (avgTimeForOneTest != 0) {
+        long ETASeconds = avgTimeForOneTest*(total - id + 1);
+        ETA = ETASeconds/60 + "m" + ETASeconds%60 + "s";
+      }
+      logger.info("\n"
+          + "           |--------------------------------------------------\n"
+          + "           | Number of registered tests: " + currentTestCount + "\n"
+          + "           | Elapsed time: " + elapsedSecond/60 + "m" + (elapsedSecond%60)  + "s (avg:"
+                        + avgTimeForOneTest/60 + "m" + avgTimeForOneTest%60 + "s" + ")\n"
+          + "           | Running test case with ID: " + this.id + "/" + (total == 0 ? "N/A" : total) + "\n"
+          + "           | ETA (for " + this.testConfig.getName() + "): " + ETA + "\n"
+          + "           |--------------------------------------------------");
+      // if there will be more phase to interop test in the future, we'll deal with it in the future
+      phaseResult = test.execute(currentPhase);
+    } else {
+      if (currentPhase.equals(StepPhase.RAMPUP)) {
+        phaseResult = test.execute(currentPhase);
+        logger.info("RAM UP phase finished, return test manager object for LOAD REACHED execution..");
+        if (phaseResult != null) {
+          builder.add(currentPhase.getName(), (JsonObject) phaseResult);
+        }
+        this.currentPhase = StepPhase.LOADREACHED;
+        return this;
+      } else {
+        phaseResult = test.execute(currentPhase);
+        logger.info("LOAD REACHED phase finished, finishing the test ..");
+      }
     }
-    // todo: need some retry mechanism here
+
+    if (phaseResult != null) {
+      builder.add(currentPhase.getName(), (JsonObject) phaseResult); 
+    }
     JsonObject jsonTestResult = developResult(builder.build());
+
     if (ENABLE_CALLBACK) {
       if (this.testConfig.getCallbackUrl() != null) {
         CallbackThread callbackThread =
             new CallbackThread(this.testConfig.getCallbackUrl(), jsonTestResult);
-        // todo: to be advised
-        // if (testResult.getString("meta", null) == null) {
-        // callbackThread.start();
-        // } else {
-        // callbackThread.postResult();
-        // }
+        // todo
       }
     }
+
     sendEmail(jsonTestResult);
     test = null;
+    finished = true;
     return jsonTestResult;
   }
 
+  public boolean isFinished() {
+    return finished;
+  }
+
+  public StepPhase getCurrentPhase() {
+    return currentPhase;
+  }
+
+  public TestConfig getTestConfig() {
+    return testConfig;
+  }
+
   private void sendEmail(JsonObject jsonTestResult) {
-    // check if the test passed or failed
-    boolean testFailed = false;
-    for (StepPhase phase : phases) {
-      Status status = test.getReport(phase).getActualStatus();
-      if (status.equals(Status.FAILED) || status.equals(Status.BROKEN)) {
-        testFailed = true;
+    try {
+      // check if the test passed or failed
+      boolean testFailed = false;
+      for (StepPhase phase : phases) {
+        if (test.isLoadTest()) {
+          for (TestRunner runner : test) {
+            Status status = runner.getReport(phase).getActualStatus();
+            if (status.equals(Status.FAILED) || status.equals(Status.BROKEN)) {
+              testFailed = true;
+              break;
+            }
+          }
+        } else {
+          Status status = test.getReport(phase).getActualStatus();
+          if (status.equals(Status.FAILED) || status.equals(Status.BROKEN)) {
+            testFailed = true;
+            break;
+          }
+        }
       }
-    }
-    endTimestamp = System.currentTimeMillis();
-    EmailSender emailSender = testConfig.getEmailSender();
-    logger.info("Test " + (testFailed ? "FAILED" : "PASSED"));
-    if (emailSender != null
-      && ((emailSender.sendOnlyOnFailure() && testFailed) || !emailSender.sendOnlyOnFailure())) {
-      if (emailSender.sendJsonResults()) {
-        String emailText = "\r\n";
-        emailText += jsonToString(jsonTestResult);
-        emailSender.send(emailText);
-      } else {
-        emailSender.send();
+      endTimestamp = System.currentTimeMillis();
+      EmailSender emailSender = testConfig.getEmailSender();
+      logger.info("Test " + (testFailed ? "FAILED" : "PASSED"));
+      if (emailSender != null
+        && ((emailSender.sendOnlyOnFailure() && testFailed) || !emailSender.sendOnlyOnFailure())) {
+        if (emailSender.sendJsonResults()) {
+          String emailText = "\r\n";
+          emailText += jsonToString(jsonTestResult);
+          emailSender.send(emailText);
+        } else {
+          emailSender.send();
+        }
       }
+    } catch (Exception e) {
+      logger.error(getStackTrace(e));
     }
   }
   
@@ -273,6 +322,8 @@ public class TestManager implements Callable<Object> {
     } else {
       phases.add(StepPhase.DEFAULT);
     }
+    this.currentPhase = phases.get(0);
+    logger.info("current phase in test manager has been set to" + this.currentPhase);
     return phases;
   }
 
@@ -309,18 +360,27 @@ public class TestManager implements Callable<Object> {
   public void setId(int id) {
     this.id = id;
   }
-
   /**
    * Set the container for the test's parent suite, for report purpose.
    *
    * @param testSuite test's parent suite
    */
-  public void setTestSuite(Container testSuite) {
+  public void setSuite(Container testSuite) {
     this.testSuite = testSuite;
+    if (this.test != null) {
+      test.setSuite(testSuite);
+    }
   }
 
-  
-  
+  public void moveToNextPhase() {
+    this.currentPhase = phases.get((phases.indexOf(currentPhase) + 1 ));
+  }
+
+
+  public Tuple getTuple() {
+    return tuple;
+  }
+
   /**
    * Terminate.
    */

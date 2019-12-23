@@ -370,6 +370,7 @@ public class WebDriverFactory {
       firefoxProfile = new FirefoxProfile();
     }
     firefoxProfile.setPreference("media.navigator.permission.disabled", true);
+    firefoxProfile.setPreference("media.autoplay.enabled.user-gestures-needed", false);
     if (client.useFakeMedia()) {
       if (client.getAudio() == null && client.getVideo() == null) {
         firefoxProfile.setPreference("media.navigator.streams.fake", client.useFakeMedia());

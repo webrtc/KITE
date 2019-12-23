@@ -32,6 +32,7 @@ import org.webrtc.kite.config.paas.Paas;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
 import org.webrtc.kite.exception.KiteBadValueException;
+import org.webrtc.kite.exception.KiteGridException;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
 import org.webrtc.kite.exception.KiteNoKeyException;
 import io.cosmosoftware.kite.report.KiteLogger;
@@ -89,11 +90,19 @@ public class Engine {
    * @param tupleList the tuple list
    */
   public static void distributeRemote(Configurator configurator, List<Tuple> tupleList) {
+    distributeRemote(configurator.getRemoteList().get(), tupleList);
+  }
+  /**
+   * Distribute remote.
+   *
+   * @param paas the remote paas
+   * @param tupleList the tuple list
+   */
+  public static void distributeRemote(Paas paas, List<Tuple> tupleList) {
     // setting remote hub address to client, using circular linked list
     // each tuple will be prioritised to be in the same hub
     // need to handle mobile == null
     for (Tuple tuple : tupleList) {
-      Paas paas = configurator.getRemoteList().get();
       for (Client client : tuple.getClients()) {
         if (client.getPaas() == null) {
           client.setPaas(paas);
@@ -117,25 +126,36 @@ public class Engine {
 
     for (TestConfig testConfig : configurator.getConfigHandler().getTestList()) {
       List<Tuple> tupleList = new ArrayList<>();
-      List<List<Integer>> matrix = configurator.getMatrix();
-      if (matrix != null && !matrix.isEmpty()) {
-        for (List<Integer> indexList : matrix) {
-          Tuple tuple = new Tuple();
-          for (int index : indexList) {
-            tuple.add(configurator.getConfigHandler().getClientList().get(index));
-          }
-          tupleList.add(tuple);
-        }
-      } else {
-        tupleList = configurator.buildTuples(testConfig.getTupleSize(), testConfig.isPermute(),
-            testConfig.isRegression());
-      }
-      distributeRemote(configurator, tupleList);
       testConfig.setPathToConfigFile(configurator.getConfigFilePath());
       testConfig.setReportPath(configurator.getReportPath());
       ExecutorService service = Executors.newSingleThreadExecutor();
       try {
-        runInterop(service, configurator.getName(), testConfig, tupleList);
+        if (testConfig.isLoadTest()) {
+          testConfig.setIncrement(testConfig.getTupleSize());
+          for (Client client : configurator.getConfigHandler().getClientList()) {
+            client.setCount(testConfig.getTupleSize());
+          }
+          List<Future<List<Future<Object>>>> ramUpResults = runRamUp(service, configurator.getName() ,testConfig,
+              configurator.getRemoteList(), configurator.getConfigHandler().getClientList());
+          List<List<TestManager>> secondPhase = processRamUpResults(ramUpResults);
+          List<Future<List<Future<Object>>>> loadreachedResults = runLoadReached(service, configurator.getName(), secondPhase);
+        } else {
+          List<List<Integer>> matrix = configurator.getMatrix();
+          if (matrix != null && !matrix.isEmpty()) {
+            for (List<Integer> indexList : matrix) {
+              Tuple tuple = new Tuple();
+              for (int index : indexList) {
+                tuple.add(configurator.getConfigHandler().getClientList().get(index));
+              }
+              tupleList.add(tuple);
+            }
+          } else {
+            tupleList = configurator.buildTuples(testConfig.getTupleSize(), testConfig.isPermute(),
+                testConfig.isRegression());
+          }
+          distributeRemote(configurator, tupleList);
+          List<Future<Object>> interopResult = runInterop(service, configurator.getName(), testConfig, tupleList);
+        }
       } catch (Exception e) {
         e.printStackTrace();
       } finally {
@@ -161,9 +181,34 @@ public class Engine {
       throws ExecutionException, InterruptedException {
     runThread = new TestRunThread(testConfig, tupleList);
     runThread.setName(testSuiteName);
-    List<Future<Object>> futureObjectList = service.submit(runThread).get();
+    List<Future<Object>> runResults = service.submit(runThread).get();
     runThread = null;
-    return futureObjectList;
+    return runResults;
+  }
+
+  private static List<Future<Object>> processRunResults (List<Future<Object>> runResults) {
+    List<Future<Object>> res = new ArrayList<>();
+    ExecutorService executor
+        = Executors.newSingleThreadExecutor();
+    for (Future future : runResults) {
+      try {
+        Object object = future.get();
+        if (object instanceof TestManager) {
+          ((TestManager) object).terminate();
+          res.add(null);
+        } else {
+          res.add(wrapObjectBackToFuture(executor, object));
+        }
+      } catch (Exception e) {
+        // ignore
+      }
+    }
+    executor.shutdown();
+    return res;
+  }
+
+  private static Future<Object> wrapObjectBackToFuture(ExecutorService executor, Object object) {
+    return executor.submit(() -> object);
   }
 
   /**
@@ -173,6 +218,88 @@ public class Engine {
     if (Engine.runThread != null) {
       Engine.runThread.interrupt();
     }
+  }
+
+
+  public static List<Future<List<Future<Object>>>> runLoadReached(ExecutorService executorService, String testSuiteName, List<List<TestManager>> secondPhaseTestManagerList)
+      throws InterruptedException {
+    List<TestRunThread> testRunThreads = new ArrayList<>();
+    for (List<TestManager> secondPhaseTestManagers : secondPhaseTestManagerList) {
+      testRunThreads.add(new TestRunThread(testSuiteName, secondPhaseTestManagers));
+    }
+    if (executorService == null) {
+      executorService = Executors.newFixedThreadPool(secondPhaseTestManagerList.size());
+    }
+    return executorService.invokeAll(testRunThreads);
+  }
+
+  public static List<Future<List<Future<Object>>>> runRamUp(ExecutorService executorService, String testSuiteName, TestConfig testConfig, List<Paas> paasList, List<Client> clients) throws KiteGridException, InterruptedException {
+    if (paasList.size() < 1) {
+      throw new KiteGridException("Looks like the grid is not up, no hub IP or DNS was provided.");
+    }
+    testConfig.setNoOfThreads(1); // one tuple at a time.
+    int numberOfHub = paasList.size();
+    int increment = testConfig.getIncrement(); // new "tuple size"
+    List<TestRunThread> testRunThreads = new ArrayList<>();
+    for (Client client : clients) {
+      int incrementPerHub = (int) Math.ceil(increment/numberOfHub);
+      int countPerHub = (int) Math.ceil(client.getCount()/numberOfHub);
+      int numberOfIterationPerHub = countPerHub/incrementPerHub;
+      int leftoverPerHub = countPerHub%incrementPerHub;
+      logger.info("***********************************************************");
+      logger.info("SUMMARY----------------------------------------------------");
+      logger.info("Current client is: " + client.toString());
+      logger.info("Running " + numberOfHub + " threads on " + numberOfHub + " hubs, one per hub, with increment per hub: " + incrementPerHub);
+      logger.info("Total number of iterations per hub: " + numberOfIterationPerHub);
+      logger.info("END OF SUMMARY---------------------------------------------");
+      int count = 0;
+      for (int iterationCount = 0; iterationCount < numberOfIterationPerHub; iterationCount ++) {
+        for (int hubCount = 0; hubCount < numberOfHub; hubCount ++) {
+          client.setPaas(paasList.get(hubCount));
+          List<Tuple> tupleList = new ArrayList<>();
+          Tuple tuple = new Tuple(client, incrementPerHub);
+          tupleList.add(tuple);
+          TestRunThread runThread = new TestRunThread(testConfig, tupleList);
+          runThread.setName(testSuiteName);
+          runThread.setCurrentIteration(count);
+          testRunThreads.add(runThread);
+          count += incrementPerHub;
+        }
+      }
+
+      if (leftoverPerHub > 0) {
+        for (int hubCount = 0; hubCount < numberOfHub; hubCount ++) {
+          client.setPaas(paasList.get(hubCount));
+          List<Tuple> tupleList = new ArrayList<>();
+          Tuple tuple = new Tuple(client, leftoverPerHub);
+          tupleList.add(tuple);
+          TestRunThread runThread = new TestRunThread(testConfig, tupleList);
+          runThread.setName(testSuiteName);
+          runThread.setCurrentIteration(count);
+          testRunThreads.add(runThread);
+          count += leftoverPerHub;
+        }
+      }
+    }
+
+    if (executorService == null) {
+      executorService = Executors.newFixedThreadPool(paasList.size());
+    }
+    return executorService.invokeAll(testRunThreads);
+  }
+
+  public static List<List<TestManager>> processRamUpResults(List<Future<List<Future<Object>>>> RamUpResults)
+      throws ExecutionException, InterruptedException {
+    List<List<TestManager>> secondPhase = new ArrayList<>();
+    for (Future futures : RamUpResults) {
+      List<Future> future = (List<Future>) futures.get();
+      List<TestManager> temp = new ArrayList<>();
+      for (Future testManager : future) {
+        temp.add((TestManager) testManager.get());
+      }
+      secondPhase.add(temp);
+    }
+    return secondPhase;
   }
 
 }

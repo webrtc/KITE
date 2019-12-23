@@ -116,6 +116,16 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
       return Json.createObjectBuilder().add("NullPointerException", getStackTrace(e)).build();
     }
   }
+
+
+  public String getRemoteIP() {
+    if (this.get("remote-candidate") != null) {
+      for (RTCSingleStatObject statObject : this.get("remote-candidate")) {
+        return ((RTCIceCandidateStats) statObject).getIp();
+      }
+    }
+    return "no remote-candidate";
+  }
   
   public RTCSingleStatObject getSuccessfulCandidate() {
     if (this.get("candidate-pair") != null) {
@@ -166,6 +176,7 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
     }
     return total;
   }
+  
   
   public int getTotalBytesByMedia(String boundDirection, String media) {
     int total = 0;

@@ -29,6 +29,7 @@ public class RTCCodecStats extends RTCSingleStatObject {
   private final String channels;
   private final String clockRate;
   private final String codec;
+  private final String mimeType;
   private final String payloadType;
   private final String sdpFmtpLine;
 
@@ -39,6 +40,7 @@ public class RTCCodecStats extends RTCSingleStatObject {
     this.clockRate = getStatByName(statObject, "clockRate");
     this.channels = getStatByName(statObject, "channels");
     this.codec = getStatByName(statObject, "codec");
+    this.mimeType = getStatByName(statObject, "mimeType");
     this.sdpFmtpLine = getStatByName(statObject, "sdpFmtpLine");
   }
   
@@ -61,7 +63,11 @@ public class RTCCodecStats extends RTCSingleStatObject {
   public String getSdpFmtpLine() {
     return sdpFmtpLine;
   }
-  
+
+  public String getMimeType() {
+    return mimeType;
+  }
+
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
     return Json.createObjectBuilder()
@@ -69,6 +75,7 @@ public class RTCCodecStats extends RTCSingleStatObject {
       .add("clockRate", this.clockRate)
       .add("channels", this.channels)
       .add("codec", this.codec)
+      .add("mimeType", this.mimeType)
       .add("sdpFmtpLine", this.sdpFmtpLine);
   }
 }

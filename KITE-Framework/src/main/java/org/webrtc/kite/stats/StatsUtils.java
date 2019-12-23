@@ -278,6 +278,9 @@ public class StatsUtils {
     builder.add("Ending Timestamp", timestamp(statArray.get(statArray.size() - 1).getTimestamp()));
 
     RTCStats lastRtcStats = statArray.get(statArray.size() -1);
+    if (lastRtcStats.get("remote-candidate") != null) {
+      builder.add(StatEnum.REMOTE_IP.toString(), lastRtcStats.getRemoteIP());
+    }
     if (lastRtcStats.get("inbound-rtp") != null) {
       builder
         .add(StatEnum.TOTAL_INBOUND_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytes("inbound"))
@@ -307,8 +310,7 @@ public class StatsUtils {
       .add(StatEnum.TOTAL_RTT.toString(), totalRTT)
       .add(StatEnum.AVG_CURRENT_RTT.toString(), agvRTT);
     if (lastRtcStats.get("inbound-rtp") != null) {
-      builder
-          .add("inbound", processStreamStats(inboundStreamStatsList,fullyDetailed));
+      builder.add("inbound", processStreamStats(inboundStreamStatsList, fullyDetailed));
     }
     if (lastRtcStats.get("outbound-rtp") != null) {
       builder
@@ -357,7 +359,7 @@ public class StatsUtils {
       boolean video = !audio;
       int size = streamStatsList.size();
       int last = size -1;
-      int durationInSeconds = (int) ((streamStatsList.get(last).getTimestamp() - streamStatsList.get(0).getTimestamp()) / 1000);
+      long duration = streamStatsList.get(last).getTimestamp() - streamStatsList.get(0).getTimestamp();
      
       JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
       objectBuilder.add("streamId", streamId);
@@ -367,10 +369,11 @@ public class StatsUtils {
           ? StatEnum.TOTAL_BYTES_RECEIVED.toString()
           : StatEnum.TOTAL_BYTES_SENT.toString()
         , checkNegativeValue(bytes.get(last)));
+            
       objectBuilder.add(inbound
           ? StatEnum.RECEIVED_BITRATE.toString()
           : StatEnum.SENT_BITRATE.toString()
-        , checkNegativeValue(8 * getDiffEndToStart(bytes)/durationInSeconds));
+        , checkNegativeValue(8000 * getDiffEndToStart(bytes)/duration));
   
       List<Double> packets = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.PACKETS, fullyDetailed);
       objectBuilder.add(inbound
@@ -378,6 +381,7 @@ public class StatsUtils {
           : StatEnum.TOTAL_PACKETS_SENT.toString()
         , checkNegativeValue(packets.get(last)));
       
+      Double packetsReceivedDiff = getDiffEndToStart(packets);
       
       if (audio) {
         List<Double> audioLvl = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.AUDIO_LEVEL, fullyDetailed);
@@ -391,17 +395,26 @@ public class StatsUtils {
           : StatEnum.TOTAL_FRAME_SENT.toString(), checkNegativeValue(frames.get(last)));
         
         List<Double> framerate = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.FRAME_RATE, fullyDetailed);
-        objectBuilder.add(StatEnum.AVG_FRAME_RATE.toString(),  checkNegativeValue(getAverage(framerate)));
+        
+        objectBuilder.add(StatEnum.AVG_FRAME_RATE.toString(),  checkNegativeValue(1000 * getDiffEndToStart(framerate)/duration));
       }
       
       if (inbound) {
         List<Double> packetsLost = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.PACKETS_LOST, fullyDetailed);
         objectBuilder.add(StatEnum.TOTAL_PACKETS_LOST.toString(), packetsLost.get(last).intValue());
-        objectBuilder.add(StatEnum.PACKETS_LOST_PERCENTAGE.toString(), checkNegativeValue(100 * packetsLost.get(last)/ packets.get(last)));
+        Double packetsLostDiff = getDiffEndToStart(packetsLost);
+        objectBuilder.add(StatEnum.PACKETS_LOST_PERCENTAGE.toString(), 
+          checkNegativeValue(100 * packetsLostDiff/ (packetsLostDiff + packetsReceivedDiff)));
+        objectBuilder.add(StatEnum.PACKETS_LOST_CUMULATIVE_PERCENTAGE.toString(),
+          checkNegativeValue(100 * packetsLost.get(last)/ (packetsLost.get(last) + packets.get(last))));
         
-        List<Double> packetsDiscarded = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.PACKETS_DISCARDED, fullyDetailed);
-        objectBuilder.add(StatEnum.TOTAL_PACKETS_DISCARDED.toString(), packetsDiscarded.get(last).intValue());
-        objectBuilder.add(StatEnum.PACKETS_DISCARDED_PERCENTAGE.toString(), checkNegativeValue(100 * packetsDiscarded.get(last)/ packets.get(last)));
+        
+        
+//        List<Double> packetsDiscarded = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.PACKETS_DISCARDED, fullyDetailed);
+//        Double packetsDiscardedDiff = getDiffEndToStart(packets);
+//        objectBuilder.add(StatEnum.TOTAL_PACKETS_DISCARDED.toString(), packetsDiscarded.get(last).intValue());
+//        objectBuilder.add(StatEnum.PACKETS_DISCARDED_PERCENTAGE.toString(),
+//          checkNegativeValue(100 * packetsDiscardedDiff/ (packetsDiscardedDiff + packetsReceivedDiff)));
   
   
         if (audio) {
@@ -409,9 +422,12 @@ public class StatsUtils {
           objectBuilder.add(StatEnum.AVG_JITTER.toString(), checkNegativeValue(getAverage(jitter)));
           
         } else {
+          List<Double> framerate = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.AVG_FRAME_RATE_DECODED, fullyDetailed);
+          objectBuilder.add(StatEnum.AVG_FRAME_RATE_DECODED.toString(),  checkNegativeValue(1000 * getDiffEndToStart(framerate)/duration));
+          
           // could be useful someday
           List<Double> framedropped = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.FRAME_DROPPED, fullyDetailed);
-          List<Double> framedecoded = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.FRAME_DECODED, fullyDetailed);
+          
         }
       }
       arrayBuilder.add(objectBuilder);
@@ -498,9 +514,10 @@ public class StatsUtils {
             result.add(stream.getTrack() == null ? -1.0 : stream.getTrack().getFramesPerSecond());
           }
           break;
+        case AVG_FRAME_RATE_DECODED:
         case FRAME_DECODED:
           if (stream.isVideo()) {
-            result.add(stream.getTrack() == null ? -1.0 : stream.getTrack().getFramesDecoded());
+            result.add(stream.getInboundStats().getFramesDecoded());
           }
           break;
         case FRAME_DROPPED:
@@ -515,6 +532,7 @@ public class StatsUtils {
           break;
         default:
           logger.error("Wrong place to look for :" + stat.toString());
+          break;
       }
     }
     if (result.isEmpty()) {

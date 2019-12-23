@@ -10,6 +10,7 @@ import io.cosmosoftware.kite.interfaces.SampleData;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.openqa.selenium.Platform;
+import org.openqa.selenium.remote.BrowserType;
 
 import javax.json.JsonObject;
 import javax.persistence.*;
@@ -378,4 +379,41 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
   public String getProfile() {
     return profile;
   }
+
+
+
+
+
+
+  /**
+   * Gets the driver string.
+   *
+   * @return the driver string
+   */
+  @Transient
+  public String getDriverString() {
+    String driverString = "";
+    switch (this.getBrowserName()) {
+      // Selenium
+      case BrowserType.CHROME:
+        if (this.getPathToDriver() != null && this.getPathToDriver() != "") {
+          driverString = "-Dwebdriver.chrome.driver=" + this.getPathToDriver();
+        } else {
+          driverString = "-Dwebdriver.chrome.driver=./chromedriver";
+        }
+
+        break;
+      case BrowserType.FIREFOX:
+        if (this.getPathToDriver() != null && this.getPathToDriver() != "") {
+          driverString = "-Dwebdriver.gecko.driver=" + this.getPathToDriver();
+        } else {
+          driverString = "-Dwebdriver.gecko.driver=./geckodriver";
+        }
+        break;
+    }
+    return driverString;
+  }
+  
+  
+  
 }

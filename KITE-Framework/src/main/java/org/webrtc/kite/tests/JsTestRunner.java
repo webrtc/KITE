@@ -32,7 +32,8 @@ public class JsTestRunner extends TestRunner {
   private int numberOfParticipant;
   private String reportPath;
   
-  public JsTestRunner(KiteBaseTest test, String jsTestImpl, int id, String implJar) throws KiteGridException, IOException {
+  public JsTestRunner(KiteBaseTest test, String jsTestImpl, int id, String implJar)
+      throws IOException {
     super(test, id);
     this.jsTestImpl = jsTestImpl;
     this.implJar = implJar;

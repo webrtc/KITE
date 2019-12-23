@@ -17,25 +17,29 @@
 package org.webrtc.kite;
 
 import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
+import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
+import static io.cosmosoftware.kite.util.TestUtils.waitAround;
 
+import io.cosmosoftware.kite.report.Container;
+import io.cosmosoftware.kite.report.KiteLogger;
+import io.cosmosoftware.kite.steps.StepPhase;
 import java.io.IOException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
 import org.webrtc.kite.config.client.Client;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
-import io.cosmosoftware.kite.report.Container;
-import io.cosmosoftware.kite.report.KiteLogger;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -64,6 +68,9 @@ public class MatrixRunner {
   /** The test manager list. */
   private List<TestManager> testManagerList = new ArrayList<>();
 
+  private StepPhase currentPhase;
+
+  private int currentIteration = 0;
   /**
    * Constructs a new MatrixRunner with the given TestConfig and List<Tuple>.
    *
@@ -88,57 +95,37 @@ public class MatrixRunner {
         }
       }
     }
-    testSuite = new Container(testConfig.getNameWithTS());
-    testSuite.setParentSuite(parentSuiteName);
-    testSuite.setReporter(testConfig.getReporter());
-
+    if (testConfig.isLoadTest()) {
+      this.testSuite = new Container("1st phase(RU) | " + getHostUrlWithTs(this.tupleList.get(0).getClients().get(0)));
+    } else {
+      this.testSuite = new Container("" + testConfig.getNameWithTS());
+    }
+    this.testSuite.setParentSuite(parentSuiteName);
+    this.testSuite.setReporter(testConfig.getReporter());
   }
 
-  /**
-   * Returns a sublist of the given futureList exclusive of the type of objects specified by the
-   * objectClass.
-   *
-   * @param futureList List of Future<Object>
-   * @param objectClass The class for the undesired required object.
-   * @return A sublist of the given futureList exclusive of the type of objects specified by the
-   *         objectClass.
-   */
-  private List<Future<Object>> getExclusiveSubList(List<Future<Object>> futureList,
-      Class<?> objectClass) {
-    List<Future<Object>> listOfFutureObjects = new ArrayList<Future<Object>>();
-    for (Future<Object> future : futureList) {
-      try {
-        Object object = future.get();
-        if (!objectClass.isInstance(object)) {
-          listOfFutureObjects.add(future);
-        }
-      } catch (InterruptedException | ExecutionException e) {
-        logger.error(getStackTrace(e));
-      }
+  public MatrixRunner(List<TestManager> testManagers, String parentSuiteName) {
+    this.testConfig = testManagers.get(0).getTestConfig();
+    this.testManagerList = testManagers;
+    waitAround(new Random().nextInt(1000)); // avoid duplicated container
+    this.testSuite = new Container("2nd phase(LR) | " + getHostUrlWithTs(this.testManagerList.get(0).getTuple().getClients().get(0)));
+    logger.info("Created container " + this.testSuite.getName());
+    this.testSuite.setParentSuite(parentSuiteName);
+    this.testSuite.setReporter(testConfig.getReporter());
+    for (TestManager manager : testManagers) {
+      manager.setSuite(this.testSuite);
     }
-    return listOfFutureObjects;
   }
 
-  /**
-   * Returns a sublist from the given list of the type of objects specified by the objectClass.
-   *
-   * @param futureList List of Future<Object>
-   * @param objectClass The class for the desired required object list.
-   * @return A sublist from the given list of the type of objects specified by the objectClass.
-   */
-  private List<?> getSubList(List<Future<Object>> futureList, Class<?> objectClass) {
-    List<Object> listOfObject = new ArrayList<Object>();
-    for (Future<Object> future : futureList) {
-      try {
-        Object object = future.get();
-        if (objectClass.isInstance(object)) {
-          listOfObject.add(object);
-        }
-      } catch (InterruptedException | ExecutionException e) {
-        logger.error(getStackTrace(e));
-      }
+  private String getHostUrlWithTs(Client client) {
+    String hubUrl = client.getPaas().getUrl();
+    try {
+      String temp = new URL(hubUrl).getHost();
+      hubUrl = temp;
+    } catch (Exception e) {
+      // ignore
     }
-    return listOfObject;
+    return hubUrl + " (" + timestamp() + ")";
   }
 
   /**
@@ -155,47 +142,53 @@ public class MatrixRunner {
    * @return List<Future < Object>>
    */
   public List<Future<Object>> run() {
-    int totalTestCases = this.tupleList.size();
-    long start = System.currentTimeMillis();
-    if (totalTestCases < 1) {
-      return null;
-    }
-
-    List<TestManager> testManagerList = new ArrayList<>();
     List<Future<Object>> futureList = new ArrayList<>();
     this.multiExecutorService = Executors.newFixedThreadPool(this.testConfig.getNoOfThreads());
 
-    logger.info("Executing " + this.testConfig + " for " + totalTestCases
-        + " browser tuples with size :" + tupleList.get(0).size());
-    testConfig.setLogger(createTestLogger(testConfig.getKiteRequestId(), testConfig.getTestClassName()));
-    try {
+    if (this.testManagerList.isEmpty()) {
+      int totalTestCases = this.tupleList.size();
+      if (totalTestCases < 1) {
+        return null;
+      }
+      logger.info("Executing " + this.testConfig + " for " + totalTestCases
+          + " browser tuples with size :" + tupleList.get(0).size());
+      testConfig.setLogger(createTestLogger(testConfig.getKiteRequestId(), testConfig.getTestClassName()));
       for (int index = 0; index < this.tupleList.size(); index++) {
         TestManager manager = new TestManager(this.testConfig, this.tupleList.get(index));
-        manager.setTestSuite(testSuite);
-        manager.setId((index + 1));
+        manager.setSuite(this.testSuite);
+        manager.setId((currentIteration + index + 1));
         manager.setTotal(this.tupleList.size());
-        testManagerList.add(manager);
+        this.testManagerList.add(manager);
       }
+    }
 
-      List<Future<Object>> tempFutureList;
-
-      while (testManagerList.size() > 0) {
-        tempFutureList = multiExecutorService.invokeAll(testManagerList);
-        testManagerList = (List<TestManager>) this.getSubList(tempFutureList, TestManager.class);
-        futureList.addAll(this.getExclusiveSubList(tempFutureList, TestManager.class));
-      }
-
-      testManagerList.clear();
-
+    try {
+      this.currentPhase = testManagerList.get(0).getCurrentPhase(); // if null -> firs time executing
+      //Runtime.getRuntime().addShutdownHook(new Thread(() -> terminate()));
+      futureList.addAll(multiExecutorService.invokeAll(testManagerList));
     } catch (Exception e) {
       logger.error(getStackTrace(e));
     } finally {
-      testSuite.setStopTimestamp();
-      testConfig.getReporter().generateReportFiles();
+      if (this.currentPhase.isLastPhase()) {
+        logger.info("Matrix runner at last phase, ending. ");
+        terminate();
+      }
       this.shutdownExecutors();
     }
 
     return futureList;
+  }
+
+  private void terminate() {
+    for (TestManager manager : this.testManagerList) {
+      if (!manager.isFinished()) {
+        manager.terminate();
+      }
+    }
+    testSuite.setStopTimestamp();
+    if (currentPhase == null || !currentPhase.equals(StepPhase.RAMPUP)) {
+      testConfig.getReporter().generateReportFiles();
+    }
   }
 
   /**
@@ -203,8 +196,12 @@ public class MatrixRunner {
    */
   synchronized private void shutdownExecutors() {
     if (this.multiExecutorService != null && !this.multiExecutorService.isShutdown()) {
-      for (TestManager manager : this.testManagerList) {
-        manager.terminate();
+      if (testConfig.isLoadTest() && (this.currentPhase == null || this.currentPhase.equals(StepPhase.RAMPUP))) {
+        // todo: maybe some action is needed at this point
+      } else {
+        for (TestManager manager : this.testManagerList) {
+          manager.terminate();
+        }
       }
       this.multiExecutorService.shutdownNow();
       this.multiExecutorService = null;
@@ -217,7 +214,6 @@ public class MatrixRunner {
    * Create a common test logger for all test cases of a given test
    *
    * @return the logger for tests
-   * @throws IOException if the FileAppender fails
    */
   private KiteLogger createTestLogger(String kiteRequestId, String testName) {
     KiteLogger testLogger = KiteLogger.getLogger(new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(new Date()));
@@ -232,5 +228,9 @@ public class MatrixRunner {
       logger.error(getStackTrace(e));
     }
     return testLogger;
+  }
+
+  public void setCurrentIteration(int currentIteration) {
+    this.currentIteration = currentIteration;
   }
 }
