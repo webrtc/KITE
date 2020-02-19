@@ -22,6 +22,11 @@ public class ReportMerger {
     String pathToOldReport = verifyPathFormat(args[0]);
     String pathToNewReport = verifyPathFormat(args[1]);
     List<String> failedCasesInOldReport = extractFailedCases(pathToOldReport);
+    try {
+      fixWrongStatus(pathToOldReport);
+    }catch (Exception e) {
+      System.out.println("Could not fix wrong status");
+    }
     for (int index = 0; index < failedCasesInOldReport.size(); index++) {
       String failedCase = failedCasesInOldReport.get(index);
       System.out.println("Processing [" + (index+1) + "/" + failedCasesInOldReport.size() + "]" + failedCase);
@@ -79,8 +84,9 @@ public class ReportMerger {
     JsonObject result = readJsonFile(pathToFailedCase);
     boolean webdriverIssue = result.getJsonObject("statusDetails").getString("message").contains("populating web drivers");
     String testCaseName = result.getString("name").split(Pattern.quote("("))[0];
+    String testFullName = result.getString("fullName");
     String fullName = result.getString("fullName");
-    List<String> testCasesInNewReports = findTestCasesInReports(pathToNewReports, testCaseName);
+    List<String> testCasesInNewReports = findTestCasesInReports(pathToNewReports, testCaseName, testFullName);
     for (String testCasePath : testCasesInNewReports) {
       JsonObject testCase = readJsonFile(testCasePath);
       if (testCase.getString("fullName").equals(fullName)) {
@@ -103,7 +109,7 @@ public class ReportMerger {
     return "";
   }
 
-  private static List<String> findTestCasesInReports(String pathToReportFolder, String testCaseName) {
+  private static List<String> findTestCasesInReports(String pathToReportFolder, String testCaseName, String testFullName) {
     List<String> res = new ArrayList<>();
     try {
       File reportFolder = new File(pathToReportFolder);
@@ -111,7 +117,8 @@ public class ReportMerger {
       for (int index = 0; index < subFiles.length; index++) {
         if (subFiles[index].getName().contains("result.json")) {
           JsonObject result = readJsonFile(subFiles[index].getAbsolutePath());
-          if (result.getString("name").contains(testCaseName)) {
+          if (result.getString("name").contains(testCaseName)
+          && result.getString("fullName").equals(testFullName)) {
             res.add(subFiles[index].getAbsolutePath());
           }
         }
@@ -159,4 +166,37 @@ public class ReportMerger {
     return res;
   }
 
+  private static void fixWrongStatus(String pathToReportFolder) throws IOException {
+    File reportFolder = new File(pathToReportFolder);
+    File[] subFiles = reportFolder.listFiles();
+    for (int index = 0; index < subFiles.length; index++) {
+      if (subFiles[index].getName().contains("result.json")) {
+        JsonObject result = readJsonFile(subFiles[index].getAbsolutePath());
+        JsonObject statusDetail = result.getJsonObject("statusDetails");
+        String message = statusDetail.getString("message");
+        boolean issue = message.equalsIgnoreCase("The test has passed successfully!")
+            && !result.getString("status").equals("PASSED");
+        if (issue) {
+          JsonArray steps = result.getJsonArray("steps");
+          for (int i = 0; i < steps.size(); i++) {
+            JsonObject step = (JsonObject)steps.get(i);
+            if (!step.getString("status").equals("PASSED")){
+              statusDetail = step.getJsonObject("statusDetails");
+              break;
+            }
+          }
+          JsonObjectBuilder builder = Json.createObjectBuilder();
+          for (String key: result.keySet()) {
+            if (!key.equals("statusDetails")) {
+              builder.add(key, result.get(key));
+            } else {
+              builder.add(key, statusDetail);
+            }
+          }
+          FileUtils.forceDelete(new File(subFiles[index].getAbsolutePath()));
+          printJsonTofile(builder.build().toString(), subFiles[index].getAbsolutePath());
+        }
+      }
+    }
+  }
 }
