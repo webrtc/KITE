@@ -4,6 +4,7 @@
 
 package org.webrtc.kite.tests;
 
+import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.steps.StepPhase;
 import org.webrtc.kite.config.client.Client;
@@ -58,7 +59,7 @@ public class KiteJsTest extends KiteBaseTest {
   }
   
   @Override
-  protected void createTestRunners() throws KiteGridException, IOException {
+  protected void createTestRunners() throws IOException, KiteTestException {
     for (int index = 0; index < this.tuple.size(); index++) {
       JsTestRunner runner = new JsTestRunner(this, jsTestImpl, index, implJar);
       runner.setNumberOfParticipant(tuple.size());

@@ -15,6 +15,7 @@ public enum StatEnum {
   FRAME_DROPPED("Frames Dropped"),
   FRAME_RATE("Frame Rate (fps)"),
   AVG_FRAME_RATE("Average Frame Rate (fps)"),
+  AVG_FRAME_RATE_DECODED("Average Frame Rate Decoded (fps)"),
   
   BYTES("Bytes"),
   TOTAL_BYTES_SENT("Total Bytes Sent (Bytes)"),
@@ -32,6 +33,7 @@ public enum StatEnum {
   PACKETS("Packets"),
   PACKETS_LOST("Packets Lost"),
   PACKETS_LOST_PERCENTAGE("Packets Lost (%)"),
+  PACKETS_LOST_CUMULATIVE_PERCENTAGE("Cumulative Packets Lost (%)"),
   PACKETS_DISCARDED("Packets Discarded"),
   PACKETS_DISCARDED_PERCENTAGE("Packets Discarded (%)"),
   TOTAL_PACKETS_SENT("Total Packets Sent"),
@@ -44,7 +46,9 @@ public enum StatEnum {
   
   CURRENT_RTT("Current Round Trip Time (ms)"),
   AVG_CURRENT_RTT("Average Current Round Trip Time (ms)"),
-  TOTAL_RTT("Total Round Trip Time (ms)")
+  TOTAL_RTT("Total Round Trip Time (ms)"),
+  
+  REMOTE_IP("Remote IP")
   ;
   
   private final String text;

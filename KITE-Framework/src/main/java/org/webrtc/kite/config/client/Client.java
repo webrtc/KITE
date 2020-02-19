@@ -16,12 +16,33 @@
 
 package org.webrtc.kite.config.client;
 
+import static org.webrtc.kite.Utils.getStackTrace;
+
 import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import io.cosmosoftware.kite.interfaces.SampleData;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.ReportUtils;
 import io.cosmosoftware.kite.util.TestUtils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
@@ -31,15 +52,6 @@ import org.webrtc.kite.config.media.MediaFile;
 import org.webrtc.kite.config.media.MediaFileType;
 import org.webrtc.kite.config.paas.Paas;
 import org.webrtc.kite.exception.KiteGridException;
-
-import javax.json.*;
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.webrtc.kite.Utils.getStackTrace;
 
 /**
  * The type End point.
@@ -214,7 +226,7 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
    * @return the webDriver
    */
   @Transient
-  public WebDriver getWebDriver() throws KiteGridException {
+  public WebDriver getWebDriver() {
     return webDriver;
   }
   /**
@@ -884,14 +896,15 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @throws KiteGridException the kite grid exception
    */
-  public void createWebDriver(Map<WebDriver, Map<String, Object>> sessionData) throws KiteGridException {
+  public WebDriver createWebDriver(Map<WebDriver, Map<String, Object>> sessionData) throws KiteGridException {
     if (this.webDriver != null) {
       logger.warn("createWebDriver() webdriver already exists, skipping.");
-      return;
+      return this.webDriver;
     }
     try {
       this.webDriver = WebDriverFactory.createWebDriver(this, null, null, this.getPaas().getGridId());
       addToSessionMap(sessionData);
+      return this.webDriver;
     } catch (Exception e) {
       logger.error(ReportUtils.getStackTrace(e));
       throw new KiteGridException(
@@ -899,7 +912,7 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
           + " creating webdriver for \n"
           + this.toString()
           + ":\n"
-          + e.getMessage(), e);
+          + e.getLocalizedMessage());
     }
   }
 
@@ -922,14 +935,14 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
   private void addToSessionMap(Map<WebDriver, Map<String, Object>> sessionData) throws KiteGridException {
     Map<String, Object> map = new HashMap<>();
     map.put("end_point", this);
-    if (!this.isApp()) {
+//    if (!this.isApp()) {
       String node = TestUtils.getNode(
         this.getPaas().getUrl(),
         ((RemoteWebDriver) this.getWebDriver()).getSessionId().toString());
       if (node != null) {
         map.put("node_host", node);
       }
-    }
+//    }
     sessionData.put(this.getWebDriver(), map);
   }
   

@@ -25,6 +25,7 @@ import java.util.Map;
  */
 public class RTCRTPStreamStats extends RTCSingleStatObject {
   private final String codecId;
+  private final String kind;
   private final String mediaType;
   private final String nackCount;
   private final String ssrc;
@@ -38,6 +39,7 @@ public class RTCRTPStreamStats extends RTCSingleStatObject {
   public RTCRTPStreamStats(Map statObject, boolean inbound) {
     this.setId(getStatByName(statObject, "id"));
     this.ssrc = getStatByName(statObject, "ssrc");
+    this.kind = getStatByName(statObject, "kind");
     this.mediaType = getStatByName(statObject, "mediaType");
     this.trackId = getStatByName(statObject, "trackId");
     this.transportId = getStatByName(statObject, "parameters");
@@ -67,7 +69,11 @@ public class RTCRTPStreamStats extends RTCSingleStatObject {
   public String getMediaType() {
     return mediaType;
   }
-  
+
+  public String getKind() {
+    return kind;
+  }
+
   public String getNackCount() {
     return nackCount;
   }
@@ -113,6 +119,7 @@ public class RTCRTPStreamStats extends RTCSingleStatObject {
     JsonObjectBuilder jsonObjectBuilder =
       Json.createObjectBuilder()
         .add("ssrc", this.ssrc)
+        .add("kind", this.kind)
         .add("mediaType", this.mediaType)
         .add("trackId", this.trackId)
         .add("transportId", this.transportId)
