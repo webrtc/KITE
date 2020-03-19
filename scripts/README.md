@@ -62,7 +62,7 @@ Scroll down to the end of the file and edit the following parameters with the ve
 ```
 rem Browser versions
 set CHROME_VERSION=80
-set FIREFOX_VERSION=68
+set FIREFOX_VERSION=73
 ```
 
 Different browser versions require a different ChromeDriver (to control Chrome) and a different GeckoDriver (to control Firefox).
