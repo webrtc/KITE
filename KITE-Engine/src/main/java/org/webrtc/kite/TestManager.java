@@ -19,12 +19,14 @@ package org.webrtc.kite;
 import static io.cosmosoftware.kite.report.CSVHelper.jsonToString;
 import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 import static io.cosmosoftware.kite.util.TestUtils.getDir;
+import static io.cosmosoftware.kite.util.TestUtils.waitAround;
 
 import io.cosmosoftware.kite.report.Container;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.usrmgmt.EmailSender;
+import io.cosmosoftware.kite.util.WebDriverUtils;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -96,6 +98,8 @@ public class TestManager implements Callable<Object> {
   private StepPhase currentPhase;
 
   private boolean finished = false;
+
+  private int delay = 0;
   /**
    * Constructs a new TestManager with the given TestConfig and List<Client>.
    *
@@ -205,6 +209,8 @@ public class TestManager implements Callable<Object> {
       phaseResult = test.execute(currentPhase);
     } else {
       if (currentPhase.equals(StepPhase.RAMPUP)) {
+        logger.debug("Delayed " + this.delay + "ms before starting!");
+        waitAround(this.delay);
         phaseResult = test.execute(currentPhase);
         logger.info("RAM UP phase finished, return test manager object for LOAD REACHED execution..");
         if (phaseResult != null) {
@@ -389,10 +395,18 @@ public class TestManager implements Callable<Object> {
       for (StepPhase stepPhase : this.phases) {
         this.test.terminate(stepPhase);
       }
+      if (!testConfig.isJavascript()) {
+        logger.info("Terminating, quiting web drivers");
+        WebDriverUtils.closeDrivers(this.tuple.getWebDrivers());
+      }
     }
   }
 
   public void setTotal(int total) {
     this.total = total;
+  }
+
+  public void setDelay(int delay) {
+    this.delay = delay;
   }
 }

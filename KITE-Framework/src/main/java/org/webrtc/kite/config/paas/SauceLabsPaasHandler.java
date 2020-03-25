@@ -39,19 +39,19 @@ public class SauceLabsPaasHandler extends PaasHandler {
     
     /* might be not necessary, depending on data format it DB */
     for (JsonObject jsonObject : availableConfigList) {
-      Client browser = new Client();
-      browser.setVersion(jsonObject.getString("short_version", ""));
+      Client client = new Client();
+      client.getBrowserSpecs().setVersion(jsonObject.getString("short_version", ""));
       
       String browserName = jsonObject.getString("api_name", "");
       if (browserName.equalsIgnoreCase(BrowserType.IE))
         browserName = BrowserType.IEXPLORE;
-      browser.setBrowserName(browserName);
+      client.getBrowserSpecs().setBrowserName(browserName);
       
       String platform = jsonObject.getString("os", "").toLowerCase();
-      browser.setPlatform(
+      client.getBrowserSpecs().setPlatform(
         Platform.fromString(platform.startsWith("mac") ? platform.replaceAll("mac", "os x") : platform));
       
-      this.clientList.add(browser);
+      this.clientList.add(client);
     }
     
   }

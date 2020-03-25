@@ -6,6 +6,7 @@ import java.util.List;
 public class RTCStatList extends LinkedList<RTCStats> {
 
   private String pcName = "peerconnection";
+  private String regionId = "NC";
 
   public RTCStatList() {
     super();
@@ -18,6 +19,7 @@ public class RTCStatList extends LinkedList<RTCStats> {
   public RTCStatList(String pcName, RTCStatList otherList) {
     super(otherList);
     this.pcName = pcName;
+    this.regionId = otherList.getRegionId();
   }
 
   public RTCStatList(List<RTCStats> otherList) {
@@ -26,5 +28,13 @@ public class RTCStatList extends LinkedList<RTCStats> {
 
   public String getPcName() {
     return pcName;
+  }
+
+  public void setRegionId(String regionId) {
+    this.regionId = regionId;
+  }
+
+  public String getRegionId() {
+    return regionId;
   }
 }

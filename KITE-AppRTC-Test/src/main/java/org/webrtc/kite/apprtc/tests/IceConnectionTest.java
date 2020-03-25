@@ -19,8 +19,8 @@ import io.cosmosoftware.kite.steps.ScreenshotStep;
 import io.cosmosoftware.kite.steps.WebRTCInternalsStep;
 import org.webrtc.kite.apprtc.checks.PeerConnectionCheck;
 import org.webrtc.kite.apprtc.checks.RemoteVideoDisplayCheck;
-import org.webrtc.kite.apprtc.steps.GetStatsStep;
 import org.webrtc.kite.apprtc.steps.JoinRoomStep;
+import org.webrtc.kite.stats.GetStatsStep;
 import org.webrtc.kite.tests.TestRunner;
 
 import static io.cosmosoftware.kite.util.WebDriverUtils.isChrome;

@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 public class RTCStatMap extends LinkedHashMap<String, RTCStatList> {
   
+  private String regionId = "NC";
   public RTCStatMap() {
     super();
   }
@@ -17,7 +18,15 @@ public class RTCStatMap extends LinkedHashMap<String, RTCStatList> {
     String pcName = keySet().toArray()[index].toString();
     return new RTCStatList(pcName, this.get(keySet().toArray()[index])) ;
   }
-  
+
+
+  @Override
+  public RTCStatList get(Object key) {
+    RTCStatList res = super.get(key);
+    res.setRegionId(this.regionId);
+    return res;
+  }
+
   /**
    * Assuming that the first stat list is of the local pc
    * @return the first stat list in the map.
@@ -25,5 +34,12 @@ public class RTCStatMap extends LinkedHashMap<String, RTCStatList> {
   public RTCStatList getLocalPcStats() {
     return this.get(0);
   }
-  
+
+  public void setRegionId(String regionId) {
+    this.regionId = regionId;
+  }
+
+  public String getRegionId() {
+    return regionId;
+  }
 }

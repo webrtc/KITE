@@ -44,6 +44,16 @@ public class ReportMerger {
               System.out.println("Could not copy " + attachment + ": " + e.getLocalizedMessage());
             }
           }
+
+          List<String> attachmentsToDelete = getAttachments(failedCase);
+          for (String attachment : attachmentsToDelete) {
+            try {
+              FileUtils.forceDelete(new File(pathToOldReport+ "/" +  attachment));
+            } catch (Exception e) {
+              System.out.println("Could not delete " + attachment + ": " + e.getLocalizedMessage());
+            }
+          }
+
         } catch (Exception e) {
           System.out.println("Could not update " + failedCase + ": " + e.getLocalizedMessage());
         }
@@ -51,6 +61,10 @@ public class ReportMerger {
         System.out.println("No possible update for " + failedCase);
       }
     }
+  }
+
+  private static void copyAttachments(String fileName) {
+
   }
 
   private static void updateResultFile(String pathToResultFile, String pathToOtherResultFile)

@@ -80,7 +80,9 @@ public class StatsUtils {
       return new RTCStats(peerConnection,
           (List<Map>) executeJsScript(webDriver, getStashedStatsScript), selectedStats);
     } catch (Exception e) {
-      throw new KiteTestException("Could not get stats from peer connection", Status.BROKEN ,e);
+//      throw new KiteTestException("Could not get stats from peer connection", Status.BROKEN, e);
+      // todo: put the e back
+      throw new KiteTestException("Could not get stats from peer connection", Status.BROKEN);
     }
   }
   
@@ -117,9 +119,14 @@ public class StatsUtils {
   public static JsonObject transformToJson(RTCStatList stats) {
     JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
     for (RTCStats stat: stats) {
-      arrayBuilder.add(stat.toJson());
+      JsonObject temp = stat.toJson();
+      if (!temp.isEmpty()) {
+        arrayBuilder.add(stat.toJson());
+      }
     }
-    return Json.createObjectBuilder().add("statsArray", arrayBuilder).build();
+    return Json.createObjectBuilder()
+        .add("region", stats.getRegionId())
+        .add("statsArray", arrayBuilder).build();
   }
 
   /**
@@ -239,7 +246,7 @@ public class StatsUtils {
    *             {
    *                 "streamId": "RTCInboundRTPAudioStream_3333556480",
    *                 "Total Bytes Received (Bytes)": "34997",
-   *                 "Average Received Bitrate (bps)": "3071",
+   *                 "Average Received Bitrate (kbps)": "3071",
    *                 "Total Packets Received": "585",
    *                 "Average Audio Level (dB)": "0",
    *                 "Total Packets Lost": 0,
@@ -252,7 +259,7 @@ public class StatsUtils {
    *             {
    *                 "streamId": "RTCInboundRTPVideoStream_3131213379",
    *                 "Total Bytes Received (Bytes)": "1031833",
-   *                 "Average Received Bitrate (bps)": "95078",
+   *                 "Average Received Bitrate (kbps)": "95078",
    *                 "Total Packets Received": "1006",
    *                 "Frames Received": "234",
    *                 "Average Frame Rate (fps)": "0",
@@ -282,16 +289,16 @@ public class StatsUtils {
       builder.add(StatEnum.REMOTE_IP.toString(), lastRtcStats.getRemoteIP());
     }
     if (lastRtcStats.get("inbound-rtp") != null) {
-      builder
-        .add(StatEnum.TOTAL_INBOUND_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytes("inbound"))
-        .add(StatEnum.TOTAL_INBOUND_AUDIO_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytesByMedia("inbound", "audio"))
-        .add(StatEnum.TOTAL_INBOUND_VIDEO_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytesByMedia("inbound", "video"));
+//      builder
+//        .add(StatEnum.TOTAL_INBOUND_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytes("inbound"))
+//        .add(StatEnum.TOTAL_INBOUND_AUDIO_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytesByMedia("inbound", "audio"))
+//        .add(StatEnum.TOTAL_INBOUND_VIDEO_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytesByMedia("inbound", "video"));
     }
     if (lastRtcStats.get("outbound-rtp") != null) {
-      builder
-        .add(StatEnum.TOTAL_OUTBOUND_BYTES_SENT.toString(), lastRtcStats.getTotalBytes("outbound"))
-        .add(StatEnum.TOTAL_OUTBOUND_AUDIO_BYTES_SENT.toString(), lastRtcStats.getTotalBytesByMedia("outbound", "audio"))
-        .add(StatEnum.TOTAL_OUTBOUND_VIDEO_BYTES_SENT.toString(), lastRtcStats.getTotalBytesByMedia("outbound", "video"));
+//      builder
+//        .add(StatEnum.TOTAL_OUTBOUND_BYTES_SENT.toString(), lastRtcStats.getTotalBytes("outbound"))
+//        .add(StatEnum.TOTAL_OUTBOUND_AUDIO_BYTES_SENT.toString(), lastRtcStats.getTotalBytesByMedia("outbound", "audio"))
+//        .add(StatEnum.TOTAL_OUTBOUND_VIDEO_BYTES_SENT.toString(), lastRtcStats.getTotalBytesByMedia("outbound", "video"));
     }
     
     for (int index = 0; index < statArray.size(); index++) {
@@ -307,7 +314,7 @@ public class StatsUtils {
     }
     
     builder
-      .add(StatEnum.TOTAL_RTT.toString(), totalRTT)
+//      .add(StatEnum.TOTAL_RTT.toString(), totalRTT)
       .add(StatEnum.AVG_CURRENT_RTT.toString(), agvRTT);
     if (lastRtcStats.get("inbound-rtp") != null) {
       builder.add("inbound", processStreamStats(inboundStreamStatsList, fullyDetailed));
@@ -365,21 +372,21 @@ public class StatsUtils {
       objectBuilder.add("streamId", streamId);
       
       List<Double> bytes = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.BYTES, fullyDetailed);
-      objectBuilder.add(inbound
-          ? StatEnum.TOTAL_BYTES_RECEIVED.toString()
-          : StatEnum.TOTAL_BYTES_SENT.toString()
-        , checkNegativeValue(bytes.get(last)));
+//      objectBuilder.add(inbound
+//          ? StatEnum.TOTAL_BYTES_RECEIVED.toString()
+//          : StatEnum.TOTAL_BYTES_SENT.toString()
+//        , checkNegativeValue(bytes.get(last)));
             
       objectBuilder.add(inbound
           ? StatEnum.RECEIVED_BITRATE.toString()
           : StatEnum.SENT_BITRATE.toString()
-        , checkNegativeValue(8000 * getDiffEndToStart(bytes)/duration));
+        , checkNegativeValue(8 * getDiffEndToStart(bytes)/duration));
   
       List<Double> packets = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.PACKETS, fullyDetailed);
-      objectBuilder.add(inbound
-          ? StatEnum.TOTAL_PACKETS_RECEIVED.toString()
-          : StatEnum.TOTAL_PACKETS_SENT.toString()
-        , checkNegativeValue(packets.get(last)));
+//      objectBuilder.add(inbound
+//          ? StatEnum.TOTAL_PACKETS_RECEIVED.toString()
+//          : StatEnum.TOTAL_PACKETS_SENT.toString()
+//        , checkNegativeValue(packets.get(last)));
       
       Double packetsReceivedDiff = getDiffEndToStart(packets);
       
@@ -395,8 +402,8 @@ public class StatsUtils {
           : StatEnum.TOTAL_FRAME_SENT.toString(), checkNegativeValue(frames.get(last)));
         
         List<Double> framerate = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.FRAME_RATE, fullyDetailed);
-        
-        objectBuilder.add(StatEnum.AVG_FRAME_RATE.toString(),  checkNegativeValue(1000 * getDiffEndToStart(framerate)/duration));
+//
+//        objectBuilder.add(StatEnum.AVG_FRAME_RATE.toString(),  checkNegativeValue(1000 * getDiffEndToStart(framerate)/duration));
       }
       
       if (inbound) {
@@ -405,8 +412,8 @@ public class StatsUtils {
         Double packetsLostDiff = getDiffEndToStart(packetsLost);
         objectBuilder.add(StatEnum.PACKETS_LOST_PERCENTAGE.toString(), 
           checkNegativeValue(100 * packetsLostDiff/ (packetsLostDiff + packetsReceivedDiff)));
-        objectBuilder.add(StatEnum.PACKETS_LOST_CUMULATIVE_PERCENTAGE.toString(),
-          checkNegativeValue(100 * packetsLost.get(last)/ (packetsLost.get(last) + packets.get(last))));
+//        objectBuilder.add(StatEnum.PACKETS_LOST_CUMULATIVE_PERCENTAGE.toString(),
+//          checkNegativeValue(100 * packetsLost.get(last)/ (packetsLost.get(last) + packets.get(last))));
         
         
         
@@ -423,8 +430,9 @@ public class StatsUtils {
           
         } else {
           List<Double> framerate = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.AVG_FRAME_RATE_DECODED, fullyDetailed);
-          objectBuilder.add(StatEnum.AVG_FRAME_RATE_DECODED.toString(),  checkNegativeValue(1000 * getDiffEndToStart(framerate)/duration));
-          
+          objectBuilder.add(StatEnum.AVG_FRAME_RATE.toString(),  checkNegativeValue(1000 * getDiffEndToStart(framerate)/duration));
+//          objectBuilder.add(StatEnum.AVG_FRAME_RATE_DECODED.toString(),  checkNegativeValue(1000 * getDiffEndToStart(framerate)/duration));
+
           // could be useful someday
           List<Double> framedropped = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.FRAME_DROPPED, fullyDetailed);
           

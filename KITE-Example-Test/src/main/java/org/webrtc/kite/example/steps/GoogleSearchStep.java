@@ -18,7 +18,7 @@ public class GoogleSearchStep extends TestStep {
   protected void step() {
     
     searchPage.open();
-    searchPage.searchFor(TARGET);
+//    searchPage.searchFor(TARGET);
   }
   
   @Override

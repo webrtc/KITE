@@ -18,43 +18,24 @@ import javax.persistence.*;
  */
 @Entity (name = Paas.TABLE_NAME)
 public class Paas extends KiteEntity implements SampleData {
-  
-  /**
-   * The Constant TABLE_NAME.
-   */
+
   final static String TABLE_NAME = "paas";
-  /**
-   * The accesskey.
-   */
   private String accesskey;
-  /**
-   * The grid id.
-   */
   private String gridId;
-  /**
-   * The id.
-   */
   private String id;
-  /**
-   * The type.
-   */
   private PaasType type;
-  /**
-   * The url.
-   */
   private String url;
-  /**
-   * The username.
-   */
   private String username;
-  
+  private String region = "NC";
+  private int availableSlots = 0;
+
   /**
    * Instantiates a new paas.
    */
   public Paas() {
     super();
   }
-  
+
   /**
    * Instantiates a new paas.
    *
@@ -65,7 +46,7 @@ public class Paas extends KiteEntity implements SampleData {
     this.type = PaasType.local;
     this.url = url;
   }
-  
+
   /**
    * Instantiates a new paas.
    *
@@ -75,26 +56,26 @@ public class Paas extends KiteEntity implements SampleData {
    */
   public Paas(JsonObject jsonObject) throws BadEntityException {
     this();
-    
+
     // Mandatory
     this.type = PaasType.valueOf(jsonObject.getString("type"));
-    
+
     // Optional
     this.username = jsonObject.getString("username", this.username);
     this.accesskey = jsonObject.getString("accessKey", this.accesskey);
     this.url = jsonObject.getString("url", this.url);
     this.gridId = jsonObject.getString("gridId", this.gridId);
-    
+
     if (this.type == PaasType.local) {
       if (this.url == null)
         throw new BadEntityException("'url' cannot be null for a local Paas");
     } else {
       if (this.username == null || this.accesskey == null)
         throw new BadEntityException(
-          "Either 'username' or 'accesskey' is not found in the " + this.type + " Paas");
+            "Either 'username' or 'accesskey' is not found in the " + this.type + " Paas");
     }
   }
-  
+
   /**
    * Checks if is local.
    *
@@ -103,7 +84,7 @@ public class Paas extends KiteEntity implements SampleData {
   public boolean checkLocal() {
     return this.type == PaasType.local;
   }
-  
+
   /**
    * Gets the accesskey.
    *
@@ -112,7 +93,7 @@ public class Paas extends KiteEntity implements SampleData {
   public String getAccesskey() {
     return this.accesskey;
   }
-  
+
   /**
    * Sets the accesskey.
    *
@@ -121,7 +102,7 @@ public class Paas extends KiteEntity implements SampleData {
   public void setAccesskey(String accesskey) {
     this.accesskey = accesskey;
   }
-  
+
   /**
    * Gets the grid id.
    *
@@ -130,7 +111,7 @@ public class Paas extends KiteEntity implements SampleData {
   public String getGridId() {
     return gridId;
   }
-  
+
   /**
    * Sets the grid id.
    *
@@ -139,7 +120,7 @@ public class Paas extends KiteEntity implements SampleData {
   public void setGridId(String gridId) {
     this.gridId = gridId;
   }
-  
+
   /**
    * Gets the id.
    *
@@ -148,11 +129,11 @@ public class Paas extends KiteEntity implements SampleData {
   @Id
   @GeneratedValue (generator = Paas.TABLE_NAME)
   @GenericGenerator (name = Paas.TABLE_NAME, strategy = "io.cosmosoftware.kite.dao.KiteIdGenerator", parameters = {
-    @Parameter (name = "prefix", value = "PAAS")})
+      @Parameter (name = "prefix", value = "PAAS")})
   public String getId() {
     return this.id;
   }
-  
+
   /**
    * Sets the id.
    *
@@ -161,7 +142,7 @@ public class Paas extends KiteEntity implements SampleData {
   public void setId(String id) {
     this.id = id;
   }
-  
+
   /**
    * Gets the type.
    *
@@ -171,7 +152,7 @@ public class Paas extends KiteEntity implements SampleData {
   public PaasType getType() {
     return this.type;
   }
-  
+
   /**
    * Sets the type.
    *
@@ -180,7 +161,7 @@ public class Paas extends KiteEntity implements SampleData {
   public void setType(PaasType type) {
     this.type = type;
   }
-  
+
   /**
    * Gets the url.
    *
@@ -189,7 +170,7 @@ public class Paas extends KiteEntity implements SampleData {
   public String getUrl() {
     return this.url;
   }
-  
+
   /**
    * Sets the url.
    *
@@ -198,7 +179,7 @@ public class Paas extends KiteEntity implements SampleData {
   public void setUrl(String url) {
     this.url = url;
   }
-  
+
   /**
    * Gets the username.
    *
@@ -207,7 +188,7 @@ public class Paas extends KiteEntity implements SampleData {
   public String getUsername() {
     return this.username;
   }
-  
+
   /**
    * Sets the username.
    *
@@ -216,7 +197,7 @@ public class Paas extends KiteEntity implements SampleData {
   public void setUsername(String username) {
     this.username = username;
   }
-  
+
   /**
    * Make paas handler.
    *
@@ -236,7 +217,7 @@ public class Paas extends KiteEntity implements SampleData {
         return null;
     }
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -246,10 +227,10 @@ public class Paas extends KiteEntity implements SampleData {
   public SampleData makeSampleData() {
     this.type = PaasType.local;
     this.url = "http://localhost:4444/wd/hub";
-    
+
     return this;
   }
-  
+
   /**
    * Retrieve hub url.
    *
@@ -258,5 +239,22 @@ public class Paas extends KiteEntity implements SampleData {
   public String retrieveHubUrl() {
     return this.checkLocal() ? this.url : this.type.hubUrl(this.username, this.accesskey);
   }
-  
+
+  @Transient
+  public String getRegion() {
+    return region;
+  }
+
+  public void setRegion(String region) {
+    this.region = region;
+  }
+
+  @Transient
+  public int getAvailableSlots() {
+    return availableSlots;
+  }
+
+  public void setAvailableSlots(int availableSlots) {
+    this.availableSlots = availableSlots;
+  }
 }

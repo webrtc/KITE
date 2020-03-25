@@ -16,27 +16,20 @@
 
 package org.webrtc.kite.config.client;
 
-import static org.webrtc.kite.Utils.getStackTrace;
-
 import io.cosmosoftware.kite.config.KiteEntity;
+import io.cosmosoftware.kite.interfaces.CommandMaker;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import io.cosmosoftware.kite.interfaces.SampleData;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.ReportUtils;
 import io.cosmosoftware.kite.util.TestUtils;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -48,8 +41,6 @@ import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.webrtc.kite.WebDriverFactory;
-import org.webrtc.kite.config.media.MediaFile;
-import org.webrtc.kite.config.media.MediaFileType;
 import org.webrtc.kite.config.paas.Paas;
 import org.webrtc.kite.exception.KiteGridException;
 
@@ -57,32 +48,25 @@ import org.webrtc.kite.exception.KiteGridException;
  * The type End point.
  */
 @Entity(name = Client.TABLE_NAME)
-public class Client extends KiteEntity implements JsonBuilder, SampleData {
+public class Client extends KiteEntity implements CommandMaker, JsonBuilder, SampleData {
 
   final static String TABLE_NAME = "clients";
   protected final KiteLogger logger = KiteLogger.getLogger(this.getClass().getName());
+
+
   protected Integer count;
   protected Integer clientIndex = -1; // in the config file
   protected String id;
-  protected BrowserSpecs specs;
+  protected Capability capability;
+  private BrowserSpecs browserSpecs;
+  private WebDriver webDriver;
   private String name = "";
   protected Paas paas;
   private Boolean exclude = false;
-  private Map<String, String> extraCapabilities = new HashMap<>();
-  private String gateway;
   private JsonObject jsonConfig;
-  private Integer maxInstances;
   protected String kind;
   private App app;
-  private final String DEFAULT_WINDOW_SIZE = "1920,1200";
-  private List<String> flags = new ArrayList<>();
-  private Boolean headless = false;
-  private Boolean technologyPreview = false;
-  private Boolean useFakeMedia = true;
-  private String windowSize = DEFAULT_WINDOW_SIZE;
-  private MediaFile audio;
-  private MediaFile video;
-  private WebDriver webDriver;
+
 
 
   /**
@@ -97,28 +81,18 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
    * @param client the client
    */
   public Client(Client client) {
+    this.capability = client.getCapability();
     this.exclude = client.isExclude();
     this.jsonConfig = client.getJsonConfig();
-    this.gateway = client.getGateway();
     this.count = client.getCount();
     this.paas = client.getPaas();
-    this.specs = client.getSpecs();
+    this.browserSpecs = client.getBrowserSpecs();
     this.clientIndex = client.getClientIndex();
-    for (String capabilityName : client.getExtraCapabilities().keySet()) {
-      this.addCapabilities(capabilityName, client.getExtraCapabilities().get(capabilityName));
-    }
+    this.capability = client.getCapability();
     this.app = client.getApp();
     this.name = client.getName();
     this.kind = this.app != null ? "app" : "browser";
 
-    this.specs = client.getSpecs();
-    this.headless = client.isHeadless();
-    this.useFakeMedia = client.useFakeMedia();
-    this.technologyPreview = client.isTechnologyPreview();
-    this.windowSize = this.getWindowSize();
-    this.flags = client.getFlags();
-    this.video = client.getVideo();
-    this.audio = client.getAudio();
     
   }
 
@@ -128,67 +102,16 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
    * @param jsonObject JsonObject
    */
   public Client(JsonObject jsonObject) {
-
+    this.browserSpecs = new BrowserSpecs(jsonObject);
     this.jsonConfig = jsonObject;
     this.exclude = jsonObject.getBoolean("exclude", false);
-    this.specs = new BrowserSpecs(jsonObject);
+    this.capability = new Capability(jsonObject);
     this.name = jsonObject.getString("name", null);
-    this.count = jsonObject.getInt("count", 1);
-    JsonValue jsonValue = jsonObject.getOrDefault("extraCapabilities", null);
-    this.gateway = jsonObject.getString("gateway", null);
-    if (jsonValue != null) {
-      JsonObject extraCapabilitiesArray = (JsonObject) jsonValue;
-      for (String capabilityName : extraCapabilitiesArray.keySet()) {
-        this.addCapabilities(capabilityName, extraCapabilitiesArray.getString(capabilityName));
-      }
-    }
+    this.count = jsonObject.getInt("count", 5);
     if (jsonObject.containsKey("app")) {
       this.app = new App(jsonObject.getJsonObject("app"));
     }
     this.kind = this.app != null ? "app" : "browser";
-
-    this.headless = jsonObject.getBoolean("headless", headless);
-    this.useFakeMedia = jsonObject.getBoolean("useFakeMedia", useFakeMedia);
-    this.technologyPreview = jsonObject.getBoolean("technologyPreview", technologyPreview);
-    this.windowSize = jsonObject.getString("windowSize", windowSize);
-    
-    jsonValue = jsonObject.getOrDefault("flags", null);
-    JsonObject jObject = jsonObject.getJsonObject("video");
-    if (jObject != null) {
-      this.video = new MediaFile(jObject);
-    }
-    jObject = jsonObject.getJsonObject("audio");
-    if (jObject != null) {
-      this.audio = new MediaFile(jObject);
-    }
-    if (jsonValue != null) {
-      JsonArray flagArray = (JsonArray) jsonValue;
-      for (int i = 0; i < flagArray.size(); i++) {
-        this.flags.add(flagArray.getString(i));
-      }
-    }
-    
-    
-  }
-
-
-  /**
-   * Adds one flag to the flag list.
-   *
-   * @param flag to add.
-   */
-  public void addFlag(String flag) {
-    this.flags.add(flag);
-  }
-
-  /**
-   * add new capability name/value pair to browser
-   *
-   * @param capabilityName capability name
-   * @param capabilityValue capability value
-   */
-  public void addCapabilities(String capabilityName, String capabilityValue) {
-    this.extraCapabilities.put(capabilityName, capabilityValue);
   }
 
 
@@ -210,15 +133,6 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
     this.count = count;
   }
 
-  /**
-   * Gets extra capabilities.
-   *
-   * @return extra capability map to be used to create webdriver
-   */
-  @Transient
-  public Map<String, String> getExtraCapabilities() {
-    return extraCapabilities;
-  }
 
   /**
    * Gets the webDriver
@@ -229,32 +143,7 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
   public WebDriver getWebDriver() {
     return webDriver;
   }
-  /**
-   * Sets extra capabilities.
-   *
-   * @param extraCapabilities the extra capabilities
-   */
-  public void setExtraCapabilities(Map<String, String> extraCapabilities) {
-    this.extraCapabilities = extraCapabilities;
-  }
 
-  /**
-   * Gets gateway.
-   *
-   * @return the gateway
-   */
-  public String getGateway() {
-    return gateway;
-  }
-
-  /**
-   * Sets gateway.
-   *
-   * @param gateway the gateway
-   */
-  public void setGateway(String gateway) {
-    this.gateway = gateway;
-  }
 
   /**
    * Gets id.
@@ -310,25 +199,6 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
   }
 
   /**
-   * Gets max instances.
-   *
-   * @return the max instances
-   */
-  @Transient
-  public int getMaxInstances() {
-    return maxInstances;
-  }
-
-  /**
-   * Sets max instances.
-   *
-   * @param maxInstances the max instances
-   */
-  public void setMaxInstances(int maxInstances) {
-    this.maxInstances = maxInstances;
-  }
-
-  /**
    * Gets paas.
    *
    * @return the paas
@@ -359,10 +229,10 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
       return false;
     }
     Client other = (Client) obj;
-    if (specs == null) {
-      return other.specs == null;
+    if (this.capability == null) {
+      return other.capability == null;
     } else {
-      return specs.equals(other.specs);
+      return this.capability.equals(other.capability);
     }
   }
 
@@ -413,73 +283,23 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
     this.exclude = exclude;
   }
 
-  /**
-   * Gets specs.
-   *
-   * @return the specs
-   */
-  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  public BrowserSpecs getSpecs() {
-    return this.specs;
-  }
-
-  /**
-   * Sets specs.
-   *
-   * @param specs the specs
-   */
-  public void setSpecs(BrowserSpecs specs) {
-    this.specs = specs;
-  }
-
-  /**
-   * Get platform from specs
-   *
-   * @return the spec's platform
-   */
-  @Transient
-  public Platform getPlatform() {
-    return this.specs.getPlatform();
-  }
-
-  /**
-   * Gets device name.
-   *
-   * @return the device name
-   */
-  @Transient
-  public String getDeviceName() {
-    return this.specs.getDeviceName();
-  }
-
-  /**
-   * Gets platform version.
-   *
-   * @return the platform version
-   */
-  @Transient
-  public String getPlatformVersion() {
-    return this.specs.getPlatformVersion();
-  }
-
-  @Override
-  public String toString() { 
-    try {
-      return buildJsonObjectBuilder().build().toString();
-    } catch (NullPointerException e) {
-      return getStackTrace(e);
-    }
-  }
+//  @Override
+//  public String toString() {
+//    return super.toString();
+//  }
 
   @Override
   public JsonObjectBuilder buildJsonObjectBuilder() throws NullPointerException {
+    if (this.browserSpecs == null) {
+      return Json.createObjectBuilder().add("BROWSER_SPEC", "NOT_FOUND");
+    }
     JsonObjectBuilder builder = Json.createObjectBuilder()
-      .add("platform", getPlatform().name());
+      .add("platform", this.browserSpecs.getPlatform().name());
     if (this.name != null) {
       builder.add("name", this.name);
     }
-    if (this.gateway != null) {
-      builder.add("gateway", this.gateway);
+    if (this.capability.getGateway() != null) {
+      builder.add("gateway", this.capability.getGateway().toString());
     }
     if (this.count != null) {
       builder.add("count", this.count);
@@ -491,43 +311,39 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
       builder.add("paas", this.paas.getType().name());
       builder.add("remoteUrl", this.paas.getUrl());
     }
-    if (this.useFakeMedia != null) {
-      builder.add("useFakeMedia", this.useFakeMedia);
-    }
-    if (this.windowSize != null) {
-      builder.add("windowSize", this.windowSize);
-    }
-    if (this.flags != null) {
-      JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
-      for (int i = 0; i < this.flags.size(); i++) {
-        jsonArrayBuilder.add(this.flags.get(i));
-      }
-      builder.add("flags", jsonArrayBuilder.build());
-    }
-    if (this.video != null) {
-      builder.add("video", this.video.buildJsonObjectBuilder());
-    }
-    if (this.audio != null) {
-      builder.add("audio", this.audio.buildJsonObjectBuilder());
-    }
-    if (this.extraCapabilities != null && !this.extraCapabilities.isEmpty()) {
-      for (Map.Entry<String, String> entry : this.extraCapabilities.entrySet()) {
-        builder.add(entry.getKey(), entry.getValue());
-      }
-    }
-    if (this.paas != null && this.paas.getGridId() != null) {
-      builder.add("gridId", this.paas.getGridId());
-    }
     if (isApp()) {
       builder.add("app", app.buildJsonObjectBuilder());
     } else {
-      builder.add("browserName", this.getBrowserName())
-        .add("headless", this.headless == null ? false : this.headless)
-        .add("technologyPreview", this.technologyPreview == null ? false : technologyPreview);
-      if (this.getVersion() != null) {
-        builder.add("version", this.getVersion());
+      builder.add("browserName", this.browserSpecs.getBrowserName())
+              .add("headless", this.capability.isHeadless() == null ? false : this.capability.isHeadless())
+              .add("technologyPreview", this.capability.isTechnologyPreview() == null ? false : this.capability.isTechnologyPreview());
+      if (this.browserSpecs.getVersion() != null) {
+        builder.add("version", this.browserSpecs.getVersion());
+      }
+      if (this.capability.useFakeMedia() != null) {
+        builder.add("useFakeMedia", this.capability.useFakeMedia());
+      }
+      if (this.capability.getWindowSize() != null) {
+        builder.add("windowSize", this.capability.getWindowSize());
+      }
+      if (this.capability.getFlags() != null) {
+        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+        for (int i = 0; i < this.capability.getFlags().size(); i++) {
+          jsonArrayBuilder.add(this.capability.getFlags().get(i));
+        }
+        builder.add("flags", jsonArrayBuilder.build());
+      }
+      if (this.capability.getExtraCapabilities() != null && !this.capability.getExtraCapabilities().isEmpty()) {
+        for (Map.Entry<String, String> entry : this.capability.getExtraCapabilities().entrySet()) {
+          builder.add(entry.getKey(), entry.getValue());
+        }
       }
     }
+
+    if (this.paas != null && this.paas.getGridId() != null) {
+      builder.add("gridId", this.paas.getGridId());
+    }
+
     return builder;
   }
 
@@ -617,174 +433,8 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
   public int hashCode() {
     final int prime = super.hashCode();
     int result = 1;
-    result = prime * result + ((specs == null) ? 0 : specs.hashCode());
+    result = prime * result + ((this.capability == null) ? 0 : this.capability.hashCode());
     return result;
-  }
-
-  /**
-   * Gets browser name.
-   *
-   * @return the browser name
-   */
-  @Transient
-  public String getBrowserName() {
-    return this.specs.getBrowserName();
-  }
-
-  /**
-   * Gets profile.
-   *
-   * @return the profile
-   */
-  @Transient
-  public String getProfile() {
-    return this.specs.getProfile();
-  }
-
-  /**
-   * Sets profile.
-   */
-  @Transient
-  public void setProfile(String profile) {
-    this.specs.setProfile(profile);
-  }
-
-  /**
-   * Gets extension.
-   *
-   * @return the extension
-   */
-  @Transient
-  public String getExtension() {
-    return this.specs.getExtension();
-  }
-
-  /**
-   * Sets extension.
-   */
-  @Transient
-  public void setExtension(String extension) {
-    this.specs.setExtension(extension);
-  }
-
-  /**
-   * Sets browser name.
-   *
-   * @param browserName the browser name
-   */
-  public void setBrowserName(String browserName) {
-    this.specs.setBrowserName(browserName);
-  }
-
-  /**
-   * Gets flags.
-   *
-   * @return the flags
-   */
-  @Column
-  @ElementCollection(fetch = FetchType.EAGER)
-  public List<String> getFlags() {
-    return this.flags;
-  }
-
-  /**
-   * Sets flags.
-   *
-   * @param flags the flags
-   */
-  public void setFlags(List<String> flags) {
-    this.flags = flags;
-  }
-
-  /**
-   * Gets use fake media.
-   *
-   * @return the use fake media
-   */
-  public Boolean getUseFakeMedia() {
-    return useFakeMedia;
-  }
-
-  /**
-   * Sets use fake media.
-   *
-   * @param useFakeMedia the use fake media
-   */
-  public void setUseFakeMedia(Boolean useFakeMedia) {
-    this.useFakeMedia = useFakeMedia;
-  }
-
-  /**
-   * Gets version.
-   *
-   * @return the version
-   */
-  @Transient
-  public String getVersion() {
-    return this.specs.getVersion();
-  }
-
-  /**
-   * Sets version.
-   *
-   * @param version the version
-   */
-  public void setVersion(String version) {
-    this.specs.setVersion(version);
-  }
-
-  /**
-   * Gets the window size
-   *
-   * @return the window size
-   */
-  public String getWindowSize() {
-    return windowSize;
-  }
-
-  /**
-   * Sets window size.
-   *
-   * @param windowSize the window size
-   */
-  public void setWindowSize(String windowSize) {
-    this.windowSize = windowSize;
-  }
-
-  /**
-   * Is headless boolean.
-   *
-   * @return the boolean
-   */
-  public Boolean isHeadless() {
-    return headless;
-  }
-
-  /**
-   * Sets headless.
-   *
-   * @param headless the headless
-   */
-  public void setHeadless(Boolean headless) {
-    this.headless = headless;
-  }
-
-  /**
-   * Is technologyPreview boolean.
-   *
-   * @return the boolean
-   */
-  public Boolean isTechnologyPreview() {
-    return technologyPreview;
-  }
-
-  /**
-   * Sets technology preview.
-   *
-   * @param technologyPreview the technology preview
-   */
-  public void setTechnologyPreview(Boolean technologyPreview) {
-    this.technologyPreview = technologyPreview;
   }
 
   /**
@@ -793,17 +443,8 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
    * @return the platform
    */
   public Platform retrieveFamilyOrPlatform() {
-    Platform platform = this.getPlatform();
+    Platform platform = this.browserSpecs.getPlatform();
     return platform.family() == null ? platform : platform.family();
-  }
-
-  /**
-   * Sets platform.
-   *
-   * @param platform the platform
-   */
-  public void setPlatform(Platform platform) {
-    this.specs.setPlatform(platform);
   }
 
   /**
@@ -815,75 +456,6 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
     return false;
   }
 
-  /**
-   * Use fake media boolean.
-   *
-   * @return true if to use the fake media from the browser
-   */
-  public Boolean useFakeMedia() {
-    return useFakeMedia;
-  }
-
-  /**
-   * Gets video.
-   *
-   * @return the video
-   */
-  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  public MediaFile getVideo() {
-    return video;
-  }
-
-  /**
-   * Sets video.
-   *
-   * @param video the video
-   */
-  public void setVideo(MediaFile video) {
-    this.video = video;
-  }
-
-  /**
-   * Gets audio.
-   *
-   * @return the audio
-   */
-  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  public MediaFile getAudio() {
-    return audio;
-  }
-
-  /**
-   * Sets audio.
-   *
-   * @param audio the audio
-   */
-  public void setAudio(MediaFile audio) {
-    this.audio = audio;
-  }
-
-
-  /**
-   * Fetch media path string.
-   *
-   * @param media the media
-   * @param browserName the browser name
-   * @return the string
-   */
-  public String fetchMediaPath(MediaFile media, String browserName) {
-    String extension;
-    if (media.getType().equals(MediaFileType.Video)) {
-      if (browserName.equalsIgnoreCase("chrome")) {
-        extension = ".y4m";
-      } else {
-        extension = ".mp4";
-      }
-    } else {
-      extension = ".wav";
-    }
-    return media.getFilepath() + extension;
-  }
-  
   @Override
   public SampleData makeSampleData() {
     // todo
@@ -926,6 +498,15 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
   }
 
 
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  public BrowserSpecs getBrowserSpecs() {
+    return this.browserSpecs;
+  }
+
+  public void setBrowserSpecs(BrowserSpecs browserSpecs) {
+    this.browserSpecs = browserSpecs;
+  }
+
   /**
    * Adds the webdriver to the sessionData map.
    * 
@@ -945,6 +526,46 @@ public class Client extends KiteEntity implements JsonBuilder, SampleData {
 //    }
     sessionData.put(this.getWebDriver(), map);
   }
-  
-  
+
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  public Capability getCapability() {
+    return capability;
+  }
+
+  public void setCapability(Capability capability) {
+    this.capability = capability;
+  }
+
+  /*
+   * (non-Javadoc)
+   *
+   * @see io.cosmosoftware.kite.dao.CommandMaker#makeCommand(boolean)
+   */
+  @Override
+  public String makeCommand(boolean isHub, boolean isWindows) {
+    String command = "";
+    if (!isHub) {
+      String binary = "";
+      if (this.browserSpecs.getPathToBinary() != null && this.browserSpecs.getPathToBinary().length() > 0) {
+        if (browserSpecs.getBrowserName().equalsIgnoreCase("chrome")) {
+          binary += ",chrome_binary=" + browserSpecs.getPathToBinary();
+        }
+        if (browserSpecs.getBrowserName().equalsIgnoreCase("firefox")) {
+          binary += ",firefox_binary=" + browserSpecs.getPathToBinary();
+        }
+      }
+      command = String
+              .format(" -browserSpecs %s,maxInstances=%d%s", this.browserSpecs.makeCommand(isHub, isWindows),
+                      this.capability.getMaxInstances(), binary);
+      if (this.capability.getGateway() != Gateway.none) {
+        command = command + ",gateway=" + this.capability.getGateway().name();
+      }
+    }
+    return command;
+  }
+
+  @Transient
+  public String getRegion() {
+    return this.paas.getRegion();
+  }
 }
