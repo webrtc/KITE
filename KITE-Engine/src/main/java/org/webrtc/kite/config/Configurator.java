@@ -318,8 +318,8 @@ public class Configurator {
    *
    * @return a list of tuples of endpoints.
    */
-  public static List<Tuple> recursivelyBuildTuples(int targetSize, int currentIndex, List<Client> fullList, 
-                                                   List<Client> refList, boolean permutation) {
+  public static List<Tuple> recursivelyBuildTuples(int targetSize, int currentIndex, List<Client> fullList,
+      List<Client> refList, boolean permutation) {
     List<Tuple> result = new ArrayList<>();
     if (currentIndex < targetSize - 1) {
       for (int index = 0; index < fullList.size(); index++) {

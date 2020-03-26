@@ -40,6 +40,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import org.openqa.selenium.WebDriver;
+import org.webrtc.kite.config.client.BrowserSpecs;
 import org.webrtc.kite.config.client.Client;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
@@ -231,13 +232,15 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
         runner.terminate();
       }
       AllureStepReport terminateStep = new AllureStepReport("Cleaning up and finishing the test");
-      terminateStep.setStartTimestamp();
-      if (stepPhase.isLastPhase() && !jsTest) {
-        logger.info("Terminating, quiting webdriver");
-        WebDriverUtils.closeDrivers(this.tuple.getWebDrivers());
-      }
+      if (!isLoadTest) {
+        terminateStep.setStartTimestamp();
+        if (stepPhase.isLastPhase() && !jsTest) {
+          logger.info("Terminating, quiting webdriver");
+          WebDriverUtils.closeDrivers(this.tuple.getWebDrivers());
+        }
 
-      terminateStep.setStopTimestamp();
+        terminateStep.setStopTimestamp();
+      }
 
       // try to put stop time for all phase
       for (StepPhase phase : reports.keySet()) {
@@ -333,15 +336,16 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
 
   public String getClientName (Client client) {
     StringBuilder name = new StringBuilder();
-    name.append(client.getPlatform().name(), 0, 3);
+    BrowserSpecs specs = client.getBrowserSpecs();
+    name.append(specs.getPlatform().name(), 0, 3);
     if (!client.isApp()) {
-      name.append("_").append(client.getBrowserName(), 0, 2);
-      if (client.getVersion() != null) {
-        String version = client.getVersion().split(" ").length > 1 ? client.getVersion().split(" ")[1] : client.getVersion();
+      name.append("_").append(specs.getBrowserName(), 0, 2);
+      if (specs.getVersion() != null) {
+        String version = specs.getVersion().split(" ").length > 1 ? specs.getVersion().split(" ")[1] : specs.getVersion();
         name.append("_").append(version);
       }
     } else {
-      name.append("_").append(client.getDeviceName(), 0, 2);
+      name.append("_").append(specs.getDeviceName(), 0, 2);
     }
     return name.toString();
   }

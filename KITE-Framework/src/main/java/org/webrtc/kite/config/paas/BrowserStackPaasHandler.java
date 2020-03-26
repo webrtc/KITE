@@ -40,22 +40,22 @@ public class BrowserStackPaasHandler extends PaasHandler {
     
     /* might be not necessary, depending on data format it DB */
     for (JsonObject jsonObject : availableConfigList) {
-      Client browser = new Client();
-      browser.setVersion(jsonObject.getString("browser_version", ""));
+      Client client = new Client();
+      client.getBrowserSpecs().setVersion(jsonObject.getString("browser_version", ""));
       
       String browserName = jsonObject.getString("browser", "");
       if (browserName.equalsIgnoreCase("edge"))
         browserName = BrowserType.EDGE;
       else if (browserName.equalsIgnoreCase("ie"))
         browserName = BrowserType.IEXPLORE;
-      browser.setBrowserName(browserName);
+      client.getBrowserSpecs().setBrowserName(browserName);
       
       String platform = jsonObject.getString("os", "").toLowerCase();
       String os_version = jsonObject.getString("os_version", "").toLowerCase();
-      browser.setPlatform(Platform
+      client.getBrowserSpecs().setPlatform(Platform
         .fromString(platform.equalsIgnoreCase("os x") ? os_version : (platform + " " + os_version).trim()));
       
-      this.clientList.add(browser);
+      this.clientList.add(client);
     }
     
   }

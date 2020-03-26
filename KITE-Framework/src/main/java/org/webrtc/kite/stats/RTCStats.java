@@ -113,7 +113,8 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
     try {
       return buildJsonObjectBuilder().build();
     } catch (NullPointerException e) {
-      return Json.createObjectBuilder().add("NullPointerException", getStackTrace(e)).build();
+//      return Json.createObjectBuilder().add("NullPointerException", getStackTrace(e)).build();
+      return Json.createObjectBuilder().build();
     }
   }
 

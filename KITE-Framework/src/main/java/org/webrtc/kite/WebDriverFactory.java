@@ -16,14 +16,14 @@
 
 package org.webrtc.kite;
 
-import io.appium.java_client.AppiumDriver;
+import static org.webrtc.kite.Utils.fetchMediaPath;
+
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.TestUtils;
-import io.cosmosoftware.kite.util.WebDriverUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeOptions;
@@ -34,6 +34,8 @@ import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariOptions;
+import org.webrtc.kite.config.client.BrowserSpecs;
+import org.webrtc.kite.config.client.Capability;
 import org.webrtc.kite.config.client.Client;
 
 import java.io.File;
@@ -63,21 +65,21 @@ public class WebDriverFactory {
     MutableCapabilities capabilities = new MutableCapabilities();
     // The absolute local path or remote http URL to an .ipa or .apk file, or a .zip containing one of these.
     // Appium will attempt to install this app binary on the appropriate device first.
-
-    if (app.getVersion() != null) {
-      capabilities.setCapability(CapabilityType.VERSION, app.getVersion());
+    BrowserSpecs specs = app.getBrowserSpecs();
+    if (specs.getVersion() != null) {
+      capabilities.setCapability(CapabilityType.VERSION, specs.getVersion());
     }
     capabilities.setCapability("browserName", "app");
     capabilities.setCapability("app", app.getAppName());
-    capabilities.setCapability("deviceName", app.getDeviceName());
-    capabilities.setCapability("platformName", app.getPlatform());
-    if (app.getPlatformVersion() != null) {
-      capabilities.setCapability("platformVersion", app.getPlatformVersion());
+    capabilities.setCapability("deviceName", specs.getDeviceName());
+    capabilities.setCapability("platformName", specs.getPlatform());
+    if (specs.getPlatformVersion() != null) {
+      capabilities.setCapability("platformVersion", specs.getPlatformVersion());
     }
-    if (app.getPlatform().name().toLowerCase().equalsIgnoreCase("ios")) {
+    if (specs.getPlatform().name().toLowerCase().equalsIgnoreCase("ios")) {
       capabilities.setCapability("automationName", "XCUITest");
     }
-    if (app.getPlatform().name().toLowerCase().equalsIgnoreCase("android")) {
+    if (specs.getPlatform().name().toLowerCase().equalsIgnoreCase("android")) {
       capabilities.setCapability("autoGrantPermissions", true);
       capabilities.setCapability("fullReset", app.isFullReset());
     }
@@ -108,24 +110,25 @@ public class WebDriverFactory {
    */
   private static MutableCapabilities buildBrowserCapabilities(Client client) {
     MutableCapabilities capabilities = new MutableCapabilities();
-    if (client.getVersion() != null) {
-      capabilities.setCapability(CapabilityType.VERSION, client.getVersion());
+    BrowserSpecs specs = client.getBrowserSpecs();
+    if (specs.getVersion() != null) {
+      capabilities.setCapability(CapabilityType.VERSION, specs.getVersion());
     }
-    if (client.getPlatform() != null) {
-      capabilities.setCapability(CapabilityType.PLATFORM_NAME, client.getPlatform());
+    if (specs.getPlatform() != null) {
+      capabilities.setCapability(CapabilityType.PLATFORM_NAME, specs.getPlatform());
     }
 
-    if (client.getGateway() != null && !"none".equalsIgnoreCase(client.getGateway())) {
-      capabilities.setCapability("gateway", client.getGateway());
-    }
+//    if (client.getCapability().getGateway().toString() != null && !"none".equalsIgnoreCase(client.getCapability().getGateway().toString())) {
+//      capabilities.setCapability("gateway", client.getCapability().getGateway().toString());
+//    }
 
     // Only consider next code block if this is a client.
-    switch (client.getBrowserName()) {
+    switch (specs.getBrowserName()) {
       case "chrome":
-        capabilities.setCapability(ChromeOptions.CAPABILITY, setCommonChromeOptions(client));
+        capabilities.setCapability(ChromeOptions.CAPABILITY, setCommonChromeOptions(client.getCapability(), specs));
         break;
       case "firefox":
-        capabilities.merge(setCommonFirefoxOptions(client));
+        capabilities.merge(setCommonFirefoxOptions(client.getCapability(), specs));
         break;
       case "MicrosoftEdge":
         EdgeOptions MicrosoftEdgeOptions = new EdgeOptions();
@@ -134,11 +137,11 @@ public class WebDriverFactory {
         break;
       case "safari":
         SafariOptions options = new SafariOptions();
-        options.setUseTechnologyPreview(client.isTechnologyPreview());
+        options.setUseTechnologyPreview(client.getCapability().isTechnologyPreview());
         capabilities.setCapability(SafariOptions.CAPABILITY, options);
         break;
       default:
-        capabilities.setCapability(CapabilityType.BROWSER_NAME, client.getBrowserName());
+        capabilities.setCapability(CapabilityType.BROWSER_NAME, specs.getBrowserName());
         break;
     }
     // Add log preference to webdriver
@@ -148,15 +151,15 @@ public class WebDriverFactory {
     capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 //    capabilities.setCapability("goog:loggingPrefs", logPrefs);
     // Capabilities for mobile client/app
-    if (client.getPlatform().toString().equalsIgnoreCase("android")
-      ||client.getPlatform().toString().equalsIgnoreCase("ios")) {
+    if (specs.getPlatform().toString().equalsIgnoreCase("android")
+      ||specs.getPlatform().toString().equalsIgnoreCase("ios")) {
       // deviceName:
       // On iOS, this should be one of the valid devices returned by instruments with instruments -s devices.
       // On Android this capability is currently ignored, though it remains required.
-      capabilities.setCapability("deviceName", client.getDeviceName());
-      capabilities.setCapability("platformName", client.getPlatform());
-      capabilities.setCapability("platformVersion", client.getPlatformVersion());
-      if (client.getPlatform().name().equalsIgnoreCase("ios")) {
+      capabilities.setCapability("deviceName", specs.getDeviceName());
+      capabilities.setCapability("platformName", specs.getPlatform());
+      capabilities.setCapability("platformVersion", specs.getPlatformVersion());
+      if (specs.getPlatform().name().equalsIgnoreCase("ios")) {
         capabilities.setCapability("automationName", "XCUITest");
         capabilities.setCapability("autoAcceptAlerts", true);
       } else {
@@ -191,9 +194,9 @@ public class WebDriverFactory {
     if (id != null && !id.isEmpty()) {
       capabilities.setCapability("id", id);
     }
-    for (String capabilityName : client.getExtraCapabilities().keySet()) {
-      logger.debug("extraCapabilites : " + capabilityName + ": " + client.getExtraCapabilities().get(capabilityName));
-      capabilities.setCapability(capabilityName, client.getExtraCapabilities().get(capabilityName));
+    for (String capabilityName : client.getCapability().getExtraCapabilities().keySet()) {
+      logger.debug("extraCapabilites : " + capabilityName + ": " + client.getCapability().getExtraCapabilities().get(capabilityName));
+      capabilities.setCapability(capabilityName, client.getCapability().getExtraCapabilities().get(capabilityName));
     }
     logger.debug("Capabilites for " + client.toString() + " = \r\n" + capabilities);
     return capabilities;
@@ -215,15 +218,16 @@ public class WebDriverFactory {
           throws MalformedURLException, WebDriverException, KiteTestException {
     String urlStr = client.getPaas().getUrl();
     logger.debug("createWebDriver on " + urlStr + " for " + client);
+    Capability capability = client.getCapability();
     URL url = new URL(urlStr);
     if (!client.isApp()) {
       RemoteWebDriver webDriver = new RemoteWebDriver(url, WebDriverFactory.createCapabilities(client, testName, id));
-      if (client.getBrowserName().equalsIgnoreCase("firefox")) {
-        if (client.useFakeMedia()) {
-          if (client.getVideo() != null || client.getAudio() != null) {
+      if (client.getBrowserSpecs().getBrowserName().equalsIgnoreCase("firefox")) {
+        if (capability.useFakeMedia()) {
+          if (capability.getVideo() != null || capability.getAudio() != null) {
             String nodePublicIp = new URL(TestUtils.getNode(urlStr, webDriver.getSessionId().toString())).getHost();
             String gridId = kiteServerGridId.length > 0 ? kiteServerGridId[0] : "null";
-            String command = writeCommand(client);
+            String command = writeCommand(capability, client.getBrowserSpecs());
             String uri = "/command?id=" + gridId + "&ip=" + nodePublicIp + "&cmd=" + command;
             logger.debug("kiteServerCommand response:\r\n" + TestUtils.kiteServerCommand(kiteServerUrl, uri));
           }
@@ -231,9 +235,9 @@ public class WebDriverFactory {
       }
       return webDriver;
     } else {
-      if (client.getPlatform().name().equalsIgnoreCase("android")) {
+      if (client.getBrowserSpecs().getPlatform().name().equalsIgnoreCase("android")) {
         return new AndroidDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
-      } else if (client.getPlatform().name().equalsIgnoreCase("ios")) {
+      } else if (client.getBrowserSpecs().getPlatform().name().equalsIgnoreCase("ios")) {
         return new IOSDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
       } else {
         return new RemoteWebDriver(url, WebDriverFactory.createCapabilities(client, testName, id));
@@ -273,26 +277,33 @@ public class WebDriverFactory {
   /**
    * Create common chrome option to create chrome web driver
    *
-   * @param client the Client object
+   * @param capability the Client capability
+   * @param specs the Client browser specs
    * @return the chrome option
    */
-  private static ChromeOptions setCommonChromeOptions(Client client) {
+  private static ChromeOptions setCommonChromeOptions(Capability capability, BrowserSpecs specs) {
     ChromeOptions chromeOptions = new ChromeOptions();
-    if (client.useFakeMedia()) {
+    if (capability.useFakeMedia()) {
       // We use fake media or mediafile as webcam/microphone
       chromeOptions.addArguments("use-fake-ui-for-media-stream");
       chromeOptions.addArguments("use-fake-device-for-media-stream");
-      // If we use mediafile (only if not on android)
-      if (!client.getPlatform().equals(Platform.ANDROID)) {
-        if (client.getVideo() != null || client.getAudio() != null) {
+      chromeOptions.addArguments("enable-automation"); // https://stackoverflow.com/a/43840128/1689770
+      chromeOptions.addArguments("no-sandbox"); //https://stackoverflow.com/a/50725918/1689770
+      chromeOptions.addArguments("disable-infobars"); //https://stackoverflow.com/a/43840128/1689770
+      chromeOptions.addArguments("disable-dev-shm-usage"); //https://stackoverflow.com/a/50725918/1689770
+      chromeOptions.addArguments("disable-browser-side-navigation"); //https://stackoverflow.com/a/49123152/1689770
+      chromeOptions.addArguments("disable-gpu"); //https://stackoverflow.com/questions/51959986/how-to-solve-selenium-chromedriver-timed-out-receiving-message-from-renderer-exc      // If we use mediafile (only if not on android)
+      chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+      if (!specs.getPlatform().equals(Platform.ANDROID)) {
+        if (capability.getVideo() != null || capability.getAudio() != null) {
           chromeOptions.addArguments("allow-file-access-from-files");
-          if (client.getVideo() != null) {
+          if (capability.getVideo() != null) {
             chromeOptions.addArguments("use-file-for-fake-video-capture="
-                + client.fetchMediaPath(client.getVideo(), client.getBrowserName()));
+                + fetchMediaPath(capability.getVideo(), specs.getBrowserName()));
           }
-          if (client.getAudio() != null) {
+          if (capability.getAudio() != null) {
             chromeOptions.addArguments("use-file-for-fake-audio-capture="
-                + client.fetchMediaPath(client.getAudio(), client.getBrowserName()));
+                + fetchMediaPath(capability.getAudio(), specs.getBrowserName()));
           }
         }
       } else {
@@ -307,30 +318,30 @@ public class WebDriverFactory {
       chromeOptions.setExperimentalOption("prefs", prefs);
     }
 
-    if (client.getPlatform().equals(Platform.ANDROID)) {
+    if (specs.getPlatform().equals(Platform.ANDROID)) {
       return chromeOptions;
     }
 
     chromeOptions.addArguments("auto-select-desktop-capture-source=Entire screen");
-    if (! "electron".equals(client.getVersion())) {
+    if (! "electron".equals(specs.getVersion())) {
       // CHROME ONLY
       String extension = System.getProperty("kite.chrome.extension");
-      extension = extension == null ? client.getExtension() : extension;
+      extension = extension == null ? specs.getExtension() : extension;
       if (extension != null && !extension.isEmpty()) {
         chromeOptions.addExtensions(new File(extension));
       }
     }
     /*
      * if (client.getVersion().toLowerCase().contains("electron")) {
-     * chromeOptions.setBinary(client.getSpecs().getPathToBinary()); }
+     * chromeOptions.setBinary(client.getBrowserSpecs().getPathToBinary()); }
      */
-    if (client.isHeadless()) {
+    if (capability.isHeadless()) {
       chromeOptions.addArguments("headless");
     }
-    if (client.getWindowSize() != null && client.getWindowSize().trim().length() > 0) {
-      chromeOptions.addArguments("window-size=" + client.getWindowSize());
+    if (capability.getWindowSize() != null && capability.getWindowSize().trim().length() > 0) {
+      chromeOptions.addArguments("window-size=" + capability.getWindowSize());
     }
-    for (String flag : client.getFlags()) {
+    for (String flag : capability.getFlags()) {
       chromeOptions.addArguments(flag);
       // Examples:
       /*
@@ -345,15 +356,16 @@ public class WebDriverFactory {
   /**
    * Create common firefox option to create firefox web driver
    *
-   * @param client the Client object
+   * @param capability the Client capability
+   * @param specs the Client browser specs
    * @return the firefox option
    */
-  private static FirefoxOptions setCommonFirefoxOptions(Client client) {
+  private static FirefoxOptions setCommonFirefoxOptions(Capability capability, BrowserSpecs specs) {
     FirefoxProfile firefoxProfile = null;
     String profile = System.getProperty("kite.firefox.profile")  ;
-    profile = profile == null ? client.getProfile() : profile;
+    profile = profile == null ? specs.getProfile() : profile;
     if (profile != null && !profile.isEmpty()) {
-      switch (client.getPlatform().name().toUpperCase()) {
+      switch (specs.getPlatform().name().toUpperCase()) {
         case "WINDOWS":
           profile += "windows";
           break;
@@ -371,34 +383,34 @@ public class WebDriverFactory {
     }
     firefoxProfile.setPreference("media.navigator.permission.disabled", true);
     firefoxProfile.setPreference("media.autoplay.enabled.user-gestures-needed", false);
-    if (client.useFakeMedia()) {
-      if (client.getAudio() == null && client.getVideo() == null) {
-        firefoxProfile.setPreference("media.navigator.streams.fake", client.useFakeMedia());
+    if (capability.useFakeMedia()) {
+      if (capability.getAudio() == null && capability.getVideo() == null) {
+        firefoxProfile.setPreference("media.navigator.streams.fake", capability.useFakeMedia());
       }
     }
     FirefoxOptions firefoxOptions = new FirefoxOptions();
     firefoxOptions.setProfile(firefoxProfile);
-    if (client.isHeadless()) {
+    if (capability.isHeadless()) {
       firefoxOptions.addArguments("-headless");
     }
-    if (client.getWindowSize() != null) {
-      firefoxOptions.addArguments("-window-size " + client.getWindowSize());
+    if (capability.getWindowSize() != null) {
+      firefoxOptions.addArguments("-window-size " + capability.getWindowSize());
     }
-    for (String flag : client.getFlags()) {
+    for (String flag : capability.getFlags()) {
       firefoxOptions.addArguments(flag);
     }
     return firefoxOptions;
   }
 
-  private static String writeCommand(Client client) {
+  private static String writeCommand(Capability capability, BrowserSpecs specs) {
     String command = "play%20";
-    if (client.getVideo() != null && client.getAudio() != null) {
-      command += client.fetchMediaPath(client.getVideo(), client.getBrowserName())
-          + "%20" + client.fetchMediaPath(client.getAudio(), client.getBrowserName());
-    } else if (client.getVideo() != null && client.getAudio() == null) {
-      command += client.fetchMediaPath(client.getVideo(), client.getBrowserName());
-    } else if (client.getVideo() == null && client.getAudio() != null) {
-      command += client.fetchMediaPath(client.getAudio(), client.getBrowserName());
+    if (capability.getVideo() != null && capability.getAudio() != null) {
+      command += fetchMediaPath(capability.getVideo(), specs.getBrowserName())
+          + "%20" + fetchMediaPath(capability.getAudio(), specs.getBrowserName());
+    } else if (capability.getVideo() != null && capability.getAudio() == null) {
+      command += fetchMediaPath(capability.getVideo(), specs.getBrowserName());
+    } else if (capability.getVideo() == null && capability.getAudio() != null) {
+      command += fetchMediaPath(capability.getAudio(), specs.getBrowserName());
     } else {
       logger.info("No file provided.");
     }

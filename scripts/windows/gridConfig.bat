@@ -28,7 +28,7 @@ set SELENIUM_VERSION=3.141.59
 
 rem Browser versions
 set CHROME_VERSION=80
-set FIREFOX_VERSION=73
+set FIREFOX_VERSION=74
 
 rem ChromeDriver and GeckoDriver versions
 set CHROMEDRIVER_VERSION=80.0.3987.106

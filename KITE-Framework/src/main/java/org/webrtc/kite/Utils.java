@@ -18,9 +18,12 @@ package org.webrtc.kite;
 
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.WebDriverUtils;
+import java.util.concurrent.ExecutorService;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.webrtc.kite.config.client.Client;
+import org.webrtc.kite.config.media.MediaFile;
+import org.webrtc.kite.config.media.MediaFileType;
 import org.webrtc.kite.config.test.Tuple;
 import org.webrtc.kite.exception.KiteBadValueException;
 import org.webrtc.kite.exception.KiteInsufficientValueException;
@@ -330,5 +333,71 @@ public class Utils {
       throw new KiteBadValueException(key);
     }
   }
-  
+
+  public static void shutdown(ExecutorService service) {
+    if (service != null) {
+      if (!service.isShutdown()) {
+        service.shutdown();
+      }
+    }
+  }
+
+  public static void openUrlWithDefaultBrowser(String url) {
+    String os = System.getProperty("os.name").toLowerCase();
+    Runtime rt = Runtime.getRuntime();
+
+    try {
+
+      if (os.indexOf("win") >= 0) {
+
+        // this doesn't support showing urls in the form of "page.html#nameLink"
+        rt.exec("rundll32 url.dll,FileProtocolHandler " + url);
+
+      } else if (os.indexOf("mac") >= 0) {
+
+        rt.exec("open " + url);
+
+      } else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
+
+        // Do a best guess on unix until we get a platform independent way
+        // Build a list of browsers to try, in this order.
+        String[] browsers = {
+            "epiphany", "firefox", "mozilla", "konqueror", "netscape", "opera", "links", "lynx"
+        };
+
+        // Build a command string which looks like "browser1 "url" || browser2 "url" ||..."
+        StringBuffer cmd = new StringBuffer();
+        for (int i = 0; i < browsers.length; i++)
+          cmd.append((i == 0 ? "" : " || ") + browsers[i] + " \"" + url + "\" ");
+
+        rt.exec(new String[] {"sh", "-c", cmd.toString()});
+
+      } else {
+        return;
+      }
+    } catch (Exception e) {
+      return;
+    }
+  }
+
+  /**
+   * Fetch media path string.
+   *
+   * @param media the media
+   * @param browserName the browser name
+   * @return the string
+   */
+  public static String fetchMediaPath(MediaFile media, String browserName) {
+    String extension;
+    if (media.getType().equals(MediaFileType.Video)) {
+      if (browserName.equalsIgnoreCase("chrome")) {
+        extension = ".y4m";
+      } else {
+        extension = ".mp4";
+      }
+    } else {
+      extension = ".wav";
+    }
+    return media.getFilepath() + extension;
+  }
 }

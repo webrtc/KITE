@@ -273,9 +273,9 @@ public abstract class PaasHandler implements Callable<Object> {
     try {
       ps = c.prepareStatement(sql);
       for (Client client : clientList) {
-        ps.setString(1, client.getBrowserName());
-        ps.setString(2, client.getVersion());
-        ps.setString(3, client.getPlatform().name());
+        ps.setString(1, client.getBrowserSpecs().getBrowserName());
+        ps.setString(2, client.getBrowserSpecs().getVersion());
+        ps.setString(3, client.getBrowserSpecs().getPlatform().name());
         ps.setString(4, client.retrieveFamilyOrPlatform().name());      
         ps.setLong(5, System.currentTimeMillis());
         ps.executeUpdate();
@@ -327,9 +327,9 @@ public abstract class PaasHandler implements Callable<Object> {
   public boolean search(Client client) throws SQLException {
     boolean result = false;
     if (!client.isApp()) {
-      String browserName = client.getBrowserName();
-      String version = client.getVersion().split("\\.")[0].trim();
-      Platform platform = client.getPlatform();
+      String browserName = client.getBrowserSpecs().getBrowserName();
+      String version = client.getBrowserSpecs().getVersion().split("\\.")[0].trim();
+      Platform platform = client.getBrowserSpecs().getPlatform();
       
       String sql = "SELECT * FROM " + this.paas.getType().name() + " WHERE BROWSER = '" + browserName + "'";
       if (version != null && !version.isEmpty())

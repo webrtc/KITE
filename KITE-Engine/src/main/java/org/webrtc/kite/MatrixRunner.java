@@ -16,6 +16,8 @@
 
 package org.webrtc.kite;
 
+import static io.cosmosoftware.kite.entities.Timeouts.FIVE_SECOND_INTERVAL;
+import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
 import static io.cosmosoftware.kite.util.TestUtils.waitAround;
@@ -30,13 +32,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
+import org.webrtc.kite.config.client.BrowserSpecs;
 import org.webrtc.kite.config.client.Client;
 import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
@@ -71,6 +73,9 @@ public class MatrixRunner {
   private StepPhase currentPhase;
 
   private int currentIteration = 0;
+
+  private boolean lastThread = false;
+
   /**
    * Constructs a new MatrixRunner with the given TestConfig and List<Tuple>.
    *
@@ -83,14 +88,15 @@ public class MatrixRunner {
     this.tupleList.addAll(listOfTuples);
     for (Tuple tuple : this.tupleList) {
       for (Client client : tuple.getClients()) {
-        if (client.getBrowserName().equals("firefox")) {
-          if (client.getProfile() != null && !client.getProfile().isEmpty()) {
-            client.setProfile(testConfig.getFirefoxProfile());
+        BrowserSpecs specs = client.getBrowserSpecs();
+        if (specs.getBrowserName().equals("firefox")) {
+          if (specs.getProfile() != null && !specs.getProfile().isEmpty()) {
+            specs.setProfile(testConfig.getFirefoxProfile());
           }
         }
-        if (client.getBrowserName().equals("chrome") && client.getVersion() != null && !client.getVersion().contains("electron")) {
-          if (client.getExtension() != null && !client.getExtension().isEmpty()) {
-            client.setExtension(testConfig.getChromeExtension());
+        if (specs.getBrowserName().equals("chrome") && specs.getVersion() != null && !specs.getVersion().contains("electron")) {
+          if (specs.getExtension() != null && !specs.getExtension().isEmpty()) {
+            specs.setExtension(testConfig.getChromeExtension());
           }
         }
       }
@@ -108,7 +114,7 @@ public class MatrixRunner {
     this.testConfig = testManagers.get(0).getTestConfig();
     this.testManagerList = testManagers;
     waitAround(new Random().nextInt(1000)); // avoid duplicated container
-    this.testSuite = new Container("2nd phase(LR) | " + getHostUrlWithTs(this.testManagerList.get(0).getTuple().getClients().get(0)));
+    this.testSuite = new Container("2nd phase(LR) | " + getHostUrl(this.testManagerList.get(0).getTuple().getClients().get(0)) + testConfig.getReporter().getTimestamp());
     logger.info("Created container " + this.testSuite.getName());
     this.testSuite.setParentSuite(parentSuiteName);
     this.testSuite.setReporter(testConfig.getReporter());
@@ -117,7 +123,7 @@ public class MatrixRunner {
     }
   }
 
-  private String getHostUrlWithTs(Client client) {
+  private String getHostUrl(Client client) {
     String hubUrl = client.getPaas().getUrl();
     try {
       String temp = new URL(hubUrl).getHost();
@@ -125,7 +131,11 @@ public class MatrixRunner {
     } catch (Exception e) {
       // ignore
     }
-    return hubUrl + " (" + timestamp() + ")";
+    return hubUrl;
+  }
+
+  private String getHostUrlWithTs(Client client) {
+    return getHostUrl(client) + " (" + timestamp() + ")";
   }
 
   /**
@@ -156,8 +166,13 @@ public class MatrixRunner {
       for (int index = 0; index < this.tupleList.size(); index++) {
         TestManager manager = new TestManager(this.testConfig, this.tupleList.get(index));
         manager.setSuite(this.testSuite);
-        manager.setId((currentIteration + index + 1));
+        if (this.testConfig.isLoadTest()) {
+          manager.setId((currentIteration + index * this.tupleList.get(index).size() + 1));
+        } else {
+          manager.setId(index);
+        }
         manager.setTotal(this.tupleList.size());
+        manager.setDelay(index*ONE_SECOND_INTERVAL);
         this.testManagerList.add(manager);
       }
     }
@@ -170,7 +185,19 @@ public class MatrixRunner {
       logger.error(getStackTrace(e));
     } finally {
       if (this.currentPhase.isLastPhase()) {
-        logger.info("Matrix runner at last phase, ending. ");
+        if (this.currentPhase.equals(StepPhase.LOADREACHED)) {
+          // todo: wait for last iteration
+          if (this.isLastThread()) {
+            logger.info("Last thread has finished!");
+            this.testConfig.setDone(true);
+          }
+          logger.info("Waiting for all threads to finish");
+          while (!this.testConfig.isDone()) {
+            waitAround(FIVE_SECOND_INTERVAL);
+          }
+        } else {
+          logger.info("Matrix runner at last phase, ending. ");
+        }
         terminate();
       }
       this.shutdownExecutors();
@@ -232,5 +259,14 @@ public class MatrixRunner {
 
   public void setCurrentIteration(int currentIteration) {
     this.currentIteration = currentIteration;
+  }
+
+
+  public void setLastThread(boolean lastThread) {
+    this.lastThread = lastThread;
+  }
+
+  public boolean isLastThread() {
+    return lastThread;
   }
 }

@@ -80,7 +80,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   private Reporter reporter;
   private RoomManager roomManager;
   private NetworkInstrumentation networkInstrumentation = null;
-
+  private Boolean done = false;
   private EmailSender emailSender = null;
   
   /**
@@ -697,5 +697,14 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
 
   public void setPathToConfigFile(String pathToConfigFile) {
     this.pathToConfigFile = pathToConfigFile;
+  }
+
+  public synchronized void setDone(Boolean done) {
+    this.done = done;
+  }
+
+  @Transient
+  public synchronized Boolean isDone() {
+    return done;
   }
 }

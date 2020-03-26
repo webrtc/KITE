@@ -27,8 +27,8 @@ public enum StatEnum {
   TOTAL_OUTBOUND_VIDEO_BYTES_SENT("Total Outbound Video Bytes Sent (Bytes)"),
   TOTAL_BYTES_RECEIVED("Total Bytes Received (Bytes)"),
   
-  SENT_BITRATE("Average Sent Bitrate (bps)"),
-  RECEIVED_BITRATE("Average Received Bitrate (bps)"),
+  SENT_BITRATE("Average Sent Bitrate (kbps)"),
+  RECEIVED_BITRATE("Average Received Bitrate (kbps)"),
   
   PACKETS("Packets"),
   PACKETS_LOST("Packets Lost"),

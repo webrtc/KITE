@@ -13,31 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.webrtc.kite.apprtc.steps;
+package org.webrtc.kite.stats;
+
+import static org.webrtc.kite.Utils.getStackTrace;
+import static org.webrtc.kite.stats.StatsUtils.buildStatSummary;
+import static org.webrtc.kite.stats.StatsUtils.getPCStatOvertime;
+import static org.webrtc.kite.stats.StatsUtils.transformToJson;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.interfaces.Runner;
 import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestStep;
-import org.webrtc.kite.apprtc.pages.AppRTCMeetingPage;
-import org.webrtc.kite.stats.RTCStatList;
-import org.webrtc.kite.stats.RTCStatMap;
-
 import javax.json.JsonObject;
 
-import static org.webrtc.kite.Utils.getStackTrace;
-import static org.webrtc.kite.stats.StatsUtils.*;
-
 public class GetStatsStep extends TestStep {
-  
-  protected AppRTCMeetingPage appRTCMeetingPage = null;
-
   private final JsonObject getStatsConfig;
-
+  private final Runner runner;
   public GetStatsStep(Runner runner, JsonObject getStatsConfig) {
     super(runner);
+    this.runner = runner;
     this.getStatsConfig = getStatsConfig;
-    appRTCMeetingPage = new AppRTCMeetingPage(runner);
   }
 
   @Override
@@ -49,9 +44,15 @@ public class GetStatsStep extends TestStep {
   protected void step() throws KiteTestException {
     try {
       RTCStatMap statsOverTime =  getPCStatOvertime(webDriver, getStatsConfig);
+      statsOverTime.setRegionId(this.runner.getClientRegion());
       RTCStatList localPcStats = statsOverTime.getLocalPcStats();
-      reporter.jsonAttachment(this.report, "Stats (Raw)", transformToJson(localPcStats));
-      reporter.jsonAttachment(this.report, "Stats Summary", buildStatSummary(localPcStats));
+      JsonObject temp = transformToJson(localPcStats);
+      if (!temp.isEmpty()) {
+        for (String pc : statsOverTime.keySet()) {
+          reporter.jsonAttachment(this.report, "Stats (Raw) - " + pc, transformToJson(statsOverTime.get(pc)));
+          reporter.jsonAttachment(this.report, "Stats (Summary) - " + pc, buildStatSummary(statsOverTime.get(pc)));
+        }
+      }
     } catch (Exception e) {
       logger.error(getStackTrace(e));
       throw new KiteTestException("Failed to getStats", Status.BROKEN, e);

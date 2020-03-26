@@ -39,21 +39,21 @@ public class TestingBotPaasHandler extends PaasHandler {
     
     /* might be not necessary, depending on data format it DB */
     for (JsonObject jsonObject : availableConfigList) {
-      Client browser = new Client();
-      browser.setVersion(jsonObject.getString("version", ""));
+      Client client = new Client();
+      client.getBrowserSpecs().setVersion(jsonObject.getString("version", ""));
       
       String browserName = jsonObject.getString("name", "");
       if (browserName.endsWith("edge"))
         browserName = BrowserType.EDGE;
       else if (browserName.equalsIgnoreCase(BrowserType.GOOGLECHROME))
         browserName = BrowserType.CHROME;
-      browser.setBrowserName(browserName);
+      client.getBrowserSpecs().setBrowserName(browserName);
       
       String platform = jsonObject.getString("platform", "");
-      browser.setPlatform(
+      client.getBrowserSpecs().setPlatform(
         platform.equalsIgnoreCase("CAPITAN") ? Platform.EL_CAPITAN : Platform.fromString(platform));
       
-      this.clientList.add(browser);
+      this.clientList.add(client);
     }
     
   }

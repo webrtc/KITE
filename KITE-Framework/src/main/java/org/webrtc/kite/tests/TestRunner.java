@@ -77,9 +77,7 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
     initStep.setPhase(stepPhase);
     initStep.setStartTimestamp();
     try {
-      if (this.client.getName() == null) {
-        this.client.setName("" + id);
-      }
+      this.client.setName(this.client.getName() == null ? ("" + id) : ( id + "_" + this.client.getName())) ;
       logger.info("Creating web driver for " + client);
       this.webDriver = client.createWebDriver(sessionData);
       Map<String, Object> clientSessionData = sessionData.get(this.webDriver);
@@ -89,7 +87,8 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
       initStep.setStatus(Status.PASSED);
     } catch (KiteGridException e) {
       this.webDriver = null;
-      logger.error("Exception while populating webdriver: \r\n" + getStackTrace(e));
+//      logger.error("Exception while populating webdriver: \r\n" + getStackTrace(e));
+      logger.error("Exception while populating webdriver: \r\n" + getClientName());
       reporter.textAttachment(initStep, "KiteGridException", getStackTrace(e), "plain");
       initStep.setStatus(Status.FAILED);
       StatusDetails details = new StatusDetails();
@@ -132,15 +131,26 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
       throws  IOException {
     this(null, test, id);
   }
-  
+
   public boolean addStep(TestStep step) {
+    return addStep(step, StepPhase.DEFAULT);
+  }
+
+  public boolean addStep(TestStep step, StepPhase stepPhase) {
+    step.setStepPhase(stepPhase);
     return add(step);
   }
 
+
   public boolean addStep(TestStep step, TestStep conditionStep) {
-    step.setDependOn(conditionStep);
-    return add(step);
+    return addStep(step, conditionStep, StepPhase.DEFAULT);
   }
+
+  public boolean addStep(TestStep step, TestStep conditionStep,  StepPhase stepPhase) {
+    step.setDependOn(conditionStep);
+    return addStep(step, stepPhase);
+  }
+
   
   @Override
   public Object call()  {
@@ -164,7 +174,9 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
     for (TestStep step : this) {
       if (this.webDriver != null) {
         if (this.test.isLoadTest) {
-          step.processTestStep(stepPhase, this.reports.get(stepPhase), testConfig.isLoadTest());
+          if (step.getStepPhase().equals(StepPhase.ALL) || step.getStepPhase().equals(stepPhase)) {
+            step.processTestStep(stepPhase, this.reports.get(stepPhase), testConfig.isLoadTest());
+          }
         } else {
           if (!this.test.hasWebdriverIssue()) {
             step.processTestStep(stepPhase, this.reports.get(stepPhase), testConfig.isLoadTest());
@@ -244,8 +256,13 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   }
 
   @Override
+  public String getClientRegion() {
+    return this.client.getRegion();
+  }
+
+  @Override
   public String getPlatform() {
-    return this.client.getPlatform().toString();
+    return this.client.getBrowserSpecs().getPlatform().toString();
   }
 
   @Override

@@ -23,6 +23,7 @@ import org.webrtc.kite.config.test.TestConfig;
 import org.webrtc.kite.config.test.Tuple;
 
 import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
+import static io.cosmosoftware.kite.util.TestUtils.executeCommand;
 
 /**
  * The Class TestRunThread.
@@ -45,6 +46,7 @@ public class TestRunThread implements Callable<List<Future<Object>>> {
 
   /** The matrix runner. */
   private MatrixRunner matrixRunner;
+
 
   /**
    * Instantiates a new test run thread.
@@ -111,6 +113,11 @@ public class TestRunThread implements Callable<List<Future<Object>>> {
         }
       }
       testResults.append("\r\nEND OF RESULTS\r\n");
+//      try {
+//        executeCommand(System.getProperty("user.dir"), "a", logger, "KITE" );
+//      } catch (Exception e) {
+//        logger.warn("Could not open Allure report: " + getStackTrace(e));
+//      }
       logger.debug(testResults.toString());
     } else {
       logger.warn("No test case was found.");
@@ -127,5 +134,14 @@ public class TestRunThread implements Callable<List<Future<Object>>> {
 
   public void setCurrentIteration(int currentIteration) {
     this.currentIteration = currentIteration;
+  }
+
+
+  public void setLastThread(boolean lastThread) {
+    this.matrixRunner.setLastThread(true);
+  }
+
+  public boolean isLastThread() {
+    return matrixRunner.isLastThread();
   }
 }
