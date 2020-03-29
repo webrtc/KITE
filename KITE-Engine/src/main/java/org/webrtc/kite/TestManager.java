@@ -329,7 +329,7 @@ public class TestManager implements Callable<Object> {
       phases.add(StepPhase.DEFAULT);
     }
     this.currentPhase = phases.get(0);
-    logger.info("current phase in test manager has been set to" + this.currentPhase);
+    logger.info("current phase in test manager has been set to " + this.currentPhase);
     return phases;
   }
 

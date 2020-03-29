@@ -125,7 +125,7 @@ public class Engine {
     }
     for (String configFile : args) {
       Configurator configurator = new Configurator();
-      buildConfig(configurator, args[0]);
+      buildConfig(configurator, configFile);
 
       for (TestConfig testConfig : configurator.getConfigHandler().getTestList()) {
         List<Tuple> tupleList = new ArrayList<>();
