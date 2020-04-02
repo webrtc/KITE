@@ -4,7 +4,7 @@
   "grids": [
     {
       "type": "local",
-      "url": "http://localhost:4444/wd/hub"
+      "url": "http://192.168.1.221:4445/wd/hub"
     }
   ],
   "tests": [
@@ -30,10 +30,6 @@
   "clients": [
     {
       "browserName": "chrome",
-      "platform": "localhost"
-    },
-    {
-      "browserName": "firefox",
       "platform": "localhost"
     }
   ]
