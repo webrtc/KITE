@@ -23,7 +23,9 @@ class Example extends KiteBaseTest{
     } catch (e) {
       console.log(e);
     } finally {
-      await this.driver.quit();
+      if (typeof this.driver !== 'undefined') {
+        await this.driver.quit();
+      }
     }
   }
 }

@@ -18,6 +18,7 @@ package org.webrtc.kite;
 
 import static org.webrtc.kite.Utils.shutdown;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -123,7 +124,8 @@ public class Engine {
       logger.error("Error [Missing Argument]: Use java -jar KITE.jar <absolute path/config.json>");
       return;
     }
-    for (String configFile : args) {
+
+    for (String configFile : getConfigfilesFromParameters(args)) {
       Configurator configurator = new Configurator();
       buildConfig(configurator, configFile);
 
@@ -168,6 +170,27 @@ public class Engine {
     }
   }
 
+  private static List<String> getConfigfilesFromParameters(String[] args) {
+    List<String> configFiles = new ArrayList<>();
+    for (String arg : args) {
+      configFiles.addAll(getJsonFiles(new File(arg)));
+    }
+    return configFiles;
+  }
+
+  private static List<String> getJsonFiles (File file) {
+    List<String> files = new ArrayList<>();
+    if (file.isFile()) {
+      if (file.getName().endsWith(".json")) {
+        files.add(file.getAbsolutePath());
+      }
+    } else {
+      for (File subFile : file.listFiles()) {
+        files.addAll(getJsonFiles(subFile));
+      }
+    }
+    return files;
+  }
 
   /**
    * Run interop.
