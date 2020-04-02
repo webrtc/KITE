@@ -36,7 +36,9 @@ class IceConnectionTest extends KiteBaseTest {
     } catch (error) {
       console.log(error);
     } finally {
-      await this.driver.quit();
+      if (typeof this.driver !== 'undefined') {
+        await this.driver.quit();
+      }
     }
   }
 }

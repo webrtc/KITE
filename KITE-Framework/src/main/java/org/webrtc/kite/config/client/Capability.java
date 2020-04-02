@@ -190,6 +190,9 @@ public class Capability extends KiteEntity implements SampleData {
     this.useFakeMedia = useFakeMedia;
   }
 
+  public Boolean isUseFakeMedia() {
+    return useFakeMedia;
+  }
 
   /**
    * Gets the window size

@@ -8,14 +8,7 @@ if not defined KITE_HOME (
 
 
 if [%1] == [] (
-  echo Usage:
-  echo:
-  echo r example.config.json
-  echo:
-  echo or
-  echo:
-  echo r configs\example.config.json
-  goto :end
+  set CONFIG=config
 )
 
 echo %1 | FINDSTR /C:"configs\\" >nul & if errorlevel 1 (

@@ -80,7 +80,6 @@ public class Configurator {
    */
   public void buildConfig()
       throws IOException, KiteInsufficientValueException, BadEntityException {
-
     this.jsonConfigObject = readJsonFile(configFilePath);
 
     this.name = jsonConfigObject.getString("name", "")  + " [" + timestamp() + "]" ;
