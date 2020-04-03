@@ -12,7 +12,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "kite-common": "^0.1.11",
+    "kite-common": "^0.1.12",
     "xmlhttprequest": "^1.8.0"
   }
 }

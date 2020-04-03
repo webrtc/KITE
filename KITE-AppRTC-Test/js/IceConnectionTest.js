@@ -12,7 +12,7 @@ class IceConnectionTest extends KiteBaseTest {
 
   async testScript() {
     try {
-      this.driver = await WebDriverFactory.getDriver(this.capabilities, this.remoteUrl);
+      this.driver = await WebDriverFactory.getDriver(this.capabilities);
       this.page = new AppRTCJoinPage(this.driver);
 
       let openAppUrlStep = new OpenAppUrlStep(this);

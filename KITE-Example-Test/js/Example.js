@@ -10,7 +10,7 @@ class Example extends KiteBaseTest{
 
   async testScript() {
     try {
-      this.driver = await WebDriverFactory.getDriver(this.capabilities, this.remoteUrl);
+      this.driver = await WebDriverFactory.getDriver(this.capabilities);
       this.page = new GoogleSearchPage(this.driver);
 
       let googleSearchStep = new GoogleSearchStep(this, "https://google.com");
