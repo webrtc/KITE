@@ -12,6 +12,9 @@ mv apache-maven-$MAVEN_VERSION ~
 
 rm -f apache-maven-$MAVEN_VERSION.zip
 echo export PATH="~/apache-maven-$MAVEN_VERSION/bin:$PATH" >> ~/.bash_profile
+
+source ~/.bashrc
+exit
 }
 
 echo -e '\n'Please check the corresponding Maven version from:

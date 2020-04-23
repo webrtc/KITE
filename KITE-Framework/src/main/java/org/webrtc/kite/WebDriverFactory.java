@@ -309,14 +309,17 @@ public class WebDriverFactory {
       } else {
         chromeOptions.setExperimentalOption("w3c", false);
       }
-    } else {
-      // Create an Hashmap to edit user profile
-      Map<String, Object> prefs = new HashMap<String, Object>();
-      // Allow access to camera & micro
-      prefs.put("profile.default_content_setting_values.media_stream_camera", 1);
-      prefs.put("profile.default_content_setting_values.media_stream_mic", 1);
-      chromeOptions.setExperimentalOption("prefs", prefs);
     }
+
+    // Create an Hashmap to edit user profile
+    Map<String, Object> prefs = new HashMap<String, Object>();
+    // Allow access to camera & micro
+    // This does not affect fake media options above
+    // but still logged the permission in profile, somes sfu require these
+    prefs.put("profile.default_content_setting_values.media_stream_camera", 1);
+    prefs.put("profile.default_content_setting_values.media_stream_mic", 1);
+    chromeOptions.setExperimentalOption("prefs", prefs);
+
 
     if (specs.getPlatform().equals(Platform.ANDROID)) {
       return chromeOptions;

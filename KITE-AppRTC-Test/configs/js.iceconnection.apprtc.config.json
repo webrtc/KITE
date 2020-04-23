@@ -4,7 +4,7 @@
   "grids": [
     {
       "type": "local",
-      "url": "http://192.168.1.221:4445/wd/hub"
+      "url": "http://localhost:4444/wd/hub"
     }
   ],
   "tests": [

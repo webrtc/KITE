@@ -168,7 +168,7 @@ public class Configurator {
     if (jsonConfigObject.containsKey("email")) {
       try {
         EmailSender sendEmailSMTP = new EmailSender(jsonConfigObject.get("email"));
-        logger.info(sendEmailSMTP.toString());
+        logger.debug(sendEmailSMTP.toString());
         for (TestConfig testConfig: configHandler.getTestList()) {
           testConfig.setEmailSender(sendEmailSMTP);
         }

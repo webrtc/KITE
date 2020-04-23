@@ -49,8 +49,8 @@ public class GetStatsStep extends TestStep {
       JsonObject temp = transformToJson(localPcStats);
       if (!temp.isEmpty()) {
         for (String pc : statsOverTime.keySet()) {
-          reporter.jsonAttachment(this.report, "Stats (Raw) - " + pc, transformToJson(statsOverTime.get(pc)));
-          reporter.jsonAttachment(this.report, "Stats (Summary) - " + pc, buildStatSummary(statsOverTime.get(pc)));
+          reporter.jsonAttachment(this.report, "Stats(Raw)_" + pc.replaceAll("\"", ""), transformToJson(statsOverTime.get(pc)));
+          reporter.jsonAttachment(this.report, "Stats(Summary)_" + pc.replaceAll("\"", ""), buildStatSummary(statsOverTime.get(pc)));
         }
       }
     } catch (Exception e) {
