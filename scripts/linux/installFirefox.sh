@@ -17,5 +17,3 @@ fi
 rm -f firefox.txt
 
 exit
-
-

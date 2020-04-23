@@ -6,12 +6,14 @@ unzip apache-maven-$MAVEN_VERSION-bin.zip
 
 mv apache-maven-$MAVEN_VERSION ~
 
-
 rm -f apache-maven-$MAVEN_VERSION-bin.zip
 echo export PATH="\$PATH:~/apache-maven-$MAVEN_VERSION/bin" >> ~/.bashrc
+
+source ~/.bashrc
+
 exit
 }
-export MAVEN_VERSION=3.6.1
+export MAVEN_VERSION=3.6.3
 echo -e '\n'Please check the corresponding Maven version from:
 echo https://maven.apache.org/download.cgi
 echo currently the config file has the following versions:

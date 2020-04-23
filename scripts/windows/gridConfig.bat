@@ -19,7 +19,7 @@ rem Set to TRUE to use localhost or FALSE to use the host's IP address
 set LOCALHOST=TRUE
 
 rem Capability Matcher
-set KITE_EXTRAS_VERSION=0.1.5
+set KITE_EXTRAS_VERSION=0.1.65
 set GRID_UTILS_VERSION=0.0.1
 
 rem Selenium version
@@ -27,9 +27,9 @@ set SELENIUM_VERSION_SHORT=3.141
 set SELENIUM_VERSION=3.141.59
 
 rem Browser versions
-set CHROME_VERSION=80
-set FIREFOX_VERSION=74
+set CHROME_VERSION=81
+set FIREFOX_VERSION=75
 
 rem ChromeDriver and GeckoDriver versions
-set CHROMEDRIVER_VERSION=80.0.3987.106
+set CHROMEDRIVER_VERSION=81.0.4044.69
 set GECKO_VERSION=v0.26.0

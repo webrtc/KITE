@@ -24,16 +24,16 @@ export LOCALHOST=TRUE
 
 # ChromeDriver and GeckoDriver versions
 export GECKO_VERSION=v0.26.0
-export CHROMEDRIVER_VERSION=80.0.3987.106
+export CHROMEDRIVER_VERSION=81.0.4044.69
 
 # Selenium version
 export SELENIUM_VERSION_SHORT=3.141
 export SELENIUM_VERSION=3.141.59
 
 # Browser versions
-export FIREFOX_VERSION=74
-export CHROME_VERSION=80
+export FIREFOX_VERSION=75
+export CHROME_VERSION=81
 
 #Capability Matcher
-export KITE_EXTRAS_VERSION=0.1.4
+export KITE_EXTRAS_VERSION=0.1.65
 export GRID_UTILS_VERSION=0.0.1

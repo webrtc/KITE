@@ -3,7 +3,7 @@
   "grids": [
     {
       "type": "local",
-      "url": "http://192.168.2.101:4444/wd/hub"
+      "url": "http://localhost:4444/wd/hub"
     }
   ],
   "tests": [
@@ -20,10 +20,12 @@
   ],
   "clients": [
     {
-      "browserName": "safari",
-      "version": "13",
-      "platform": "MAC",
-      "headless": false
+      "browserName": "chrome",
+      "platform": "localhost"
+    },
+    {
+      "browserName": "firefox",
+      "platform": "localhost"
     }
   ]
 }

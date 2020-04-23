@@ -58,10 +58,10 @@ open -a TextEdit gridConfig.sh
 
 
 Scroll down to the end of the file and edit the following parameters with the versions corresponding to the latest stable releases versions.
- Please only input the major (only 80 and not 80.0.3987.106).
+ Please only input the major (only 80 and not 81.0.4044.69).
 ```
 rem Browser versions
-set CHROME_VERSION=80
+set CHROME_VERSION=81
 set FIREFOX_VERSION=73
 ```
 
@@ -70,10 +70,10 @@ You will need to find out what are the corresponding driver version. Please visi
 * http://chromedriver.chromium.org/downloads
 * https://github.com/mozilla/geckodriver/releases
  
- And edit the following values in gridConfig.bat accordingly. This time, please input the full version with the minor (80.0.3987.106 and not 80).
+ And edit the following values in gridConfig.bat accordingly. This time, please input the full version with the minor (81.0.4044.69 and not 80).
 ```
 rem ChromeDriver and GeckoDriver versions
-set CHROMEDRIVER_VERSION=80.0.3987.106
+set CHROMEDRIVER_VERSION=81.0.4044.69
 set GECKO_VERSION=v0.26.0
 ```
 

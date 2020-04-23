@@ -1,6 +1,6 @@
 @echo off
 echo.
-set MAVEN_VERSION=3.6.1
+set MAVEN_VERSION=3.6.3
 echo Please check the corresponding Maven version from:
 echo http://maven.apache.org/download.cgi
 echo currently the config file has the following version:
