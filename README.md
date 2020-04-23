@@ -29,7 +29,7 @@ Please contact [contact@cosmosoftware.io](mailto:contact@cosmosoftware.io) for m
 
 #### Tutorials: Writing a simple KITE Test for Jitsi in Java and/or Javascript
 
-Once you've completed the installation and run the sample tests, pleaae try to write your own KITE test following our tutorials.  
+Once you've completed the installation and run the sample tests, please try to write your own KITE test following our tutorials.  
  * [KITE Test for Jitsi in Java](tutorial/Tutorial_Java.md)
  * [KITE Test for Jitsi in Javascript](tutorial/Tutorial_Javascript.md)
 
@@ -144,8 +144,8 @@ source .bash_profile
     
     3.3 On Mac, open a terminal and enter the following commands:
     ```
-    chmod +x configureMac.command  
-    ./configureMac.command
+    chmod +x configureMac.sh  
+    ./configureMac.sh
     ```
     
     During this step, you will be prompt to setup the local grid. This is an interactive setup. 
