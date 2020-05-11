@@ -96,7 +96,8 @@ public class JsTestRunner extends TestRunner {
             try {
               if (!extension.equals("png")) {
                 String text = TestUtils.readFile(path + attachmentSource);
-                reporter.textAttachment(stepReport, "attachment", text, extension);
+                String name = attachmentJSON.getString("name");
+                reporter.textAttachment(stepReport, name, text, extension);
               } else {
                 reporter.screenshotAttachment(stepReport, "Screenshot", Files.readAllBytes(Paths.get(path + "/screenshots/" + attachmentSource)));
               }
