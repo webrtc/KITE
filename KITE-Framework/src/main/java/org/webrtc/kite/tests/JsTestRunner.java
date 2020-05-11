@@ -86,6 +86,17 @@ public class JsTestRunner extends TestRunner {
         stepReport.setStatus((Status.fromValue(stepStatus)));
         stepReport.setStartTimestamp((long) idx.getInt("start"));
         stepReport.setStopTimestamp((long) idx.getInt("stop"));
+
+        if(idx.containsKey("statusDetails")) {
+          JsonObject details = idx.getJsonObject("statusDetails");
+          StatusDetails statusDetails = new StatusDetails();
+          statusDetails.setMessage(details.getString("message"));
+          statusDetails.setKnown(details.getBoolean("known"));
+          statusDetails.setFlaky(details.getBoolean("flaky"));
+          statusDetails.setMuted(details.getBoolean("muted"));
+          stepReport.setDetails(statusDetails);
+        }
+
         if (idx.get("attachments") != null) {
           JsonArray attachmentsObj = (JsonArray) idx.get("attachments");
           for (int j = 0; j < attachmentsObj.size(); j++) {

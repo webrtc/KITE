@@ -56,6 +56,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   final static String TABLE_NAME = "testconfigs";
   private final String DEFAULT_DESC = "No description was provided fot this test.";
   private String callbackUrl;
+  private String tagName;
   private String firefoxProfile;
   private String chromeExtension;
   private Long delayForClosing = 0L;
@@ -130,7 +131,8 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     
     // Override the global value with the local value
     this.callbackUrl = jsonObject.getString("callbackurl", null);
-    
+    this.tagName = jsonObject.getString("tag", null);
+
     this.tupleSize = getIntFromJsonObject(jsonObject, "tupleSize", -1);
     this.noOfThreads = getIntFromJsonObject(jsonObject, "noOfThreads", 1);
     this.maxRetryCount = getIntFromJsonObject(jsonObject, "maxRetryCount", 0);
@@ -706,5 +708,14 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   @Transient
   public synchronized Boolean isDone() {
     return done;
+  }
+
+  @Transient
+  public String getTagName() {
+    return tagName;
+  }
+
+  public void setTagName(String tagName) {
+    this.tagName = tagName;
   }
 }

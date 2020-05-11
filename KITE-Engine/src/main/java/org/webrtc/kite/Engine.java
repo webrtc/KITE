@@ -29,6 +29,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import javax.json.JsonException;
+
+import io.cosmosoftware.kite.util.ReportUtils;
 import org.webrtc.kite.config.Configurator;
 import org.webrtc.kite.config.client.Client;
 import org.webrtc.kite.config.paas.Paas;
@@ -161,9 +163,25 @@ public class Engine {
             distributeRemote(configurator, tupleList);
             List<Future<Object>> interopResult = runInterop(service, configurator.getName(), testConfig, tupleList);
           }
+
+          if(testConfig.getCallbackUrl() != null) {
+            String desFile = testConfig.getReporter().getReportPath() + "../" + System.currentTimeMillis() + ".zip";
+            ReportUtils.zipFile(testConfig.getReporter().getReportPath(), desFile);
+            File zipToSend = new File(desFile);
+            if (zipToSend.exists()) {
+              CallbackThread callbackThread = new CallbackThread(testConfig.getCallbackUrl(), zipToSend);
+              callbackThread.addParameter("tagName", testConfig.getTagName() == null
+                  ? String.valueOf(System.currentTimeMillis())
+                  : testConfig.getTagName());
+              callbackThread.run();
+              zipToSend.delete();
+            }
+          }
+
         } catch (Exception e) {
           e.printStackTrace();
         } finally {
+
           service.shutdown();
         }
       }
