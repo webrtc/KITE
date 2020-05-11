@@ -17,14 +17,21 @@
 package org.webrtc.kite;
 
 import io.cosmosoftware.kite.report.KiteLogger;
+import java.util.HashMap;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import javax.json.JsonObject;
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
 
 /**
  * A thread to post the result in json format to the callback URL.
@@ -34,64 +41,87 @@ public class CallbackThread extends Thread {
   private static final KiteLogger logger = KiteLogger.getLogger(CallbackThread.class.getName());
   
   private String callbackURL;
-  private JsonObject jsonObject;
+  private File file;
+  private HashMap<String,String> parameters = new HashMap<>();
   
   /**
    * Constructs a new CallBackThread object with the given callbackURL and JsonObject.
    *
    * @param callbackURL a string representation of the callback URL.
-   * @param jsonObject  JsonObject
+   * @param file  File
    */
-  public CallbackThread(String callbackURL, JsonObject jsonObject) {
+  public CallbackThread(String callbackURL, File file) {
     this.callbackURL = callbackURL;
-    this.jsonObject = jsonObject;
+    this.file = file;
     
   }
   
   /**
    * Posts result to the callback URL.
    */
-  public void postResult() {
-    
-    CloseableHttpClient client = null;
-    CloseableHttpResponse response = null;
-    
-    if (logger.isDebugEnabled())
-      logger.debug("Posting to '" + callbackURL + "' with body '" + jsonObject.toString() + "'");
-    
-    try {
-      client = HttpClients.createDefault();
-      HttpPost httpPost = new HttpPost(callbackURL);
-      httpPost.setHeader("Accept", "application/json");
-      httpPost.setHeader("Content-type", "application/json");
-      StringEntity entity = new StringEntity(jsonObject.toString());
-      httpPost.setEntity(entity);
-      response = client.execute(httpPost);
+  public void postResult() throws IOException {
+    String charset = "UTF-8";
+    String boundary = Long.toHexString(System.currentTimeMillis()); // Just generate some unique random value.
+    String CRLF = "\r\n"; // Line separator required by multipart/form-data.
+
+    URLConnection connection = new URL(this.callbackURL + this.getParameterString()).openConnection();
+    logger.debug("Sending result to callback url: " + connection);
+    connection.setDoOutput(true);
+    connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+    try (
+            OutputStream output = connection.getOutputStream();
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, charset), true);
+    ) {
+      // Send binary file.
+      writer.append("--" + boundary).append(CRLF);
+      writer.append("Content-Disposition: form-data; name=\"binaryFile\"; filename=\"" + this.file.getName() + "\"").append(CRLF);
+      writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(this.file.getName())).append(CRLF);
+      writer.append("Content-Transfer-Encoding: binary").append(CRLF);
+      writer.append(CRLF).flush();
+      Files.copy(this.file.toPath(), output);
+      output.flush(); // Important before continuing with writer!
+      writer.append(CRLF).flush(); // CRLF is important! It indicates end of boundary.
+
+      // End of multipart/form-data.
+      writer.append("--" + boundary + "--").append(CRLF).flush();
     } catch (IOException e) {
-      logger.error("Exception while posting the result", e);
-    } finally {
-      if (response != null) {
-        if (logger.isDebugEnabled())
-          logger.debug("response->" + response);
-        try {
-          response.close();
-        } catch (IOException e) {
-          logger.warn("Exception while closing the CloseableHttpResponse", e);
-        }
-      }
-      if (client != null)
-        try {
-          client.close();
-        } catch (IOException e) {
-          logger.warn("Exception while closing the CloseableHttpClient", e);
-        }
+      e.printStackTrace();
     }
-    
+
+// Request is lazily fired whenever you need to obtain information about response.
+    int responseCode = 0;
+    try {
+      responseCode = ((HttpURLConnection) connection).getResponseCode();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    System.out.println(responseCode); // Should be 200
   }
   
   @Override
   public void run() {
-    this.postResult();
+    try {
+      this.postResult();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private String getParameterString() {
+    String res = "?";
+    if (this.parameters.isEmpty()) {
+      return "";
+    }
+    for (String key : parameters.keySet()) {
+      res += key + "=" + parameters.get(key) + "&";
+    }
+    // to remove the last &
+    return res.substring(0,res.length() - 1);
+  }
+
+  public void addParameter(String key, String value) {
+    this.parameters.put(key, value);
   }
   
 }

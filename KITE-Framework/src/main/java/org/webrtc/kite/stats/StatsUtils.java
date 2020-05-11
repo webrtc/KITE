@@ -403,7 +403,7 @@ public class StatsUtils {
         
         List<Double> framerate = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.FRAME_RATE, fullyDetailed);
 //
-//        objectBuilder.add(StatEnum.AVG_FRAME_RATE.toString(),  checkNegativeValue(1000 * getDiffEndToStart(framerate)/duration));
+        objectBuilder.add(StatEnum.AVG_FRAME_RATE.toString(),  checkNegativeValue(1000 * getDiffEndToStart(frames)/duration));
       }
       
       if (inbound) {

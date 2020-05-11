@@ -16,7 +16,7 @@ import static org.webrtc.kite.Utils.getStackTrace;
 public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> implements JsonBuilder {
   
   private final String pcName;
-  private long timestamp = 0;
+  private long timestamp = System.currentTimeMillis();
   
   public RTCStats(String pcName, TreeMap<String, List<RTCSingleStatObject>> statMap) {
     super(statMap);

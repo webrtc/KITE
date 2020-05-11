@@ -31,7 +31,7 @@ export SELENIUM_VERSION_SHORT=3.141
 export SELENIUM_VERSION=3.141.59
 
 # Browser versions
-export FIREFOX_VERSION=75
+export FIREFOX_VERSION=76
 export CHROME_VERSION=81
 
 #Capability Matcher

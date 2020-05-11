@@ -229,14 +229,6 @@ public class TestManager implements Callable<Object> {
     }
     JsonObject jsonTestResult = developResult(builder.build());
 
-    if (ENABLE_CALLBACK) {
-      if (this.testConfig.getCallbackUrl() != null) {
-        CallbackThread callbackThread =
-            new CallbackThread(this.testConfig.getCallbackUrl(), jsonTestResult);
-        // todo
-      }
-    }
-
     sendEmail(jsonTestResult);
     test = null;
     finished = true;

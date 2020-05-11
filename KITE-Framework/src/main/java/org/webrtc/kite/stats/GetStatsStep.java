@@ -29,6 +29,9 @@ import javax.json.JsonObject;
 public class GetStatsStep extends TestStep {
   private final JsonObject getStatsConfig;
   private final Runner runner;
+  private String customName = "";
+
+
   public GetStatsStep(Runner runner, JsonObject getStatsConfig) {
     super(runner);
     this.runner = runner;
@@ -49,13 +52,17 @@ public class GetStatsStep extends TestStep {
       JsonObject temp = transformToJson(localPcStats);
       if (!temp.isEmpty()) {
         for (String pc : statsOverTime.keySet()) {
-          reporter.jsonAttachment(this.report, "Stats(Raw)_" + pc.replaceAll("\"", ""), transformToJson(statsOverTime.get(pc)));
-          reporter.jsonAttachment(this.report, "Stats(Summary)_" + pc.replaceAll("\"", ""), buildStatSummary(statsOverTime.get(pc)));
+          reporter.jsonAttachment(this.report, customName + "Stats(Raw)_" + pc.replaceAll("\"", ""), transformToJson(statsOverTime.get(pc)));
+          reporter.jsonAttachment(this.report, customName + "Stats(Summary)_" + pc.replaceAll("\"", ""), buildStatSummary(statsOverTime.get(pc)));
         }
       }
     } catch (Exception e) {
       logger.error(getStackTrace(e));
       throw new KiteTestException("Failed to getStats", Status.BROKEN, e);
     }
+  }
+
+  public void setCustomName(String customName) {
+    this.customName = customName;
   }
 }
