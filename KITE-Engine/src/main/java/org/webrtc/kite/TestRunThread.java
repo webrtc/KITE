@@ -129,7 +129,9 @@ public class TestRunThread implements Callable<List<Future<Object>>> {
    * Interrupt.
    */
   public void interrupt() {
-    this.matrixRunner.interrupt();
+    if (this.matrixRunner != null) {
+      this.matrixRunner.interrupt();
+    }
   }
 
   public void setCurrentIteration(int currentIteration) {

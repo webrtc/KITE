@@ -98,9 +98,6 @@ goto :configGrid
 echo Please enter the current version of KITE Extras
 set /P InputKiteExtrasVersion=
 cscript //Nologo replace.vbs gridConfig.bat "KITE_EXTRAS_VERSION=%KITE_EXTRAS_VERSION%" "KITE_EXTRAS_VERSION=%InputKiteExtrasVersion%"
-echo Please enter the current version of grid-utils
-set /P inputGridVersion=
-cscript //Nologo replace.vbs gridConfig.bat "GRID_UTILS_VERSION=%GRID_UTILS_VERSION%" "GRID_UTILS_VERSION=%inputGridVersion%"
 goto :localhost
 
 :localhost

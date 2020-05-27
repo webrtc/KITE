@@ -228,9 +228,9 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   public void terminate(StepPhase stepPhase) {
     if (!this.finished) {
       this.finished = true;
-      for (TestRunner runner : this) {
-        runner.terminate();
-      }
+//      for (TestRunner runner : this) {
+//        runner.terminate();
+//      }
       AllureStepReport terminateStep = new AllureStepReport("Cleaning up and finishing the test");
       if (!isLoadTest) {
         terminateStep.setStartTimestamp();
@@ -252,6 +252,9 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
           }
         }
       }
+    }
+    for (TestRunner runner : this) {
+      runner.terminate();
     }
   }
 
