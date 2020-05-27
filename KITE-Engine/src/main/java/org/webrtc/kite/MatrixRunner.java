@@ -143,6 +143,9 @@ public class MatrixRunner {
    */
   public void interrupt() {
     this.interrupted = true;
+    for (TestManager manager : this.testManagerList) {
+      manager.terminate();
+    }
     this.shutdownExecutors();
   }
 

@@ -80,15 +80,16 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
       this.client.setName(this.client.getName() == null ? ("" + id) : ( id + "_" + this.client.getName())) ;
       logger.info("Creating web driver for " + client);
       this.webDriver = client.createWebDriver(sessionData);
-      Map<String, Object> clientSessionData = sessionData.get(this.webDriver);
-      if (clientSessionData.containsKey("node_host")) {
-        logger.debug("created " + client +" on node: " + clientSessionData.get("node_host"));
+      if (sessionData != null && sessionData.containsKey(this.webDriver)) {
+        Map<String, Object> clientSessionData = sessionData.get(this.webDriver);
+        if (clientSessionData.containsKey("node_host")) {
+          logger.debug("created " + client + " on node: " + clientSessionData.get("node_host"));
+        }
       }
       initStep.setStatus(Status.PASSED);
     } catch (KiteGridException e) {
       this.webDriver = null;
-//      logger.error("Exception while populating webdriver: \r\n" + getStackTrace(e));
-      logger.error("Exception while populating webdriver: \r\n" + getClientName());
+      logger.error("Exception while populating webdriver: " + getClientName() + "\r\n" + getStackTrace(e));
       reporter.textAttachment(initStep, "KiteGridException", getStackTrace(e), "plain");
       initStep.setStatus(Status.FAILED);
       StatusDetails details = new StatusDetails();

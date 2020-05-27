@@ -238,10 +238,7 @@ function configGrid() {
 		[Nn]* )
 			   echo Please enter the current version of KITE Extras
 			   read InputKiteExtrasVersion
-			   sed -i'' -e s/KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION/KITE_EXTRAS_VERSION=$InputKiteExtrasVersion/ ./gridConfig.sh			   
-			   echo Please enter the current version of grid-utils
-			   read inputGridVersion
-			   sed -i'' -e s/GRID_UTILS_VERSION=$GRID_UTILS_VERSION/GRID_UTILS_VERSION=$inputGridVersion/ ./gridConfig.sh
+			   sed -i'' -e s/KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION/KITE_EXTRAS_VERSION=$InputKiteExtrasVersion/ ./gridConfig.sh
 			   localhost
 			   ;;
 		[Yy]* )

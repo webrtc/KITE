@@ -48,7 +48,9 @@ import io.cosmosoftware.kite.report.KiteLogger;
 public class Engine {
 
   /** The run thread. */
-  public static TestRunThread runThread;
+//  public static TestRunThread runThread;
+  public static List<TestRunThread> testRunThreads = new ArrayList<>();
+
 
   static {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HHmmss");
@@ -224,8 +226,9 @@ public class Engine {
   public static List<Future<Object>> runInterop(ExecutorService service, String testSuiteName,
       TestConfig testConfig, List<Tuple> tupleList)
       throws ExecutionException, InterruptedException {
-    runThread = new TestRunThread(testConfig, tupleList);
+    TestRunThread runThread = new TestRunThread(testConfig, tupleList);
     runThread.setName(testSuiteName);
+    testRunThreads.add(runThread);
     List<Future<Object>> runResults = service.submit(runThread).get();
     runThread = null;
     return runResults;
@@ -259,16 +262,18 @@ public class Engine {
   /**
    * Stop interop.
    */
-  public static void stopInterop() {
-    if (Engine.runThread != null) {
-      Engine.runThread.interrupt();
+  public static void stopRunThreads() {
+    logger.info("Trying to stop all test run threads");
+    for (TestRunThread thread : testRunThreads ) {
+      thread.interrupt();
     }
   }
 
 
   public static List<Future<List<Future<Object>>>> runLoadReached(ExecutorService executorService, String testSuiteName, List<List<TestManager>> secondPhaseTestManagerList)
       throws InterruptedException {
-    List<TestRunThread> testRunThreads = new ArrayList<>();
+//    List<TestRunThread> testRunThreads = new ArrayList<>();
+    testRunThreads.clear();
     for (int index = 0 ; index < secondPhaseTestManagerList.size(); index ++) {
       TestRunThread testRunThread = new TestRunThread(testSuiteName, secondPhaseTestManagerList.get(index));
       if (index == secondPhaseTestManagerList.size() - 1) {
@@ -289,7 +294,7 @@ public class Engine {
     testConfig.setNoOfThreads(paasList.size()); // one tuple at a time.
     int numberOfHub = paasList.size();
     int increment = testConfig.getIncrement(); // new "tuple size"
-    List<TestRunThread> testRunThreads = new ArrayList<>();
+    testRunThreads.clear();
     for (Client client : clients) {
       int incrementPerHub = (int) Math.ceil(increment/numberOfHub);
       int countPerHub = (int) Math.ceil(client.getCount()/numberOfHub);
