@@ -6,6 +6,7 @@ package org.webrtc.kite.config.paas;
 
 import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.exception.BadEntityException;
+import io.cosmosoftware.kite.instrumentation.NetworkProfile;
 import io.cosmosoftware.kite.interfaces.SampleData;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
@@ -27,6 +28,7 @@ public class Paas extends KiteEntity implements SampleData {
   private String url;
   private String username;
   private String region = "NC";
+  private NetworkProfile networkProfile;
   private int availableSlots = 0;
 
   /**
@@ -256,5 +258,15 @@ public class Paas extends KiteEntity implements SampleData {
 
   public void setAvailableSlots(int availableSlots) {
     this.availableSlots = availableSlots;
+  }
+
+  @Transient
+  public void setNetworkProfile(NetworkProfile networkProfile) {
+    this.networkProfile = networkProfile;
+  }
+
+  @Transient
+  public NetworkProfile getNetworkProfile() {
+    return networkProfile;
   }
 }

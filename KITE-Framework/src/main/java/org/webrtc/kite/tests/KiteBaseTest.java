@@ -78,7 +78,6 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   protected boolean jsTest = false;
   protected TestConfig testConfig;
   private boolean consoleLogs = true;
-  private boolean csvReport = false;
   private int expectedTestDuration = 60; //in minutes
   private boolean fastRampUp = false;
   private boolean finished = false;
@@ -532,7 +531,6 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       meetingDuration = this.payload.getInt("meetingDuration", meetingDuration);
       setExpectedTestDuration(Math.max(getExpectedTestDuration(), (meetingDuration + 300) / 60));
       maxUsersPerRoom = payload.getInt("usersPerRoom", maxUsersPerRoom);
-      csvReport = payload.getBoolean("csvReport", csvReport);
       consoleLogs = payload.getBoolean("consoleLogs", consoleLogs);
       fastRampUp = payload.getBoolean("fastRampUp", fastRampUp);
       if (payload.containsKey("windowSize") && payload.getString("windowSize").contains("x")) {

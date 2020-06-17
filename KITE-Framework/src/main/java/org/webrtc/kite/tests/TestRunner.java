@@ -267,6 +267,11 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   }
 
   @Override
+  public String getNetworkProfile() {
+    return this.client.getNetworkProfile() == null ? "NC" : this.client.getNetworkProfile().getName();
+  }
+
+  @Override
   public boolean isApp() {
     return this.client.isApp();
   }

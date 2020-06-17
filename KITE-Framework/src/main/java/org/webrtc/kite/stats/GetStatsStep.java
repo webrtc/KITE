@@ -48,6 +48,7 @@ public class GetStatsStep extends TestStep {
     try {
       RTCStatMap statsOverTime =  getPCStatOvertime(webDriver, getStatsConfig);
       statsOverTime.setRegionId(this.runner.getClientRegion());
+      statsOverTime.setNetworkProfile(this.runner.getNetworkProfile());
       RTCStatList localPcStats = statsOverTime.getLocalPcStats();
       JsonObject temp = transformToJson(localPcStats);
       if (!temp.isEmpty()) {

@@ -2,6 +2,7 @@ package org.webrtc.kite.stats;
 
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 
+import java.util.HashMap;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -11,22 +12,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.webrtc.kite.Utils.getStackTrace;
-
 public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> implements JsonBuilder {
   
   private final String pcName;
   private long timestamp = System.currentTimeMillis();
-  
+  private boolean noData = true;
+  private String roomUrl = "unknown";
+
   public RTCStats(String pcName, TreeMap<String, List<RTCSingleStatObject>> statMap) {
     super(statMap);
     this.pcName = pcName;
+    this.noData = false;
   }
   
   public RTCStats (String pcName, List<Map> statArray, JsonArray selectedStats) {
     super();
     this.pcName = pcName;
     if (statArray != null) {
+      this.noData = false;
       for (Map statMap : statArray) {
         if (statMap != null) {
           String type = (String) statMap.get("type");
@@ -214,5 +217,17 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
     }
     return builder;
   }
-  
+
+  public boolean hasNoData() {
+    return noData;
+  }
+
+  public void setRoomUrl(String roomUrl) {
+    this.roomUrl = roomUrl;
+  }
+
+  public String getRoomUrl() {
+    return roomUrl;
+  }
+
 }

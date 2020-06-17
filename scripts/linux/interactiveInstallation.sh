@@ -20,11 +20,7 @@ echo GECKO_VERSION=$GECKO_VERSION
 echo CHROMEDRIVER_VERSION=$CHROMEDRIVER_VERSION
 echo -e '\n'Selenium Standalone Server version
 echo SELENIUM_VERSION_SHORT=$SELENIUM_VERSION_SHORT
-echo SELENIUM_VERSION=$SELENIUM_VERSION
-echo -e '\n'Whether to use CAPABILITY MATCHER and the KITE Extras and Grid Utils versions
-echo USE_CAPABILITY_MATCHER=$USE_CAPABILITY_MATCHER
-echo KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION
-echo -e GRID_UTILS_VERSION=$GRID_UTILS_VERSION '\n'
+echo SELENIUM_VERSION=$SELENIUM_VERSION'\n'
 
 
 function quit() {
@@ -58,10 +54,7 @@ function remind() {
 	echo -e '\n'Selenium Standalone Server version
 	echo SELENIUM_VERSION_SHORT=$SELENIUM_VERSION_SHORT
 	echo SELENIUM_VERSION=$SELENIUM_VERSION
-	echo -e '\n'Whether to use CAPABILITY MATCHER and the KITE Extras and Grid Utils versions
-	echo USE_CAPABILITY_MATCHER=$USE_CAPABILITY_MATCHER
-	echo KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION
-	echo -e GRID_UTILS_VERSION=$GRID_UTILS_VERSION '\n'
+	echo -e '\n'
 	read -p "Do you want to start the Grid (y/n)?  " yn
 case $yn in
     [Yy]* )
@@ -247,56 +240,6 @@ function desktopEnvironment() {
 	esac
 }
 
-function configGrid() {
-
-	echo -e '\n'Please check the corresponding KITE-Extras version from:
-	echo https://github.com/CoSMoSoftware/KITE-Extras/releases
-	echo currently the config file has the following versions:
-	echo KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION
-	echo GRID_UTILS_VERSION=$GRID_UTILS_VERSION
-	read -p "Are those versions correct? (y/n/q)" ynq
-	case $ynq in
-		[Nn]* )
-			   echo Please enter the current version of KITE Extras
-			   read InputKiteExtrasVersion
-			   sed -i s/KITE_EXTRAS_VERSION=$KITE_EXTRAS_VERSION/KITE_EXTRAS_VERSION=$InputKiteExtrasVersion/ ./gridConfig.sh
-			   desktopEnvironment
-			   ;;
-		[Yy]* )
-			   desktopEnvironment
-			  ;;
-    [Qq]* )
-           quit
-		;;
-    * ) echo "Please answer yes, no or quit."
-		configGrid;;
-	esac
-}
-
-
-function capabilityMatcher() {
-		echo -e 
-	read -p "Would you like to use the capability Matcher? (y/n/q)" ynq
-	case $ynq in
-		[Yy]* )
-			echo You chose to use capability matcher
-			   sed -i s/USE_CAPABILITY_MATCHER=$USE_CAPABILITY_MATCHER/USE_CAPABILITY_MATCHER=TRUE/ ./gridConfig.sh
-			   configGrid
-			   ;;
-		[Nn]* )
-					echo You chose to not use capability matcher
-			   sed -i s/USE_CAPABILITY_MATCHER=$USE_CAPABILITY_MATCHER/USE_CAPABILITY_MATCHER=FALSE/ ./gridConfig.sh
-			   desktopEnvironment
-			  ;;
-    [Qq]* )
-           quit
-		;;
-    * ) echo "Please answer yes, no or quit."
-		capabilityMatcher;;
-	esac
-}
-
-
 function choiceInstallBrowser() {
 		echo -e 
 		read -p "Would you like to install the browsers? (y/n/q)" ynq
@@ -304,12 +247,12 @@ function choiceInstallBrowser() {
 		[Yy]* )
 			echo You chose to install the Browsers
 			   sed -i s/INSTALL_BROWSERS=$INSTALL_BROWSERS/INSTALL_BROWSERS=TRUE/ ./gridConfig.sh
-			   capabilityMatcher
+			   desktopEnvironment
 			   ;;
 		[Nn]* )
 				echo You chose to skip the browser installation
 			   sed -i s/INSTALL_BROWSERS=$INSTALL_BROWSERS/INSTALL_BROWSERS=FALSE/ ./gridConfig.sh
-			   capabilityMatcher
+			   desktopEnvironment
 			  ;;
     [Qq]* )
            quit

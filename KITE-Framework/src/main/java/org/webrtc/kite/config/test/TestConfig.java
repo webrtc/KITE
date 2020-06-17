@@ -83,6 +83,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   private NetworkInstrumentation networkInstrumentation = null;
   private Boolean done = false;
   private EmailSender emailSender = null;
+  private Boolean csvReport;
   
   /**
    * Instantiates a new test config.
@@ -125,7 +126,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.description = jsonObject.getString("description", DEFAULT_DESC);
   
     this.reporter = new Reporter(this.name);
-    this.reporter.setCsvReport(jsonObject.getBoolean("csvReport", false));
+    this.csvReport = jsonObject.getBoolean("csvReport", false);
     this.payload = jsonObject.getJsonObject("payload").toString();
     this.initRoomManagerFromPayload();
     
@@ -170,6 +171,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.reporter.setReportPath(reportPath);
     this.reporter.setConfigFilePath(this.pathToConfigFile);
     this.reporter.setTestConfig(this.testJsonConfig);
+    this.reporter.setCsvReport(this.csvReport);
   }
 
   /*
@@ -597,14 +599,14 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     int maxUsersPerRoom = payload.getInt("usersPerRoom", 1);
     boolean loopRooms = payload.getBoolean("loopRooms", false);
     if (maxUsersPerRoom > 0) {
-      roomManager = new RoomManager(url, maxUsersPerRoom, loopRooms);
+      roomManager = new RoomManager(url, maxUsersPerRoom);
       String[] rooms;
       if (payload.getJsonArray("rooms") != null) {
         JsonArray roomArr = payload.getJsonArray("rooms");
         rooms = new String[roomArr.size()];
         for (int i = 0; i < roomArr.size(); i++) {
           rooms[i] = roomArr.getString(i);
-          roomManager.setRoomNames(rooms);
+//          roomManager.setRoomNames(rooms);
         }
       }
     }
@@ -717,5 +719,13 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
 
   public void setTagName(String tagName) {
     this.tagName = tagName;
+  }
+
+  public Boolean getCsvReport() {
+    return csvReport;
+  }
+
+  public void setCsvReport(Boolean csvReport) {
+    this.csvReport = csvReport;
   }
 }
