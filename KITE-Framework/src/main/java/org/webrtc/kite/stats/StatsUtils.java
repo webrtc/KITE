@@ -77,8 +77,10 @@ public class StatsUtils {
 
       executeJsScript(webDriver, stashStatsScript);
       waitAround(Timeouts.ONE_SECOND_INTERVAL);
-      return new RTCStats(peerConnection,
+      RTCStats rtn =  new RTCStats(peerConnection,
           (List<Map>) executeJsScript(webDriver, getStashedStatsScript), selectedStats);
+      rtn.setRoomUrl(webDriver.getCurrentUrl());
+      return rtn;
     } catch (Exception e) {
 //      throw new KiteTestException("Could not get stats from peer connection", Status.BROKEN, e);
       // todo: put the e back
@@ -124,9 +126,15 @@ public class StatsUtils {
         arrayBuilder.add(stat.toJson());
       }
     }
-    return Json.createObjectBuilder()
-        .add("region", stats.getRegionId())
-        .add("statsArray", arrayBuilder).build();
+    JsonObjectBuilder rtn =  Json.createObjectBuilder()
+        .add("Connected", !stats.hasNoData())
+        .add("Room", stats.getRoomUrl())
+        .add("StatsArray", arrayBuilder);
+
+    for (String key : stats.getAdditionalData().keySet()) {
+      rtn.add(key, stats.getAdditionalData().get(key));
+    }
+    return rtn.build();
   }
 
   /**
@@ -283,6 +291,12 @@ public class StatsUtils {
     List<List<RTCRTPStreamStats>> outboundStreamStatsList = new ArrayList<>();
     builder.add("Starting Timestamp", timestamp(statArray.get(0).getTimestamp()));
     builder.add("Ending Timestamp", timestamp(statArray.get(statArray.size() - 1).getTimestamp()));
+    builder.add("Connected", !statArray.hasNoData());
+    builder.add("Room", statArray.getRoomUrl());
+
+    for (String key : statArray.getAdditionalData().keySet()) {
+      builder.add(key, statArray.getAdditionalData().get(key));
+    }
 
     RTCStats lastRtcStats = statArray.get(statArray.size() -1);
     if (lastRtcStats.get("remote-candidate") != null) {

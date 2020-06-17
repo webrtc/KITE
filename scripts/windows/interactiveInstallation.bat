@@ -25,11 +25,7 @@ echo:
 echo Selenium Standalone Server version
 echo SELENIUM_VERSION_SHORT=%SELENIUM_VERSION_SHORT%
 echo SELENIUM_VERSION=%SELENIUM_VERSION%
-echo:
-echo Whether to use CAPABILITY MATCHER and the KITE Extras and Grid Utils versions
-echo USE_CAPABILITY_MATCHER=%USE_CAPABILITY_MATCHER%
-echo KITE_EXTRAS_VERSION=%KITE_EXTRAS_VERSION%
-echo GRID_UTILS_VERSION=%GRID_UTILS_VERSION%
+
 echo:
 
 :choice
@@ -55,50 +51,13 @@ goto :choiceInstallBrowser
 :installBrowser
 echo You chose to install the Browsers
 cscript //Nologo replace.vbs gridConfig.bat INSTALL_BROWSERS=%INSTALL_BROWSERS% INSTALL_BROWSERS=TRUE
-goto :capabilityMatcher
+goto :configGrid
 
 :skipBrowser
 echo You chose to skip the browser installation
 cscript //Nologo replace.vbs gridConfig.bat INSTALL_BROWSERS=%INSTALL_BROWSERS% INSTALL_BROWSERS=FALSE
-goto :capabilityMatcher
-
-
-:capabilityMatcher
-echo.
-set /P c=Would you like to use the capability Matcher? (y/n/q)  
-if /I "%c%" EQU "Y" goto :useCapabilityMatcher 
-if /I "%c%" EQU "N" goto :skipCapabilityMatcher
-if /I "%c%" EQU "Q" goto :quit
-goto :capabilityMatcher
-
-:skipCapabilityMatcher
-echo You chose to not use capability matcher
-cscript //Nologo replace.vbs gridConfig.bat USE_CAPABILITY_MATCHER=%USE_CAPABILITY_MATCHER% USE_CAPABILITY_MATCHER=FALSE
 goto :localhost
 
-:useCapabilityMatcher
-echo You chose to use capability matcher
-cscript //Nologo replace.vbs gridConfig.bat USE_CAPABILITY_MATCHER=%USE_CAPABILITY_MATCHER% USE_CAPABILITY_MATCHER=TRUE
-goto :configGrid
-
-:configGrid
-echo.
-echo Please check the corresponding KITE-Extras version from:
-echo https://github.com/CoSMoSoftware/KITE-Extras/releases
-echo currently the config file has the following version:
-echo KITE_EXTRAS_VERSION=%KITE_EXTRAS_VERSION%
-echo GRID_UTILS_VERSION=%GRID_UTILS_VERSION%
-set /P c=Are those versions correct?  (y/n/q)  
-if /I "%c%" EQU "N" goto :changeGrid
-if /I "%c%" EQU "Y" goto :localhost
-if /I "%c%" EQU "Q" goto :quit
-goto :configGrid
-
-:changeGrid
-echo Please enter the current version of KITE Extras
-set /P InputKiteExtrasVersion=
-cscript //Nologo replace.vbs gridConfig.bat "KITE_EXTRAS_VERSION=%KITE_EXTRAS_VERSION%" "KITE_EXTRAS_VERSION=%InputKiteExtrasVersion%"
-goto :localhost
 
 :localhost
 echo.
@@ -239,11 +198,6 @@ echo:
 echo Selenium Standalone Server version
 echo SELENIUM_VERSION_SHORT=%SELENIUM_VERSION_SHORT%
 echo SELENIUM_VERSION=%SELENIUM_VERSION%
-echo:
-echo Whether to use CAPABILITY MATCHER and the KITE Extras and Grid Utils versions
-echo USE_CAPABILITY_MATCHER=%USE_CAPABILITY_MATCHER%
-echo KITE_EXTRAS_VERSION=%KITE_EXTRAS_VERSION%
-echo GRID_UTILS_VERSION=%GRID_UTILS_VERSION%
 echo:
 
 pause

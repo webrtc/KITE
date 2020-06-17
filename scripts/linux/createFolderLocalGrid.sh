@@ -55,13 +55,7 @@ echo java -Dwebdriver.gecko.driver=./geckodriver -jar ../selenium.jar -role node
 
 rm hub/startHub.sh || true
 echo echo -n -e '"\033]0;HUB\007"' >> hub/startHub.sh
-if [ "$USE_CAPABILITY_MATCHER" = "TRUE" ]
-then
-  echo java -cp "*:.:../*" org.openqa.grid.selenium.GridLauncherV3 -role hub --debug -host $IP -capabilityMatcher io.cosmosoftware.kite.grid.KiteCapabilityMatcher >> hub/startHub.sh
-else
-  echo java -jar ../selenium.jar -role hub --debug -host $IP >> hub/startHub.sh
-fi
-
+echo java -cp "*:.:../*" org.openqa.grid.selenium.GridLauncherV3 -role hub --debug -host $IP >> hub/startHub.sh
 chmod +x startGrid.sh
 chmod +x stopGrid.sh
 cd hub

@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 public class RTCStatMap extends LinkedHashMap<String, RTCStatList> {
   
   private String regionId = "NC";
+  private String networkProfile = "NC";
+  private int itinerary = 0;
   public RTCStatMap() {
     super();
   }
@@ -23,7 +25,9 @@ public class RTCStatMap extends LinkedHashMap<String, RTCStatList> {
   @Override
   public RTCStatList get(Object key) {
     RTCStatList res = super.get(key);
-    res.setRegionId(this.regionId);
+    res.addNewData("Region Id", this.regionId);
+    res.addNewData("Network Profile", this.networkProfile);
+    res.addNewData("Itinerary", this.itinerary + "");
     return res;
   }
 
@@ -41,5 +45,21 @@ public class RTCStatMap extends LinkedHashMap<String, RTCStatList> {
 
   public String getRegionId() {
     return regionId;
+  }
+
+  public void setNetworkProfile(String networkProfile) {
+    this.networkProfile = networkProfile;
+  }
+
+  public String getNetworkProfile() {
+    return networkProfile;
+  }
+
+  public void setItinerary(int itinerary) {
+    this.itinerary = itinerary;
+  }
+
+  public int getItinerary() {
+    return itinerary;
   }
 }

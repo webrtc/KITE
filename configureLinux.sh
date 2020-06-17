@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # This script will set the USER enviroment variable KITE_HOME to the current folder
 # and add '%KITE_HOME%\scripts\path' to the USER PATH.
 # It will close the current and open a new one with the command c, r and a ready to use

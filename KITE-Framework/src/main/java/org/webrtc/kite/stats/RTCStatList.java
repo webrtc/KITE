@@ -1,5 +1,6 @@
 package org.webrtc.kite.stats;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -7,6 +8,8 @@ public class RTCStatList extends LinkedList<RTCStats> {
 
   private String pcName = "peerconnection";
   private String regionId = "NC";
+  private String networkProfile = "NC";
+  private HashMap<String, String> addtionalData = new HashMap<>();
 
   public RTCStatList() {
     super();
@@ -19,7 +22,6 @@ public class RTCStatList extends LinkedList<RTCStats> {
   public RTCStatList(String pcName, RTCStatList otherList) {
     super(otherList);
     this.pcName = pcName;
-    this.regionId = otherList.getRegionId();
   }
 
   public RTCStatList(List<RTCStats> otherList) {
@@ -30,11 +32,27 @@ public class RTCStatList extends LinkedList<RTCStats> {
     return pcName;
   }
 
-  public void setRegionId(String regionId) {
-    this.regionId = regionId;
+  public boolean hasNoData() {
+    for (RTCStats stats: this) {
+      if (!stats.hasNoData()) {
+        return false;
+      }
+    }
+    return true;
   }
 
-  public String getRegionId() {
-    return regionId;
+  public String getRoomUrl() {
+    if (!this.isEmpty()) {
+      return this.get(0).getRoomUrl();
+    }
+    return "unknown";
+  }
+
+  public void addNewData(String key, String value) {
+    this.addtionalData.put(key, value);
+  }
+
+  public HashMap<String, String> getAdditionalData() {
+    return addtionalData;
   }
 }

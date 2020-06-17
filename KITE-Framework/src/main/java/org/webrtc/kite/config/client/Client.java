@@ -17,6 +17,7 @@
 package org.webrtc.kite.config.client;
 
 import io.cosmosoftware.kite.config.KiteEntity;
+import io.cosmosoftware.kite.instrumentation.NetworkProfile;
 import io.cosmosoftware.kite.interfaces.CommandMaker;
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 import io.cosmosoftware.kite.interfaces.SampleData;
@@ -66,6 +67,7 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
   private JsonObject jsonConfig;
   protected String kind;
   private App app;
+  private NetworkProfile networkProfile;
 
 
 
@@ -215,6 +217,7 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
    */
   public void setPaas(Paas paas) {
     this.paas = paas;
+    this.networkProfile = paas.getNetworkProfile();
   }
 
   @Override
@@ -567,5 +570,16 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
   @Transient
   public String getRegion() {
     return this.paas.getRegion();
+  }
+
+
+  @Transient
+  public void setNetworkProfile(NetworkProfile networkProfile) {
+    this.networkProfile = networkProfile;
+  }
+
+  @Transient
+  public NetworkProfile getNetworkProfile() {
+    return networkProfile;
   }
 }

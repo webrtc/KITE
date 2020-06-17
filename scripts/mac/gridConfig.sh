@@ -13,26 +13,19 @@
 # Set to TRUE to install Chrome and Firefox, or FALSE to skip this step if the correct versions are already installed.
 INSTALL_BROWSERS=FALSE
 
-# Set to TRUE/FALSE to enable/disable the CAPABILITY MATCHER
-USE_CAPABILITY_MATCHER=FALSE
-
 # Set to TRUE to use localhost or FALSE to use the host's IP address
 LOCALHOST=TRUE
 
 # ChromeDriver and GeckoDriver versions
 GECKO_VERSION=v0.26.0
-CHROMEDRIVER_VERSION=81.0.4044.69
+CHROMEDRIVER_VERSION=83.0.4103.106
 
 # Selenium version
 SELENIUM_VERSION_SHORT=3.141
 SELENIUM_VERSION=3.141.59
 
 # Browser versions
-FIREFOX_VERSION=76
-CHROME_VERSION=81
+FIREFOX_VERSION=77
+CHROME_VERSION=83
 
 SAFARI_VERSION=13
-
-#Capability Matcher
-KITE_EXTRAS_VERSION=0.1.65
-GRID_UTILS_VERSION=0.0.1

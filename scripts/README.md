@@ -61,7 +61,7 @@ Scroll down to the end of the file and edit the following parameters with the ve
  Please only input the major (only 80 and not 81.0.4044.69).
 ```
 rem Browser versions
-set CHROME_VERSION=81
+set CHROME_VERSION=83
 set FIREFOX_VERSION=73
 ```
 
@@ -73,7 +73,7 @@ You will need to find out what are the corresponding driver version. Please visi
  And edit the following values in gridConfig.bat accordingly. This time, please input the full version with the minor (81.0.4044.69 and not 80).
 ```
 rem ChromeDriver and GeckoDriver versions
-set CHROMEDRIVER_VERSION=81.0.4044.69
+set CHROMEDRIVER_VERSION=83.0.4103.106
 set GECKO_VERSION=v0.26.0
 ```
 
