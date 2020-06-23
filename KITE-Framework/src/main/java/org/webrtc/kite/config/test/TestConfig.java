@@ -30,6 +30,8 @@ import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.report.Reporter;
 import io.cosmosoftware.kite.usrmgmt.EmailSender;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -596,18 +598,17 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   private void initRoomManagerFromPayload() {
     JsonObject payload = readJsonString(this.payload);
     String url = payload.getString("url", null);
-    int maxUsersPerRoom = payload.getInt("usersPerRoom", 1);
-    boolean loopRooms = payload.getBoolean("loopRooms", false);
+    int maxUsersPerRoom = payload.getInt("usersPerRoom", tupleSize);
     if (maxUsersPerRoom > 0) {
       roomManager = new RoomManager(url, maxUsersPerRoom);
-      String[] rooms;
+      List<String> rooms;
       if (payload.getJsonArray("rooms") != null) {
         JsonArray roomArr = payload.getJsonArray("rooms");
-        rooms = new String[roomArr.size()];
+        rooms = new ArrayList<>();
         for (int i = 0; i < roomArr.size(); i++) {
-          rooms[i] = roomArr.getString(i);
-//          roomManager.setRoomNames(rooms);
+          rooms.add(roomArr.getString(i));
         }
+        roomManager.setPreconfiguredRooms(rooms);
       }
     }
   }
