@@ -217,7 +217,9 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
    */
   public void setPaas(Paas paas) {
     this.paas = paas;
-    this.networkProfile = paas.getNetworkProfile();
+    if (paas != null && paas.getNetworkProfile() != null) {
+      this.networkProfile = paas.getNetworkProfile();
+    }
   }
 
   @Override
