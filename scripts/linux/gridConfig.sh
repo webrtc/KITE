@@ -21,7 +21,7 @@ export LOCALHOST=TRUE
 
 # ChromeDriver and GeckoDriver versions
 export GECKO_VERSION=v0.26.0
-export CHROMEDRIVER_VERSION=83.0.4103.106
+export CHROMEDRIVER_VERSION=83.0.4103.39
 
 # Selenium version
 export SELENIUM_VERSION_SHORT=3.141
