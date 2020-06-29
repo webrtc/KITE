@@ -130,13 +130,13 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.reporter = new Reporter(this.name);
     this.csvReport = jsonObject.getBoolean("csvReport", false);
     this.payload = jsonObject.getJsonObject("payload").toString();
-    this.initRoomManagerFromPayload();
-    
+
     // Override the global value with the local value
     this.callbackUrl = jsonObject.getString("callbackurl", null);
     this.tagName = jsonObject.getString("tag", null);
-
     this.tupleSize = getIntFromJsonObject(jsonObject, "tupleSize", -1);
+
+    this.initRoomManagerFromPayload();
     this.noOfThreads = getIntFromJsonObject(jsonObject, "noOfThreads", 1);
     this.maxRetryCount = getIntFromJsonObject(jsonObject, "maxRetryCount", 0);
     this.increment = getIntFromJsonObject(jsonObject, "increment", 1);
@@ -598,7 +598,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   private void initRoomManagerFromPayload() {
     JsonObject payload = readJsonString(this.payload);
     String url = payload.getString("url", null);
-    int maxUsersPerRoom = payload.getInt("usersPerRoom", tupleSize);
+    int maxUsersPerRoom = payload.getInt("usersPerRoom", this.tupleSize);
     if (maxUsersPerRoom > 0) {
       roomManager = new RoomManager(url, maxUsersPerRoom);
       List<String> rooms;
