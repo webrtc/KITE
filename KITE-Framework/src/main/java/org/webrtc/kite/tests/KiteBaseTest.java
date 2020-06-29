@@ -530,7 +530,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       expectedTestDuration = payload.getInt("expectedTestDuration", expectedTestDuration);
       meetingDuration = this.payload.getInt("meetingDuration", meetingDuration);
       setExpectedTestDuration(Math.max(getExpectedTestDuration(), (meetingDuration + 300) / 60));
-      maxUsersPerRoom = payload.getInt("usersPerRoom", maxUsersPerRoom);
+      maxUsersPerRoom = payload.getInt("usersPerRoom", this.tupleSize);
       consoleLogs = payload.getBoolean("consoleLogs", consoleLogs);
       fastRampUp = payload.getBoolean("fastRampUp", fastRampUp);
       if (payload.containsKey("windowSize") && payload.getString("windowSize").contains("x")) {
