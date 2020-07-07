@@ -4,7 +4,7 @@
   "grids": [
     {
       "type": "local",
-      "url": "http://localhost:4444/wd/hub"
+      "url": "http://hub:4444/wd/hub"
     }
   ],
   "tests": [
@@ -17,6 +17,7 @@
         "url": "https://appr.tc",
         "port": 30000,
         "testTimeout": 60,
+        "windowSize": "800x600",
         "getStats" : {
           "enabled": true,
           "statsCollectionTime": 2,
@@ -30,7 +31,9 @@
   "clients": [
     {
       "browserName": "chrome",
-      "platform": "localhost"
+      "platform": "localhost",
+      "platform": "LINUX",
+      "headless": true
     }
   ]
 }

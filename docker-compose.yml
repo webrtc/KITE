@@ -1,0 +1,32 @@
+# To execute this docker-compose yml file use `docker-compose -f <file_name> up`
+# Add the `-d` flag at the end for detached execution
+version: "3"
+services:
+  hub:
+    image: selenium/hub:3.141.59
+    container_name: hub
+    ports:
+      - 4444:4444
+
+  chrome:
+    image: selenium/node-chrome:3.141.59
+    depends_on:
+      - hub
+    environment:
+      - HUB_HOST=hub
+
+  kite:
+    build:
+      context: .
+      args:
+        testpathdir: KITE-AppRTC-Test
+        configfilename: js.iceconnection.apprtc.config.json
+    volumes:
+      - /dev/shm:/dev/shm
+      - ./KITE-AppRTC-Test:/KITE/KITE-AppRTC-Test
+      - ./scripts:/KITE/scripts
+    depends_on:
+      - hub
+    environment:
+      - HUB_HOST=hub
+      - HUB_PORT=4444

@@ -12,8 +12,8 @@
   },
   "license": "ISC",
   "dependencies": {
-    "kite-common": "^0.1.14",
     "express": "^4.15.2",
+    "kite-common": "^0.1.14",
     "socket.io": "^2.2.0"
   }
 }
