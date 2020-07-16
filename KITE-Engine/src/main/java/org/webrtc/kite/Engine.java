@@ -18,11 +18,14 @@ package org.webrtc.kite;
 
 import static org.webrtc.kite.Utils.shutdown;
 
+import io.cosmosoftware.kite.instrumentation.NetworkProfile;
+import io.cosmosoftware.kite.util.CircularLinkedList;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -97,23 +100,39 @@ public class Engine {
    * @param tupleList the tuple list
    */
   public static void distributeRemote(Configurator configurator, List<Tuple> tupleList) {
-    distributeRemote(configurator.getRemoteList().get(), tupleList);
+    distributeRemote(configurator.getRemoteList(), tupleList);
   }
+
+
   /**
    * Distribute remote.
    *
-   * @param paas the remote paas
+   * @param paasList the list of available paas
    * @param tupleList the tuple list
    */
-  public static void distributeRemote(Paas paas, List<Tuple> tupleList) {
+  public static void distributeRemote(List<Paas> paasList, List<Tuple> tupleList) {
+    CircularLinkedList<Paas> linkedList = new CircularLinkedList(paasList);
+    for (Tuple tuple : tupleList) {
+      distributeRemote(linkedList, tuple);
+    }
+  }
+
+
+  /**
+   * Distribute remote.
+   *
+   * @param paasList the list of available paas
+   * @param tuple the tuple
+   */
+  public static void distributeRemote(CircularLinkedList<Paas> paasList, Tuple tuple) {
     // setting remote hub address to client, using circular linked list
     // each tuple will be prioritised to be in the same hub
     // need to handle mobile == null
-    for (Tuple tuple : tupleList) {
-      for (Client client : tuple.getClients()) {
-        if (client.getPaas() == null) {
-          client.setPaas(paas);
-        }
+    for (Client client : tuple.getClients()) {
+      if (client.getPaas() == null) {
+        Paas paas = paasList.get();
+        logger.debug("Assigning client to: " + paas.toString());
+        client.setPaas(paas);
       }
     }
   }
@@ -144,7 +163,7 @@ public class Engine {
             for (Client client : configurator.getConfigHandler().getClientList()) {
               client.setCount(testConfig.getTupleSize());
             }
-            List<Future<List<Future<Object>>>> ramUpResults = runRamUp(service, configurator.getName() ,testConfig,
+            List<Future<List<Future<Object>>>> ramUpResults = runRampUp(service, configurator.getName() ,testConfig,
                 configurator.getRemoteList(), configurator.getConfigHandler().getClientList());
             List<List<TestManager>> secondPhase = processRamUpResults(ramUpResults);
             runLoadReached(service, configurator.getName(), secondPhase);
@@ -287,15 +306,17 @@ public class Engine {
     return res;
   }
 
-  public static List<Future<List<Future<Object>>>> runRamUp(ExecutorService executorService, String testSuiteName, TestConfig testConfig, List<Paas> paasList, List<Client> clients) throws KiteGridException, InterruptedException {
+  public static List<Future<List<Future<Object>>>> runRampUp(ExecutorService executorService, String testSuiteName, TestConfig testConfig, List<Paas> paasList, List<Client> clients) throws KiteGridException, InterruptedException {
     if (paasList.size() < 1) {
       throw new KiteGridException("Looks like the grid is not up, no hub IP or DNS was provided.");
     }
-    testConfig.setNoOfThreads(paasList.size()); // one tuple at a time.
-    int numberOfHub = paasList.size();
-    int increment = testConfig.getIncrement(); // new "tuple size"
+    testConfig.setNoOfThreads(paasList.size());
+    HashMap<Client, Integer> incrementMap = getIncrementMap(clients, testConfig.getIncrement());
     testRunThreads.clear();
     for (Client client : clients) {
+      List<Paas> paasWithProfile = getPaasWithProfile(paasList, client);
+      int increment = incrementMap.get(client);
+      int numberOfHub = paasWithProfile.size();
       int incrementPerHub = (int) Math.ceil(increment/numberOfHub);
       int countPerHub = (int) Math.ceil(client.getCount()/numberOfHub);
       int numberOfIterationPerHub = countPerHub/incrementPerHub;
@@ -309,12 +330,14 @@ public class Engine {
       int count = 0;
       for (int iterationCount = 0; iterationCount < numberOfIterationPerHub; iterationCount ++) {
         List<Tuple> tupleList = new ArrayList<>();
-        for (int hubCount = 0; hubCount < numberOfHub; hubCount ++) {
-          client.setPaas(paasList.get(hubCount));
+
+        for (Paas paas : paasWithProfile) {
+          client.setPaas(paas);
           Tuple tuple = new Tuple(client, incrementPerHub);
           tupleList.add(tuple);
           count += incrementPerHub;
         }
+
         TestRunThread runThread = new TestRunThread(testConfig, tupleList);
         runThread.setName(testSuiteName);
         runThread.setCurrentIteration(iterationCount*increment);
@@ -322,8 +345,8 @@ public class Engine {
       }
 
       if (leftoverPerHub > 0) {
-        for (int hubCount = 0; hubCount < numberOfHub; hubCount ++) {
-          client.setPaas(paasList.get(hubCount));
+        for (Paas paas : paasWithProfile) {
+          client.setPaas(paas);
           List<Tuple> tupleList = new ArrayList<>();
           Tuple tuple = new Tuple(client, leftoverPerHub);
           tupleList.add(tuple);
@@ -340,6 +363,36 @@ public class Engine {
     List<Future<List<Future<Object>>>> res =  executorService.invokeAll(testRunThreads);
     shutdown(executorService);
     return res;
+  }
+
+  public static List<Paas> getPaasWithProfile(List<Paas> originalList, Client client) {
+
+    List<Paas> res = new ArrayList<>();
+    for (Paas paas : originalList) {
+//      logger.info("looking for paas with spec " + client.getBrowserSpecs());
+//      if (paas.getSpecList().contains(client.getBrowserSpecs())) {
+        logger.info("looking for paas with profile " + client.getNetworkProfile().getName());
+        if (paas.getNetworkProfile().getName().equals(client.getNetworkProfile().getName())) {
+          if (paas.getAvailableSlots() > 0) {
+            res.add(paas);
+          }
+        }
+//      }
+    }
+    return res;
+  }
+
+  private static HashMap<Client, Integer> getIncrementMap(List<Client> clients, int totalIncrement) {
+    int totalCount = 0;
+    HashMap<Client, Integer> map = new HashMap<>();
+    for (Client client : clients) {
+      totalCount += client.getCount();
+    }
+    for (Client client : clients) {
+      int ratio = client.getCount()/totalCount;
+      map.put(client, ratio*totalIncrement);
+    }
+    return map;
   }
 
   public static List<List<TestManager>> processRamUpResults(List<Future<List<Future<Object>>>> RamUpResults)

@@ -327,7 +327,7 @@ public class BrowserSpecs extends KiteEntity implements CommandMaker, SampleData
     } else if (!browserName.equals(other.browserName)) {
       return false;
     }
-    if (platform != other.platform) {
+    if (!platform.equals(other.platform)) {
       return false;
     }
     if (version == null) {

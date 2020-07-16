@@ -217,8 +217,11 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
    */
   public void setPaas(Paas paas) {
     this.paas = paas;
-    if (paas != null && paas.getNetworkProfile() != null) {
-      this.networkProfile = paas.getNetworkProfile();
+    if (paas != null) {
+      paas.minusOneSlot();
+      if (this.networkProfile == null && paas.getNetworkProfile() != null) {
+        this.networkProfile = paas.getNetworkProfile();
+      }
     }
   }
 
@@ -234,11 +237,38 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
       return false;
     }
     Client other = (Client) obj;
-    if (this.capability == null) {
-      return other.capability == null;
+
+    if ((this.networkProfile == null && other.networkProfile != null)
+      || (this.networkProfile != null && other.networkProfile == null)) {
+      return false;
     } else {
-      return this.capability.equals(other.capability);
+      if (this.networkProfile != null) {
+        if (!this.networkProfile.getName().equals(other.networkProfile.getName())) {
+          return false;
+        }
+      }
     }
+
+    if ((this.browserSpecs == null && other.browserSpecs != null)
+      || (this.browserSpecs != null && other.browserSpecs == null)) {
+      return false;
+    } else {
+      if (!this.browserSpecs.equals(other.browserSpecs)) {
+        return false;
+      }
+    }
+//
+//    if ((this.capability == null && other.capability != null)
+//      || (this.capability != null && other.capability == null)) {
+//      return false;
+//    } else {
+//      if (!this.capability.equals(other.capability)) {
+//        return false;
+//      }
+//    }
+
+    return true;
+
   }
 
   /**
@@ -582,6 +612,11 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
 
   @Transient
   public NetworkProfile getNetworkProfile() {
+    if (this.networkProfile == null) {
+      NetworkProfile none = new NetworkProfile();
+      none.setName("NONE");
+      return none;
+    }
     return networkProfile;
   }
 }

@@ -8,11 +8,14 @@ import io.cosmosoftware.kite.config.KiteEntity;
 import io.cosmosoftware.kite.exception.BadEntityException;
 import io.cosmosoftware.kite.instrumentation.NetworkProfile;
 import io.cosmosoftware.kite.interfaces.SampleData;
+import java.util.ArrayList;
+import java.util.List;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
 import javax.json.JsonObject;
 import javax.persistence.*;
+import org.webrtc.kite.config.client.BrowserSpecs;
 
 /**
  * Entity implementation class for Entity: Paas.
@@ -29,6 +32,7 @@ public class Paas extends KiteEntity implements SampleData {
   private String username;
   private String region = "NC";
   private NetworkProfile networkProfile;
+  private List<BrowserSpecs> specList = new ArrayList<>();
   private int availableSlots = 0;
 
   /**
@@ -229,7 +233,6 @@ public class Paas extends KiteEntity implements SampleData {
   public SampleData makeSampleData() {
     this.type = PaasType.local;
     this.url = "http://localhost:4444/wd/hub";
-
     return this;
   }
 
@@ -267,6 +270,33 @@ public class Paas extends KiteEntity implements SampleData {
 
   @Transient
   public NetworkProfile getNetworkProfile() {
+    if (this.networkProfile == null) {
+      NetworkProfile none = new NetworkProfile();
+      none.setName("NONE");
+      return none;
+    }
     return networkProfile;
+  }
+
+  public void addSpec(BrowserSpecs specs) {
+    this.specList.add(specs);
+  }
+
+  @Transient
+  public List<BrowserSpecs> getSpecList() {
+    return specList;
+  }
+
+  public void minusOneSlot() {
+    if (this.availableSlots > 0) {
+      this.availableSlots--;
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "[URL: " + this.url
+        + " - Available Slots: " + this.availableSlots
+        + " - Network Profile: " + (this.networkProfile == null ? "NONE" : this.networkProfile.getName()) + "]\n";
   }
 }
