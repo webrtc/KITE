@@ -166,6 +166,15 @@ public class MatrixRunner {
       logger.info("Executing " + this.testConfig + " for " + totalTestCases
           + " browser tuples with size :" + tupleList.get(0).size());
       testConfig.setLogger(createTestLogger(testConfig.getKiteRequestId(), testConfig.getTestClassName()));
+      if (testConfig.isLoadTest()) {
+        Tuple neo = new Tuple();
+        for (Tuple tuple: this.tupleList) {
+          neo.mergeWith(tuple);
+        }
+        this.tupleList.clear();
+        this.tupleList.add(neo);
+      }
+
       for (int index = 0; index < this.tupleList.size(); index++) {
         TestManager manager = new TestManager(this.testConfig, this.tupleList.get(index));
         manager.setSuite(this.testSuite);
@@ -247,11 +256,11 @@ public class MatrixRunner {
    */
   private KiteLogger createTestLogger(String kiteRequestId, String testName) {
     KiteLogger testLogger = KiteLogger.getLogger(new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(new Date()));
-    String logFileName = ((kiteRequestId == null || kiteRequestId.equals("null")) ? 
-      "" : (kiteRequestId + "_")) + testName + "/test_" + testLogger.getName() + ".log";
+    String logFileName = (kiteRequestId.equals("") ?
+            "logs/" : ( System.getProperty("catalina.base") + "/logs/" +kiteRequestId + "_")) + testName + "/test_" + testLogger.getName() + ".log";
     try {
       FileAppender fileAppender = new FileAppender(
-        new PatternLayout("%d %-5p - %m%n"), "logs/" + logFileName, false);    
+        new PatternLayout("%d %-5p - %m%n"), logFileName, false);
       fileAppender.setThreshold(Level.INFO);
       testLogger.addAppender(fileAppender);
     } catch (IOException e) {

@@ -26,7 +26,7 @@ public class Tuple extends KiteEntity implements JsonBuilder {
    * The constant TABLE_NAME.
    */
   final static String TABLE_NAME = "tuples";
-  private List<Client> clients = new ArrayList<Client>();
+  private List<Client> clients = new ArrayList<>();
   private String id;
   private String resultId;
   private List<WebDriver> webDrivers;
@@ -210,5 +210,8 @@ public class Tuple extends KiteEntity implements JsonBuilder {
     }
     return res;
   }
-    
+
+  public void mergeWith(Tuple another) {
+    this.clients.addAll(another.clients);
+  }
 }

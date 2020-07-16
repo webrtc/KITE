@@ -5,18 +5,15 @@
 package org.webrtc.kite.config.client;
 
 import io.cosmosoftware.kite.config.KiteEntity;
-import io.cosmosoftware.kite.interfaces.CommandMaker;
 import io.cosmosoftware.kite.interfaces.SampleData;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.persistence.*;
-import javax.print.attribute.standard.Media;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.openqa.selenium.Platform;
 import org.webrtc.kite.config.media.MediaFile;
 
 import java.util.ArrayList;
@@ -30,7 +27,7 @@ public class Capability extends KiteEntity implements SampleData {
   final static String TABLE_NAME = "capabilities";
   private static final long serialVersionUID = 1L;
   private final String DEFAULT_WINDOW_SIZE = "1920,1200";
-  private final int DEFAULT_MAXINTANCES = 5;
+  private final int DEFAULT_MAXINSTANCES = 5;
 
   private String id;
   private Gateway gateway = Gateway.none;
@@ -51,7 +48,7 @@ public class Capability extends KiteEntity implements SampleData {
   public Capability(JsonObject jsonObject) {
     this();
     // Mandatory
-    this.maxInstances = jsonObject.getInt("maxInstances", DEFAULT_MAXINTANCES);
+    this.maxInstances = jsonObject.getInt("maxInstances", DEFAULT_MAXINSTANCES);
     this.gateway = Gateway.valueOf(jsonObject.getString("gateway", "none"));
     this.headless = jsonObject.getBoolean("headless", headless);
     this.useFakeMedia = jsonObject.getBoolean("useFakeMedia", useFakeMedia);

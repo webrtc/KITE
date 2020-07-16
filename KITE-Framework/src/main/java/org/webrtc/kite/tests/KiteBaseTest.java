@@ -763,7 +763,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
    */
   public int getInterval(int id) {
     //min 200 ms
-    int interval = testConfig.getInterval() < 200 ? 200 : testConfig.getInterval();
+    int interval = testConfig.getInterval() < 50 ? 50 : testConfig.getInterval();
     return id % testConfig.getIncrement() * interval;
   }
 

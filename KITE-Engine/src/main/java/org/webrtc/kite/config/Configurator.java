@@ -30,10 +30,7 @@ import org.webrtc.kite.exception.KiteInsufficientValueException;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
 import static io.cosmosoftware.kite.util.TestUtils.readJsonFile;
@@ -319,6 +316,8 @@ public class Configurator {
    */
   public static List<Tuple> recursivelyBuildTuples(int targetSize, int currentIndex, List<Client> fullList,
       List<Client> refList, boolean permutation) {
+    Set<Client> set = new HashSet<>(refList);
+    refList = new ArrayList<>(set);
     List<Tuple> result = new ArrayList<>();
     if (currentIndex < targetSize - 1) {
       for (int index = 0; index < fullList.size(); index++) {
