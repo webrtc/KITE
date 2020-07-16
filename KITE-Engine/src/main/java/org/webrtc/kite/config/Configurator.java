@@ -316,8 +316,6 @@ public class Configurator {
    */
   public static List<Tuple> recursivelyBuildTuples(int targetSize, int currentIndex, List<Client> fullList,
       List<Client> refList, boolean permutation) {
-    Set<Client> set = new HashSet<>(refList);
-    refList = new ArrayList<>(set);
     List<Tuple> result = new ArrayList<>();
     if (currentIndex < targetSize - 1) {
       for (int index = 0; index < fullList.size(); index++) {
