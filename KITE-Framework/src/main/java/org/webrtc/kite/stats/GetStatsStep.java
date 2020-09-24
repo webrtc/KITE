@@ -30,6 +30,7 @@ public class GetStatsStep extends TestStep {
   private final JsonObject getStatsConfig;
   private final Runner runner;
   private String customName = "";
+  private boolean getRaw = true;
 
 
   public GetStatsStep(Runner runner, JsonObject getStatsConfig) {
@@ -40,7 +41,7 @@ public class GetStatsStep extends TestStep {
 
   @Override
   public String stepDescription() {
-    return "GetStats";
+    return "Getting stats from " + this.getStatsConfig.getJsonArray("peerConnections");
   }
 
   @Override
@@ -53,7 +54,12 @@ public class GetStatsStep extends TestStep {
       JsonObject temp = transformToJson(localPcStats);
       if (!temp.isEmpty()) {
         for (String pc : statsOverTime.keySet()) {
-          reporter.jsonAttachment(this.report, customName + "Stats(Raw)_" + pc.replaceAll("\"", ""), transformToJson(statsOverTime.get(pc)));
+          if (getRaw) {
+            reporter.jsonAttachment(
+                this.report,
+                customName + "Stats(Raw)_" + pc.replaceAll("\"", ""),
+                transformToJson(statsOverTime.get(pc)));
+          }
           reporter.jsonAttachment(this.report, customName + "Stats(Summary)_" + pc.replaceAll("\"", ""), buildStatSummary(statsOverTime.get(pc)));
         }
       }
@@ -65,5 +71,9 @@ public class GetStatsStep extends TestStep {
 
   public void setCustomName(String customName) {
     this.customName = customName;
+  }
+
+  public void setGetRaw(boolean getRaw) {
+    this.getRaw = getRaw;
   }
 }
