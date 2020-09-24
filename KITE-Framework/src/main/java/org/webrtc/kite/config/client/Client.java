@@ -93,6 +93,7 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
     this.capability = client.getCapability();
     this.app = client.getApp();
     this.name = client.getName();
+    this.networkProfile = client.getNetworkProfile();
     this.kind = this.app != null ? "app" : "browser";
 
     
@@ -114,6 +115,9 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
       this.app = new App(jsonObject.getJsonObject("app"));
     }
     this.kind = this.app != null ? "app" : "browser";
+    if (jsonObject.get("networkProfile") != null) {
+      this.networkProfile = new NetworkProfile(jsonObject.getJsonObject("networkProfile"));
+    }
   }
 
 
@@ -217,6 +221,7 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
    */
   public void setPaas(Paas paas) {
     this.paas = paas;
+    logger.debug("Assigning client to " + paas);
     if (paas != null) {
       paas.minusOneSlot();
       if (this.networkProfile == null && paas.getNetworkProfile() != null) {

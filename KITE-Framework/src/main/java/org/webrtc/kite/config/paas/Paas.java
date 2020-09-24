@@ -64,13 +64,14 @@ public class Paas extends KiteEntity implements SampleData {
     this();
 
     // Mandatory
-    this.type = PaasType.valueOf(jsonObject.getString("type"));
+    this.type = PaasType.valueOf(jsonObject.getString("type", String.valueOf(PaasType.local)));
 
     // Optional
     this.username = jsonObject.getString("username", this.username);
     this.accesskey = jsonObject.getString("accessKey", this.accesskey);
     this.url = jsonObject.getString("url", this.url);
     this.gridId = jsonObject.getString("gridId", this.gridId);
+    this.availableSlots = jsonObject.getInt("availableSlots", 5);
 
     if (this.type == PaasType.local) {
       if (this.url == null)

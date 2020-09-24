@@ -53,7 +53,7 @@ public class Engine {
   /** The run thread. */
 //  public static TestRunThread runThread;
   public static List<TestRunThread> testRunThreads = new ArrayList<>();
-
+  private static final int IDEAL_TUPLE_SIZE = 20;
 
   static {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HHmmss");
@@ -311,31 +311,29 @@ public class Engine {
       throw new KiteGridException("Looks like the grid is not up, no hub IP or DNS was provided.");
     }
     testConfig.setNoOfThreads(paasList.size());
-    HashMap<Client, Integer> incrementMap = getIncrementMap(clients, testConfig.getIncrement());
     testRunThreads.clear();
+
     for (Client client : clients) {
-      List<Paas> paasWithProfile = getPaasWithProfile(paasList, client);
-      int increment = incrementMap.get(client);
-      int numberOfHub = paasWithProfile.size();
-      int incrementPerHub = (int) Math.ceil(increment/numberOfHub);
-      int countPerHub = (int) Math.ceil(client.getCount()/numberOfHub);
-      int numberOfIterationPerHub = countPerHub/incrementPerHub;
-      int leftoverPerHub = countPerHub%incrementPerHub;
-      logger.info("***********************************************************");
+      CircularLinkedList<Paas> paasWithProfile = getPaasWithProfile(paasList, client);
+      int increment = testConfig.getIncrement();
+      int numberOfIteration = (int) Math.floor(client.getCount()/increment);
+      int leftOver = client.getCount() - increment*numberOfIteration;
       logger.info("SUMMARY----------------------------------------------------");
       logger.info("Current client is: " + client.toString());
-      logger.info("Running " + numberOfHub + " threads on " + numberOfHub + " hubs, one per hub, with increment per hub: " + incrementPerHub);
-      logger.info("Total number of iterations per hub: " + numberOfIterationPerHub);
+      logger.info("Increment: "  + increment);
+      logger.info("The client will be distributed evenly into every grids in round-robin fashion");
       logger.info("END OF SUMMARY---------------------------------------------");
-      int count = 0;
-      for (int iterationCount = 0; iterationCount < numberOfIterationPerHub; iterationCount ++) {
+      for (int iterationCount = 0; iterationCount < numberOfIteration; iterationCount ++) {
         List<Tuple> tupleList = new ArrayList<>();
-
-        for (Paas paas : paasWithProfile) {
-          client.setPaas(paas);
-          Tuple tuple = new Tuple(client, incrementPerHub);
+        if (increment > IDEAL_TUPLE_SIZE) {
+          tupleList = getSmallerTuple(paasWithProfile, client, increment, IDEAL_TUPLE_SIZE);
+        } else {
+          Tuple tuple = new Tuple();
+          for (int count = 0; count < increment; count ++) {
+            client.setPaas(paasWithProfile.get());
+            tuple.add(client);
+          }
           tupleList.add(tuple);
-          count += incrementPerHub;
         }
 
         TestRunThread runThread = new TestRunThread(testConfig, tupleList);
@@ -344,18 +342,23 @@ public class Engine {
         testRunThreads.add(runThread);
       }
 
-      if (leftoverPerHub > 0) {
-        for (Paas paas : paasWithProfile) {
-          client.setPaas(paas);
-          List<Tuple> tupleList = new ArrayList<>();
-          Tuple tuple = new Tuple(client, leftoverPerHub);
+      if (leftOver > 0) {
+        List<Tuple> tupleList = new ArrayList<>();
+        if (leftOver > IDEAL_TUPLE_SIZE) {
+          tupleList = getSmallerTuple(paasWithProfile, client, leftOver, IDEAL_TUPLE_SIZE);
+        } else {
+          Tuple tuple = new Tuple();
+          for (int count = 0; count < leftOver; count ++) {
+            client.setPaas(paasWithProfile.get());
+            tuple.add(client);
+          }
           tupleList.add(tuple);
-          TestRunThread runThread = new TestRunThread(testConfig, tupleList);
-          runThread.setName(testSuiteName);
-          runThread.setCurrentIteration(count);
-          testRunThreads.add(runThread);
-          count += leftoverPerHub;
         }
+
+        TestRunThread runThread = new TestRunThread(testConfig, tupleList);
+        runThread.setName(testSuiteName);
+        runThread.setCurrentIteration(increment*numberOfIteration);
+        testRunThreads.add(runThread);
       }
     }
 
@@ -365,7 +368,31 @@ public class Engine {
     return res;
   }
 
-  public static List<Paas> getPaasWithProfile(List<Paas> originalList, Client client) {
+  private static List<Tuple> getSmallerTuple(CircularLinkedList<Paas> paasList, Client client, int originalTupleSize, int idealTupleSize) {
+    List<Tuple> tupleList = new ArrayList<>();
+    int tupleCount = originalTupleSize/idealTupleSize;
+    int leftOver = originalTupleSize - idealTupleSize*tupleCount;
+
+    for (int i = 0; i < tupleCount; i++) {
+      Tuple tuple = new Tuple();
+      for (int j = 0; j < idealTupleSize; j++) {
+        client.setPaas(paasList.get());
+        tuple.add(client);
+      }
+      tupleList.add(tuple);
+    }
+    if (leftOver > 0) {
+      Tuple tuple = new Tuple();
+      for (int j = 0; j < leftOver; j++) {
+        client.setPaas(paasList.get());
+        tuple.add(client);
+      }
+      tupleList.add(tuple);
+    }
+    return tupleList;
+  }
+
+  public static CircularLinkedList<Paas> getPaasWithProfile(List<Paas> originalList, Client client) {
 
     List<Paas> res = new ArrayList<>();
     for (Paas paas : originalList) {
@@ -379,7 +406,7 @@ public class Engine {
         }
 //      }
     }
-    return res;
+    return new CircularLinkedList<Paas>(res);
   }
 
   private static HashMap<Client, Integer> getIncrementMap(List<Client> clients, int totalIncrement) {
@@ -389,8 +416,7 @@ public class Engine {
       totalCount += client.getCount();
     }
     for (Client client : clients) {
-      int ratio = client.getCount()/totalCount;
-      map.put(client, ratio*totalIncrement);
+      map.put(client, client.getCount()*totalIncrement/totalCount);
     }
     return map;
   }
