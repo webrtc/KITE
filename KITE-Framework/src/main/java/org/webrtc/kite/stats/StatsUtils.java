@@ -24,6 +24,16 @@ import org.openqa.selenium.WebDriver;
 
 import javax.json.*;
 import java.util.*;
+import org.webrtc.kite.stats.rtc.RTCIceCandidatePairStats;
+import org.webrtc.kite.stats.rtc.RTCStatList;
+import org.webrtc.kite.stats.rtc.RTCStatMap;
+import org.webrtc.kite.stats.rtc.RTCStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCInboundRtpStreamStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCOutboundRtpStreamStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCReceivedRtpStreamStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCRemoteInboundRtpStreamStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCRtpStreamStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCSentRtpStreamStats;
 
 import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
 import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
@@ -287,8 +297,8 @@ public class StatsUtils {
     JsonObjectBuilder builder = Json.createObjectBuilder();
     double totalRTT = 0;
     double agvRTT = 0;
-    List<List<RTCRTPStreamStats>> inboundStreamStatsList = new ArrayList<>();
-    List<List<RTCRTPStreamStats>> outboundStreamStatsList = new ArrayList<>();
+    List<List<RTCRtpStreamStats>> inboundStreamStatsList = new ArrayList<>();
+    List<List<RTCRtpStreamStats>> outboundStreamStatsList = new ArrayList<>();
     builder.add("Starting Timestamp", timestamp(statArray.get(0).getTimestamp()));
     builder.add("Ending Timestamp", timestamp(statArray.get(statArray.size() - 1).getTimestamp()));
     builder.add("Connected", !statArray.hasNoData());
@@ -304,13 +314,13 @@ public class StatsUtils {
     }
     if (lastRtcStats.get("inbound-rtp") != null) {
 //      builder
-//        .add(StatEnum.TOTAL_INBOUND_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytes("inbound"))
+//        .add(StatEnum.TOTAL_INBOUND_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytesByMedia("inbound"))
 //        .add(StatEnum.TOTAL_INBOUND_AUDIO_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytesByMedia("inbound", "audio"))
 //        .add(StatEnum.TOTAL_INBOUND_VIDEO_BYTES_RECEIVED.toString(), lastRtcStats.getTotalBytesByMedia("inbound", "video"));
     }
     if (lastRtcStats.get("outbound-rtp") != null) {
 //      builder
-//        .add(StatEnum.TOTAL_OUTBOUND_BYTES_SENT.toString(), lastRtcStats.getTotalBytes("outbound"))
+//        .add(StatEnum.TOTAL_OUTBOUND_BYTES_SENT.toString(), lastRtcStats.getTotalBytesByMedia("outbound"))
 //        .add(StatEnum.TOTAL_OUTBOUND_AUDIO_BYTES_SENT.toString(), lastRtcStats.getTotalBytesByMedia("outbound", "audio"))
 //        .add(StatEnum.TOTAL_OUTBOUND_VIDEO_BYTES_SENT.toString(), lastRtcStats.getTotalBytesByMedia("outbound", "video"));
     }
@@ -342,15 +352,15 @@ public class StatsUtils {
   }
   
   
-  private static JsonObject processStreamStats(List<List<RTCRTPStreamStats>> streamStatsList, boolean fullyDetailed) {
+  private static JsonObject processStreamStats(List<List<RTCRtpStreamStats>> streamStatsList, boolean fullyDetailed) {
     JsonObjectBuilder builder = Json.createObjectBuilder();
-    Map<String, List<RTCRTPStreamStats>> audioStreamMap = new HashMap<>();
-    Map<String, List<RTCRTPStreamStats>> videoStreamMap = new HashMap<>();
+    Map<String, List<RTCRtpStreamStats>> audioStreamMap = new HashMap<>();
+    Map<String, List<RTCRtpStreamStats>> videoStreamMap = new HashMap<>();
     
-    for (List<RTCRTPStreamStats> streamStatsArray : streamStatsList) {
-      for (RTCRTPStreamStats streamStats : streamStatsArray) {
+    for (List<RTCRtpStreamStats> streamStatsArray : streamStatsList) {
+      for (RTCRtpStreamStats streamStats : streamStatsArray) {
         String streamId = streamStats.getId();
-        if (streamStats.getMediaType().equals("audio")) {
+        if (streamStats.getKind().equals("audio")) {
           if (!audioStreamMap.keySet().contains(streamId)) {
             audioStreamMap.put(streamId, new ArrayList<>());
           }
@@ -369,14 +379,14 @@ public class StatsUtils {
     return builder.build();
   }
   
-  private static JsonArray transformStreamStatToJson(Map<String, List<RTCRTPStreamStats>> streamStatMap, boolean fullyDetailed) {
+  private static JsonArray transformStreamStatToJson(Map<String, List<RTCRtpStreamStats>> streamStatMap, boolean fullyDetailed) {
     JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
     
     for (String streamId : streamStatMap.keySet()) {
-      List<RTCRTPStreamStats> streamStatsList = streamStatMap.get(streamId);
+      List<RTCRtpStreamStats> streamStatsList = streamStatMap.get(streamId);
       
-      boolean inbound = streamStatsList.get(0).isInbound();
-      boolean audio = streamStatsList.get(0).isAudio();
+      boolean inbound = streamStatsList.get(0) instanceof RTCReceivedRtpStreamStats;
+      boolean audio = streamStatsList.get(0).getKind().equals("audio");
       boolean video = !audio;
       int size = streamStatsList.size();
       int last = size -1;
@@ -390,42 +400,38 @@ public class StatsUtils {
 //          ? StatEnum.TOTAL_BYTES_RECEIVED.toString()
 //          : StatEnum.TOTAL_BYTES_SENT.toString()
 //        , checkNegativeValue(bytes.get(last)));
-            
+
       objectBuilder.add(inbound
           ? StatEnum.RECEIVED_BITRATE.toString()
           : StatEnum.SENT_BITRATE.toString()
         , checkNegativeValue(8 * getDiffEndToStart(bytes)/duration));
   
       List<Double> packets = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.PACKETS, fullyDetailed);
-//      objectBuilder.add(inbound
-//          ? StatEnum.TOTAL_PACKETS_RECEIVED.toString()
-//          : StatEnum.TOTAL_PACKETS_SENT.toString()
-//        , checkNegativeValue(packets.get(last)));
       
       Double packetsReceivedDiff = getDiffEndToStart(packets);
       
-      if (audio) {
-        List<Double> audioLvl = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.AUDIO_LEVEL, fullyDetailed);
-        objectBuilder.add(StatEnum.AVG_AUDIO_LEVEL.toString(), checkNegativeValue(getAverage(audioLvl)));
-      }
-      
+
       if (video) {
         List<Double> frames = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.FRAME, fullyDetailed);
         objectBuilder.add(inbound
           ? StatEnum.TOTAL_FRAME_RECEIVED.toString()
           : StatEnum.TOTAL_FRAME_SENT.toString(), checkNegativeValue(frames.get(last)));
-        
+//        System.out.println((inbound ? "inbound" : "outbound") + "\n" + frames );
         List<Double> framerate = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.FRAME_RATE, fullyDetailed);
-//
+
         objectBuilder.add(StatEnum.AVG_FRAME_RATE.toString(),  checkNegativeValue(1000 * getDiffEndToStart(frames)/duration));
       }
       
       if (inbound) {
+        if (audio) {
+          List<Double> audioLvl = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.AUDIO_LEVEL, fullyDetailed);
+          objectBuilder.add(StatEnum.AVG_AUDIO_LEVEL.toString(), checkNegativeValue(getAverage(audioLvl)));
+        }
         List<Double> packetsLost = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.PACKETS_LOST, fullyDetailed);
-        objectBuilder.add(StatEnum.TOTAL_PACKETS_LOST.toString(), packetsLost.get(last).intValue());
+        objectBuilder.add(StatEnum.TOTAL_PACKETS_LOST.toString(), "" + packetsLost.get(last).intValue());
         Double packetsLostDiff = getDiffEndToStart(packetsLost);
         objectBuilder.add(StatEnum.PACKETS_LOST_PERCENTAGE.toString(), 
-          checkNegativeValue(100 * packetsLostDiff/ (packetsLostDiff + packetsReceivedDiff)));
+          checkNegativeValue((100 * packetsLostDiff/ (packetsLostDiff + packetsReceivedDiff))) + "%");
 //        objectBuilder.add(StatEnum.PACKETS_LOST_CUMULATIVE_PERCENTAGE.toString(),
 //          checkNegativeValue(100 * packetsLost.get(last)/ (packetsLost.get(last) + packets.get(last))));
         
@@ -440,11 +446,12 @@ public class StatsUtils {
   
         if (audio) {
           List<Double> jitter = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.JITTER, fullyDetailed);
-          objectBuilder.add(StatEnum.AVG_JITTER.toString(), checkNegativeValue(getAverage(jitter)));
-          
+          objectBuilder.add(StatEnum.AVG_JITTER.toString(), checkNegativeValue(getAverage(jitter)/1000));
+//          objectBuilder.add(StatEnum.AVG_JITTER.toString(), checkNegativeValue(jitter.get(last)));
+
         } else {
-          List<Double> framerate = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.AVG_FRAME_RATE_DECODED, fullyDetailed);
-          objectBuilder.add(StatEnum.AVG_FRAME_RATE.toString(),  checkNegativeValue(1000 * getDiffEndToStart(framerate)/duration));
+          List<Double> framerate = addStatToJsonBuilder(objectBuilder, streamStatsList, StatEnum.FRAME_RATE, fullyDetailed);
+//          objectBuilder.add(StatEnum.AVG_FRAME_RATE.toString(),  checkNegativeValue(1000 * getDiffEndToStart(framerate)/duration));
 //          objectBuilder.add(StatEnum.AVG_FRAME_RATE_DECODED.toString(),  checkNegativeValue(1000 * getDiffEndToStart(framerate)/duration));
 
           // could be useful someday
@@ -457,7 +464,7 @@ public class StatsUtils {
     return arrayBuilder.build();
   }
   
-  private static List<Double> addStatToJsonBuilder(JsonObjectBuilder objectBuilder, List<RTCRTPStreamStats> streams, StatEnum stat, boolean fullyDetailed) {
+  private static List<Double> addStatToJsonBuilder(JsonObjectBuilder objectBuilder, List<RTCRtpStreamStats> streams, StatEnum stat, boolean fullyDetailed) {
     List<Double> temp = extractStreamTrackStat(streams, stat);
     if (fullyDetailed) {
       objectBuilder.add(stat.toString(), toJsonArray(temp));
@@ -481,77 +488,92 @@ public class StatsUtils {
     return builder.build();
   }
   
-  private static List<Double> extractStreamTrackStat(List<RTCRTPStreamStats> streams, StatEnum stat) {
+  private static List<Double> extractStreamTrackStat(List<RTCRtpStreamStats> streams, StatEnum stat) {
     List<Double> result = new ArrayList<>();
-    for (RTCRTPStreamStats stream : streams) {
+    for (RTCRtpStreamStats stream : streams) {
       switch (stat) {
         case RECEIVED_BITRATE:
         case SENT_BITRATE:
         case BYTES:
-          if (stream.isInbound()) {
-            result.add(stream.getInboundStats().getBytesReceived());
+          if (stream instanceof RTCReceivedRtpStreamStats) {
+            result.add(((RTCReceivedRtpStreamStats)stream).getBytesReceived());
           } else {
-            result.add(stream.getOutboundStats().getBytesSent());
+            if (stream instanceof RTCSentRtpStreamStats) {
+              result.add(((RTCSentRtpStreamStats) stream).getBytesSent());
+            }
           }
           break;
         case PACKETS:
-          if (stream.isInbound()) {
-            result.add(stream.getInboundStats().getPacketsReceived());
+          if (stream instanceof RTCInboundRtpStreamStats) {
+            result.add(((RTCInboundRtpStreamStats)stream).getPacketsReceived());
           } else {
-            result.add(stream.getOutboundStats().getPacketsSent());
+            result.add(((RTCSentRtpStreamStats)stream).getPacketsSent());
           }
           break;
         case PACKETS_LOST:
         case AVG_PACKETS_LOST:
-          result.add(stream.getInboundStats().getPacketsLost());
+          result.add(((RTCReceivedRtpStreamStats)stream).getPacketsLost());
           break;
         case PACKETS_DISCARDED:
-          result.add(stream.getInboundStats().getPacketsDiscarded());
+          result.add(((RTCReceivedRtpStreamStats)stream).getPacketsDiscarded());
           break;
         case JITTER:
         case AVG_JITTER:
-          if (stream.isAudio() && stream.isInbound()) {
-            result.add(stream.getInboundStats().getJitter());
+          if (stream.getKind().equals("audio") && stream instanceof RTCInboundRtpStreamStats) {
+            result.add(((RTCReceivedRtpStreamStats)stream).getJitter());
           }
           break;
         case AUDIO_LEVEL:
         case AVG_AUDIO_LEVEL:
-          if (stream.isAudio()) {
-            result.add(stream.getTrack() == null ? -1.0 : stream.getTrack().getAudioLevel());
+          if (stream.getKind().equals("audio")) {
+            if (stream instanceof RTCInboundRtpStreamStats) {
+              result.add(((RTCInboundRtpStreamStats)stream).getAudioLevel());
+            }
           }
           break;
         case FRAME:
         case TOTAL_FRAME_RECEIVED:
         case TOTAL_FRAME_SENT:
-          if (stream.isVideo()) {
-            if (stream.isInbound()) {
-              result.add(stream.getTrack() == null ? -1.0 : stream.getTrack().getFramesReceived());
+          if (stream.getKind().equals("video")) {
+            if (stream instanceof RTCInboundRtpStreamStats) {
+              result.add(((RTCInboundRtpStreamStats)stream).getFramesReceived() == -1
+                  ? ((RTCInboundRtpStreamStats)stream).getFramesDecoded()
+                  : ((RTCInboundRtpStreamStats)stream).getFramesReceived());
             } else {
-              result.add(stream.getTrack() == null ? -1.0 : stream.getTrack().getFramesSent());
+              result.add(((RTCOutboundRtpStreamStats)stream).getFramesSent() == -1
+                  ? ((RTCOutboundRtpStreamStats)stream).getFramesEncoded()
+                  : ((RTCOutboundRtpStreamStats)stream).getFramesSent());
             }
           }
           break;
         case FRAME_RATE:
-          if (stream.isVideo()) {
-            result.add(stream.getTrack() == null ? -1.0 : stream.getTrack().getFramesPerSecond());
+          if (stream.getKind().equals("video")) {
+            //            todo
+            if (stream instanceof RTCOutboundRtpStreamStats) {
+              result.add(((RTCOutboundRtpStreamStats) stream).getFramesPerSecond());
+            }
           }
           break;
-        case AVG_FRAME_RATE_DECODED:
+//        case AVG_FRAME_RATE_DECODED:
         case FRAME_DECODED:
-          if (stream.isVideo()) {
-            result.add(stream.getInboundStats().getFramesDecoded());
+          if (stream.getKind().equals("video")) {
+            //            todo
+            if (stream instanceof RTCInboundRtpStreamStats) {
+              result.add(((RTCInboundRtpStreamStats)stream).getFramesDecoded());
+            }
           }
           break;
         case FRAME_DROPPED:
-          if (stream.isVideo()) {
-            result.add(stream.getTrack() == null ? -1.0 : stream.getTrack().getFramesDropped());
+          if (stream.getKind().equals("video")) {
+            result.add(((RTCInboundRtpStreamStats)stream).getFramesDropped());
           }
           break;
-        case FRAME_CORRUPTED:
-          if (stream.isVideo()) {
-            result.add(stream.getTrack() == null ? -1.0 : stream.getTrack().getFramesCorrupted());
-          }
-          break;
+          // not applicable
+//        case FRAME_CORRUPTED:
+//          if (stream.isVideo()) {
+//            result.add(stream.getTrack() == null ? -1.0 : stream.getTrack().getFramesCorrupted());
+//          }
+//          break;
         default:
           logger.error("Wrong place to look for :" + stat.toString());
           break;
@@ -565,11 +587,14 @@ public class StatsUtils {
       logger.debug("There seems to be no track available for " + stat + ". " +
         "Please verify that the media track stats are included in the provided stats.");
     }
-    
+
     return result;
   }
   
   private static double getDiffEndToStart(List<Double> values) {
+    if (values.isEmpty()) {
+      return 0;
+    }
     if (values.size() > 1) {
       return values.get(values.size() - 1) - values.get(0);
     } else {

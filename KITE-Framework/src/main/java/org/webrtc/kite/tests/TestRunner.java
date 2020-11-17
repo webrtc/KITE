@@ -68,7 +68,11 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
     setInterval(test.getInterval(id));
     if (client != null) {
       // client is null for JsTestRunner since the webdriver and client are created in JS.
-      initClient();
+      InitClientWebDriverStep initClient = new InitClientWebDriverStep(this, this.id, this.client, this.sessionData);
+      initClient.setStepPhase(this.stepPhase);
+      initClient.processTestStep(this.stepPhase, this.reports.get(stepPhase), this.testConfig.isLoadTest());
+      this.webDriver = initClient.getWebDriver();
+//      initClient();
     }
   }
 
@@ -272,6 +276,12 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   }
 
   @Override
+  public String getPublicIpAddress() {
+    // to be changed
+    return null;
+  }
+
+  @Override
   public boolean isApp() {
     return this.client.isApp();
   }
@@ -326,4 +336,13 @@ public class TestRunner extends ArrayList<TestStep> implements Callable<Object>,
   public Map<String, Object> getSessionData() {
     return sessionData.get(this.webDriver);
   }
+
+  public void setWebDriver(WebDriver webDriver) {
+    this.webDriver = webDriver;
+  }
+
+  public Client getClient() {
+    return client;
+  }
+
 }

@@ -14,33 +14,35 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc.rtpstream;
 
-
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
 import java.util.Map;
-import org.webrtc.kite.stats.rtc.RTCSingleStatObject;
+import javax.json.JsonObjectBuilder;
 
 /**
- * RTCCertificateStats, with attributes fingerprint,
- * fingerprintAlgorithm, base64Certificate, issuerCertificateId
+ * Represent RTCRtpStreamStats, outbound and inbound, sent and received.
  */
-public class SDP extends RTCSingleStatObject {
+public class RTCRemoteOutboundRtpStreamStats extends RTCOutboundRtpStreamStats {
+  protected final String localId;
+  protected final String remoteTimestamp;
 
-  private final String sdp;
-  private final String type;
 
-  public SDP(Map statObject) {
-    super(null);
-    this.type = getStatByName( "type");
-    this.sdp = getStatByName( "sdp");
+
+
+  public RTCRemoteOutboundRtpStreamStats(Map statObject) {
+    super(statObject);
+    this.localId = getStatByName( "localId");
+    this.remoteTimestamp = getStatByName( "remoteTimestamp");
   }
+
+
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    return Json.createObjectBuilder()
-      .add("type", this.type)
-      .add("sdp", this.sdp);
+    return super.getJsonObjectBuilder()
+        .add("localId", this.localId)
+        .add("remoteTimestamp", this.remoteTimestamp);
   }
+
+
 }

@@ -117,6 +117,8 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
     this.kind = this.app != null ? "app" : "browser";
     if (jsonObject.get("networkProfile") != null) {
       this.networkProfile = new NetworkProfile(jsonObject.getJsonObject("networkProfile"));
+    } else {
+      this.networkProfile = new NetworkProfile();
     }
   }
 
@@ -243,11 +245,12 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
     }
     Client other = (Client) obj;
 
-    if ((this.networkProfile == null && other.networkProfile != null)
-      || (this.networkProfile != null && other.networkProfile == null)) {
-      return false;
+    if (this.networkProfile == null)  {
+      if (other.networkProfile != null) {
+        return false;
+      }
     } else {
-      if (this.networkProfile != null) {
+      if (other.networkProfile != null) {
         if (!this.networkProfile.getName().equals(other.networkProfile.getName())) {
           return false;
         }
@@ -515,7 +518,9 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
     }
     try {
       this.webDriver = WebDriverFactory.createWebDriver(this, null, null, this.getPaas().getGridId());
-      addToSessionMap(sessionData);
+      if (sessionData!= null) {
+        addToSessionMap(sessionData);
+      }
       return this.webDriver;
     } catch (Exception e) {
       logger.error(ReportUtils.getStackTrace(e));
@@ -623,5 +628,9 @@ public class Client extends KiteEntity implements CommandMaker, JsonBuilder, Sam
       return none;
     }
     return networkProfile;
+  }
+
+  public void removeWebdriver() {
+    this.webDriver = null;
   }
 }

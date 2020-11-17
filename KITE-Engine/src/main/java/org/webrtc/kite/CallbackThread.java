@@ -18,6 +18,11 @@ package org.webrtc.kite;
 
 import io.cosmosoftware.kite.report.KiteLogger;
 import java.util.HashMap;
+
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPClientConfig;
+import org.apache.commons.net.ftp.FTPReply;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.FileEntity;
@@ -39,64 +44,64 @@ import java.nio.file.Files;
 public class CallbackThread extends Thread {
   
   private static final KiteLogger logger = KiteLogger.getLogger(CallbackThread.class.getName());
-  
+
   private String callbackURL;
+  private int callbackPort;
+  private String username;
+  private String password;
   private File file;
-  private HashMap<String,String> parameters = new HashMap<>();
-  
+  private boolean uploadComplete;
+
   /**
    * Constructs a new CallBackThread object with the given callbackURL and JsonObject.
    *
    * @param callbackURL a string representation of the callback URL.
    * @param file  File
    */
-  public CallbackThread(String callbackURL, File file) {
+  public CallbackThread(String callbackURL, int callbackPort, String username, String password, File file) {
     this.callbackURL = callbackURL;
     this.file = file;
-    
+    this.callbackPort = callbackPort;
+    this.username = username;
+    this.password = password;
   }
   
   /**
    * Posts result to the callback URL.
    */
   public void postResult() throws IOException {
-    String charset = "UTF-8";
-    String boundary = Long.toHexString(System.currentTimeMillis()); // Just generate some unique random value.
-    String CRLF = "\r\n"; // Line separator required by multipart/form-data.
-
-    URLConnection connection = new URL(this.callbackURL + this.getParameterString()).openConnection();
-    logger.debug("Sending result to callback url: " + connection);
-    connection.setDoOutput(true);
-    connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-
-    try (
-            OutputStream output = connection.getOutputStream();
-            PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, charset), true);
-    ) {
-      // Send binary file.
-      writer.append("--" + boundary).append(CRLF);
-      writer.append("Content-Disposition: form-data; name=\"binaryFile\"; filename=\"" + this.file.getName() + "\"").append(CRLF);
-      writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(this.file.getName())).append(CRLF);
-      writer.append("Content-Transfer-Encoding: binary").append(CRLF);
-      writer.append(CRLF).flush();
-      Files.copy(this.file.toPath(), output);
-      output.flush(); // Important before continuing with writer!
-      writer.append(CRLF).flush(); // CRLF is important! It indicates end of boundary.
-
-      // End of multipart/form-data.
-      writer.append("--" + boundary + "--").append(CRLF).flush();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
-// Request is lazily fired whenever you need to obtain information about response.
-    int responseCode = 0;
+    FTPClient ftp = new FTPClient();
+    boolean error = false;
     try {
-      responseCode = ((HttpURLConnection) connection).getResponseCode();
-    } catch (IOException e) {
+      int reply;
+      ftp.connect(callbackURL, callbackPort);
+      ftp.login(username, password);
+      ftp.enterLocalPassiveMode();
+      ftp.setFileType(FTP.BINARY_FILE_TYPE);
+      logger.info("Connected to " + callbackURL + ".");
+      reply = ftp.getReplyCode();
+      if(!FTPReply.isPositiveCompletion(reply)) {
+        ftp.disconnect();
+        logger.error("FTP server refused connection.");
+      }
+      FileInputStream inputStream = new FileInputStream(file);
+      this.uploadComplete = ftp.storeFile(file.getName(), inputStream);
+      if(this.uploadComplete) {
+        inputStream.close();
+        this.file.delete();
+      }
+      ftp.logout();
+    } catch(IOException e) {
       e.printStackTrace();
+    } finally {
+      if(ftp.isConnected()) {
+        try {
+          ftp.disconnect();
+        } catch(IOException ioe) {
+          // do nothing
+        }
+      }
     }
-    System.out.println(responseCode); // Should be 200
   }
   
   @Override
@@ -108,20 +113,8 @@ public class CallbackThread extends Thread {
     }
   }
 
-  private String getParameterString() {
-    String res = "?";
-    if (this.parameters.isEmpty()) {
-      return "";
-    }
-    for (String key : parameters.keySet()) {
-      res += key + "=" + parameters.get(key) + "&";
-    }
-    // to remove the last &
-    return res.substring(0,res.length() - 1);
+  public boolean isUploadComplete() {
+    return this.uploadComplete;
   }
 
-  public void addParameter(String key, String value) {
-    this.parameters.put(key, value);
-  }
-  
 }

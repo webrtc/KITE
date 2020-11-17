@@ -2,8 +2,9 @@
  * Copyright (C) CoSMo Software Consulting Pte. Ltd. - All Rights Reserved
  */
 
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc;
 
+import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
@@ -11,10 +12,19 @@ import java.util.Map;
 /**
  * Parent class for any WebRTC stats object.
  */
-public abstract class RTCSingleStatObject {
-  private String id;
+public class RTCSingleStatObject {
+  protected String id;
   protected String timestamp;
-  
+  protected final Map statObject;
+
+  public RTCSingleStatObject(Map statObject) {
+    this.statObject = statObject;
+    if (statObject != null) {
+      this.setId(getStatByName("id"));
+      this.timestamp = getStatByName("timestamp");
+    }
+  }
+
   /**
    * Gets id.
    *
@@ -23,11 +33,11 @@ public abstract class RTCSingleStatObject {
   public String getId() {
     return id;
   }
-  
+
   public long getTimestamp() {
     return timestamp == null ? 0 : Long.parseLong(this.timestamp);
   }
- 
+
   /**
    * Sets id.
    *
@@ -36,7 +46,7 @@ public abstract class RTCSingleStatObject {
   public void setId(String id) {
     this.id = id;
   }
-  
+
   /**
    * Returns a JsonObject representation.
    *
@@ -45,24 +55,28 @@ public abstract class RTCSingleStatObject {
   public JsonObject getJsonObject() {
     return this.getJsonObjectBuilder().build();
   }
-  
+
   /**
    * Returns JsonObjectBuilder.
    *
    * @return JsonObjectBuilder json object builder
    */
-  public abstract JsonObjectBuilder getJsonObjectBuilder();
-  
+  public JsonObjectBuilder getJsonObjectBuilder() {
+    return Json.createObjectBuilder()
+        .add("id", this.id)
+        .add("timestamp", this.timestamp);
+  }
+
+
   /**
    * Obtain a value of a key in the data map if not null
    *
-   * @param statObject data Map
    * @param statName   name of the key
    *
    * @return true if both the provided objects are not null.
    */
-  protected String getStatByName(Map statObject, String statName) {
-    String str = statObject.get(statName) != null ? statObject.get(statName).toString() : "NA";
+  protected String getStatByName( String statName) {
+    String str = this.statObject.get(statName) != null ? statObject.get(statName).toString() : "NA";
     if ("timestamp".equals(statName)) {
       str = formatTimestamp(str);
     }
@@ -92,18 +106,18 @@ public abstract class RTCSingleStatObject {
     try {
       return Double.parseDouble(string);
     } catch (Exception e) {
-      return 0;
+      return -1.0;
     }
   }
-  
+
   public boolean isEmpty() {
     return this instanceof EmptyStatObject;
   }
-  
+
   protected int parseInt(String string) {
     return (int) parseDouble(string);
   }
-  
+
   @Override
   public String toString() {
     return this.getJsonObject().toString();

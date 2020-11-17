@@ -3,6 +3,7 @@ package org.webrtc.kite.wpt.steps;
 import io.cosmosoftware.kite.interfaces.Runner;
 import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.steps.TestStep;
+import org.webrtc.kite.tests.TestRunner;
 import org.webrtc.kite.wpt.pages.WPTDirPage;
 
 import java.util.ArrayList;
@@ -13,16 +14,15 @@ import static io.cosmosoftware.kite.util.TestUtils.verifyPathFormat;
 public class RetrieveTestStep extends TestStep {
   private final String sercureURL;
   private final String url;
-  private final WPTDirPage wptDirPage;
-  private final Runner runner;
+  private WPTDirPage wptDirPage;
+  private final TestRunner runner;
   List<String> testUrlList;
 
   public RetrieveTestStep(Runner runner, String url, String sercureURL, List<String> testUrlList) {
     super(runner);
     this.url = verifyPathFormat(url);
-    this.runner = runner;
+    this.runner = (TestRunner) runner;
     this.sercureURL = verifyPathFormat(sercureURL);
-    this.wptDirPage = new WPTDirPage(runner, url);
     this.testUrlList = testUrlList;
   }
 
@@ -43,8 +43,10 @@ public class RetrieveTestStep extends TestStep {
 
   @Override
   protected void step() {
+    this.webDriver = runner.getWebDriver();
+    this.wptDirPage = new WPTDirPage(runner, url);
     List<String> temp = new ArrayList<>();
-    wptDirPage.openPage();
+    this.wptDirPage.openPage();
     for (String testName : wptDirPage.getTestList()) {
       if (isHttps(testName)) {
         temp.add(sercureURL + testName);

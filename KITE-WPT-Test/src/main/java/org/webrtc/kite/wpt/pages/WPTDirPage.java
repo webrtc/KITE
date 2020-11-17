@@ -72,6 +72,9 @@ public class WPTDirPage extends BasePage {
     List<String> testList = new ArrayList<>();
     for (WebElement file : files) {
       String fileName = fixTestName(file.getText());
+      if (fileName.endsWith("RTCDataChannel-binaryType.window.js")) {
+        fileName = fileName.replace("js", "html");
+      }
       if (testURLIsValid(fileName)) {
         testList.add(fileName);
       }

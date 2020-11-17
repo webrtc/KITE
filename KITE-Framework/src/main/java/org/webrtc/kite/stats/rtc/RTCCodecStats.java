@@ -14,34 +14,33 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc;
 
 
-import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
 
 /**
- * RTCCodecStats, with attributes payloadType, codec, clockRate, channels, sdpFmtpLine
+ * RTCCodecStats, with attributes payloadType, codecType, clockRate, channels, sdpFmtpLine
  */
 public class RTCCodecStats extends RTCSingleStatObject {
 
-  private final String channels;
-  private final String clockRate;
-  private final String codec;
-  private final String mimeType;
   private final String payloadType;
+  private final String codecType;
+  private final String mimeType;
+  private final String clockRate;
+  private final String channels;
   private final String sdpFmtpLine;
 
 
   public RTCCodecStats(Map statObject) {
-    this.setId(getStatByName(statObject, "id"));
-    this.payloadType = getStatByName(statObject, "payloadType");
-    this.clockRate = getStatByName(statObject, "clockRate");
-    this.channels = getStatByName(statObject, "channels");
-    this.codec = getStatByName(statObject, "codec");
-    this.mimeType = getStatByName(statObject, "mimeType");
-    this.sdpFmtpLine = getStatByName(statObject, "sdpFmtpLine");
+    super(statObject);
+    this.payloadType = getStatByName( "payloadType");
+    this.clockRate = getStatByName( "clockRate");
+    this.channels = getStatByName( "channels");
+    this.codecType = getStatByName( "codecType");
+    this.mimeType = getStatByName( "mimeType");
+    this.sdpFmtpLine = getStatByName( "sdpFmtpLine");
   }
   
   public String getChannels() {
@@ -52,8 +51,8 @@ public class RTCCodecStats extends RTCSingleStatObject {
     return clockRate;
   }
   
-  public String getCodec() {
-    return codec;
+  public String getCodecType() {
+    return codecType;
   }
   
   public String getPayloadType() {
@@ -70,11 +69,11 @@ public class RTCCodecStats extends RTCSingleStatObject {
 
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    return Json.createObjectBuilder()
+    return super.getJsonObjectBuilder()
       .add("payloadType", this.payloadType)
       .add("clockRate", this.clockRate)
       .add("channels", this.channels)
-      .add("codec", this.codec)
+      .add("codecType", this.codecType)
       .add("mimeType", this.mimeType)
       .add("sdpFmtpLine", this.sdpFmtpLine);
   }

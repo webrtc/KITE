@@ -186,17 +186,8 @@ public class Engine {
           }
 
           if(testConfig.getCallbackUrl() != null) {
-            String desFile = testConfig.getReporter().getReportPath() + "../" + System.currentTimeMillis() + ".zip";
-            ReportUtils.zipFile(testConfig.getReporter().getReportPath(), desFile);
-            File zipToSend = new File(desFile);
-            if (zipToSend.exists()) {
-              CallbackThread callbackThread = new CallbackThread(testConfig.getCallbackUrl(), zipToSend);
-              callbackThread.addParameter("tagName", testConfig.getTagName() == null
-                  ? String.valueOf(System.currentTimeMillis())
-                  : testConfig.getTagName());
-              callbackThread.run();
-              zipToSend.delete();
-            }
+            upload(testConfig.getReporter().getReportPath() + "../" + testConfig.getName() + "-allure." + System.currentTimeMillis() + ".zip",
+                    testConfig.getReporter().getReportPath(), testConfig.getCallbackUrl(), testConfig.getCallbackPort(), testConfig.getCallbackUsername(), testConfig.getCallbackPassword());
           }
 
         } catch (Exception e) {
@@ -229,6 +220,17 @@ public class Engine {
       }
     }
     return files;
+  }
+
+  public static boolean upload(String desFile, String sourcePath, String callbackUrl, int callbackPort, String username, String password) {
+    String fileName = ReportUtils.zipFile(sourcePath, desFile, true);
+    File zipToSend = new File(fileName);
+    if (zipToSend.exists()) {
+      CallbackThread callbackThread = new CallbackThread(callbackUrl, callbackPort, username, password, zipToSend);
+      callbackThread.run();
+      return callbackThread.isUploadComplete();
+    }
+    return false;
   }
 
   /**
@@ -399,11 +401,11 @@ public class Engine {
 //      logger.info("looking for paas with spec " + client.getBrowserSpecs());
 //      if (paas.getSpecList().contains(client.getBrowserSpecs())) {
         logger.info("looking for paas with profile " + client.getNetworkProfile().getName());
-        if (paas.getNetworkProfile().getName().equals(client.getNetworkProfile().getName())) {
-          if (paas.getAvailableSlots() > 0) {
+//        if (paas.getNetworkProfile().getName().equals(client.getNetworkProfile().getName())) {
+//          if (paas.getAvailableSlots() > 0) {
             res.add(paas);
-          }
-        }
+//          }
+//        }
 //      }
     }
     return new CircularLinkedList<Paas>(res);

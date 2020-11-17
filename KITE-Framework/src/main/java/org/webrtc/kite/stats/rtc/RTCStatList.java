@@ -1,4 +1,4 @@
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc;
 
 import java.util.HashMap;
 import java.util.LinkedList;

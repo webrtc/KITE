@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc;
 
 
-import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
 
@@ -26,23 +25,20 @@ import java.util.Map;
  */
 public class RTCTransportStats extends RTCSingleStatObject {
 
-  private final String bytesReceived;
   private final String bytesSent;
+  private final String bytesReceived;
+  private final String selectedCandidatePairId;
   private final String localCertificateId;
   private final String remoteCertificateId;
-  private final String rtcpTransportStatsId;
-  private final String selectedCandidatePairId;
 
 
   public RTCTransportStats(Map statObject) {
-    this.setId(getStatByName(statObject, "id"));
-    this.rtcpTransportStatsId = getStatByName(statObject, "rtcpTransportStatsId");
-    this.selectedCandidatePairId = getStatByName(statObject, "selectedCandidatePairId");
-    this.localCertificateId = getStatByName(statObject, "localCertificateId");
-    this.remoteCertificateId = getStatByName(statObject, "remoteCertificateId");
-    this.bytesSent = getStatByName(statObject, "bytesSent");
-    this.bytesReceived = getStatByName(statObject, "bytesReceived");
-    this.timestamp = getStatByName(statObject, "timestamp");
+    super(statObject);
+    this.bytesSent = getStatByName( "bytesSent");
+    this.bytesReceived = getStatByName( "bytesReceived");
+    this.selectedCandidatePairId = getStatByName( "selectedCandidatePairId");
+    this.localCertificateId = getStatByName( "localCertificateId");
+    this.remoteCertificateId = getStatByName( "remoteCertificateId");
   }
   
   public String getBytesReceived() {
@@ -61,23 +57,17 @@ public class RTCTransportStats extends RTCSingleStatObject {
     return remoteCertificateId;
   }
   
-  public String getRtcpTransportStatsId() {
-    return rtcpTransportStatsId;
-  }
-  
   public String getSelectedCandidatePairId() {
     return selectedCandidatePairId;
   }
   
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    return Json.createObjectBuilder()
-      .add("rtcpTransportStatsId", this.rtcpTransportStatsId)
-      .add("selectedCandidatePairId", this.selectedCandidatePairId)
-      .add("localCertificateId", this.localCertificateId)
-      .add("remoteCertificateId", this.remoteCertificateId)
-      .add("bytesSent", this.bytesSent)
-      .add("bytesReceived", this.bytesReceived)
-      .add("timestamp", this.timestamp);
+    return super.getJsonObjectBuilder()
+        .add("bytesSent", this.bytesSent)
+        .add("bytesReceived", this.bytesReceived)
+        .add("selectedCandidatePairId", this.selectedCandidatePairId)
+        .add("localCertificateId", this.localCertificateId)
+        .add("remoteCertificateId", this.remoteCertificateId);
   }
 }

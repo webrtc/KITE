@@ -137,8 +137,13 @@ public class WebDriverFactory {
         break;
       case "safari":
         SafariOptions options = new SafariOptions();
-        options.setUseTechnologyPreview(client.getCapability().isTechnologyPreview());
         capabilities.setCapability(SafariOptions.CAPABILITY, options);
+        break;
+      case "Safari Technology Preview":
+        SafariOptions TPoptions = new SafariOptions();
+        TPoptions.setCapability(CapabilityType.BROWSER_NAME, specs.getBrowserName());
+        TPoptions.setUseTechnologyPreview(true);
+        capabilities.setCapability(SafariOptions.CAPABILITY, TPoptions);
         break;
       default:
         capabilities.setCapability(CapabilityType.BROWSER_NAME, specs.getBrowserName());
@@ -311,6 +316,9 @@ public class WebDriverFactory {
       }
     }
 
+    if (specs.getPlatform().equals(Platform.ANDROID)) {
+      return chromeOptions;
+    }
     // Create an Hashmap to edit user profile
     Map<String, Object> prefs = new HashMap<String, Object>();
     // Allow access to camera & micro
@@ -321,9 +329,6 @@ public class WebDriverFactory {
     chromeOptions.setExperimentalOption("prefs", prefs);
 
 
-    if (specs.getPlatform().equals(Platform.ANDROID)) {
-      return chromeOptions;
-    }
 
     chromeOptions.addArguments("auto-select-desktop-capture-source=Entire screen");
     if (! "electron".equals(specs.getVersion())) {
