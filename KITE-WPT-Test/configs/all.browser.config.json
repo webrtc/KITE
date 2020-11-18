@@ -12,21 +12,24 @@
     {
       "name": "Web Platform Test %ts",
       "tupleSize": 1,
-      "noOfThreads": 5,
+      "noOfThreads": 6,
       "testImpl": "org.webrtc.kite.wpt.WPTTest",
       "payload": {
         "report": true,
-        "revision": "aab8bf00bd40f392c06b88f8afd03a8b03691099",
+        "revision": "75a04240a669feafba02302fdcf8b3d1ad1c2790",
         "reportStyle": 2,
-        "securedURL": "https://w3c-test.org/",
-        "nonSecuredURL": "http://w3c-test.org/",
+        "securedURL": "https://wpt.live/",
+        "nonSecuredURL": "http://wpt.live/",
         "tests": [
           "webrtc",
+          "webrtc-extensions",
           "webrtc-identity",
-          "webrtc-quic",
+          "webrtc-insertable-streams",
+          "webrtc-priority",
           "webrtc-stats",
           "webrtc-svc",
           "media-capabilities",
+          "media-feeds",
           "media-playback-quality",
           "media-source",
           "mediacapture-depth",
@@ -43,63 +46,43 @@
     {
       "browserName": "chrome",
       "platform": "WINDOWS",
-      "version": "77"
+      "version": "86"
     },
     {
       "browserName": "chrome",
       "platform": "MAC",
-      "version": "77"
+      "version": "86"
     },
     {
       "browserName": "chrome",
-      "platform": "WINDOWS",
-      "version": "79"
-    },
-    {
-      "browserName": "chrome",
-      "platform": "MAC",
-      "version": "79"
-    },
-    {
-      "browserName": "firefox",
-      "platform": "MAC",
-      "version": "71"
+      "platform": "LINUX",
+      "version": "86"
     },
     {
       "browserName": "firefox",
       "platform": "WINDOWS",
-      "version": "71"
+      "version": "81"
     },
     {
       "browserName": "firefox",
       "platform": "MAC",
-      "version": "69"
+      "version": "81"
     },
     {
       "browserName": "firefox",
-      "platform": "WINDOWS",
-      "version": "69"
+      "platform": "LINUX",
+      "version": "81"
     },
     {
       "browserName": "safari",
       "platform": "MAC",
-      "version": "12"
+      "version": "14"
     },
     {
-      "browserName": "chrome",
-      "version": "ANDROID 77",
-      "platform": "ANDROID",
-      "headless": false,
-      "exclude": true
-    },
-    {
-      "browserName": "safari",
-      "version": "12",
-      "platform": "IOS",
-      "platformName": "iOS",
-      "platformVersion": "12.4.1",
-      "headless": false,
-      "exclude": false
+      "browserName": "Safari Technology Preview",
+      "platform": "MAC",
+      "version": "14.1",
+      "technologyPreview": true
     }
   ]
 }

@@ -1,8 +1,7 @@
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc;
 
 import io.cosmosoftware.kite.interfaces.JsonBuilder;
 
-import java.util.HashMap;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -11,6 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import org.webrtc.kite.stats.rtc.msource.RTCAudioSourceStats;
+import org.webrtc.kite.stats.rtc.msource.RTCMediaSourceStats;
+import org.webrtc.kite.stats.rtc.msource.RTCVideoSourceStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCInboundRtpStreamStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCOutboundRtpStreamStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCReceivedRtpStreamStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCRemoteInboundRtpStreamStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCRemoteOutboundRtpStreamStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCRtpStreamStats;
+import org.webrtc.kite.stats.rtc.rtpstream.RTCSentRtpStreamStats;
 
 public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> implements JsonBuilder {
   
@@ -41,19 +50,32 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
                 break;
               }
               case "track": {
-                statObject = new RTCMediaStreamTrackStats(statMap);
+                String kind = (String) statMap.get("kind");
+                if (kind.equals("video")) {
+                  statObject = new RTCVideoSourceStats(statMap);
+                } else {
+                  statObject = new RTCAudioSourceStats(statMap);
+                }
                 break;
               }
-              case "stream": {
-                statObject = new RTCMediaStreamStats(statMap);
-                break;
-              }
+//              case "stream": {
+//                statObject = new RTCMediaSourceStats(statMap);
+//                break;
+//              }
               case "inbound-rtp": {
-                statObject = new RTCRTPStreamStats(statMap, true);
+                statObject = new RTCInboundRtpStreamStats(statMap);
+                break;
+              }
+              case "remote-inbound-rtp": {
+                statObject = new RTCRemoteInboundRtpStreamStats(statMap);
                 break;
               }
               case "outbound-rtp": {
-                statObject = new RTCRTPStreamStats(statMap, false);
+                statObject = new RTCOutboundRtpStreamStats(statMap);
+                break;
+              }
+              case "remote-outbound-rtp": {
+                statObject = new RTCRemoteOutboundRtpStreamStats(statMap);
                 break;
               }
               case "peer-connection": {
@@ -86,21 +108,6 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
           }
         }
       }
-      
-      // organize track to corresponding stream
-      List<RTCRTPStreamStats> streams = new ArrayList<>();
-      streams.addAll(this.getStreamsStats("inbound"));
-      streams.addAll(this.getStreamsStats("outbound"));
-      for (RTCRTPStreamStats stream : streams) {
-        if (this.get("track") != null) {
-          for (int index = 0; index < this.get("track").size(); index++) {
-            RTCMediaStreamTrackStats track = (RTCMediaStreamTrackStats) this.get("track").get(index);
-            if (track.getId().equals(stream.getTrackId())) {
-              stream.setTrack(track);
-            }
-          }
-        }
-      }
     }
   }
   
@@ -125,7 +132,7 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
   public String getRemoteIP() {
     if (this.get("remote-candidate") != null) {
       for (RTCSingleStatObject statObject : this.get("remote-candidate")) {
-        return ((RTCIceCandidateStats) statObject).getIp();
+        return ((RTCIceCandidateStats) statObject).getAddress();
       }
     }
     return "no remote-candidate";
@@ -150,14 +157,20 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
         }
       }
     }
-    return new EmptyStatObject();
+    return new EmptyStatObject(null);
   }
   
-  public List<RTCRTPStreamStats> getStreamsStats(String boundDirection) {
-    List<RTCRTPStreamStats> result = new ArrayList<>();
+  public List<RTCRtpStreamStats> getStreamsStats(String boundDirection) {
+    List<RTCRtpStreamStats> result = new ArrayList<>();
     if (this.get(boundDirection + "-rtp") != null) {
       for (RTCSingleStatObject statObject : this.get(boundDirection + "-rtp")) {
-        result.add((RTCRTPStreamStats) statObject);
+        result.add((RTCRtpStreamStats) statObject);
+      }
+    }
+    if (this.get("remote-" + boundDirection + "-rtp") != null) {
+
+      for (RTCSingleStatObject statObject : this.get("remote-" + boundDirection + "-rtp")) {
+        result.add((RTCRtpStreamStats) statObject);
       }
     }
     return result;
@@ -166,40 +179,48 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
   public String getPcName() {
     return pcName;
   }
-  
-  public int getTotalBytes(String boundDirection) {
-    int total = 0;
-    if (this.get(boundDirection + "-rtp") != null) {
-      for (RTCSingleStatObject statObject : this.get(boundDirection + "-rtp")) {
-        if (boundDirection.equals("inbound")) {
-          total += ((RTCRTPStreamStats) statObject).getInboundStats().getBytesReceived();
-        } else {
-          total += ((RTCRTPStreamStats) statObject).getOutboundStats().getBytesSent();
-        }
-      }
-    }
-    return total;
-  }
-  
-  
+
   public int getTotalBytesByMedia(String boundDirection, String media) {
     int total = 0;
     if (this.get(boundDirection + "-rtp") != null) {
-      for (RTCSingleStatObject statObject : this.get(boundDirection + "-rtp")) {
-        if (((RTCRTPStreamStats) statObject).getMediaType().equals(media)) {
-          if (boundDirection.equals("inbound")) {
-            total += ((RTCRTPStreamStats) statObject).getInboundStats().getBytesReceived();
-          } else {
-            total += ((RTCRTPStreamStats) statObject).getOutboundStats().getBytesSent();
+      if (boundDirection.equals("inbound")) {
+        for (RTCSingleStatObject statObject : this.get("remote -" + boundDirection + "-rtp")) {
+          if (((RTCRemoteInboundRtpStreamStats) statObject).getKind().equals(media)) {
+            total += ((RTCRemoteInboundRtpStreamStats) statObject).getBytesReceived();
+          }
+        }
+      } else {
+        for (RTCSingleStatObject statObject : this.get(boundDirection + "-rtp")) {
+          if (((RTCOutboundRtpStreamStats) statObject).getKind().equals(media)) {
+            total += ((RTCOutboundRtpStreamStats) statObject).getBytesSent();
           }
         }
       }
     }
     return total;
   }
-  
-  
-  
+
+  public int getTotalFrames(String boundDirection) {
+    int total = 0;
+    if (this.get(boundDirection + "-rtp") != null) {
+      if (boundDirection.equals("inbound")) {
+        for (RTCSingleStatObject statObject : this.get(boundDirection + "-rtp")) {
+          if (((RTCInboundRtpStreamStats) statObject).getKind().equals("video")) {
+            total += ((RTCInboundRtpStreamStats) statObject).getFramesReceived();
+          }
+        }
+      } else {
+        for (RTCSingleStatObject statObject : this.get(boundDirection + "-rtp")) {
+          if (((RTCOutboundRtpStreamStats) statObject).getKind().equals("video")) {
+            total += ((RTCOutboundRtpStreamStats) statObject).getFramesSent();
+          }
+        }
+      }
+    }
+    return total;
+  }
+
+
   @Override
   public String toString() {
     return toJson().toString();

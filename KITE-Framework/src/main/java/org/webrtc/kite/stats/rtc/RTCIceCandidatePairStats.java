@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc;
 
 
-import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
 
@@ -27,31 +26,27 @@ import java.util.Map;
  */
 public class RTCIceCandidatePairStats extends RTCSingleStatObject {
 
-  private final String bytesReceived;
-  private final String bytesSent;
-  private final String currentRoundTripTime;
   private final String localCandidateId;
-  private final String nominated;
-  private final String priority;
   private final String remoteCandidateId;
   private final String state;
-
+  private final String priority;
+  private final String nominated;
+  private final String bytesSent;
+  private final String bytesReceived;
+  private final String currentRoundTripTime;
   private final String totalRoundTripTime;
-  private final String transportId;
 
   public RTCIceCandidatePairStats(Map statObject) {
-    this.setId(getStatByName(statObject, "id"));
-    this.transportId = getStatByName(statObject, "transportId");
-    this.localCandidateId = getStatByName(statObject, "localCandidateId");
-    this.remoteCandidateId = getStatByName(statObject, "remoteCandidateId");
-    this.state = getStatByName(statObject, "state");
-    this.priority = getStatByName(statObject, "priority");
-    this.nominated = getStatByName(statObject, "nominated");
-    this.bytesSent = getStatByName(statObject, "bytesSent");
-    this.bytesReceived = getStatByName(statObject, "bytesReceived");
-    this.totalRoundTripTime = getStatByName(statObject, "totalRoundTripTime");
-    this.currentRoundTripTime = getStatByName(statObject, "currentRoundTripTime");
-    this.timestamp = getStatByName(statObject, "timestamp");
+    super(statObject);
+    this.localCandidateId = getStatByName( "localCandidateId");
+    this.remoteCandidateId = getStatByName( "remoteCandidateId");
+    this.state = getStatByName( "state");
+    this.priority = getStatByName( "priority");
+    this.nominated = getStatByName( "nominated");
+    this.bytesSent = getStatByName( "bytesSent");
+    this.bytesReceived = getStatByName( "bytesReceived");
+    this.totalRoundTripTime = getStatByName( "totalRoundTripTime");
+    this.currentRoundTripTime = getStatByName( "currentRoundTripTime");
   }
   
   public double getBytesReceived() {
@@ -90,14 +85,10 @@ public class RTCIceCandidatePairStats extends RTCSingleStatObject {
     return 1000*parseDouble(totalRoundTripTime);
   }
   
-  public String getTransportId() {
-    return transportId;
-  }
-  
+
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    return Json.createObjectBuilder()
-      .add("transportId", this.transportId)
+    return super.getJsonObjectBuilder()
       .add("localCandidateId", this.localCandidateId)
       .add("remoteCandidateId", this.remoteCandidateId)
       .add("state", this.state)
@@ -106,7 +97,6 @@ public class RTCIceCandidatePairStats extends RTCSingleStatObject {
       .add("bytesSent", this.bytesSent)
       .add("currentRoundTripTime", this.currentRoundTripTime)
       .add("totalRoundTripTime", this.totalRoundTripTime)
-      .add("bytesReceived", this.bytesReceived)
-      .add("timestamp", this.timestamp);
+      .add("bytesReceived", this.bytesReceived);
   }
 }

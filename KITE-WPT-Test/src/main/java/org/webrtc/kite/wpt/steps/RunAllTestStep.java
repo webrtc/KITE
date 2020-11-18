@@ -5,12 +5,16 @@ import io.cosmosoftware.kite.interfaces.Runner;
 import io.cosmosoftware.kite.report.*;
 import io.cosmosoftware.kite.steps.StepPhase;
 import io.cosmosoftware.kite.steps.TestStep;
+import java.util.ArrayList;
+import org.webrtc.kite.config.client.Client;
+import org.webrtc.kite.tests.TestRunner;
 import org.webrtc.kite.wpt.Result;
 import org.webrtc.kite.wpt.RunInfo;
 import org.webrtc.kite.wpt.SubTest;
 import org.webrtc.kite.wpt.TestSummary;
 
 import java.util.List;
+import org.webrtc.kite.wpt.pages.WPTTestPage;
 
 import static io.cosmosoftware.kite.util.ReportUtils.timestamp;
 
@@ -19,7 +23,7 @@ public class RunAllTestStep extends TestStep {
   private final String testCaseName;
   private final String testName;
   private final List<String> urlList;
-  private final Runner runner;
+  private final TestRunner runner;
   private final int reportStyle;
   private TestSummary testSummary = new TestSummary();
 
@@ -31,12 +35,14 @@ public class RunAllTestStep extends TestStep {
       String testCaseName,
       int reportStyle) {
     super(runner);
-    this.testCaseName = testCaseName.split(" ")[0];
+//    this.testCaseName = testCaseName.split(" ")[0];
+    this.testCaseName = testCaseName;
     this.testName = testName;
     this.urlList = urlList;
     this.revision = revision;
-    this.runner = runner;
+    this.runner = (TestRunner) runner;
     this.reportStyle = reportStyle;
+    this.setOptional(true);
   }
 
   @Override
@@ -52,7 +58,7 @@ public class RunAllTestStep extends TestStep {
   private RunInfo getRunInfo() throws KiteTestException {
     try {
       RunInfo info = new RunInfo(this.revision);
-      info.getInfoFromWebDriver(this.webDriver);
+      info.getInfoFromWebDriver(this.runner.getWebDriver());
       logger.info("Run information: " + info.toString());
       return info;
     } catch (Exception e) {
@@ -69,29 +75,47 @@ public class RunAllTestStep extends TestStep {
           Status.FAILED);
     }
     int total = 0;
+    int success = 0;
     Container testSuite = new Container(testName);
     testSuite.setParentSuite(this.report.getName() + "-" + this.revision);
-    testSuite.setReporter(this.reporter);
-
+    List<AllureTestReport> testReports = new ArrayList<>();
     for (int index = 0; index < urlList.size(); index++) {
       String url = urlList.get(index);
       RunOneTestStep runOneTestStep =
-          new RunOneTestStep(runner, url, "[" + (index + 1) + "/" + urlList.size() + "]");
+          new RunOneTestStep(runner,url, "[" + (index + 1) + "/" + urlList.size() + "]");
       long start = System.currentTimeMillis();
       runOneTestStep.processTestStep(StepPhase.DEFAULT, report, false);
       long stop = System.currentTimeMillis();
       Result result = runOneTestStep.getTestResult();
       total += result.size();
+      success += result.getSucessCount();
       testSummary.addResult(result);
       switch (reportStyle) {
+        case 0: {
+          //both
+          // grouped
+          String[] split = urlList.get(index).split("/");
+          String shortName = split[split.length -1];
+          AllureTestReport testReport = new AllureTestReport(shortName);
+          testSuite.addChild(testReport.getUuid());
+          testReport.addLabel("parentSuite", this.testCaseName);
+          testReport.setFullName(this.logger.getName() + "_" + urlList.get(index));
+          testReport.setReporter(this.reporter);
+          testReports.add(testReport);
+          makeGroupedResults(testReport, result, start, stop);
+          makeIndividualResults(testSuite, urlList.get(index), result, start, stop);
+          break;
+        }
         case 1:
           { // grouped
-            AllureTestReport testReport = new AllureTestReport(urlList.get(index));
+            String[] split = urlList.get(index).split("/");
+            String shortName = split[split.length -1];
+            AllureTestReport testReport = new AllureTestReport(shortName);
             testSuite.addChild(testReport.getUuid());
             testReport.addLabel("parentSuite", this.testCaseName);
-            testReport.addLabel("suite", testSuite.getName());
             testReport.setFullName(this.logger.getName() + "_" + urlList.get(index));
             testReport.setReporter(this.reporter);
+            testReports.add(testReport);
             makeGroupedResults(testReport, result, start, stop);
             break;
           }
@@ -100,10 +124,19 @@ public class RunAllTestStep extends TestStep {
             makeIndividualResults(testSuite, urlList.get(index), result, start, stop);
             break;
           }
+        default:
+          // do nothing
+          break;
       }
     }
     // testSuite.setName(testSuite.getName() + " - " + total + " tests");
     reporter.textAttachment(this.report, "Test run summary", testSummary.toString(), "json");
+    logger.info("updating test suite name from " + testName + " ->" + testName + "(" + success + "/" + total + ")");
+    testSuite.setName(testName + " (" + success + "/" + total + ")");
+    testSuite.setReporter(this.reporter);
+    for (AllureTestReport testReport : testReports) {
+      testReport.addLabel("suite", testSuite.getName());
+    }
     if (!this.report.broken()) {
       reporter.saveAttachmentToSubFolder(
           testSummary.getName(),
@@ -139,10 +172,10 @@ public class RunAllTestStep extends TestStep {
         details.setMessage(subTest.getName());
         subStepReport.setDetails(details);
         subStepReport.setStatus(Status.FAILED);
+        reporter.textAttachment(subStepReport, "Reason ", subTest.getMessage(), "plain");
       } else {
         subStepReport.setStatus(Status.PASSED);
       }
-      //      reporter.textAttachment(subStepReport, "Result", subTest.toString(), "json");
       subStepReport.setStopTimestamp(stop);
       testReport.addStepReport(subStepReport);
     }
@@ -152,7 +185,7 @@ public class RunAllTestStep extends TestStep {
       AllureTestReport testReport, Result result, long start, long stop) {
     testReport.setName(
         testReport.getName() + " (" + result.getSucessCount() + "/" + result.size() + ")");
-    testReport.setStopTimestamp(start);
+    testReport.setStartTimestamp(start);
     for (SubTest subTest : result) {
       AllureStepReport subStepReport = new AllureStepReport(subTest.getName());
       subStepReport.setStartTimestamp(start);
@@ -162,10 +195,10 @@ public class RunAllTestStep extends TestStep {
       subStepReport.setIgnore(true);
       if (!subTest.getActualResult().equals("PASS") && !subTest.getActualResult().equals("OK")) {
         subStepReport.setStatus(Status.FAILED);
+        reporter.textAttachment(subStepReport, "Reason ", subTest.getMessage(), "plain");
       } else {
         subStepReport.setStatus(Status.PASSED);
       }
-      //      reporter.textAttachment(subStepReport, "Result", subTest.toString(), "json");
       subStepReport.setStopTimestamp(stop);
       testReport.addStepReport(subStepReport);
     }

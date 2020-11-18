@@ -25,6 +25,8 @@ import io.cosmosoftware.kite.interfaces.Runner;
 import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.steps.TestStep;
 import javax.json.JsonObject;
+import org.webrtc.kite.stats.rtc.RTCStatList;
+import org.webrtc.kite.stats.rtc.RTCStatMap;
 
 public class GetStatsStep extends TestStep {
   private final JsonObject getStatsConfig;

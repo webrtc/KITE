@@ -152,6 +152,11 @@
       <artifactId>sqlite-jdbc</artifactId>
       <version>${kite.sqlite.jdbc.version}</version>
     </dependency>
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+      <version>3.7</version>
+    </dependency>
   </dependencies>
 
 </project>

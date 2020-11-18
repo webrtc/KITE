@@ -217,13 +217,13 @@ public class Configurator {
 
       listOfTuples = recursivelyBuildTuples(tupleSize, 0, clientList, (new Tuple()).getClients(), permute);
 
-//      List<Tuple> tempListOfTuples = new ArrayList<>(listOfTuples);
-//      for (Tuple tuple : tempListOfTuples) {
-//        if (Collections.disjoint(tuple.getClients(), focusedList)
-//            || (skipSame && tuple.getClients().stream().distinct().limit(2).count() <= 1)) {
-//          listOfTuples.remove(tuple);
-//        }
-//      }
+      List<Tuple> tempListOfTuples = new ArrayList<>(listOfTuples);
+      for (Tuple tuple : tempListOfTuples) {
+        if (Collections.disjoint(tuple.getClients(), focusedList)
+            || (skipSame && tuple.getClients().stream().distinct().limit(2).count() <= 1)) {
+          listOfTuples.remove(tuple);
+        }
+      }
       for (Tuple t :listOfTuples) {
         logger.debug("Tuple = " + t.getId());
       }      

@@ -256,11 +256,15 @@ public class MatrixRunner {
    */
   private KiteLogger createTestLogger(String kiteRequestId, String testName) {
     KiteLogger testLogger = KiteLogger.getLogger(new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(new Date()));
-    String logFileName = (kiteRequestId.equals("") ?
-            "logs/" : ( System.getProperty("catalina.base") + "/logs/" +kiteRequestId + "_")) + testName + "/test_" + testLogger.getName() + ".log";
+    String logFileName = ((kiteRequestId == null || kiteRequestId.equals("null")) ? 
+      "" : (kiteRequestId + "_")) + testName + "/test_" + testLogger.getName() + ".log";
+    String logFilePath = "logs/" + logFileName;
+    if (System.getProperty("catalina.base") != null) {
+      logFilePath = System.getProperty("catalina.base") + "/" + logFilePath;
+    }
     try {
       FileAppender fileAppender = new FileAppender(
-        new PatternLayout("%d %-5p - %m%n"), logFileName, false);
+        new PatternLayout("%d %-5p - %m%n"), logFilePath, false);
       fileAppender.setThreshold(Level.INFO);
       testLogger.addAppender(fileAppender);
     } catch (IOException e) {

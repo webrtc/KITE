@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc.msource;
 
 
-import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
+import org.webrtc.kite.stats.rtc.RTCSingleStatObject;
 
 /**
- * RTCMediaStreamStats, with attributes streamIdentifer, trackIds
+ * RTCMediaSourceStats, with attributes trackIdentifier, kind
  */
-public class RTCMediaStreamStats extends RTCSingleStatObject {
-  private final String streamIdentifer;
-  private final String trackIds;
+public class RTCMediaSourceStats extends RTCSingleStatObject {
+  protected final String trackIdentifier;
+  protected final String kind;
 
-  public RTCMediaStreamStats(Map statObject) {
-    this.setId(getStatByName(statObject, "id"));
-    this.streamIdentifer = getStatByName(statObject, "streamIdentifer");
-    this.trackIds = getStatByName(statObject, "trackIds");
+  public RTCMediaSourceStats(Map statObject) {
+    super(statObject);
+    this.trackIdentifier = getStatByName( "trackIdentifier");
+    this.kind = getStatByName( "kind");
   }
   
-  public String getStreamIdentifer() {
-    return streamIdentifer;
+  public String getTrackIdentifier() {
+    return trackIdentifier;
   }
   
-  public String getTrackIds() {
-    return trackIds;
+  public String getKind() {
+    return kind;
   }
   
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    return Json.createObjectBuilder()
-      .add("streamIdentifer", this.streamIdentifer)
-      .add("trackIds", this.trackIds);
+    return super.getJsonObjectBuilder()
+      .add("trackIdentifier", this.trackIdentifier)
+      .add("kind", this.kind);
   }
 }

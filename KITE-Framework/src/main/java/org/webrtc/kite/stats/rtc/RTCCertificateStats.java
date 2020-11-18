@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc;
 
 
-import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
 
@@ -28,17 +27,17 @@ import java.util.Map;
  */
 public class RTCCertificateStats extends RTCSingleStatObject {
 
-  private final String base64Certificate;
   private final String fingerprint;
   private final String fingerprintAlgorithm;
+  private final String base64Certificate;
   private final String issuerCertificateId;
 
   public RTCCertificateStats(Map statObject) {
-    this.setId(getStatByName(statObject, "id"));
-    this.fingerprint = getStatByName(statObject, "fingerprint");
-    this.fingerprintAlgorithm = getStatByName(statObject, "fingerprintAlgorithm");
-    this.base64Certificate = getStatByName(statObject, "base64Certificate");
-    this.issuerCertificateId = getStatByName(statObject, "issuerCertificateId");
+    super(statObject);
+    this.fingerprint = getStatByName( "fingerprint");
+    this.fingerprintAlgorithm = getStatByName( "fingerprintAlgorithm");
+    this.base64Certificate = getStatByName( "base64Certificate");
+    this.issuerCertificateId = getStatByName( "issuerCertificateId");
 
   }
   
@@ -60,7 +59,7 @@ public class RTCCertificateStats extends RTCSingleStatObject {
   
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    return Json.createObjectBuilder()
+    return super.getJsonObjectBuilder()
       .add("fingerprint", this.fingerprint)
       .add("fingerprintAlgorithm", this.fingerprintAlgorithm)
       .add("base64Certificate", this.base64Certificate)

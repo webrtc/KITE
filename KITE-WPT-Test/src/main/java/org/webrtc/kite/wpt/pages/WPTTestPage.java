@@ -11,15 +11,17 @@ import io.cosmosoftware.kite.pages.BasePage;
 import io.cosmosoftware.kite.report.Status;
 import java.util.List;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.webrtc.kite.tests.InitClientWebDriverStep;
+import org.webrtc.kite.tests.TestRunner;
 import org.webrtc.kite.wpt.Result;
 import org.webrtc.kite.wpt.SubTest;
 
 public class WPTTestPage extends BasePage {
 
-  private final Result resultReport;
-
+  private Result resultReport;
   @FindBy(className = "instructions")
   WebElement description;
 
@@ -36,15 +38,17 @@ public class WPTTestPage extends BasePage {
   private int retry = 0;
   private long start;
 
-  public WPTTestPage(Runner runner, String pageUrl) {
+  public WPTTestPage(Runner runner) {
     super(runner);
     setImplicitWait(webDriver, EXTENDED_TIMEOUT);
+  }
+
+  public void setPageUrl(String pageUrl) {
     this.pageUrl = pageUrl;
     this.resultReport = new Result(pageUrl);
   }
 
-  public void fillResultReport() throws KiteTestException {
-    try {
+  public void fillResultReport() {
       String status = getStatus();
       resultReport.setStatus(status.replace("Harness status: ", ""));
       for (int indexResult = 1; indexResult < resultLines.size(); indexResult++) {
@@ -54,9 +58,6 @@ public class WPTTestPage extends BasePage {
       }
       long end = System.currentTimeMillis();
       resultReport.setDuration(end - start);
-    } catch (Exception e) {
-      throw new KiteTestException("Could not retrieve the test result", Status.BROKEN, e);
-    }
   }
 
   public Result getResultReport() {
@@ -103,12 +104,11 @@ public class WPTTestPage extends BasePage {
   public void runTest() throws KiteTestException {
     this.start = System.currentTimeMillis();
     try {
-      webDriver.get(pageUrl);
+      this.loadPage(this.pageUrl, EXTENDED_TIMEOUT);
     } catch (Exception e) {
       if (retry < 4) {
         retry++;
         logger.warn("Failed to load page, trying again at: " + pageUrl);
-        webDriver.get("https://google.com"); // to refresh the cache on browser
         waitAround(HALF_SECOND_INTERVAL);
         runTest();
       } else {
@@ -117,4 +117,5 @@ public class WPTTestPage extends BasePage {
       }
     }
   }
+
 }

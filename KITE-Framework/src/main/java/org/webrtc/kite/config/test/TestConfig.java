@@ -58,6 +58,9 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   final static String TABLE_NAME = "testconfigs";
   private final String DEFAULT_DESC = "No description was provided fot this test.";
   private String callbackUrl;
+  private int callbackPort;
+  private String callbackUsername;
+  private String callbackPassword;
   private String tagName;
   private String firefoxProfile;
   private String chromeExtension;
@@ -132,7 +135,11 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.payload = jsonObject.getJsonObject("payload").toString();
 
     // Override the global value with the local value
-    this.callbackUrl = jsonObject.getString("callbackurl", null);
+    this.callbackUrl = jsonObject.getString("callbackUrl", null);
+    this.callbackPort = getIntFromJsonObject(jsonObject, "callbackPort", 0);
+    this.callbackUsername = jsonObject.getString("callbackUsername", null);
+    this.callbackPassword = jsonObject.getString("callbackPassword", null);
+
     this.tagName = jsonObject.getString("tag", null);
     this.tupleSize = getIntFromJsonObject(jsonObject, "tupleSize", -1);
 
@@ -212,8 +219,31 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   public void setCallbackUrl(String callbackUrl) {
     this.callbackUrl = callbackUrl;
   }
-  
-  
+
+  public int getCallbackPort() {
+    return callbackPort;
+  }
+
+  public void setCallbackPort(int callbackPort) {
+    this.callbackPort = callbackPort;
+  }
+
+  public String getCallbackUsername() {
+    return callbackUsername;
+  }
+
+  public void setCallbackUsername(String callbackUsername) {
+    this.callbackUsername = callbackUsername;
+  }
+
+  public String getCallbackPassword() {
+    return callbackPassword;
+  }
+
+  public void setCallbackPassword(String callbackPassword) {
+    this.callbackPassword = callbackPassword;
+  }
+
   /**
    * Gets delay for closing.
    *

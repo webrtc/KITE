@@ -14,41 +14,39 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc;
 
 
-import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
 
 /**
- * RTCDataChannelStats, with attributes label, protocol, datachannelId, state, messagesSent, bytesSent,
+ * RTCDataChannelStats, with attributes label, protocol, dataChannelIdentifier, state, messagesSent, bytesSent,
  * messagesReceived, bytesReceived
  */
 public class RTCDataChannelStats extends RTCSingleStatObject {
 
-  private final String bytesReceived;
-  private final String bytesSent;
-  private final String datachannelId;
   private final String label;
-  private final String messagesReceived;
-  private final String messagesSent;
   private final String protocol;
+  private final String dataChannelIdentifier;
   private final String state;
-
+  private final String messagesSent;
+  private final String bytesSent;
+  private final String messagesReceived;
+  private final String bytesReceived;
 
 
   public RTCDataChannelStats(Map statObject) {
-    this.setId(getStatByName(statObject, "id"));
-    this.label = getStatByName(statObject, "label");
-    this.protocol = getStatByName(statObject, "protocol");
-    this.datachannelId = getStatByName(statObject, "datachannelId");
-    this.state = getStatByName(statObject, "state");
-    this.messagesSent = getStatByName(statObject, "messagesSent");
-    this.bytesSent = getStatByName(statObject, "bytesSent");
-    this.messagesReceived = getStatByName(statObject, "messagesReceived");
-    this.bytesReceived = getStatByName(statObject, "bytesReceived");
-    this.timestamp = getStatByName(statObject, "timestamp");
+    super(statObject);
+    this.label = getStatByName( "label");
+    this.protocol = getStatByName( "protocol");
+    this.dataChannelIdentifier = getStatByName( "dataChannelIdentifier");
+    this.state = getStatByName( "state");
+    this.messagesSent = getStatByName( "messagesSent");
+    this.bytesSent = getStatByName( "bytesSent");
+    this.messagesReceived = getStatByName( "messagesReceived");
+    this.bytesReceived = getStatByName( "bytesReceived");
+    this.timestamp = getStatByName( "timestamp");
   }
   
   public double getBytesReceived() {
@@ -59,8 +57,8 @@ public class RTCDataChannelStats extends RTCSingleStatObject {
     return parseDouble(bytesSent);
   }
   
-  public String getDatachannelId() {
-    return datachannelId;
+  public String getDataChannelIdentifier() {
+    return dataChannelIdentifier;
   }
   
   public String getLabel() {
@@ -85,15 +83,14 @@ public class RTCDataChannelStats extends RTCSingleStatObject {
   
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    return Json.createObjectBuilder()
+    return super.getJsonObjectBuilder()
       .add("label", this.label)
       .add("protocol", this.protocol)
-      .add("datachannelId", this.datachannelId)
+      .add("dataChannelIdentifier", this.dataChannelIdentifier)
       .add("state", this.state)
       .add("messagesSent", this.messagesSent)
       .add("bytesSent", this.bytesSent)
       .add("messagesReceived", this.messagesReceived)
-      .add("bytesReceived", this.bytesReceived)
-      .add("timestamp", this.timestamp);
+      .add("bytesReceived", this.bytesReceived);
   }
 }

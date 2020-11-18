@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc;
 
 
-import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
 
@@ -29,9 +28,9 @@ public class RTCPeerConnectionStats extends RTCSingleStatObject {
   private final String dataChannelsOpened;
 
   public RTCPeerConnectionStats(Map statObject) {
-    this.setId(getStatByName(statObject, "id"));
-    this.dataChannelsOpened = getStatByName(statObject, "dataChannelsOpened");
-    this.dataChannelsClosed = getStatByName(statObject, "dataChannelsClosed");
+    super(statObject);
+    this.dataChannelsOpened = getStatByName( "dataChannelsOpened");
+    this.dataChannelsClosed = getStatByName( "dataChannelsClosed");
   }
   
   public String getDataChannelsClosed() {
@@ -44,7 +43,7 @@ public class RTCPeerConnectionStats extends RTCSingleStatObject {
   
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    return Json.createObjectBuilder()
+    return super.getJsonObjectBuilder()
       .add("dataChannelsOpened", this.dataChannelsOpened)
       .add("dataChannelsClosed", this.dataChannelsClosed);
   }

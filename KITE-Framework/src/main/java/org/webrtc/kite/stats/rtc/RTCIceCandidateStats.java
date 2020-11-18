@@ -14,33 +14,30 @@
  * limitations under the License.
  */
 
-package org.webrtc.kite.stats;
+package org.webrtc.kite.stats.rtc;
 
 
-import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Map;
 
 /**
- * RTCIceCandidateStats, with attributes ip, port, protocol, candidateType, priority, url
+ * RTCIceCandidateStats, with attributes ip, port, protocol, candidateType, address, url
  */
 public class RTCIceCandidateStats extends RTCSingleStatObject {
 
-  private final String candidateType;
-  private final String ip;
+  private final String address;
   private final String port;
-  private final String priority;
   private final String protocol;
+  private final String candidateType;
   private final String url;
 
   public RTCIceCandidateStats(Map statObject) {
-    this.setId(getStatByName(statObject, "id"));
-    this.ip = getStatByName(statObject, "ip");
-    this.port = getStatByName(statObject, "port");
-    this.protocol = getStatByName(statObject, "protocol");
-    this.candidateType = getStatByName(statObject, "candidateType");
-    this.priority = getStatByName(statObject, "priority");
-    this.url = getStatByName(statObject, "url");
+    super(statObject);
+    this.port = getStatByName( "port");
+    this.protocol = getStatByName( "protocol");
+    this.candidateType = getStatByName( "candidateType");
+    this.address = getStatByName( "address");
+    this.url = getStatByName( "url");
 
   }
   
@@ -48,16 +45,12 @@ public class RTCIceCandidateStats extends RTCSingleStatObject {
     return candidateType;
   }
   
-  public String getIp() {
-    return ip;
-  }
-  
   public String getPort() {
     return port;
   }
   
-  public String getPriority() {
-    return priority;
+  public String getAddress() {
+    return address;
   }
   
   public String getProtocol() {
@@ -70,12 +63,11 @@ public class RTCIceCandidateStats extends RTCSingleStatObject {
   
   @Override
   public JsonObjectBuilder getJsonObjectBuilder() {
-    return Json.createObjectBuilder()
-      .add("ip", this.ip)
+    return super.getJsonObjectBuilder()
+      .add("address", this.address)
       .add("port", this.port)
       .add("protocol", this.protocol)
       .add("candidateType", this.candidateType)
-      .add("priority", this.priority)
       .add("url", this.url);
   }
 }
