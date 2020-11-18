@@ -31,7 +31,6 @@
     {
       "browserName": "chrome",
       "platform": "localhost",
-      "headless": true
     }
   ]
 }
