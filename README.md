@@ -144,8 +144,8 @@ source .bash_profile
     
     3.3 On Mac, open a terminal and enter the following commands:
     ```
-    chmod +x configureMac.command  
-    ./configureMac.command
+    chmod +x configureMac.sh  
+    ./configureMac.sh
     ```
     
     During this step, you will be prompt to setup the local grid. This is an interactive setup. 
