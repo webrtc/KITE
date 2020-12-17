@@ -20,7 +20,7 @@ goto :install
 :install
 rem download Maven with the specified version from the gridConfig.bat
 echo [Net.ServicePointManager]::SecurityProtocol = 'TLS11','TLS12','ssl3' >> installMaven.ps1
-echo Invoke-WebRequest -OutFile maven.zip https://www-us.apache.org/dist/maven/maven-3/%MAVEN_VERSION%/binaries/apache-maven-%MAVEN_VERSION%-bin.zip >> installMaven.ps1
+echo Invoke-WebRequest -OutFile maven.zip https://downloads.apache.org/maven/maven-3/%MAVEN_VERSION%/binaries/apache-maven-%MAVEN_VERSION%-bin.zip >> installMaven.ps1
 
 rem unzip the downloaded files 
 Powershell.exe -executionpolicy remotesigned -File installMaven.ps1

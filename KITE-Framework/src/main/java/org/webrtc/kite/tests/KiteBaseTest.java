@@ -74,9 +74,10 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   protected RoomManager roomManager;
   protected int windowWidth = 0;
   protected int windowHeight = 0;
-  private String testJar = null;
   protected boolean jsTest = false;
   protected TestConfig testConfig;
+  protected boolean generateReport = true;
+  private String testJar = null;
   private boolean consoleLogs = true;
   private int expectedTestDuration = 60; //in minutes
   private boolean fastRampUp = false;
@@ -809,5 +810,13 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
 
   public void setCurrentIteration(int currentIteration) {
     this.currentIteration = currentIteration;
+  }
+
+  public void setGenerateReport(boolean generateReport) {
+    this.generateReport = generateReport;
+  }
+
+  public boolean generateReport() {
+    return generateReport;
   }
 }

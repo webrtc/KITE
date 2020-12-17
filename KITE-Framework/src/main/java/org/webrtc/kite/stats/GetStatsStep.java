@@ -33,12 +33,14 @@ public class GetStatsStep extends TestStep {
   private final Runner runner;
   private String customName = "";
   private boolean getRaw = true;
-
+  private boolean keepStats = false;
+  private RTCStatMap statMap;
 
   public GetStatsStep(Runner runner, JsonObject getStatsConfig) {
     super(runner);
     this.runner = runner;
     this.getStatsConfig = getStatsConfig;
+    this.keepStats = getStatsConfig.getBoolean("keepStats", this.keepStats);
   }
 
   @Override
@@ -49,26 +51,32 @@ public class GetStatsStep extends TestStep {
   @Override
   protected void step() throws KiteTestException {
     try {
-      RTCStatMap statsOverTime =  getPCStatOvertime(webDriver, getStatsConfig);
-      statsOverTime.setRegionId(this.runner.getClientRegion());
-      statsOverTime.setNetworkProfile(this.runner.getNetworkProfile());
-      RTCStatList localPcStats = statsOverTime.getLocalPcStats();
-      JsonObject temp = transformToJson(localPcStats);
-      if (!temp.isEmpty()) {
-        for (String pc : statsOverTime.keySet()) {
+      RTCStatMap results = getPCStatOvertime(webDriver, getStatsConfig);
+      results.setRegionId(this.runner.getClientRegion());
+      results.setNetworkProfile(this.runner.getNetworkProfile());
+      if (keepStats) {
+        this.statMap = results;
+      }
+      if (!results.isEmpty()) {
+        for (String pc : results.keySet()) {
           if (getRaw) {
             reporter.jsonAttachment(
                 this.report,
                 customName + "Stats(Raw)_" + pc.replaceAll("\"", ""),
-                transformToJson(statsOverTime.get(pc)));
+                transformToJson(results.get(pc)));
           }
-          reporter.jsonAttachment(this.report, customName + "Stats(Summary)_" + pc.replaceAll("\"", ""), buildStatSummary(statsOverTime.get(pc)));
+          reporter.jsonAttachment(this.report, customName + "Stats(Summary)_" + pc.replaceAll("\"", ""), buildStatSummary(
+              results.get(pc)));
         }
       }
     } catch (Exception e) {
-      logger.error(getStackTrace(e));
-      throw new KiteTestException("Failed to getStats", Status.BROKEN, e);
+      throw new KiteTestException("Failed to getStats: " + e.getLocalizedMessage(), Status.BROKEN, e);
     }
+  }
+
+
+  public RTCStatMap getResults() {
+    return statMap;
   }
 
   public void setCustomName(String customName) {
@@ -77,5 +85,9 @@ public class GetStatsStep extends TestStep {
 
   public void setGetRaw(boolean getRaw) {
     this.getRaw = getRaw;
+  }
+
+  public void setKeepStats(boolean keepStats) {
+    this.keepStats = keepStats;
   }
 }

@@ -145,7 +145,7 @@ public class TestManager implements Callable<Object> {
     test.setTuple(tuple);
     test.setCurrentIteration(this.id);
     test.setDelayForClosing(testConfig.getDelayForClosing());
-
+    test.setGenerateReport(testConfig.generateReport());
     test.setPhases(this.phases);
 
     test.setParentSuite(testSuite.getParentSuite());

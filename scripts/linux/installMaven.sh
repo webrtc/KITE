@@ -1,7 +1,7 @@
 #!/bin/bash
 set +v
 function install(){
-wget https://www-us.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.zip 
+wget https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.zip
 unzip apache-maven-$MAVEN_VERSION-bin.zip
 
 mv apache-maven-$MAVEN_VERSION ~
