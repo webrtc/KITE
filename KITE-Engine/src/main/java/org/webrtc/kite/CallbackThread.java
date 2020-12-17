@@ -69,9 +69,10 @@ public class CallbackThread extends Thread {
   /**
    * Posts result to the callback URL.
    */
-  public void postResult() throws IOException {
+  public void postResult() {
     FTPClient ftp = new FTPClient();
     boolean error = false;
+    FileInputStream inputStream = null;
     try {
       int reply;
       ftp.connect(callbackURL, callbackPort);
@@ -84,16 +85,23 @@ public class CallbackThread extends Thread {
         ftp.disconnect();
         logger.error("FTP server refused connection.");
       }
-      FileInputStream inputStream = new FileInputStream(file);
+      inputStream = new FileInputStream(file);
       this.uploadComplete = ftp.storeFile(file.getName(), inputStream);
       if(this.uploadComplete) {
-        inputStream.close();
         this.file.delete();
       }
       ftp.logout();
     } catch(IOException e) {
-      e.printStackTrace();
+      // e.printStackTrace();
+      logger.error( "Could not upload result zip file: " + e.getMessage());
     } finally {
+      if (inputStream != null) {
+        try {
+        inputStream.close();
+        } catch (Exception e) {
+          //
+        }
+      }
       if(ftp.isConnected()) {
         try {
           ftp.disconnect();
@@ -106,11 +114,7 @@ public class CallbackThread extends Thread {
   
   @Override
   public void run() {
-    try {
-      this.postResult();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    this.postResult();
   }
 
   public boolean isUploadComplete() {

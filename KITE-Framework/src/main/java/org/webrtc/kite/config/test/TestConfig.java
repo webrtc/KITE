@@ -88,15 +88,18 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   private NetworkInstrumentation networkInstrumentation = null;
   private Boolean done = false;
   private EmailSender emailSender = null;
-  private Boolean csvReport;
-  
+  private Boolean csvReport = false;
+  private boolean generateReport = true;
+
+
   /**
    * Instantiates a new test config.
    */
   public TestConfig() {
     super();
   }
-  
+
+
   /**
    * Constructs a new TestConfig with the given callback url and JsonObject.
    * <p>
@@ -131,7 +134,8 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.description = jsonObject.getString("description", DEFAULT_DESC);
   
     this.reporter = new Reporter(this.name);
-    this.csvReport = jsonObject.getBoolean("csvReport", false);
+    this.csvReport = jsonObject.getBoolean("csvReport", csvReport);
+    this.generateReport = jsonObject.getBoolean("generateReport", generateReport);
     this.payload = jsonObject.getJsonObject("payload").toString();
 
     // Override the global value with the local value
@@ -758,5 +762,14 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
 
   public void setCsvReport(Boolean csvReport) {
     this.csvReport = csvReport;
+  }
+
+
+  public boolean generateReport() {
+    return generateReport;
+  }
+
+  public void setGenerateReport(boolean generateReport) {
+    this.generateReport = generateReport;
   }
 }

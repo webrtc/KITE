@@ -226,7 +226,9 @@ public class MatrixRunner {
     }
     testSuite.setStopTimestamp();
     if (currentPhase == null || !currentPhase.equals(StepPhase.RAMPUP)) {
-      testConfig.getReporter().generateReportFiles();
+      if (testConfig.generateReport()) {
+        testConfig.getReporter().generateReportFiles();
+      }
     }
   }
 

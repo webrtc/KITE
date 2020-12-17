@@ -8,7 +8,7 @@ import org.openqa.selenium.support.FindBy;
 
 public class GoogleSearchPage extends BasePage {
   
-  private final static String GOOGLE_PAGE = "https://www.youtube.com/watch?v=DCgfVBoBy9s";
+  private final static String GOOGLE_PAGE = "https://google.com";
   
   @FindBy(className = "gLFyf")
   WebElement searchBar;

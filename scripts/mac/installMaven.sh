@@ -4,7 +4,7 @@ cd $BASEDIR
 MAVEN_VERSION=3.6.3
 
 function installMaven(){
-curl https://www-us.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.zip  -o apache-maven-$MAVEN_VERSION.zip
+curl https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.zip  -o apache-maven-$MAVEN_VERSION.zip
 unzip apache-maven-$MAVEN_VERSION.zip
 
 
