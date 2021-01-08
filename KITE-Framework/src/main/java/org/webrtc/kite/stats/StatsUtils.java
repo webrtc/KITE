@@ -94,7 +94,7 @@ public class StatsUtils {
     } catch (Exception e) {
 //      throw new KiteTestException("Could not get stats from peer connection", Status.BROKEN, e);
       // todo: put the e back
-      throw new KiteTestException("Could not get stats from peer connection", Status.BROKEN);
+      throw new KiteTestException("Could not get stats from peer connection: " + e.getLocalizedMessage(), Status.BROKEN);
     }
   }
   

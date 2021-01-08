@@ -1,5 +1,7 @@
 # This is KITE 2.0, Karoshi Interoperability Testing Engine (version 2.0)
 
+_* Change to kite command (28 December 2020), all existing commands need prefix __kite____ (Ex: r -> kite_r)
+
 The effortless way to test WebRTC compliance, prevent [Karoshi](https://en.wikipedia.org/wiki/Kar%C5%8Dshi) with __KITE!__
 
 Write automated interoperability test scripts in Java or Javascript and run them on any platforms. KITE supports:  
@@ -52,12 +54,33 @@ You can download it from:
 
 You can download it from:  
 [JDK 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  
+Set JAVA_HOME:
+* On Windows: 
+  * Right click My Computer and select Properties.
+  * On the Advanced tab, select Environment Variables, and then add a new variable JAVA_HOME to point to where the JDK software is located, for example, C:\Program Files\Java\jdk1.8.0_271.
+  * Edit the variable PATH and add %JAVA_HOME%\bin
+* On UNIX System: 
+  * For Korn and bash shells, run the following commands:
+    * export JAVA_HOME=jdk-install-dir (for example /usr/lib/jvm/openjdk-8; you can use the command readlink -f $(which java) to help you find the folder)
+    * export PATH=$JAVA_HOME/bin:$PATH
+  * For the bourne shell, run the following commands:
+    * JAVA_HOME=jdk-install-dir (for example /usr/lib/jvm/openjdk-8; you can use the command readlink -f $(which java) to help you find the folder)
+    * export JAVA_HOME
+    * PATH=$JAVA_HOME/bin:$PATH
+    * export PATH
+  * For the C shell, run the following commands:
+    * setenv JAVA_HOME jdk-install-dir (for example /usr/lib/jvm/openjdk-8; you can use the command readlink -f $(which java) to help you find the folder)
+    * setenv PATH $JAVA_HOME/bin:$PATH
+    * export PATH=$JAVA_HOME/bin:$PATH
+* On Mac: 
+  * sudo vi ~/.profile
+  * Add the following line
+    * export JAVA_HOME=$(/usr/libexec/java_home)
+  * Save the file by tapping on ESC button on the keyboard and then :wq. This will save the file and will quite.
+  * source ~/.profile
 
 ##### Maven installation
-
-If you are not familiar with Maven and/or new to the concept of PATH and environmnent variables, Maven's
- installation can prove quite tricky as it requires you to add JAVA_HOME to
- your environment variables and MAVEN/bin to your PATH. To make this easier, we're providing an installation script. 
+ 
  If you would like to use our script to install Maven, you can skip it for now and install it after cloning the git repo
  (following the instructions at B.2.).
  
@@ -120,7 +143,7 @@ source .bash_profile
     scripts/linux/installMaven.sh
     ```     
     
-    2.3 On Mac, open a terminal and enter the following commands:
+    On Mac, open a terminal and enter the following commands:
     ```
     chmod -R +x scripts/mac
     scripts/mac/installMaven.sh
@@ -144,8 +167,8 @@ source .bash_profile
     
     3.3 On Mac, open a terminal and enter the following commands:
     ```
-    chmod +x configureMac.command  
-    ./configureMac.command
+    chmod +x configureMac.sh 
+    ./configureMac.sh
     ```
     
     During this step, you will be prompt to setup the local grid. This is an interactive setup. 
@@ -165,18 +188,18 @@ source .bash_profile
     * http://chromedriver.chromium.org/downloads
     * https://github.com/mozilla/geckodriver/releases  
  
-    By default, the local grid setup script is configured for __Chrome__ version __83__ and __Firefox__ version __77__. 
+    By default, the local grid setup script is configured for __Chrome__ version __87__ and __Firefox__ version __83__. 
     If these are the versions installed on your computer, you can safely use the default settings.
     Otherwise, you will need to edit the following settings when prompt to do so:  
     
     ```
-    CHROME_VERSION=83
-    FIREFOX_VERSION=77
-    CHROMEDRIVER_VERSION=83.0.4103.39
+    CHROME_VERSION=87
+    FIREFOX_VERSION=83
+    CHROMEDRIVER_VERSION=87.0.4280.88
     GECKO_VERSION=v0.26.0
     ```
     
-    __Note:__ Please input only the major (i.e. 83 or 77) for the browser versions, but the full version with the minor (i.e. 83.0.4103.39 or v0.26.0) for the driver versions.     
+    __Note:__ Please input only the major (i.e. 83 or 77) for the browser versions, but the full version with the minor (i.e. 87.0.4280.88 or v0.26.0) for the driver versions.     
    The latest version of ChromeDriver is available at: https://chromedriver.storage.googleapis.com/LATEST_RELEASE
    More details are available in the [local grid setup guide](scripts/README.md).
     
@@ -188,32 +211,32 @@ source .bash_profile
 
     
 __On Windows:__  
-    Just type `c` (which will execute `mvn clean install -DskipTests`). 
+    Just type `kite_c` (which will execute `mvn clean install -DskipTests`). 
     
     ```
     cd %KITE_HOME%
-    c
+    kite_c
     ```
 
-If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`c`__ to compile the test module
-only or __`c all`__ to recompile the entire project:
+If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`kite_c`__ to compile the test module
+only or __`kite_c all`__ to recompile the entire project:
 
     ```
     cd %KITE_HOME%\KITE-AppRTC-Test  
-    c all
+    kite_c all
     ```  
 __On Linux/Mac:__  
-Just type `c` (which will execute `mvn clean install -DskipTests`).
+Just type `kite_c` (which will execute `mvn clean install -DskipTests`).
     ```
     cd $KITE_HOME
-    c
+    kite_c
     ```
-If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`c`__ to compile the test module
- only or __`c all`__ to recompile the entire project:  
+If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`kite_c`__ to compile the test module
+ only or __`kite_c all`__ to recompile the entire project:  
 
     ```
     cd $KITE_HOME/KITE-AppRTC-Test
-    c all
+    kite_c all
     ```
 
 
@@ -233,21 +256,21 @@ by following [local grid setup guide](scripts/README.md).
 __Note:__ You will need to have your [local grid](scripts/README.md) running before you can execute any test.  
 You can check if your local grid is running and the browser versions installed by 
 opening the [Grid Console](http://localhost:4444/grid/console).
-In the following example, we are assuming __Chrome__ version __83__ and __Firefox__ version __77__.
+In the following example, we are assuming __Chrome__ version __87__ and __Firefox__ version __83__.
 
 
 ### Edit the test config file
 
-If your Grid is running on localhost and with __Chrome__ version __83__ and __Firefox__ version __77__ you can skip this step.
+If your Grid is running on localhost and with __Chrome__ version __87__ and __Firefox__ version __83__ you can skip this step.
 
 Edit the file `./KITE-Example-Test/configs/search.local.config.json` with your favorite text editor. 
 
 #### Version 
 You will need to change __`version`__ according to what is installed on your local grid.
-For example, if the latest stable version of __Chrome__ is __83__, you should set: 
+For example, if the latest stable version of __Chrome__ is __87__, you should set: 
 ```json
       "browserName": "chrome",
-      "version": "83",
+      "version": "87",
       "platform": "localhost",
 ```
 
@@ -260,7 +283,7 @@ Example for Windows:
 
 ```json
       "browserName": "chrome",
-      "version": "83",
+      "version": "87",
       "platform": "WINDOWS",
 ```
 You can find more information about the Basic Configuration File [here](#basic-configuration-file).
@@ -274,12 +297,12 @@ To run the example test,
 __On Windows:__ 
 ```
 cd %KITE_HOME%\KITE-Example-Test
-r configs\search.local.config.json
+kite_r configs\search.local.config.json
 ```
 __On Linux/Mac:__   
 ```
 cd $KITE_HOME/KITE-Example-Test
-r configs/search.local.config.json
+kite_r configs/search.local.config.json
 ```
 
 
@@ -293,12 +316,12 @@ To run the AppRTC iceconnection test,
 __On Windows:__  
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
-r configs\iceconnection.apprtc.config.json
+kite_r configs\iceconnection.apprtc.config.json
 ```
 __On Linux/Mac:__   
 ```
 cd $KITE_HOME/KITE-AppRTC-Test
-r configs/iceconnection.apprtc.config.json
+kite_r configs/iceconnection.apprtc.config.json
 ```
 
 Alternatively, you can launch the test with the full command.  
@@ -314,17 +337,17 @@ java -Dkite.firefox.profile="$KITE_HOME"/third_party/firefox-h264-profiles/ -cp 
 
 ### Open the dashboard
 
-After running the test, you can open the Allure dashboard with the command `a`.
+After running the test, you can open the Allure dashboard with the command `kite_a`.
 
 __On Windows:__  
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
-a
+kite_a
 ```
 __On Linux/Mac:__  
 ```
 cd $KITE_HOME/KITE-AppRTC-Test
-a
+kite_a
 ```
 
 Congratulation! You should see the results of your first KITE test.
@@ -374,7 +397,7 @@ The example search.local.config.json file is almost the simplest config file you
   "clients": [
     {
       "browserName": "chrome",
-      "version": "83",
+      "version": "87",
       "platform": "WINDOWS",
       "flags": []
     },
@@ -423,7 +446,7 @@ Sample config files in `KITE-Example-Test/configs` contain the example with diff
   "clients": [
     {
       "browserName": "chrome",
-      "version": "83",
+      "version": "87",
       "platform": "LINUX",
       "flags": []
     },

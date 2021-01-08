@@ -223,13 +223,18 @@ public class Engine {
   }
 
   public static boolean upload(String desFile, String sourcePath, String callbackUrl, int callbackPort, String username, String password) {
-    String fileName = ReportUtils.zipFile(sourcePath, desFile, true);
-    File zipToSend = new File(fileName);
-    if (zipToSend.exists()) {
-      CallbackThread callbackThread = new CallbackThread(callbackUrl, callbackPort, username, password, zipToSend);
-      callbackThread.run();
-      return callbackThread.isUploadComplete();
+    try{
+      String fileName = ReportUtils.zipFile(sourcePath, desFile, true);
+      File zipToSend = new File(fileName);
+      if (zipToSend.exists()) {
+        CallbackThread callbackThread = new CallbackThread(callbackUrl, callbackPort, username, password, zipToSend);
+        callbackThread.run();
+        return callbackThread.isUploadComplete();
+      }
+    } catch (Exception e) {
+      logger.error("Could not upload the file (" + desFile +") to -> " + callbackUrl);
     }
+
     return false;
   }
 
