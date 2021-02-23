@@ -1,0 +1,10 @@
+echo -n -e "\033]0;COMPILE\007"
+mypath=`pwd`
+if [ "$1" = "all" ]
+then
+  cd ..
+  mvn -DskipTests clean install $2 $3 $4
+  cd $mypath
+else
+  mvn -DskipTests clean install $1 $2 $3 $4
+fi

@@ -1,4 +1,5 @@
 #! /bin/bash
+[[ -z ${JAVA_HOME} ]] && echo "Error: JAVA_HOME is not set." && exit -1;
 BASEDIR=$(dirname "$0")
 cd $BASEDIR
 MAVEN_VERSION=3.6.3
@@ -14,7 +15,8 @@ rm -f apache-maven-$MAVEN_VERSION.zip
 echo export PATH="~/apache-maven-$MAVEN_VERSION/bin:$PATH" >> ~/.bash_profile
 echo export PATH="~/apache-maven-$MAVEN_VERSION/bin:$PATH" >> ~/.zshenv
 
-source ~/.bashrc
+source ~/.bash_profile
+source ~/.zshenv
 exit
 }
 

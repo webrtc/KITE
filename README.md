@@ -1,5 +1,7 @@
 # This is KITE 2.0, Karoshi Interoperability Testing Engine (version 2.0)
 
+_* Change to kite command (28 December 2020), all existing commands need prefix __kite____ (Ex: r -> kite_r)
+
 The effortless way to test WebRTC compliance, prevent [Karoshi](https://en.wikipedia.org/wiki/Kar%C5%8Dshi) with __KITE!__
 
 Write automated interoperability test scripts in Java or Javascript and run them on any platforms. KITE supports:  
@@ -52,12 +54,33 @@ You can download it from:
 
 You can download it from:  
 [JDK 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  
+Set JAVA_HOME:
+* On Windows: 
+  * Right click My Computer and select Properties.
+  * On the Advanced tab, select Environment Variables, and then add a new variable JAVA_HOME to point to where the JDK software is located, for example, C:\Program Files\Java\jdk1.8.0_271.
+  * Edit the variable PATH and add %JAVA_HOME%\bin
+* On UNIX System: 
+  * For Korn and bash shells, run the following commands:
+    * export JAVA_HOME=jdk-install-dir (for example /usr/lib/jvm/openjdk-8; you can use the command readlink -f $(which java) to help you find the folder)
+    * export PATH=$JAVA_HOME/bin:$PATH
+  * For the bourne shell, run the following commands:
+    * JAVA_HOME=jdk-install-dir (for example /usr/lib/jvm/openjdk-8; you can use the command readlink -f $(which java) to help you find the folder)
+    * export JAVA_HOME
+    * PATH=$JAVA_HOME/bin:$PATH
+    * export PATH
+  * For the C shell, run the following commands:
+    * setenv JAVA_HOME jdk-install-dir (for example /usr/lib/jvm/openjdk-8; you can use the command readlink -f $(which java) to help you find the folder)
+    * setenv PATH $JAVA_HOME/bin:$PATH
+    * export PATH=$JAVA_HOME/bin:$PATH
+* On Mac: 
+  * sudo vi ~/.profile
+  * Add the following line
+    * export JAVA_HOME=$(/usr/libexec/java_home)
+  * Save the file by tapping on ESC button on the keyboard and then :wq. This will save the file and will quite.
+  * source ~/.profile
 
 ##### Maven installation
-
-If you are not familiar with Maven and/or new to the concept of PATH and environmnent variables, Maven's
- installation can prove quite tricky as it requires you to add JAVA_HOME to
- your environment variables and MAVEN/bin to your PATH. To make this easier, we're providing an installation script. 
+ 
  If you would like to use our script to install Maven, you can skip it for now and install it after cloning the git repo
  (following the instructions at B.2.).
  
@@ -120,7 +143,7 @@ source .bash_profile
     scripts/linux/installMaven.sh
     ```     
     
-    2.3 On Mac, open a terminal and enter the following commands:
+    On Mac, open a terminal and enter the following commands:
     ```
     chmod -R +x scripts/mac
     scripts/mac/installMaven.sh
@@ -144,7 +167,7 @@ source .bash_profile
     
     3.3 On Mac, open a terminal and enter the following commands:
     ```
-    chmod +x configureMac.sh  
+    chmod +x configureMac.sh 
     ./configureMac.sh
     ```
     
@@ -188,32 +211,32 @@ source .bash_profile
 
     
 __On Windows:__  
-    Just type `c` (which will execute `mvn clean install -DskipTests`). 
+    Just type `kite_c` (which will execute `mvn clean install -DskipTests`). 
     
     ```
     cd %KITE_HOME%
-    c
+    kite_c
     ```
 
-If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`c`__ to compile the test module
-only or __`c all`__ to recompile the entire project:
+If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`kite_c`__ to compile the test module
+only or __`kite_c all`__ to recompile the entire project:
 
     ```
     cd %KITE_HOME%\KITE-AppRTC-Test  
-    c all
+    kite_c all
     ```  
 __On Linux/Mac:__  
-Just type `c` (which will execute `mvn clean install -DskipTests`).
+Just type `kite_c` (which will execute `mvn clean install -DskipTests`).
     ```
     cd $KITE_HOME
-    c
+    kite_c
     ```
-If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`c`__ to compile the test module
- only or __`c all`__ to recompile the entire project:  
+If you are within a test folder, for example in KITE-AppRTC-Test, you can type __`kite_c`__ to compile the test module
+ only or __`kite_c all`__ to recompile the entire project:  
 
     ```
     cd $KITE_HOME/KITE-AppRTC-Test
-    c all
+    kite_c all
     ```
 
 
@@ -274,12 +297,12 @@ To run the example test,
 __On Windows:__ 
 ```
 cd %KITE_HOME%\KITE-Example-Test
-r configs\search.local.config.json
+kite_r configs\search.local.config.json
 ```
 __On Linux/Mac:__   
 ```
 cd $KITE_HOME/KITE-Example-Test
-r configs/search.local.config.json
+kite_r configs/search.local.config.json
 ```
 
 
@@ -293,12 +316,12 @@ To run the AppRTC iceconnection test,
 __On Windows:__  
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
-r configs\iceconnection.apprtc.config.json
+kite_r configs\iceconnection.apprtc.config.json
 ```
 __On Linux/Mac:__   
 ```
 cd $KITE_HOME/KITE-AppRTC-Test
-r configs/iceconnection.apprtc.config.json
+kite_r configs/iceconnection.apprtc.config.json
 ```
 
 Alternatively, you can launch the test with the full command.  
@@ -314,17 +337,17 @@ java -Dkite.firefox.profile="$KITE_HOME"/third_party/firefox-h264-profiles/ -cp 
 
 ### Open the dashboard
 
-After running the test, you can open the Allure dashboard with the command `a`.
+After running the test, you can open the Allure dashboard with the command `kite_a`.
 
 __On Windows:__  
 ```
 cd %KITE_HOME%\KITE-AppRTC-Test
-a
+kite_a
 ```
 __On Linux/Mac:__  
 ```
 cd $KITE_HOME/KITE-AppRTC-Test
-a
+kite_a
 ```
 
 Congratulation! You should see the results of your first KITE test.

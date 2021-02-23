@@ -1,0 +1,30 @@
+echo -n -e '"\033]0;Run Test\007"'
+echo off
+KITE_JAR=$KITE_HOME/KITE-Engine/target/kite-jar-with-dependencies.jar
+
+if [ -z $KITE_HOME ]
+then
+  echo KITE_HOME is not defined. Please run configure.bat or manually add KITE_HOME to your environment variables.
+  exit 0
+fi
+
+if [ [$1] = [] ]
+then
+  CONFIG=config
+fi
+
+if [[ $1 == *"configs/"* ]]
+then
+  CONFIG=$1
+else
+  CONFIG=configs/$1
+fi
+
+if [ -f "$KITE_JAR" ]
+then
+  echo java -Dkite.firefox.profile="$KITE_HOME/third_party/firefox-h264-profiles/" -cp "$KITE_JAR:target/*" org.webrtc.kite.Engine $CONFIG
+  java -Dkite.firefox.profile="$KITE_HOME"/third_party/firefox-h264-profiles/ -cp "$KITE_JAR:target/*" org.webrtc.kite.Engine $CONFIG
+else
+  echo "File not found: $KITE_JAR"
+  echo "Please edit this file and set KITE_JAR to the correct path."
+fi

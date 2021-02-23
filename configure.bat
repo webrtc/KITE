@@ -1,8 +1,16 @@
 @echo off
+if not defined JAVA_HOME (
+  echo Error: JAVA_HOME is not set.
+  exit /b
+)
+if not defined MAVEN_HOME (
+  echo "Error: MAVEN_HOME is not set, please install maven. If you just ran installMaven.bat, run the script on a new terminal as the environment variables have been updated."
+  exit /b
+)
 
 rem This script will set the USER enviroment variable KITE_HOME to the current folder
 rem and add '%KITE_HOME%\scripts\path' to the USER PATH.
-rem It will close the current and open a new one with the command c, r and a ready to use
+rem It will close the current and open a new one with the command kite_c, kite_r and kite_a ready to use
 rem to respectively compile, run and launch allure reports from the KITE Tests
 
 set KITE_HOME=%cd%
@@ -27,6 +35,6 @@ interactiveInstallation.bat
 goto :startNewPrompt
 
 :startNewPrompt
-start "Command Promt" cmd /K "cd %KITE_HOME%&&echo:&&echo Environment variable [1mKITE_HOME[0m set to [1m%KITE_HOME%[0m&&echo The path [1m%KITE_HOME%\scripts\windows\path;[0m has been added to the USER PATH.&&echo:&&echo You can now use commands [93mc[0m to compile, [93mr[0m to run and [93ma[0m to launch Allure."
+start "Command Promt" cmd /K "cd %KITE_HOME%&&echo:&&echo Environment variable [1mKITE_HOME[0m set to [1m%KITE_HOME%[0m&&echo The path [1m%KITE_HOME%\scripts\windows\path;[0m has been added to the USER PATH.&&echo:&&echo You can now use commands [93mkite_c[0m to compile, [93mkite_r[0m to run and [93mkite_a[0m to launch Allure."
 
 exit

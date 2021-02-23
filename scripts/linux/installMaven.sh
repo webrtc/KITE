@@ -1,4 +1,5 @@
 #!/bin/bash
+[[ -z ${JAVA_HOME} ]] && echo "Error: JAVA_HOME is not set." && exit -1;
 set +v
 function install(){
 wget https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.zip

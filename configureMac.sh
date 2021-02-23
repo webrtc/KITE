@@ -1,7 +1,12 @@
 #!/bin/bash
+[[ -z ${JAVA_HOME} ]] && echo "Error: JAVA_HOME is not set." && exit -1;
+if ! [ -x "$(command -v mvn)" ]; then
+  echo "Error: mvn is not set, please install maven. If you just ran installMaven.sh, run the script on a new terminal as the environment variables have been updated." >&2
+  exit 1
+fi
 # This script will set the USER enviroment variable KITE_HOME to the current folder
 # and add '%KITE_HOME%\scripts\path' to the USER PATH.
-# It will close the current and open a new one with the command c, r and a ready to use
+# It will close the current and open a new one with the command kite_c, kite_r and kite_a ready to use
 # to respectively compile, run and launch allure reports from the KITE Tests
 
 KITE_HOME=`pwd`
