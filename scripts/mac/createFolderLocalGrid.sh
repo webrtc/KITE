@@ -21,21 +21,20 @@ fi
 
 rm startGrid.sh || true
 echo cd $KITE_HOME/localGrid/hub >> startGrid.sh
-echo osascript -e "'tell application \"Terminal\" to do script \"$KITE_HOME/localGrid/hub/startHub.sh\" '" >> startGrid.sh
+echo osascript -e "'tell application \"Terminal\" to do script \"$KITE_HOME/localGrid/hub/startHub.sh;exit\" '" >> startGrid.sh
 
 echo cd $KITE_HOME/localGrid/chrome >> startGrid.sh
-echo  osascript -e "'tell application \"Terminal\" to do script \"$KITE_HOME/localGrid/chrome/startNode.sh\" '" >> startGrid.sh
+echo  osascript -e "'tell application \"Terminal\" to do script \"$KITE_HOME/localGrid/chrome/startNode.sh;exit\" '" >> startGrid.sh
 
 echo cd $KITE_HOME/localGrid/safari >> startGrid.sh
-echo  osascript -e "'tell application \"Terminal\" to do script \"$KITE_HOME/localGrid/safari/startNode.sh\" '" >> startGrid.sh
+echo  osascript -e "'tell application \"Terminal\" to do script \"$KITE_HOME/localGrid/safari/startNode.sh;exit\" '" >> startGrid.sh
 
 echo cd $KITE_HOME/localGrid/firefox >> startGrid.sh
-echo  osascript -e "'tell application \"Terminal\" to do script \"$KITE_HOME/localGrid/firefox/startNode.sh\" '" >> startGrid.sh
-echo cd .. >> startGrid.sh
+echo  osascript -e "'tell application \"Terminal\" to do script \"$KITE_HOME/localGrid/firefox/startNode.sh;exit\" '" >> startGrid.sh
 
 rm stopGrid.sh || true
-echo kill $(ps aux | grep role | grep -v grep | awk '{print $2}') >> stopGrid.sh
-echo pkill -f hub >> stopGrid.sh
+echo "kill \$(ps aux | grep role | grep -v grep | awk '{print \$2}')" >> stopGrid.sh
+echo "pkill -f hub" >> stopGrid.sh
 
 rm chrome/startNode.sh || true
 echo echo -n -e '"\033]0;NODE CHROME\007"' >> chrome/startNode.sh
@@ -58,6 +57,7 @@ echo   java -jar $KITE_HOME/localGrid/selenium.jar -role hub --debug -host $IP >
 
 
 chmod +x startGrid.sh
+chmod +x stopGrid.sh
 
 cd hub
 chmod +x startHub.sh
