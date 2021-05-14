@@ -211,6 +211,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
    *
    * @return the callback url
    */
+  @Transient
   public String getCallbackUrl() {
     return callbackUrl;
   }
@@ -224,6 +225,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.callbackUrl = callbackUrl;
   }
 
+  @Transient
   public int getCallbackPort() {
     return callbackPort;
   }
@@ -232,6 +234,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.callbackPort = callbackPort;
   }
 
+  @Transient
   public String getCallbackUsername() {
     return callbackUsername;
   }
@@ -240,6 +243,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.callbackUsername = callbackUsername;
   }
 
+  @Transient
   public String getCallbackPassword() {
     return callbackPassword;
   }
