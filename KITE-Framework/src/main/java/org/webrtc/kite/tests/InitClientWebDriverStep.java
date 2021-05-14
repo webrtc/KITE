@@ -4,6 +4,7 @@ import static io.cosmosoftware.kite.util.ReportUtils.getStackTrace;
 
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.interfaces.Runner;
+import io.cosmosoftware.kite.report.Status;
 import io.cosmosoftware.kite.report.StatusDetails;
 import io.cosmosoftware.kite.steps.TestStep;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class InitClientWebDriverStep extends TestStep {
         }
       }
     } catch (KiteGridException e) {
+      this.report.setStatus(Status.FAILED);
       this.webDriver = null;
       logger.error("Exception while populating webdriver: " + client.getName() + "\r\n" + getStackTrace(e));
       reporter.textAttachment(this.report, "KiteGridException", getStackTrace(e), "plain");

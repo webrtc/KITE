@@ -119,7 +119,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
         populateTestSteps(runner);
       }
     } catch (Exception e) {
-      logger.debug("Error creating test runners : \n" + getStackTrace(e));
+      logger.error("Error creating test runners : \n" + getStackTrace(e));
     }
   }
 

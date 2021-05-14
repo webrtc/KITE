@@ -21,6 +21,7 @@ import static org.webrtc.kite.Utils.fetchMediaPath;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
+import io.appium.java_client.windows.WindowsDriver;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.TestUtils;
@@ -244,6 +245,8 @@ public class WebDriverFactory {
         return new AndroidDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
       } else if (client.getBrowserSpecs().getPlatform().name().equalsIgnoreCase("ios")) {
         return new IOSDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
+      } else if(client.getBrowserSpecs().getPlatform().name().equalsIgnoreCase("windows")){
+        return new WindowsDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
       } else {
         return new RemoteWebDriver(url, WebDriverFactory.createCapabilities(client, testName, id));
       }

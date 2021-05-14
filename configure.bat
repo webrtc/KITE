@@ -13,7 +13,6 @@ rem and add '%KITE_HOME%\scripts\path' to the USER PATH.
 rem It will close the current and open a new one with the command kite_c, kite_r and kite_a ready to use
 rem to respectively compile, run and launch allure reports from the KITE Tests
 
-set KITE_HOME=%cd%
 
 setx KITE_HOME "%KITE_HOME%"
 for /F "tokens=2* delims= " %%f IN ('reg query HKCU\Environment /v PATH ^| findstr /i path') do set OLD_SYSTEM_PATH=%%g
