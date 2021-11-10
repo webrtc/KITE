@@ -104,7 +104,7 @@ __clients__: List of all the browsers that will be tested. This list will be use
 #### Running the test
 Once done, we can already run the test with:
 ```
-r configs\js.jitsiTutorial.config.json
+r configs/js.jitsiTutorial.config.json
 ```
 At this stage, the test only launches a webbrowser, opens https://google.com and does a random check.
 
