@@ -108,6 +108,20 @@ Default locale: en_US, platform encoding: Cp1252
 OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"
 ```
 
+You might need to create the file ~/.m2/settings.xml:
+```
+<settings>
+  <mirrors>
+    <mirror>
+      <id>internal-repository</id>
+      <name>Maven Repository Manager running on repo.mycompany.com</name>
+      <url>http://repository.springsource.com/maven/bundles/external</url>
+      <mirrorOf>com.springsource.repository.bundles.external</mirrorOf>
+    </mirror>
+  </mirrors>
+</settings>
+```
+
 Install your favorite Java IDE. We recommend [IntelliJ IDEA Community](https://www.jetbrains.com/idea/download) but you can use Eclipe or any other IDE if you prefer.
 &nbsp;    
 
@@ -148,8 +162,23 @@ source .bash_profile
     chmod -R +x scripts/mac
     scripts/mac/installMaven.sh
     ```
+   
+    You might need to create the file ~/.m2/settings.xml:
+```
+<settings>
+  <mirrors>
+    <mirror>
+      <id>internal-repository</id>
+      <name>Maven Repository Manager running on repo.mycompany.com</name>
+      <url>http://repository.springsource.com/maven/bundles/external</url>
+      <mirrorOf>com.springsource.repository.bundles.external</mirrorOf>
+    </mirror>
+  </mirrors>
+</settings>
+```
+
     
-3. Configure __KITE__  
+4. Configure __KITE__  
 
 
     This will set KITE_HOME environment variable and add utility scripts to your path.  

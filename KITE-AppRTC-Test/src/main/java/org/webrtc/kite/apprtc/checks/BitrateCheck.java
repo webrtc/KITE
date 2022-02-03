@@ -50,7 +50,7 @@ public class BitrateCheck extends TestCheck {
     // Get a stats array of the selected stat for 5 seconds
     int duration = 5;
     RTCStatList stats = getPCStatOvertime(
-      webDriver,"", 5 * ONE_SECOND_INTERVAL, ONE_SECOND_INTERVAL);
+      webDriver,"", 5 * ONE_SECOND_INTERVAL, ONE_SECOND_INTERVAL, runner.getPlatform());
     double startingTotalByteCount = stats.get(0).getTotalBytesByMedia(direction, mediaType);
     double endingTotalByteCount = stats.get(duration - 1).getTotalBytesByMedia(direction, mediaType);
     double avgBitrate = (endingTotalByteCount - startingTotalByteCount)/duration;

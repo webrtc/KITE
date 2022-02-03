@@ -16,6 +16,8 @@
 
 package org.webrtc.kite;
 
+import static io.cosmosoftware.kite.entities.Timeouts.ONE_SECOND_INTERVAL;
+import static io.cosmosoftware.kite.util.TestUtils.waitAround;
 import static org.webrtc.kite.Utils.shutdown;
 
 import io.cosmosoftware.kite.instrumentation.NetworkProfile;
@@ -193,7 +195,6 @@ public class Engine {
         } catch (Exception e) {
           e.printStackTrace();
         } finally {
-
           service.shutdown();
         }
       }
@@ -368,10 +369,34 @@ public class Engine {
         testRunThreads.add(runThread);
       }
     }
-
-    executorService = Executors.newFixedThreadPool(1);
-    List<Future<List<Future<Object>>>> res =  executorService.invokeAll(testRunThreads);
-    shutdown(executorService);
+    List<Future<List<Future<Object>>>> res = new ArrayList<>();
+    if(testConfig.getRampUpDelay() == 0) {
+      executorService = Executors.newFixedThreadPool(1);
+       res =  executorService.invokeAll(testRunThreads);
+      shutdown(executorService);
+    } else {
+      List<ExecutorService> executorServices = new ArrayList<>();
+      int index = 0;
+      while(index < testRunThreads.size() ) {
+        long start = System.currentTimeMillis();
+        logger.info("Starting batch no. " + index);
+        List<TestRunThread> testRunThread = new ArrayList<>();
+        testRunThread.add(testRunThreads.get(index));
+        executorService = Executors.newFixedThreadPool(1);
+        res.addAll(executorService.invokeAll(testRunThread));
+        executorServices.add(executorService);
+        int threadTime = (int) (System.currentTimeMillis() - start);
+        logger.info("Threadtime : " + threadTime);
+        index ++;
+        if (threadTime < testConfig.getRampUpDelay()) {
+          logger.info("Waiting " +  (testConfig.getRampUpDelay() - threadTime));
+          waitAround(Math.abs((testConfig.getRampUpDelay() - threadTime) - ONE_SECOND_INTERVAL));
+        }
+      }
+      for(ExecutorService service: executorServices) {
+        shutdown(service);
+      }
+    }
     return res;
   }
 

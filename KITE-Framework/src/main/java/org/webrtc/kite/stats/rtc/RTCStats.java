@@ -27,6 +27,7 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
   private long timestamp = System.currentTimeMillis();
   private boolean noData = true;
   private String roomUrl = "unknown";
+  private int batchId = 0;
 
   public RTCStats(String pcName, TreeMap<String, List<RTCSingleStatObject>> statMap) {
     super(statMap);
@@ -51,7 +52,14 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
               }
               case "track": {
                 String kind = (String) statMap.get("kind");
-                if (kind.equals("video")) {
+                if(kind == null) {
+                  if(statMap.get("audioLevel") != null) {
+                    statObject = new RTCAudioSourceStats(statMap);
+                  }
+                  if(statMap.get("frameHeight") != null) {
+                    statObject = new RTCVideoSourceStats(statMap);
+                  }
+                } else if (kind.equals("video")) {
                   statObject = new RTCVideoSourceStats(statMap);
                 } else {
                   statObject = new RTCAudioSourceStats(statMap);
@@ -245,6 +253,12 @@ public class RTCStats extends TreeMap<String, List<RTCSingleStatObject>> impleme
 
   public void setRoomUrl(String roomUrl) {
     this.roomUrl = roomUrl;
+  }
+
+  public void setBatch(int batchId) { this.batchId = batchId; }
+
+  public int getBatchId() {
+    return batchId;
   }
 
   public String getRoomUrl() {

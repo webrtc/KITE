@@ -21,6 +21,7 @@ import static org.webrtc.kite.Utils.fetchMediaPath;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
+import io.appium.java_client.windows.WindowsDriver;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.util.TestUtils;
@@ -69,8 +70,8 @@ public class WebDriverFactory {
     if (specs.getVersion() != null) {
       capabilities.setCapability(CapabilityType.VERSION, specs.getVersion());
     }
-    capabilities.setCapability("browserName", "app");
-    capabilities.setCapability("app", app.getAppName());
+//    capabilities.setCapability("browserName", "app");
+//    capabilities.setCapability("appium:app", app.getAppName());
     capabilities.setCapability("deviceName", specs.getDeviceName());
     capabilities.setCapability("platformName", specs.getPlatform());
     if (specs.getPlatformVersion() != null) {
@@ -78,13 +79,15 @@ public class WebDriverFactory {
     }
     if (specs.getPlatform().name().toLowerCase().equalsIgnoreCase("ios")) {
       capabilities.setCapability("automationName", "XCUITest");
+      capabilities.setCapability("appium:udid", specs.getDeviceName());
+      capabilities.setCapability("appium:bundleId", app.getAppPackage());
     }
     if (specs.getPlatform().name().toLowerCase().equalsIgnoreCase("android")) {
       capabilities.setCapability("autoGrantPermissions", true);
       capabilities.setCapability("fullReset", app.isFullReset());
     }
     if (app.getApp().getAppWorkingDir() != null) {
-      capabilities.setCapability("appWorkingDir", app.getApp().getAppWorkingDir());
+      capabilities.setCapability("appium:appWorkingDir", app.getApp().getAppWorkingDir());
     }
     if (app.getAppPackage() == null || app.getAppActivity() == null) {
       logger.warn("Using [" + app.getAppName() + "]: Some mobile applications may require appPackage and appActivity " +
@@ -244,6 +247,8 @@ public class WebDriverFactory {
         return new AndroidDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
       } else if (client.getBrowserSpecs().getPlatform().name().equalsIgnoreCase("ios")) {
         return new IOSDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
+      } else if(client.getBrowserSpecs().getPlatform().name().equalsIgnoreCase("windows")){
+        return new WindowsDriver<>(url, WebDriverFactory.createCapabilities(client, testName, id));
       } else {
         return new RemoteWebDriver(url, WebDriverFactory.createCapabilities(client, testName, id));
       }
