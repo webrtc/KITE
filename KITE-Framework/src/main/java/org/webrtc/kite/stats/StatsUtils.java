@@ -15,10 +15,17 @@
  */
 package org.webrtc.kite.stats;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.AndroidElement;
+import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.ios.IOSElement;
 import io.cosmosoftware.kite.entities.Timeouts;
 import io.cosmosoftware.kite.exception.KiteTestException;
 import io.cosmosoftware.kite.report.KiteLogger;
 import io.cosmosoftware.kite.report.Status;
+import io.cosmosoftware.kite.util.WebDriverUtils;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
@@ -57,8 +64,8 @@ public class StatsUtils {
    * @return String. pc stat once
    * @throws KiteTestException the KITE test exception
    */
-  public static RTCStats getPCStatOnce(WebDriver webDriver, String peerConnection) throws KiteTestException {
-    return getPCStatOnce(webDriver, peerConnection, null);
+  public static RTCStats getPCStatOnce(WebDriver webDriver, String peerConnection, int batchId, String platform) throws KiteTestException {
+    return getPCStatOnce(webDriver, peerConnection, null, batchId, platform);
   }
   
   /**
@@ -71,26 +78,97 @@ public class StatsUtils {
    * @return String. pc stat once
    * @throws KiteTestException the KITE test exception
    */
-  public static RTCStats getPCStatOnce(WebDriver webDriver, String peerConnection, JsonArray selectedStats) throws KiteTestException {
+  public static RTCStats getPCStatOnce(WebDriver webDriver, String peerConnection, JsonArray selectedStats, int batchId, String platform) throws KiteTestException {
     try {
-      String stashStatsScript = "const getStatsValues = () =>" +
-          peerConnection + "  .getStats()" +
-          "    .then(data => {" +
-          "      return [...data.values()];" +
-          "    });" +
-          "const stashStats = async () => {" +
-          "  window.KITEStats = await getStatsValues();" +
-          "  return 0;" +
-          "};" +
-          "stashStats();";
-      String getStashedStatsScript = "return window.KITEStats;";
+      RTCStats rtn;
+      switch(platform.toLowerCase()) {
+        case "android":
+          waitAround(300);
+          ((AndroidElement) ((AndroidDriver) webDriver).findElementsByClassName("android.widget.EditText").get(0)).click();
+          ((AndroidElement) ((AndroidDriver) webDriver).findElementsByClassName("android.widget.EditText").get(0)).sendKeys("JSON.stringify(window.KITEStats)");
+          ((AndroidElement) ((AndroidDriver) webDriver).findElementsByClassName("android.view.View").get(10)).findElementsByClassName("android.widget.TextView").get(2).click();
 
-      executeJsScript(webDriver, stashStatsScript);
-      waitAround(Timeouts.ONE_SECOND_INTERVAL);
-      RTCStats rtn =  new RTCStats(peerConnection,
-          (List<Map>) executeJsScript(webDriver, getStashedStatsScript), selectedStats);
-      rtn.setRoomUrl(webDriver.getCurrentUrl());
+          Gson gson = new Gson();
+          List<Map> list = gson.fromJson(((AndroidElement) ((AndroidDriver) webDriver).findElementsByClassName("android.widget.TextView").get(17)).getText(), new TypeToken<ArrayList<Map>>() {}.getType());
+          ((AndroidElement) ((AndroidDriver) webDriver).findElementsByClassName("android.widget.EditText").get(0)).click();
+          ((AndroidElement) ((AndroidDriver) webDriver).findElementsByClassName("android.widget.EditText").get(0)).sendKeys("const getStatsValues = () => peer.getStats().then(data => {  return [...data.values()];}); const stashStats = async () => {  window.KITEStats = await getStatsValues();  return 0;};stashStats(); clear();");
+          ((AndroidElement) ((AndroidDriver) webDriver).findElementsByClassName("android.view.View").get(12)).findElementsByClassName("android.widget.TextView").get(1).click(); // execute
+          rtn = new RTCStats(peerConnection,
+                  list, selectedStats);
+          rtn.setRoomUrl("N/A");
+
+          break;
+        case "ios":
+          int tries = 0;
+          waitAround(300);
+          ((IOSDriver) webDriver).findElementByClassName("XCUIElementTypeTextView").click();
+          ((IOSDriver) webDriver).findElementByClassName("XCUIElementTypeTextView").sendKeys("JSON.stringify(window.KITEStats)");
+          do {
+            ((IOSElement) ((IOSDriver) webDriver).findElementsById("Live Viewer").get(0)).click();
+            waitAround(200);
+            tries++;
+          } while (tries<5 && ((IOSDriver) webDriver).isKeyboardShown());
+
+          WebDriverUtils.scroll_ios((IOSDriver) webDriver,0.5, 0.8, 0.5, 0.2);
+          waitAround(300);
+          ((IOSDriver) webDriver).findElementById("Execute").click();
+          waitAround(300);
+
+
+          gson = new Gson();
+           try {
+            list = gson.fromJson(((IOSElement) ((IOSDriver) webDriver).findElementsByClassName("XCUIElementTypeStaticText").get(14)).getText(), new TypeToken<ArrayList<Map>>() {
+            }.getType());
+          } catch(Exception e) {
+            list = gson.fromJson(((IOSElement) ((IOSDriver) webDriver).findElementsByClassName("XCUIElementTypeStaticText").get(6)).getText(), new TypeToken<ArrayList<Map>>() {
+            }.getType());
+          }
+          ((IOSDriver) webDriver).findElementByClassName("XCUIElementTypeTextView").click();
+          ((IOSDriver) webDriver).findElementByClassName("XCUIElementTypeTextView").sendKeys("const getStatsValues = () => peer.getStats().then(data => {  return [...data.values()];}); const stashStats = async () => {  window.KITEStats = await getStatsValues();  return 0;};stashStats(); clear();"); // write command
+          tries = 0;
+          do {
+            ((IOSElement) ((IOSDriver) webDriver).findElementsById("Live Viewer").get(0)).click();
+            waitAround(200);
+            tries++;
+          } while (tries<5 && ((IOSDriver) webDriver).isKeyboardShown());
+
+          WebDriverUtils.scroll_ios((IOSDriver) webDriver,0.5, 0.8, 0.5, 0.2);
+          waitAround(300);
+          ((IOSDriver) webDriver).findElementById("Execute").click(); // execute
+
+          try {
+            rtn = new RTCStats(peerConnection,
+                    list, selectedStats);
+            rtn.setRoomUrl("N/A");
+          } catch(Exception e) {
+            logger.info(e);
+            logger.info("Couldn't do stats");
+            throw e;
+          }
+          break;
+        default:
+          String stashStatsScript = "const getStatsValues = () =>" +
+                  peerConnection + "  .getStats()" +
+                  "    .then(data => {" +
+                  "      return [...data.values()];" +
+                  "    });" +
+                  "const stashStats = async () => {" +
+                  "  window.KITEStats = await getStatsValues();" +
+                  "  return 0;" +
+                  "};" +
+                  "stashStats();";
+          String getStashedStatsScript = "return window.KITEStats;";
+          executeJsScript(webDriver, stashStatsScript);
+          waitAround(Timeouts.ONE_SECOND_INTERVAL);
+          rtn = new RTCStats(peerConnection,
+                  (List<Map>) executeJsScript(webDriver, getStashedStatsScript), selectedStats);
+          rtn.setRoomUrl(webDriver.getCurrentUrl());
+          break;
+      }
+
+      rtn.setBatch(batchId);
       return rtn;
+
     } catch (Exception e) {
 //      throw new KiteTestException("Could not get stats from peer connection", Status.BROKEN, e);
       // todo: put the e back
@@ -107,7 +185,21 @@ public class StatsUtils {
    * @return JsonObjectBuilder of the stat object
    * @throws KiteTestException the kite test exception
    */
-  public static RTCStatMap getPCStatOvertime(WebDriver webDriver, JsonObject getStatsConfig)
+  public static RTCStatMap getPCStatOvertime(WebDriver webDriver, JsonObject getStatsConfig, String platform)
+          throws KiteTestException {
+    RTCStatMap result = new RTCStatMap();
+    for (JsonString pc : getStatsConfig.getJsonArray("peerConnections").getValuesAs(JsonString.class)) {
+      result.put(pc.toString(), getPCStatOvertime(
+              webDriver,
+              pc.getString(),
+              getStatsConfig.getInt("statsCollectionTime"),
+              getStatsConfig.getInt("statsCollectionInterval"),
+              getStatsConfig.getJsonArray("selectedStats"), 0, platform));
+    }
+    return result;
+  }
+
+  public static RTCStatMap getPCStatOvertime(WebDriver webDriver, JsonObject getStatsConfig, int batchId, String platform)
     throws KiteTestException {
     RTCStatMap result = new RTCStatMap();
     for (JsonString pc : getStatsConfig.getJsonArray("peerConnections").getValuesAs(JsonString.class)) {
@@ -116,7 +208,7 @@ public class StatsUtils {
         pc.getString(),
         getStatsConfig.getInt("statsCollectionTime"),
         getStatsConfig.getInt("statsCollectionInterval"),
-        getStatsConfig.getJsonArray("selectedStats")));
+        getStatsConfig.getJsonArray("selectedStats"), batchId, platform));
     }
     return result;
   }
@@ -158,9 +250,9 @@ public class StatsUtils {
    * @return JsonObjectBuilder of the stat object
    * @throws KiteTestException the kite test exception
    */
-  public static RTCStatList getPCStatOvertime(WebDriver webDriver, String peerConnection, int durationInMilliSeconds, int intervalInMilliSeconds)
+  public static RTCStatList getPCStatOvertime(WebDriver webDriver, String peerConnection, int durationInMilliSeconds, int intervalInMilliSeconds, String platform)
       throws KiteTestException {
-    return getPCStatOvertime(webDriver, peerConnection, durationInMilliSeconds, intervalInMilliSeconds, null);
+    return getPCStatOvertime(webDriver, peerConnection, durationInMilliSeconds, intervalInMilliSeconds, null, 0, platform);
   }
 
   /**
@@ -175,15 +267,33 @@ public class StatsUtils {
    * @return JsonObjectBuilder of the stat object
    * @throws KiteTestException the kite test exception
    */
-  public static RTCStatList getPCStatOvertime(WebDriver webDriver, String peerConnection, int durationInMilliSeconds, int intervalInMilliSeconds, JsonArray selectedStats)
+  public static RTCStatList getPCStatOvertime(WebDriver webDriver, String peerConnection, int durationInMilliSeconds, int intervalInMilliSeconds, JsonArray selectedStats, int batchId, String platform)
     throws KiteTestException {
     RTCStatList statsOverTime = new RTCStatList();
-    for (int timer = 0; timer <= durationInMilliSeconds; timer += intervalInMilliSeconds) {
-      statsOverTime.add(getPCStatOnce(webDriver, peerConnection, selectedStats));
-      if (timer <= durationInMilliSeconds - intervalInMilliSeconds) {
-        waitAround(Math.abs(intervalInMilliSeconds - ONE_SECOND_INTERVAL));
-      }
+    switch(platform.toLowerCase()){
+      case "android":
+      case "ios":
+        int threadTime;
+        for (int timer = 0; timer <= durationInMilliSeconds; timer += threadTime) {
+          long start = System.currentTimeMillis();
+          statsOverTime.add(getPCStatOnce(webDriver, peerConnection, selectedStats, batchId, platform));
+          threadTime = (int) (System.currentTimeMillis() - start);
+          if (threadTime < intervalInMilliSeconds) {
+            waitAround(Math.abs((intervalInMilliSeconds - threadTime) - ONE_SECOND_INTERVAL));
+            threadTime = intervalInMilliSeconds;
+          }
+        }
+        break;
+      default:
+        for (int timer = 0; timer <= durationInMilliSeconds; timer += intervalInMilliSeconds) {
+          statsOverTime.add(getPCStatOnce(webDriver, peerConnection, selectedStats, batchId, platform));
+          if (timer <= durationInMilliSeconds - intervalInMilliSeconds) {
+            waitAround(Math.abs(intervalInMilliSeconds - ONE_SECOND_INTERVAL));
+          }
+        }
+        break;
     }
+
     return statsOverTime;
   }
   
@@ -303,6 +413,7 @@ public class StatsUtils {
     builder.add("Ending Timestamp", timestamp(statArray.get(statArray.size() - 1).getTimestamp()));
     builder.add("Connected", !statArray.hasNoData());
     builder.add("Room", statArray.getRoomUrl());
+    builder.add("Batch", statArray.getBatchId());
 
     for (String key : statArray.getAdditionalData().keySet()) {
       builder.add(key, statArray.getAdditionalData().get(key));

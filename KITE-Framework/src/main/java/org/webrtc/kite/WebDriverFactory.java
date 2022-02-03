@@ -70,8 +70,8 @@ public class WebDriverFactory {
     if (specs.getVersion() != null) {
       capabilities.setCapability(CapabilityType.VERSION, specs.getVersion());
     }
-    capabilities.setCapability("browserName", "app");
-    capabilities.setCapability("app", app.getAppName());
+//    capabilities.setCapability("browserName", "app");
+//    capabilities.setCapability("appium:app", app.getAppName());
     capabilities.setCapability("deviceName", specs.getDeviceName());
     capabilities.setCapability("platformName", specs.getPlatform());
     if (specs.getPlatformVersion() != null) {
@@ -79,13 +79,15 @@ public class WebDriverFactory {
     }
     if (specs.getPlatform().name().toLowerCase().equalsIgnoreCase("ios")) {
       capabilities.setCapability("automationName", "XCUITest");
+      capabilities.setCapability("appium:udid", specs.getDeviceName());
+      capabilities.setCapability("appium:bundleId", app.getAppPackage());
     }
     if (specs.getPlatform().name().toLowerCase().equalsIgnoreCase("android")) {
       capabilities.setCapability("autoGrantPermissions", true);
       capabilities.setCapability("fullReset", app.isFullReset());
     }
     if (app.getApp().getAppWorkingDir() != null) {
-      capabilities.setCapability("appWorkingDir", app.getApp().getAppWorkingDir());
+      capabilities.setCapability("appium:appWorkingDir", app.getApp().getAppWorkingDir());
     }
     if (app.getAppPackage() == null || app.getAppActivity() == null) {
       logger.warn("Using [" + app.getAppName() + "]: Some mobile applications may require appPackage and appActivity " +

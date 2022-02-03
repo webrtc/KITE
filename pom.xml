@@ -22,10 +22,10 @@
     <!-- KITE dependency version-->
     <kite.version>2.0.8</kite.version>
     <kite.apprtc.version>2.0.1</kite.apprtc.version>
-    <kite.extras.version>0.1.80</kite.extras.version>
+    <kite.extras.version>0.1.82</kite.extras.version>
     <kite.framework.version>1.0.15</kite.framework.version>
     <!-- Core dependencies -->
-    <kite.log4j.version>1.2.17</kite.log4j.version>
+    <kite.log4j.version>2.16.0</kite.log4j.version>
     <kite.mvn.compiler.version>3.6.1</kite.mvn.compiler.version>
     <kite.java.version>1.8</kite.java.version>
     <kite.guava.version>25.1-jre</kite.guava.version>
@@ -69,7 +69,7 @@
 
     <!-- Automation framework dependencies -->
     <kite.selenium.version>3.141.59</kite.selenium.version>
-    <kite.appium.version>6.1.0</kite.appium.version>
+    <kite.appium.version>7.6.0</kite.appium.version>
 
     <!-- Test framework dependencies -->
     <kite.junit.version>4.12</kite.junit.version>

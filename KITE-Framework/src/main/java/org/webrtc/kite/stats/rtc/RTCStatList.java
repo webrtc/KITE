@@ -48,6 +48,13 @@ public class RTCStatList extends LinkedList<RTCStats> {
     return "unknown";
   }
 
+  public String getBatchId() {
+    if(!this.isEmpty()) {
+      return Integer.toString(this.get(0).getBatchId());
+    }
+    return "unknown";
+  }
+
   public void addNewData(String key, String value) {
     this.addtionalData.put(key, value);
   }

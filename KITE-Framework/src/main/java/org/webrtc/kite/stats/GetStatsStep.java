@@ -35,6 +35,7 @@ public class GetStatsStep extends TestStep {
   private boolean getRaw = true;
   private boolean keepStats = false;
   private RTCStatMap statMap;
+  private int batchId = 0;
 
   public GetStatsStep(Runner runner, JsonObject getStatsConfig) {
     super(runner);
@@ -51,7 +52,7 @@ public class GetStatsStep extends TestStep {
   @Override
   protected void step() throws KiteTestException {
     try {
-      RTCStatMap results = getPCStatOvertime(webDriver, getStatsConfig);
+      RTCStatMap results = getPCStatOvertime(webDriver, getStatsConfig, batchId, runner.getPlatform());
       results.setRegionId(this.runner.getClientRegion());
       results.setNetworkProfile(this.runner.getNetworkProfile());
       if (keepStats) {
@@ -90,4 +91,6 @@ public class GetStatsStep extends TestStep {
   public void setKeepStats(boolean keepStats) {
     this.keepStats = keepStats;
   }
+
+  public void setBatchId(int batchId) { this.batchId = batchId; }
 }

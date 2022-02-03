@@ -88,6 +88,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
   private boolean takeScreenshotForEachTest = false; // false by default
   private int testTimeout = 60;
   private long delayForClosing = 0;
+  protected boolean closeDrivers;
 
   public KiteBaseTest() {}
 
@@ -210,18 +211,28 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       }
       reporter.setLogger(logger);
       addExtraCategories();
-      Runtime.getRuntime().addShutdownHook(new Thread(() -> terminate(stepPhase)));
+      Runtime.getRuntime().addShutdownHook(new Thread(() -> emergencyTerminate(stepPhase)));
       logger.info("Creating runners");
       createTestRunners();
       getInfoFromNavigator();
       setStepPhaseToRunner(stepPhase); // set phase for runner
       initStep.setStatus(Status.PASSED);
-      Runtime.getRuntime().removeShutdownHook(new Thread(() -> terminate(stepPhase)));
+      if(!closeDrivers) {
+        Runtime.getRuntime().removeShutdownHook(new Thread(() -> emergencyTerminate(stepPhase)));
+      }
     } catch (IOException e) {
       logger.error(getStackTrace(e));
       reporter.textAttachment(initStep, "IOException", getStackTrace(e), "plain");
       initStep.setStatus(Status.FAILED);
       throw new KiteTestException("IOException", Status.BROKEN, e);
+    }
+  }
+
+
+  public void emergencyTerminate(StepPhase stepPhase) {
+    WebDriverUtils.closeDrivers(this.tuple.getWebDrivers());
+    for (TestRunner runner : this) {
+      runner.terminate();
     }
   }
 
@@ -530,6 +541,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
       multiThread = payload.getBoolean("multiThread", true);
       expectedTestDuration = payload.getInt("expectedTestDuration", expectedTestDuration);
       meetingDuration = this.payload.getInt("meetingDuration", meetingDuration);
+      closeDrivers = payload.getBoolean("closeDrivers", false);
       setExpectedTestDuration(Math.max(getExpectedTestDuration(), (meetingDuration + 300) / 60));
       maxUsersPerRoom = payload.getInt("usersPerRoom", this.tupleSize);
       consoleLogs = payload.getBoolean("consoleLogs", consoleLogs);
@@ -764,7 +776,7 @@ public abstract class KiteBaseTest extends ArrayList<TestRunner> implements Step
    */
   public int getInterval(int id) {
     //min 200 ms
-    int interval = testConfig.getInterval() < 50 ? 50 : testConfig.getInterval();
+    int interval = testConfig.getInterval();
     return id % testConfig.getIncrement() * interval;
   }
 

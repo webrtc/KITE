@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d %-5p - %m%n "/>
+        </Console>
+        <RollingFile name="debugFileAppender"
+                     filePattern="logs/kite_debug_%d{dd-MM-yyyy}.log"
+        >
+            <PatternLayout pattern="%d [%t] %c %x %-5p - %m%n "/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="infoFileAppender"
+                     filePattern="logs/kite_info_%d{dd-MM-yyyy}.log"
+        >
+            <PatternLayout pattern="%d %-5p - %m%n "/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.apache.log4j.xml" level="ALL"/>
+        <Root level="ALL">
+            <AppenderRef ref="console" level="info"/>
+            <AppenderRef ref="infoFileAppender" level="info"/>
+            <AppenderRef ref="debugFileAppender" level="debug"/>
+        </Root>
+    </Loggers>
+</Configuration>

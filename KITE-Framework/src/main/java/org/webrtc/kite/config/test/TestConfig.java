@@ -90,6 +90,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
   private EmailSender emailSender = null;
   private Boolean csvReport = false;
   private boolean generateReport = true;
+  private Integer rampUpDelay = 0;
 
 
   /**
@@ -143,7 +144,7 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
     this.callbackPort = getIntFromJsonObject(jsonObject, "callbackPort", 0);
     this.callbackUsername = jsonObject.getString("callbackUsername", null);
     this.callbackPassword = jsonObject.getString("callbackPassword", null);
-
+    this.rampUpDelay = jsonObject.getInt("rampUpDelay", 0);
     this.tagName = jsonObject.getString("tag", null);
     this.tupleSize = getIntFromJsonObject(jsonObject, "tupleSize", -1);
 
@@ -775,5 +776,13 @@ public class TestConfig extends KiteEntity implements JsonBuilder, SampleData {
 
   public void setGenerateReport(boolean generateReport) {
     this.generateReport = generateReport;
+  }
+
+  public Integer getRampUpDelay() {
+    return rampUpDelay;
+  }
+
+  public void setRampUpDelay(Integer rampUpDelay) {
+    this.rampUpDelay = rampUpDelay;
   }
 }
