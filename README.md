@@ -15,7 +15,7 @@ __KITE__ can be setup on Windows, Mac or Linux.  The installation process only t
 
 Additional free WebRTC sample tests are available https://github.com/CoSMoSoftware/KITE-Sample-Tests  
 The sample tests cover all the major open-source SFUs demos:  
- * Jisti
+ * Jitsi
  * Janus
  * Kurento/openvidu
  * Mediasoup
@@ -31,7 +31,7 @@ Please contact [contact@cosmosoftware.io](mailto:contact@cosmosoftware.io) for m
 
 #### Tutorials: Writing a simple KITE Test for Jitsi in Java and/or Javascript
 
-Once you've completed the installation and run the sample tests, pleaae try to write your own KITE test following our tutorials.  
+Once you've completed the installation and run the sample tests, please try to write your own KITE test following our tutorials.  
  * [KITE Test for Jitsi in Java](tutorial/Tutorial_Java.md)
  * [KITE Test for Jitsi in Javascript](tutorial/Tutorial_Javascript.md)
 
